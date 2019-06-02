@@ -69,6 +69,16 @@
             <a class="btn btn-sm btn-light" style="position:absolute;right:5px;top:50%;transform:translateY(-50%);line-height:0;z-index:10"
                 @click="hideSearch"><i class="fas fa-times"></i></a>
         </div>
+        <div class="auto-ads" v-show="isAutopostingAds()">
+            <h4>Auto-Posting Ads</h4>
+            <div class="update">{{adAutoPostUpdate}}</div>
+
+
+            <div v-show="adAutoPostNextAd" class="next">
+                <h5>Coming Next</h5>
+                <div>{{(adAutoPostNextAd ? adAutoPostNextAd.substr(0, 50) : '')}}...</div>
+            </div>
+        </div>
         <div class="border-top messages" :class="isChannel(conversation) ? 'messages-' + conversation.mode : undefined" ref="messages"
             @scroll="onMessagesScroll" style="flex:1;overflow:auto;margin-top:2px">
             <template v-for="message in messages">
@@ -114,6 +124,9 @@
                         <a href="#" :class="{active: conversation.isSendingAds, disabled: conversation.channel.mode != 'both'}"
                             class="nav-link" @click.prevent="setSendingAds(true)">{{adsMode}}</a>
                     </li>
+                    <li class="nav-item">
+                        <a href="#" :class="{active: conversation.adState.active}" class="nav-link" @click="autoPostAds()">Auto-Post Ads</a>
+                    </li>
                 </ul>
                 <div class="btn btn-sm btn-primary" v-show="!settings.enterSend" @click="sendButton">{{l('chat.send')}}</div>
             </div>
@@ -133,7 +146,7 @@
     import {Keys} from '../keys';
     import {BBCodeView, Editor} from './bbcode';
     import CommandHelp from './CommandHelp.vue';
-    import {characterImage, getByteLength, getKey} from './common';
+    import { AdState, characterImage, getByteLength, getKey } from "./common";
     import ConversationSettings from './ConversationSettings.vue';
     import core from './core';
     import {Channel, channelModes, Character, Conversation, Settings} from './interfaces';
@@ -177,6 +190,9 @@
         ignoreScroll = false;
         adCountdown = 0;
         adsMode = l('channel.mode.ads');
+        autoPostingUpdater = 0;
+        adAutoPostUpdate: string|null = null;
+        adAutoPostNextAd: string|null = null;
         isChannel = Conversation.isChannel;
         isPrivate = Conversation.isPrivate;
 
@@ -219,6 +235,8 @@
                     this.adCountdown = window.setInterval(setAdCountdown, 1000);
                 setAdCountdown();
             });
+
+            this.$watch('conversation.adState.active', () => (this.refreshAutoPostingTimer()));
         }
 
         @Hook('destroyed')
@@ -227,6 +245,8 @@
             window.removeEventListener('keydown', this.keydownHandler);
             window.removeEventListener('keypress', this.keypressHandler);
             clearInterval(this.searchTimer);
+            clearInterval(this.autoPostingUpdater);
+            clearInterval(this.adCountdown);
         }
 
         hideSearch(): void {
@@ -377,6 +397,124 @@
             (<ManageChannel>this.$refs['manageDialog']).show();
         }
 
+
+        isAutopostingAds(): boolean {
+            return this.conversation.adState.active;
+        }
+
+
+        clearAutoPostAds(): void {
+            if (this.conversation.adState.interval) {
+                clearTimeout(this.conversation.adState.interval);
+            }
+
+            this.conversation.adState = new AdState();
+        }
+
+
+        autoPostAds(): void {
+            if(this.isAutopostingAds()) {
+                this.clearAutoPostAds();
+                this.refreshAutoPostingTimer();
+                return;
+            }
+
+            const conversation = this.conversation;
+
+            /**** Do not use 'this' keyword below this line, it will operate differently than you expect ****/
+
+            const chanConv = (<Conversation.ChannelConversation>conversation);
+
+            const adState = conversation.adState;
+            const initialWait = Math.max(0, chanConv.nextAd - Date.now()) * 1.1;
+
+            adState.adIndex = 0;
+
+            const sendNextPost = async () => {
+                const ads = conversation.settings.adSettings.ads;
+                const index = (adState.adIndex || 0);
+
+                if ((ads.length === 0) || ((adState.expireDue) && (adState.expireDue.getTime() < Date.now()))) {
+                    conversation.adState = new AdState();
+                    return;
+                }
+
+                const msg = ads[index % ads.length];
+
+                await chanConv.sendAd(msg);
+
+                const nextInMs = Math.max(0, (chanConv.nextAd - Date.now())) * 1.1;
+
+                adState.adIndex = index + 1;
+                adState.nextPostDue = new Date(Date.now() + nextInMs);
+
+                adState.interval = setTimeout(
+                    async () => {
+                        await sendNextPost();
+                    },
+                    nextInMs
+                );
+            };
+
+
+            adState.active = true;
+            adState.nextPostDue = new Date(Date.now() + initialWait);
+            adState.expireDue = new Date(Date.now() + 2 * 60 * 60 * 1000);
+
+
+            adState.interval = setTimeout(
+                async () => {
+                    adState.firstPost = new Date();
+
+                    await sendNextPost();
+                },
+                initialWait
+            );
+
+            this.refreshAutoPostingTimer();
+        }
+
+
+        refreshAutoPostingTimer() {
+            if (this.autoPostingUpdater) {
+                window.clearInterval(this.autoPostingUpdater);
+            }
+
+            if(this.isAutopostingAds() === false) {
+                this.adAutoPostUpdate = null;
+                this.adAutoPostNextAd = null;
+                return;
+            }
+
+            const updateAutoPostingState = () => {
+                const adState = this.conversation.adState;
+                const ads = this.conversation.settings.adSettings.ads;
+
+                if(ads.length > 0) {
+                    this.adAutoPostNextAd = ads[(adState.adIndex || 0) % ads.length];
+
+                    const diff = ((adState.nextPostDue || new Date()).getTime() - Date.now()) / 1000;
+                    const expDiff = ((adState.expireDue || new Date()).getTime() - Date.now()) / 1000;
+
+                    if((adState.nextPostDue) && (!adState.firstPost)) {
+                        this.adAutoPostUpdate = `Posting beings in ${Math.floor(diff / 60)}m ${Math.floor(diff % 60)}s`;
+                    } else {
+                        this.adAutoPostUpdate = `Next ad in ${Math.floor(diff / 60)}m ${Math.floor(diff % 60)}s`;
+                    }
+
+                    this.adAutoPostUpdate += `, auto-posting expires in ${Math.floor(expDiff / 60)}m ${Math.floor(expDiff % 60)}s`;
+                } else {
+                    this.adAutoPostNextAd = null;
+                    this.adAutoPostUpdate = 'No ads have been set up -- auto-posting will be cancelled.';
+                }
+            };
+
+            this.autoPostingUpdater = window.setInterval(updateAutoPostingState, 1000);
+
+            updateAutoPostingState();
+        }
+
+
         hasSFC(message: Conversation.Message): message is Conversation.SFCMessage {
             return (<Partial<Conversation.SFCMessage>>message).sfc !== undefined;
         }
@@ -419,6 +557,39 @@
 
         .send-ads-switcher a {
             padding: 3px 10px;
+        }
+
+        .auto-ads {
+            background-color: rgba(255, 128, 32, 0.8);
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            margin: 0;
+
+            h4 {
+                font-size: 1.1rem;
+                margin: 0;
+                line-height: 100%;
+            }
+
+            .update {
+                color: rgba(255, 255, 255, 0.6);
+                font-size: 13px;
+            }
+
+            .next {
+                margin-top: 0.5rem;
+                color: rgba(255, 255, 255, 0.4);
+                font-size: 11px;
+
+                h5 {
+                    font-size: 0.8rem;
+                    margin: 0;
+                    line-height: 100%;
+                }
+            }
+
         }
 
         @media (max-width: breakpoint-max(sm)) {

@@ -62,6 +62,7 @@ export namespace Conversation {
         mode: Channel.Mode
         readonly nextAd: number
         isSendingAds: boolean
+        sendAd(text: string): Promise<void>
     }
 
     export function isPrivate(conversation: Conversation): conversation is PrivateConversation {
@@ -94,7 +95,24 @@ export namespace Conversation {
         readonly highlightWords: ReadonlyArray<string>;
         readonly joinMessages: Setting;
         readonly defaultHighlights: boolean;
+        readonly adSettings: AdSettings;
     }
+
+
+    export interface AdSettings {
+        readonly ads: string[];
+    }
+
+
+    export interface AdState {
+        active: boolean;
+        firstPost?: Date;
+        nextPostDue?: Date;
+        expireDue?: Date;
+        interval?: any;
+        adIndex?: number;
+    }
+
 
     export const enum UnreadState { None, Unread, Mention }
 
@@ -109,6 +127,7 @@ export namespace Conversation {
         readonly key: string
         readonly unread: UnreadState
         settings: Settings
+        adState: AdState
         send(): Promise<void>
         clear(): void
         loadLastSent(): void

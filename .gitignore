@@ -3,3 +3,5 @@ node_modules/
 /electron/dist
 /mobile/www
 /webchat/dist
+
+.idea/workspace.xml

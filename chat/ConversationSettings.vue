@@ -35,6 +35,12 @@
                 <option :value="setting.False">{{l('conversationSettings.false')}}</option>
             </select>
         </div>
+        <div class="form-group" v-for="(ad, index) in ads">
+            <label :for="'ad' + conversation.key + '-' + index" class="control-label">Channel Auto-Posting Ad #{{(index + 1)}}</label>
+            <input :id="'ad' + conversation.key + '-' + index" class="form-control" v-model="ads[index]" />
+        </div>
+        <button class="btn" @click="addAd()">Add Auto-Posting Ad</button>
+
     </modal>
 </template>
 
@@ -58,6 +64,7 @@
         highlightWords!: string;
         joinMessages!: Conversation.Setting;
         defaultHighlights!: boolean;
+        ads!: string[];
 
         load(): void {
             const settings = this.conversation.settings;
@@ -66,16 +73,29 @@
             this.highlightWords = settings.highlightWords.join(',');
             this.joinMessages = settings.joinMessages;
             this.defaultHighlights = settings.defaultHighlights;
+            this.ads = settings.adSettings.ads.slice(0);
+
+            if (this.ads.length === 0) {
+                this.ads.push('');
+            }
         }
 
         submit(): void {
             this.conversation.settings = {
                 notify: this.notify,
                 highlight: this.highlight,
-                highlightWords: this.highlightWords.split(',').map((x) => x.trim()).filter((x) => x.length),
+                highlightWords: this.highlightWords.split(',').map((x) => x.trim()).filter((x) => (x.length > 0)),
                 joinMessages: this.joinMessages,
-                defaultHighlights: this.defaultHighlights
+                defaultHighlights: this.defaultHighlights,
+                adSettings: {
+                    ads: this.ads.filter((ad: string) => (ad.length > 0))
+                }
             };
+        }
+
+
+        addAd(): void {
+            this.ads.push('');
         }
     }
 </script>

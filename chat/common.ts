@@ -44,12 +44,29 @@ export class Settings implements ISettings {
     bbCodeBar = true;
 }
 
+
+export class AdSettings implements Conversation.AdSettings {
+    ads: string[] = [];
+}
+
+
+export class AdState implements Conversation.AdState {
+    active = false;
+    firstPost?: Date = undefined;
+    nextPostDue?: Date = undefined;
+    interval?: any = undefined;
+    adIndex?: number = undefined;
+    expireDue?: Date = undefined;
+}
+
+
 export class ConversationSettings implements Conversation.Settings {
     notify = Conversation.Setting.Default;
     highlight = Conversation.Setting.Default;
     highlightWords: string[] = [];
     joinMessages = Conversation.Setting.Default;
     defaultHighlights = true;
+    adSettings: Conversation.AdSettings = { ads: [] };
 }
 
 function pad(num: number): string | number {
