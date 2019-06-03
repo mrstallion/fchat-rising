@@ -37,7 +37,7 @@
         </div>
         <div class="form-group" v-for="(ad, index) in ads">
             <label :for="'ad' + conversation.key + '-' + index" class="control-label">Channel Auto-Posting Ad #{{(index + 1)}}</label>
-            <input :id="'ad' + conversation.key + '-' + index" class="form-control" v-model="ads[index]" />
+            <textarea :id="'ad' + conversation.key + '-' + index" class="form-control" v-model="ads[index]"></textarea>
         </div>
         <button class="btn" @click="addAd()">Add Auto-Posting Ad</button>
 
@@ -88,7 +88,7 @@
                 joinMessages: this.joinMessages,
                 defaultHighlights: this.defaultHighlights,
                 adSettings: {
-                    ads: this.ads.filter((ad: string) => (ad.length > 0))
+                    ads: this.ads.map((ad: string) => ad.trim()).filter((ad: string) => (ad.length > 0))
                 }
             };
         }
