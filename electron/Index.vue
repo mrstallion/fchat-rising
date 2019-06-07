@@ -49,7 +49,10 @@
         </modal>
         <modal :buttons="false" ref="profileViewer" dialogClass="profile-viewer">
             <character-page :authenticated="true" :oldApi="true" :name="profileName" :image-preview="true"></character-page>
-            <template slot="title">{{profileName}} <a class="btn" @click="openProfileInBrowser"><i class="fa fa-external-link-alt"/></a>
+            <template slot="title">
+                {{profileName}}
+                <a class="btn" @click="openProfileInBrowser"><i class="fa fa-external-link-alt"/></a>
+                <a class="btn" @click="openConversation"><i class="fa fa-comment"></i></a>
             </template>
         </modal>
         <modal :action="l('fixLogs.action')" ref="fixLogsModal" @submit="fixLogs" buttonClass="btn-danger">
@@ -253,6 +256,18 @@
 
         openProfileInBrowser(): void {
             electron.remote.shell.openExternal(`https://www.f-list.net/c/${this.profileName}`);
+            this.$refs.profileViewer.hide();
+        }
+
+        openConversation(a?: any, b?: any, c?: any): void {
+            //this.
+            // this.profileName
+            const character = core.characters.get(this.profileName);
+            const conversation = core.conversations.getPrivate(character);
+
+            conversation.show();
+
+            this.$refs.profileViewer.hide();
         }
 
         get styling(): string {
