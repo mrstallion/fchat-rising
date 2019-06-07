@@ -2,9 +2,9 @@ import { Conversation } from './interfaces';
 
 export class AdManager {
     static readonly POSTING_PERIOD = 3 * 60 * 60 * 1000;
-    static readonly START_VARIANCE = 3 * 60 * 1000;
-    static readonly POST_VARIANCE = 10 * 60 * 1000;
-    static readonly POST_DELAY = 2 * 60 * 1000;
+    static readonly START_VARIANCE = 2 * 60 * 1000;
+    static readonly POST_VARIANCE = 7 * 60 * 1000;
+    static readonly POST_DELAY = 1 * 60 * 1000;
 
     private conversation: Conversation;
 

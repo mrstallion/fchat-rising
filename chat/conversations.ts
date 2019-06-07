@@ -343,6 +343,8 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
         if (text.length < 1)
             return;
 
+        core.connection.send('LRP', {channel: this.channel.id, message: text});
+
         await this.addMessage(
             createMessage(MessageType.Ad, core.characters.ownCharacter, text, new Date())
         );
