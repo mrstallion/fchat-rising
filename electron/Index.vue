@@ -256,10 +256,11 @@
 
         openProfileInBrowser(): void {
             electron.remote.shell.openExternal(`https://www.f-list.net/c/${this.profileName}`);
-            this.$refs.profileViewer.hide();
+
+            (this.$refs.profileViewer as any).hide();
         }
 
-        openConversation(a?: any, b?: any, c?: any): void {
+        openConversation(): void {
             //this.
             // this.profileName
             const character = core.characters.get(this.profileName);
@@ -267,7 +268,7 @@
 
             conversation.show();
 
-            this.$refs.profileViewer.hide();
+            (this.$refs.profileViewer as any).hide();
         }
 
         get styling(): string {
