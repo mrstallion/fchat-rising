@@ -2,6 +2,7 @@
 import {Connection} from '../fchat';
 
 import {Channel, Character} from '../fchat/interfaces';
+import { AdManager } from './ad-manager';
 export {Connection, Channel, Character} from '../fchat/interfaces';
 export const userStatuses: ReadonlyArray<Character.Status> = ['online', 'looking', 'away', 'busy', 'dnd'];
 export const channelModes: ReadonlyArray<Channel.Mode> = ['chat', 'ads', 'both'];
@@ -98,21 +99,9 @@ export namespace Conversation {
         readonly adSettings: AdSettings;
     }
 
-
     export interface AdSettings {
         readonly ads: string[];
     }
-
-
-    export interface AdState {
-        active: boolean;
-        firstPost?: Date;
-        nextPostDue?: Date;
-        expireDue?: Date;
-        interval?: any;
-        adIndex?: number;
-    }
-
 
     export const enum UnreadState { None, Unread, Mention }
 
@@ -127,7 +116,7 @@ export namespace Conversation {
         readonly key: string
         readonly unread: UnreadState
         settings: Settings
-        adState: AdState
+        readonly adManager: AdManager;
         send(): Promise<void>
         clear(): void
         loadLastSent(): void

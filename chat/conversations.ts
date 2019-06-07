@@ -1,6 +1,7 @@
 import {queuedJoin} from '../fchat/channels';
 import {decodeHTML} from '../fchat/common';
-import { AdState, characterImage, ConversationSettings, EventMessage, Message, messageToString } from './common';
+import { AdManager } from './ad-manager';
+import { characterImage, ConversationSettings, EventMessage, Message, messageToString } from './common';
 import core from './core';
 import {Channel, Character, Conversation as Interfaces} from './interfaces';
 import l from './localize';
@@ -30,14 +31,15 @@ abstract class Conversation implements Interfaces.Conversation {
     infoText = '';
     abstract readonly maxMessageLength: number | undefined;
     _settings: Interfaces.Settings | undefined;
-    _adState: Interfaces.AdState | undefined;
     protected abstract context: CommandContext;
     protected maxMessages = 50;
     protected allMessages: Interfaces.Message[] = [];
     readonly reportMessages: Interfaces.Message[] = [];
     private lastSent = '';
+    adManager: AdManager;
 
     constructor(readonly key: string, public _isPinned: boolean) {
+        this.adManager = new AdManager(this);
     }
 
     get settings(): Interfaces.Settings {
@@ -49,17 +51,6 @@ abstract class Conversation implements Interfaces.Conversation {
         this._settings = value;
         state.setSettings(this.key, value); //tslint:disable-line:no-floating-promises
     }
-
-    get adState(): Interfaces.AdState {
-        //tslint:disable-next-line:strict-boolean-expressions
-        return this._adState || (this._adState = state.adStates[this.key] || new AdState());
-    }
-
-    set adState(value: Interfaces.AdState) {
-        this._adState = value;
-        state.setAdState(this.key, value); //tslint:disable-line:no-floating-promises
-    }
-
 
     get isPinned(): boolean {
         return this._isPinned;
@@ -200,11 +191,10 @@ class PrivateConversation extends Conversation implements Interfaces.PrivateConv
             return;
         }
 
-        if(this.adState.active) {
+        if(this.adManager.isActive()) {
             this.errorText = 'Cannot send ads manually while ad auto-posting is active';
             return;
         }
-
 
         core.connection.send('PRI', {recipient: this.name, message: this.enteredText});
         const message = createMessage(MessageType.Message, core.characters.ownCharacter, this.enteredText);
@@ -331,7 +321,7 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
     protected async doSend(): Promise<void> {
         const isAd = this.isSendingAds;
 
-        if(this.adState.active) {
+        if(this.adManager.isActive()) {
             this.errorText = 'Cannot post ads manually while ad auto-posting is active';
             return;
         }
@@ -348,7 +338,6 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
             this.nextAd = Date.now() + core.connection.vars.lfrp_flood * 1000;
         else this.clearText();
     }
-
 
     async sendAd(text: string): Promise<void> {
         if (text.length < 1)
@@ -399,7 +388,6 @@ class State implements Interfaces.State {
     recentChannels: Interfaces.RecentChannelConversation[] = [];
     pinned!: {channels: string[], private: string[]};
     settings!: {[key: string]: Interfaces.Settings};
-    adStates: {[key: string]: Interfaces.AdState} = {};
     modes!: {[key: string]: Channel.Mode | undefined};
     windowFocused = document.hasFocus();
 
@@ -443,12 +431,6 @@ class State implements Interfaces.State {
         this.settings[key] = value;
         await core.settingsStore.set('conversationSettings', this.settings);
     }
-
-
-    setAdState(key: string, value: Interfaces.AdState): void {
-        this.adStates[key] = value;
-    }
-
 
     show(conversation: Conversation): void {
         this.selectedConversation.onHide();

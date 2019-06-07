@@ -70,14 +70,15 @@
                 @click="hideSearch"><i class="fas fa-times"></i></a>
         </div>
         <div class="auto-ads" v-show="isAutopostingAds()">
-            <h4>Auto-Posting Ads</h4>
+            <h4>{{l('admgr.activeHeader')}}</h4>
             <div class="update">{{adAutoPostUpdate}}</div>
 
-
             <div v-show="adAutoPostNextAd" class="next">
-                <h5>Coming Next</h5>
+                <h5>{{l('admgr.comingNext')}}</h5>
                 <div>{{(adAutoPostNextAd ? adAutoPostNextAd.substr(0, 50) : '')}}...</div>
             </div>
+
+            <a class="btn btn-sm btn-outline-primary renew-autoposts" @click="renewAutoPosting()">{{l('admgr.renew')}}</a>
         </div>
         <div class="border-top messages" :class="isChannel(conversation) ? 'messages-' + conversation.mode : undefined" ref="messages"
             @scroll="onMessagesScroll" style="flex:1;overflow:auto;margin-top:2px">
@@ -117,15 +118,15 @@
                 <ul class="nav nav-pills send-ads-switcher" v-if="isChannel(conversation)"
                     style="position:relative;z-index:10;margin-right:5px">
                     <li class="nav-item">
-                        <a href="#" :class="{active: !conversation.isSendingAds, disabled: conversation.channel.mode != 'both'}"
+                        <a href="#" :class="{active: !conversation.isSendingAds, disabled: (conversation.channel.mode != 'both') || (conversation.adManager.isActive())}"
                             class="nav-link" @click.prevent="setSendingAds(false)">{{l('channel.mode.chat')}}</a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" :class="{active: conversation.isSendingAds, disabled: conversation.channel.mode != 'both'}"
+                        <a href="#" :class="{active: conversation.isSendingAds, disabled: (conversation.channel.mode != 'both') || (conversation.adManager.isActive())}"
                             class="nav-link" @click.prevent="setSendingAds(true)">{{adsMode}}</a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" :class="{active: conversation.adState.active}" class="nav-link" @click="autoPostAds()">Auto-Post Ads</a>
+                        <a href="#" :class="{active: conversation.adManager.isActive()}" class="nav-link toggle-autopost" @click="toggleAutoPostAds()">{{l('admgr.toggleAutoPost')}}</a>
                     </li>
                 </ul>
                 <div class="btn btn-sm btn-primary" v-show="!settings.enterSend" @click="sendButton">{{l('chat.send')}}</div>
@@ -146,7 +147,7 @@
     import {Keys} from '../keys';
     import {BBCodeView, Editor} from './bbcode';
     import CommandHelp from './CommandHelp.vue';
-    import { AdState, characterImage, getByteLength, getKey } from "./common";
+    import { characterImage, getByteLength, getKey } from "./common";
     import ConversationSettings from './ConversationSettings.vue';
     import core from './core';
     import {Channel, channelModes, Character, Conversation, Settings} from './interfaces';
@@ -191,8 +192,8 @@
         adCountdown = 0;
         adsMode = l('channel.mode.ads');
         autoPostingUpdater = 0;
-        adAutoPostUpdate: string|null = null;
-        adAutoPostNextAd: string|null = null;
+        adAutoPostUpdate: string | null = null;
+        adAutoPostNextAd: string | null = null;
         isChannel = Conversation.isChannel;
         isPrivate = Conversation.isPrivate;
 
@@ -236,7 +237,8 @@
                 setAdCountdown();
             });
 
-            this.$watch('conversation.adState.active', () => (this.refreshAutoPostingTimer()));
+            this.$watch(() => this.conversation.adManager.isActive(), () => (this.refreshAutoPostingTimer()));
+            this.refreshAutoPostingTimer();
         }
 
         @Hook('destroyed')
@@ -273,6 +275,7 @@
             if(!anyDialogsShown) (<Editor>this.$refs['textBox']).focus();
             this.$nextTick(() => setTimeout(() => this.messageView.scrollTop = this.messageView.scrollHeight));
             this.scrolledDown = true;
+            this.refreshAutoPostingTimer();
         }
 
         @Watch('conversation.messages')
@@ -399,77 +402,28 @@
 
 
         isAutopostingAds(): boolean {
-            return this.conversation.adState.active;
+            return this.conversation.adManager.isActive();
         }
 
 
-        clearAutoPostAds(): void {
-            if (this.conversation.adState.interval) {
-                clearTimeout(this.conversation.adState.interval);
-            }
-
-            this.conversation.adState = new AdState();
+        stopAutoPostAds(): void {
+            this.conversation.adManager.stop();
         }
 
 
-        autoPostAds(): void {
+        renewAutoPosting(): void {
+            this.conversation.adManager.renew();
+
+            this.refreshAutoPostingTimer();
+        }
+
+
+        toggleAutoPostAds(): void {
             if(this.isAutopostingAds()) {
-                this.clearAutoPostAds();
-                this.refreshAutoPostingTimer();
-                return;
+                this.stopAutoPostAds();
+            } else {
+                this.conversation.adManager.start();
             }
-
-            const conversation = this.conversation;
-
-            /**** Do not use 'this' keyword below this line, it will operate differently than you expect ****/
-
-            const chanConv = (<Conversation.ChannelConversation>conversation);
-
-            const adState = conversation.adState;
-            const initialWait = Math.max(0, chanConv.nextAd - Date.now()) * 1.1;
-
-            adState.adIndex = 0;
-
-            const sendNextPost = async () => {
-                const ads = conversation.settings.adSettings.ads;
-                const index = (adState.adIndex || 0);
-
-                if ((ads.length === 0) || ((adState.expireDue) && (adState.expireDue.getTime() < Date.now()))) {
-                    conversation.adState = new AdState();
-                    return;
-                }
-
-                const msg = ads[index % ads.length];
-
-                await chanConv.sendAd(msg);
-
-                const nextInMs = Math.max(0, (chanConv.nextAd - Date.now())) * 1.1;
-
-                adState.adIndex = index + 1;
-                adState.nextPostDue = new Date(Date.now() + nextInMs);
-
-                adState.interval = setTimeout(
-                    async () => {
-                        await sendNextPost();
-                    },
-                    nextInMs
-                );
-            };
-
-
-            adState.active = true;
-            adState.nextPostDue = new Date(Date.now() + initialWait);
-            adState.expireDue = new Date(Date.now() + 2 * 60 * 60 * 1000);
-
-
-            adState.interval = setTimeout(
-                async () => {
-                    adState.firstPost = new Date();
-
-                    await sendNextPost();
-                },
-                initialWait
-            );
 
             this.refreshAutoPostingTimer();
         }
@@ -487,25 +441,28 @@
             }
 
             const updateAutoPostingState = () => {
-                const adState = this.conversation.adState;
-                const ads = this.conversation.settings.adSettings.ads;
+                const adManager = this.conversation.adManager;
 
-                if(ads.length > 0) {
-                    this.adAutoPostNextAd = ads[(adState.adIndex || 0) % ads.length];
+                this.adAutoPostNextAd = adManager.getNextAd() || null;
 
-                    const diff = ((adState.nextPostDue || new Date()).getTime() - Date.now()) / 1000;
-                    const expDiff = ((adState.expireDue || new Date()).getTime() - Date.now()) / 1000;
+                if(this.adAutoPostNextAd) {
+                    const diff = ((adManager.getNextPostDue() || new Date()).getTime() - Date.now()) / 1000;
+                    const expDiff = ((adManager.getExpireDue() || new Date()).getTime() - Date.now()) / 1000;
 
-                    if((adState.nextPostDue) && (!adState.firstPost)) {
-                        this.adAutoPostUpdate = `Posting beings in ${Math.floor(diff / 60)}m ${Math.floor(diff % 60)}s`;
-                    } else {
-                        this.adAutoPostUpdate = `Next ad in ${Math.floor(diff / 60)}m ${Math.floor(diff % 60)}s`;
-                    }
+                    const diffMins = Math.floor(diff / 60);
+                    const diffSecs = Math.floor(diff % 60);
+                    const expDiffMins = Math.floor(expDiff / 60);
+                    const expDiffSecs = Math.floor(expDiff % 60);
 
-                    this.adAutoPostUpdate += `, auto-posting expires in ${Math.floor(expDiff / 60)}m ${Math.floor(expDiff % 60)}s`;
+                    this.adAutoPostUpdate = l(
+                        ((adManager.getNextPostDue()) && (!adManager.getFirstPost())) ? 'admgr.postingBegins' : 'admgr.nextPostDue',
+                        diffMins,
+                        diffSecs
+                    ) + l('admgr.expiresIn', expDiffMins, expDiffSecs);
                 } else {
                     this.adAutoPostNextAd = null;
-                    this.adAutoPostUpdate = 'No ads have been set up -- auto-posting will be cancelled.';
+
+                    this.adAutoPostUpdate = l('admgr.noAds');
                 }
             };
 
@@ -513,7 +470,6 @@
 
             updateAutoPostingState();
         }
-
 
         hasSFC(message: Conversation.Message): message is Conversation.SFCMessage {
             return (<Partial<Conversation.SFCMessage>>message).sfc !== undefined;
@@ -559,6 +515,12 @@
             padding: 3px 10px;
         }
 
+
+        .toggle-autopost {
+            margin-left: 1px;
+        }
+
+
         .auto-ads {
             background-color: rgba(255, 128, 32, 0.8);
             padding-left: 10px;
@@ -566,6 +528,29 @@
             padding-top: 5px;
             padding-bottom: 5px;
             margin: 0;
+            position: relative;
+
+            .renew-autoposts {
+                display: block;
+                float: right;
+                /* margin-top: auto; */
+                /* margin-bottom: auto; */
+                position: absolute;
+                /* bottom: 1px; */
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                border-color: rgba(255, 255, 255, 0.5);
+                color: rgba(255, 255, 255, 0.9);
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.3);
+                }
+
+                &:active {
+                    background-color: rgba(255, 255, 255, 0.6);
+                }
+            }
 
             h4 {
                 font-size: 1.1rem;

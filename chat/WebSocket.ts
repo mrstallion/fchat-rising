@@ -1,7 +1,7 @@
 import {WebSocketConnection} from '../fchat';
 
 export default class Socket implements WebSocketConnection {
-    static host = 'wss://chat.f-list.net:9799';
+    static host = 'wss://chat.f-list.net/chat2';
     private socket: WebSocket;
     private lastHandler: Promise<void> = Promise.resolve();
 

@@ -50,16 +50,6 @@ export class AdSettings implements Conversation.AdSettings {
 }
 
 
-export class AdState implements Conversation.AdState {
-    active = false;
-    firstPost?: Date = undefined;
-    nextPostDue?: Date = undefined;
-    interval?: any = undefined;
-    adIndex?: number = undefined;
-    expireDue?: Date = undefined;
-}
-
-
 export class ConversationSettings implements Conversation.Settings {
     notify = Conversation.Setting.Default;
     highlight = Conversation.Setting.Default;
