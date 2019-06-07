@@ -65,7 +65,7 @@
 </template>
 
 <script lang="ts">
-    import {Component, Prop, Watch} from '@f-list/vue-ts';
+    import {Component, Prop, Watch, Hook} from '@f-list/vue-ts';
     import Vue from 'vue';
     import {Kink, KinkChoice} from '../../interfaces';
     import * as Utils from '../utils';
@@ -103,6 +103,7 @@
                 this.loading = true;
                 this.comparing = true;
                 const kinks = await methods.kinksGet(this.characterToCompare);
+
                 const toAssign: {[key: number]: KinkChoice} = {};
                 for(const kink of kinks)
                     toAssign[kink.id] = kink.choice;
@@ -127,6 +128,19 @@
             }
             this.highlighting = toAssign;
         }
+
+
+        @Hook('mounted')
+        async mounted(): Promise<void> {
+            await this.compareKinks();
+        }
+
+
+        @Watch('character')
+        characterChanged(): void {
+            this.compareKinks();
+        }
+
 
         get kinkGroups(): {[key: string]: KinkGroup | undefined} {
             return this.shared.kinks.kink_groups;

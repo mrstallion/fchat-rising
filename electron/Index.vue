@@ -148,6 +148,13 @@
                 if(getKey(e) === Keys.Tab && e.ctrlKey && !e.altKey && !e.shiftKey)
                     parent.send('switch-tab', this.character);
             });
+
+            if (process.env.NODE_ENV !== 'production') {
+                const dt = require('@vue/devtools');
+
+                dt.connect();
+            }
+
         }
 
         async login(): Promise<void> {

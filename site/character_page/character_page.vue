@@ -158,6 +158,7 @@
                 this.character = await methods.characterData(this.name, this.characterid);
                 standardParser.allowInlines = true;
                 standardParser.inlines = this.character.character.inlines;
+
             } catch(e) {
                 this.error = Utils.isJSONError(e) ? <string>e.response.data.error : (<Error>e).message;
                 Utils.ajaxError(e, 'Failed to load character information.');
