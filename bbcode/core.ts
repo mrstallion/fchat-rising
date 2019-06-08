@@ -4,7 +4,7 @@ const urlFormat = '((?:https?|ftps?|irc)://[^\\s/$.?#"\']+\\.[^\\s"]+)';
 export const findUrlRegex = new RegExp(`(\\[url[=\\]]\\s*)?${urlFormat}`, 'gi');
 export const urlRegex = new RegExp(`^${urlFormat}$`);
 
-function domain(url: string): string | undefined {
+export function domain(url: string): string | undefined {
     const pieces = urlRegex.exec(url);
     if(pieces === null) return;
     const match = pieces[1].match(/(?:(https?|ftps?|irc):)?\/\/(?:www.)?([^\/]+)/);
@@ -16,6 +16,39 @@ function fixURL(url: string): string {
         url = `https://${url}`;
     return url.replace(/ /g, '%20');
 }
+
+export function analyzeUrlTag(parser: BBCodeParser, param: string, content: string): {success: boolean, url?: string, domain?: string, textContent: string} {
+    let url: string | undefined, textContent: string = content;
+    let success = true;
+
+    if(param.length > 0) {
+        url = param.trim();
+        if(content.length === 0) textContent = param;
+    } else if(content.length > 0) url = content;
+    else {
+        parser.warning('url tag contains no url.');
+        textContent = '';
+        success = false;
+    }
+
+    if((success) && (url)) {
+        // This fixes problems where content based urls are marked as invalid if they contain spaces.
+        url = fixURL(url);
+
+        if (!urlRegex.test(url)) {
+            textContent = `[BAD URL] ${url}`;
+            success = false;
+        }
+    }
+
+    return {
+        success,
+        url,
+        textContent,
+        domain: url ? domain(url) : undefined
+    };
+}
+
 
 export class CoreBBCodeParser extends BBCodeParser {
     /*tslint:disable-next-line:typedef*///https://github.com/palantir/tslint/issues/711
@@ -40,41 +73,32 @@ export class CoreBBCodeParser extends BBCodeParser {
             return el;
         }));
         this.addTag(new BBCodeTextTag('url', (parser, parent, param, content) => {
+            const tagData = analyzeUrlTag(parser, param, content);
             const element = parser.createElement('span');
+
             parent.appendChild(element);
 
-            let url: string, display: string = content;
-            if(param.length > 0) {
-                url = param.trim();
-                if(content.length === 0) display = param;
-            } else if(content.length > 0) url = content;
-            else {
-                parser.warning('url tag contains no url.');
-                element.textContent = '';
+            if (!tagData.success) {
+                element.textContent = tagData.textContent;
                 return;
             }
 
-            // This fixes problems where content based urls are marked as invalid if they contain spaces.
-            url = fixURL(url);
-            if(!urlRegex.test(url)) {
-                element.textContent = `[BAD URL] ${url}`;
-                return;
-            }
             const fa = parser.createElement('i');
             fa.className = 'fa fa-link';
             element.appendChild(fa);
             const a = parser.createElement('a');
-            a.href = url;
+            a.href = tagData.url as string;
             a.rel = 'nofollow noreferrer noopener';
             a.target = '_blank';
             a.className = 'user-link';
-            a.title = url;
-            a.textContent = display;
+            a.title = tagData.url as string;
+            a.textContent = tagData.textContent;
             element.appendChild(a);
             const span = document.createElement('span');
             span.className = 'link-domain bbcode-pseudo';
-            span.textContent = ` [${domain(url)}]`;
+            span.textContent = ` [${tagData.domain}]`;
             element.appendChild(span);
+
             return element;
         }));
     }

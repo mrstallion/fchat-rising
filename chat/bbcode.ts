@@ -1,5 +1,5 @@
 import Vue, {Component, CreateElement, RenderContext, VNode} from 'vue';
-import {CoreBBCodeParser} from '../bbcode/core';
+import { CoreBBCodeParser, analyzeUrlTag } from '../bbcode/core';
 //tslint:disable-next-line:match-default-export-name
 import BaseEditor from '../bbcode/Editor.vue';
 import {BBCodeTextTag} from '../bbcode/parser';
@@ -7,6 +7,7 @@ import ChannelView from './ChannelTagView.vue';
 import {characterImage} from './common';
 import core from './core';
 import {Character} from './interfaces';
+import UrlView from './UrlTagView.vue';
 import UserView from './user_view';
 
 export const BBCodeView: Component = {
@@ -100,6 +101,27 @@ export default class BBCodeParser extends CoreBBCodeParser {
             this.cleanup.push(view);
             return root;
         }));
+
+        this.addTag(new BBCodeTextTag(
+            'url',
+            (parser, parent, _, content) => {
+                const tagData = analyzeUrlTag(parser, _, content);
+
+                const root = parser.createElement('span');
+                // const el = parser.createElement('span');
+                parent.appendChild(root);
+                // root.appendChild(el);
+
+                if (!tagData.success) {
+                    root.textContent = tagData.textContent;
+                    return;
+                }
+
+                const view = new UrlView({el: root, propsData: {url: tagData.url, text: tagData.textContent, domain: tagData.domain}});
+                this.cleanup.push(view);
+
+                return root;
+            }));
     }
 
     parseEverything(input: string): BBCodeElement {

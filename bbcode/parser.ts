@@ -92,6 +92,10 @@ export class BBCodeParser {
         this._tags[impl.tag] = impl;
     }
 
+    getTag(tag: string): BBCodeTag | undefined {
+        return this._tags[tag];
+    }
+
     removeTag(tag: string): void {
         delete this._tags[tag];
     }
