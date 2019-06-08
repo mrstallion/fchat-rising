@@ -118,7 +118,8 @@ function createWindow(): Electron.BrowserWindow | undefined {
     if(tabCount >= 3) return;
     const lastState = windowState.getSavedWindowState();
     const windowProperties: Electron.BrowserWindowConstructorOptions & {maximized: boolean} = {
-        ...lastState, center: lastState.x === undefined, show: false
+        ...lastState, center: lastState.x === undefined, show: false,
+        webPreferences: { webviewTag: true }
     };
     if(process.platform === 'darwin') windowProperties.titleBarStyle = 'hiddenInset';
     else windowProperties.frame = false;
