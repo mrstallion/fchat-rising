@@ -84,7 +84,10 @@
 
         @Hook('mounted')
         mounted(): void {
+            // browserWindow.webContents.openDevTools();
+
             this.addTab();
+
             electron.ipcRenderer.on('settings', (_: Event, settings: GeneralSettings) => this.settings = settings);
             electron.ipcRenderer.on('allow-new-tabs', (_: Event, allow: boolean) => this.canOpenTab = allow);
             electron.ipcRenderer.on('open-tab', () => this.addTab());

@@ -1,6 +1,6 @@
 <template>
     <div class="infotag">
-        <span class="infotag-label">{{label}}: </span>
+        <span class="infotag-label">{{label}}</span>
         <span v-if="!contactLink" class="infotag-value">{{value}}</span>
         <span v-if="contactLink" class="infotag-value"><a :href="contactLink">{{value}}</a></span>
     </div>

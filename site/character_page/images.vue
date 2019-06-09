@@ -1,12 +1,19 @@
 <template>
-    <div class="character-images row">
+<!--    <div class="character-images row">-->
+    <div class="character-images">
         <div v-show="loading" class="alert alert-info">Loading images.</div>
         <template v-if="!loading">
-            <div class="character-image col-6 col-sm-4 col-md-2" v-for="image in images" :key="image.id">
-                <a :href="imageUrl(image)" target="_blank" @click="handleImageClick($event, image)">
-                    <img :src="thumbUrl(image)" :title="image.description">
-                </a>
-            </div>
+            <img :src="imageUrl(image)" :title="image.description" class="character-image" v-for="image in images" :key="image.id">
+
+<!--            <div class="character-image col-6 col-sm-12 col-md-12" v-for="image in images" :key="image.id">-->
+<!--                <img :src="imageUrl(image)" :title="image.description">-->
+<!--            </div>-->
+<!--                -->
+
+<!--                <a :href="imageUrl(image)" target="_blank" @click="handleImageClick($event, image)">-->
+<!--                    <img :src="thumbUrl(image)" :title="image.description">-->
+<!--                </a>-->
+<!--            </div>-->
         </template>
         <div v-if="!loading && !images.length" class="alert alert-info">No images.</div>
         <div class="image-preview" v-show="previewImage" @click="previewImage = ''">

@@ -1,15 +1,15 @@
 <template>
-    <span
-        @mouseover="show()"
-        @mouseleave="dismiss()"
-    >
+    <span>
         <i class="fa fa-link"></i>
         <a
             :href="url"
             rel="nofollow noreferrer noopener"
             target="_blank"
             class="user-link"
-            :title="url"
+            @mouseover="show()"
+            @mouseenter="show()"
+            @mouseleave="dismiss()"
+            @mouseout="dismiss()"
         >{{text}}</a>
         <span
             class="link-domain bbcode-pseudo"
@@ -34,24 +34,21 @@
         @Prop({required: true})
         readonly domain!: string;
 
-        @Prop()
-        hover!: boolean = false;
-
         @Hook("beforeDestroy")
-        beforeDestroy() {
+        beforeDestroy(): void {
             this.dismiss();
         }
 
         @Hook("deactivated")
-        deactivate() {
+        deactivate(): void {
             this.dismiss();
         }
 
-        dismiss() {
+        dismiss(): void {
             EventBus.$emit('imagepreview-dismiss', {url: this.url});
         }
 
-        show() {
+        show(): void {
             EventBus.$emit('imagepreview-show', {url: this.url});
         }
     }

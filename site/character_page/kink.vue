@@ -2,15 +2,16 @@
     <div class="character-kink" :class="kinkClasses" :id="kinkId" @click="toggleSubkinks" :data-custom="customId"
         @mouseover.stop="showTooltip = true" @mouseout.stop="showTooltip = false">
         <i v-show="kink.hasSubkinks" class="fa" :class="{'fa-minus': !listClosed, 'fa-plus': listClosed}"></i>
-        <i v-show="!kink.hasSubkinks && kink.isCustom" class="far fa-dot-circle custom-kink-icon"></i>
+        <i v-show="!kink.hasSubkinks && kink.isCustom" class="far custom-kink-icon"></i>
         <span class="kink-name">{{ kink.name }}</span>
+        <span class="kink-custom-desc" v-if="(kink.isCustom)">{{kink.description}}</span>
         <template v-if="kink.hasSubkinks">
             <div class="subkink-list" :class="{closed: this.listClosed}">
                 <kink v-for="subkink in kink.subkinks" :kink="subkink" :key="subkink.id" :comparisons="comparisons"
                     :highlights="highlights"></kink>
             </div>
         </template>
-        <div class="popover popover-top" v-if="showTooltip" style="display:block;bottom:100%;top:initial;margin-bottom:5px">
+        <div class="popover popover-top" v-if="((showTooltip) && (!kink.isCustom))" style="display:block;bottom:100%;top:initial;margin-bottom:5px">
             <div class="arrow" style="left:10%"></div>
             <h5 class="popover-header">{{kink.name}}</h5>
             <div class="popover-body"><p>{{kink.description}}</p></div>

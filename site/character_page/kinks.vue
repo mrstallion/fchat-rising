@@ -129,18 +129,15 @@
             this.highlighting = toAssign;
         }
 
-
         @Hook('mounted')
         async mounted(): Promise<void> {
             await this.compareKinks();
         }
 
-
         @Watch('character')
-        characterChanged(): void {
-            this.compareKinks();
+        async characterChanged(): Promise<void> {
+            await this.compareKinks();
         }
-
 
         get kinkGroups(): {[key: string]: KinkGroup | undefined} {
             return this.shared.kinks.kink_groups;

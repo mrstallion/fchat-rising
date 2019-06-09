@@ -167,3 +167,85 @@
         }
     }
 </script>
+
+
+<style lang="scss">
+
+    .custom-kink {
+        &:first-child {
+            margin-top: 0;
+        }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        font-weight: bold;
+        margin-top: 14px;
+        margin-bottom: 14px;
+        margin-left: -6px;
+        margin-right: -6px;
+        color: #f2cd00;
+        border: 1px rgba(255, 255, 255, 0.1) solid;
+        border-radius: 2px;
+        /* border-collapse: collapse; */
+        padding: 5px;
+    }
+
+
+    .kink-custom-desc {
+        display: block;
+        font-weight: normal;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 125%;
+    }
+
+
+    .infotag-label {
+        display: block;
+        /* margin-bottom: 1rem; */
+        font-weight: normal !important;
+        line-height: 120%;
+        font-size: 85%;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+
+    .infotag-value {
+        display: block;
+        margin-bottom: 1rem;
+        font-weight: bold;
+        line-height: 120%;
+    }
+
+    .quick-info-value {
+        display: block;
+        font-weight: bold;
+    }
+
+    .quick-info-label {
+        display: block;
+        /* margin-bottom: 1rem; */
+        font-weight: normal !important;
+        line-height: 120%;
+        font-size: 85%;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .quick-info {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    img.character-image {
+        max-width: 33% !important;
+        width: 33% !important;
+        height: auto !important;
+        object-fit: contain;
+        object-position: top center;
+        vertical-align: top !important;
+    }
+
+</style>

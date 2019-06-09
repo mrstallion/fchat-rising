@@ -1,3 +1,28 @@
+# F-Chat Rising
+
+This repository contains a modified version of the mainline F-Chat 3.0 client.
+
+
+## Key Differences
+
+*   Ad auto-posting
+    *    Manage channel's ad settings in "Tab Settings"
+    *    Automatically repost ads every 11-18 minutes (randomized)
+    *    Auto-posting can rotate through multiple ads
+*   Link previews
+    *    Hover cursor over any `[url]` to see a preview of it
+*   Profile
+    *    Kinks are auto-compared when profile is loaded
+    *    Custom kink explanations are shown inline
+    *    Custom kinks are highlighted  
+    *    Gender, fur/human status, age, and sexual preference are highlighted if compatible or incompatible
+    *    Guestbook, friend, and group counts are visible on tabs
+    *    Character pictures can be expanded inline
+    *    Cleaner presentation for the side bar details (age, etc.), sorted in most relevant order
+    *    Less informative side bar details (views, contact) are separated and shown in a less prominent way
+
+
+
 # F-List Exported
 This repository contains the open source parts of F-list and F-Chat 3.0.
 All necessary files to build F-Chat 3.0 as an Electron, mobile or web application are included.

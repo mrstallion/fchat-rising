@@ -142,6 +142,7 @@ function createWindow(): Electron.BrowserWindow | undefined {
         window.show();
         if(lastState.maximized) window.maximize();
     });
+
     return window;
 }
 
