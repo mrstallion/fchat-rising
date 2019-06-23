@@ -136,7 +136,6 @@
         <settings ref="settingsDialog" :conversation="conversation"></settings>
         <logs ref="logsDialog" :conversation="conversation"></logs>
         <manage-channel ref="manageDialog" v-if="isChannel(conversation)" :channel="conversation.channel"></manage-channel>
-        <image-preview ref="imagePreview"></image-preview>
     </div>
 </template>
 
@@ -151,7 +150,6 @@
     import { characterImage, getByteLength, getKey } from "./common";
     import ConversationSettings from './ConversationSettings.vue';
     import core from './core';
-    import ImagePreview from './ImagePreview.vue';
     import {Channel, channelModes, Character, Conversation, Settings} from './interfaces';
     import l from './localize';
     import Logs from './Logs.vue';
@@ -164,8 +162,7 @@
     @Component({
         components: {
             user: UserView, 'bbcode-editor': Editor, 'manage-channel': ManageChannel, settings: ConversationSettings,
-            logs: Logs, 'message-view': MessageView, bbcode: BBCodeView, 'command-help': CommandHelp,
-            'image-preview': ImagePreview
+            logs: Logs, 'message-view': MessageView, bbcode: BBCodeView, 'command-help': CommandHelp
         }
     })
     export default class ConversationView extends Vue {

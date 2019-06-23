@@ -3,7 +3,13 @@
     <div class="character-images">
         <div v-show="loading" class="alert alert-info">Loading images.</div>
         <template v-if="!loading">
-            <img :src="imageUrl(image)" :title="image.description" class="character-image" v-for="image in images" :key="image.id">
+            <!-- @click="handleImageClick($event, image)" -->
+            <div v-for="image in images" :key="image.id" class="character-image-wrapper">
+                <a :href="imageUrl(image)" target="_blank">
+                    <img :src="imageUrl(image)" class="character-image">
+                </a>
+                <div class="image-description" v-if="!!image.description">{{image.description}}</div>
+            </div>
 
 <!--            <div class="character-image col-6 col-sm-12 col-md-12" v-for="image in images" :key="image.id">-->
 <!--                <img :src="imageUrl(image)" :title="image.description">-->

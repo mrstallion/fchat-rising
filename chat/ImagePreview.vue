@@ -267,4 +267,8 @@
         background-repeat: no-repeat;
         // background-color: black;
     }
+
+    .image-preview-wrapper {
+        z-index: 10000;
+    }
 </style>

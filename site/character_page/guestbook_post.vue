@@ -12,7 +12,7 @@
                     <span v-show="!post.approved" class="post-unapproved"> (unapproved)</span>
 
                     <span class="guestbook-timestamp">
-                        <character-link :character="post.character"></character-link>, posted <date-display
+                        <character-link :character="post.character"></character-link> posted <date-display
                         :time="post.postedAt"></date-display>
                     </span>
                     <button class="btn btn-secondary" v-show="canEdit" @click="approve" :disabled="approving" style="margin-left:10px">

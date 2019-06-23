@@ -1,7 +1,11 @@
+import Vue from 'vue';
+import { BBCodeElement } from '../chat/bbcode';
 import {InlineImage} from '../interfaces';
-import {CoreBBCodeParser} from './core';
+import { analyzeUrlTag, CoreBBCodeParser } from './core';
 import {InlineDisplayMode} from './interfaces';
 import {BBCodeCustomTag, BBCodeSimpleTag, BBCodeTextTag} from './parser';
+import UrlTagView from '../chat/UrlTagView.vue';
+
 
 interface StandardParserSettings {
     siteDomain: string
@@ -15,6 +19,8 @@ const usernameRegex = /^[a-zA-Z0-9_\-\s]+$/;
 export class StandardBBCodeParser extends CoreBBCodeParser {
     allowInlines = true;
     inlines: {[key: string]: InlineImage | undefined} | undefined;
+
+    cleanup: Vue[] = [];
 
     createInline(inline: InlineImage): HTMLElement {
         const p1 = inline.hash.substr(0, 2);
@@ -187,6 +193,38 @@ export class StandardBBCodeParser extends CoreBBCodeParser {
             } else parent.appendChild(element = parser.createInline(inline));
             return element;
         }));
+
+        this.addTag(new BBCodeTextTag(
+            'url',
+            (parser, parent, _, content) => {
+                const tagData = analyzeUrlTag(parser, _, content);
+
+                const root = parser.createElement('span');
+                // const el = parser.createElement('span');
+                parent.appendChild(root);
+                // root.appendChild(el);
+
+                if (!tagData.success) {
+                    root.textContent = tagData.textContent;
+                    return;
+                }
+
+                const view = new UrlTagView({el: root, propsData: {url: tagData.url, text: tagData.textContent, domain: tagData.domain}});
+                this.cleanup.push(view);
+
+                return root;
+            }));
+    }
+
+
+    parseEverything(input: string): BBCodeElement {
+        const elm = <BBCodeElement>super.parseEverything(input);
+        if(this.cleanup.length > 0)
+            elm.cleanup = ((cleanup: Vue[]) => () => {
+                for(const component of cleanup) component.$destroy();
+            })(this.cleanup);
+        this.cleanup = [];
+        return elm;
     }
 }
 

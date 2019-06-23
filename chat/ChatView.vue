@@ -90,6 +90,7 @@
         <report-dialog ref="reportDialog"></report-dialog>
         <user-menu ref="userMenu" :reportDialog="$refs['reportDialog']"></user-menu>
         <recent-conversations ref="recentDialog"></recent-conversations>
+        <image-preview ref="imagePreview"></image-preview>
     </div>
 </template>
 
@@ -114,6 +115,7 @@
     import {getStatusIcon} from './user_view';
     import UserList from './UserList.vue';
     import UserMenu from './UserMenu.vue';
+    import ImagePreview from './ImagePreview.vue';
 
     const unreadClasses = {
         [Conversation.UnreadState.None]: '',
@@ -125,7 +127,8 @@
         components: {
             'user-list': UserList, channels: ChannelList, 'status-switcher': StatusSwitcher, 'character-search': CharacterSearch,
             settings: SettingsView, conversation: ConversationView, 'report-dialog': ReportDialog, sidebar: Sidebar,
-            'user-menu': UserMenu, 'recent-conversations': RecentConversations
+            'user-menu': UserMenu, 'recent-conversations': RecentConversations,
+            'image-preview': ImagePreview
         }
     })
     export default class ChatView extends Vue {

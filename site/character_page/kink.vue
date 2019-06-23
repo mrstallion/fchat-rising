@@ -4,14 +4,14 @@
         <i v-show="kink.hasSubkinks" class="fa" :class="{'fa-minus': !listClosed, 'fa-plus': listClosed}"></i>
         <i v-show="!kink.hasSubkinks && kink.isCustom" class="far custom-kink-icon"></i>
         <span class="kink-name">{{ kink.name }}</span>
-        <span class="kink-custom-desc" v-if="(kink.isCustom)">{{kink.description}}</span>
+        <span class="kink-custom-desc" v-if="((kink.isCustom) && (expandedCustom))">{{kink.description}}</span>
         <template v-if="kink.hasSubkinks">
             <div class="subkink-list" :class="{closed: this.listClosed}">
                 <kink v-for="subkink in kink.subkinks" :kink="subkink" :key="subkink.id" :comparisons="comparisons"
                     :highlights="highlights"></kink>
             </div>
         </template>
-        <div class="popover popover-top" v-if="((showTooltip) && (!kink.isCustom))" style="display:block;bottom:100%;top:initial;margin-bottom:5px">
+        <div class="popover popover-top" v-if="((showTooltip) && ((!kink.isCustom) || (!expandedCustom)))" style="display:block;bottom:100%;top:initial;margin-bottom:5px">
             <div class="arrow" style="left:10%"></div>
             <h5 class="popover-header">{{kink.name}}</h5>
             <div class="popover-body"><p>{{kink.description}}</p></div>
@@ -34,8 +34,16 @@
         readonly highlights!: {[key: number]: boolean};
         @Prop({required: true})
         readonly comparisons!: {[key: number]: string | undefined};
+        @Prop({required: false})
+        expandedCustom: boolean = false;
+
         listClosed = true;
         showTooltip = false;
+
+
+        toggleExpandedCustoms(): void {
+            this.expandedCustom = !this.expandedCustom;
+        }
 
         toggleSubkinks(): void {
             if(!this.kink.hasSubkinks)
@@ -52,7 +60,8 @@
                 'stock-kink': !this.kink.isCustom,
                 'custom-kink': this.kink.isCustom,
                 highlighted: !this.kink.isCustom && this.highlights[this.kink.id],
-                subkink: this.kink.hasSubkinks
+                subkink: this.kink.hasSubkinks,
+                'expanded-custom-kink': this.expandedCustom,
             };
             classes[`kink-id-${this.kinkId}`] = true;
             classes[`kink-group-${this.kink.group}`] = true;

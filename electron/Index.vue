@@ -152,11 +152,11 @@
                     parent.send('switch-tab', this.character);
             });
 
-            if (process.env.NODE_ENV !== 'production') {
+            /*if (process.env.NODE_ENV !== 'production') {
                 const dt = require('@vue/devtools');
 
                 dt.connect();
-            }
+            }*/
 
         }
 

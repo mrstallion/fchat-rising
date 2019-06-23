@@ -1,12 +1,17 @@
 <template>
     <div class="character-kinks-block" @contextmenu="contextMenu" @touchstart="contextMenu" @touchend="contextMenu">
         <div class="compare-highlight-block d-flex justify-content-between">
+            <div class="expand-custom-kinks-block form-inline">
+                <button class="btn btn-primary" @click="toggleExpandedCustomKinks" :disabled="loading">Expand Custom Kinks</button>
+            </div>
+
             <div v-if="shared.authenticated" class="quick-compare-block form-inline">
                 <character-select v-model="characterToCompare"></character-select>
-                <button class="btn btn-primary" @click="compareKinks" :disabled="loading || !characterToCompare">
+                <button class="btn btn-outline-secondary" @click="compareKinks" :disabled="loading || !characterToCompare">
                     {{ compareButtonText }}
                 </button>
             </div>
+
             <div class="form-inline">
                 <select v-model="highlightGroup" class="form-control">
                     <option :value="undefined">None</option>
@@ -21,7 +26,7 @@
                         <h4>Favorites</h4>
                     </div>
                     <div class="card-body">
-                        <kink v-for="kink in groupedKinks['favorite']" :kink="kink" :key="kink.id" :highlights="highlighting"
+                        <kink v-for="kink in groupedKinks['favorite']" :kink="kink" :key="kink.id" :highlights="highlighting" :expandedCustom="expandedCustoms"
                             :comparisons="comparison"></kink>
                     </div>
                 </div>
@@ -32,7 +37,7 @@
                         <h4>Yes</h4>
                     </div>
                     <div class="card-body">
-                        <kink v-for="kink in groupedKinks['yes']" :kink="kink" :key="kink.id" :highlights="highlighting"
+                        <kink v-for="kink in groupedKinks['yes']" :kink="kink" :key="kink.id" :highlights="highlighting" :expandedCustom="expandedCustoms"
                             :comparisons="comparison"></kink>
                     </div>
                 </div>
@@ -43,7 +48,7 @@
                         <h4>Maybe</h4>
                     </div>
                     <div class="card-body">
-                        <kink v-for="kink in groupedKinks['maybe']" :kink="kink" :key="kink.id" :highlights="highlighting"
+                        <kink v-for="kink in groupedKinks['maybe']" :kink="kink" :key="kink.id" :highlights="highlighting" :expandedCustom="expandedCustoms"
                             :comparisons="comparison"></kink>
                     </div>
                 </div>
@@ -54,7 +59,7 @@
                         <h4>No</h4>
                     </div>
                     <div class="card-body">
-                        <kink v-for="kink in groupedKinks['no']" :kink="kink" :key="kink.id" :highlights="highlighting"
+                        <kink v-for="kink in groupedKinks['no']" :kink="kink" :key="kink.id" :highlights="highlighting" :expandedCustom="expandedCustoms"
                             :comparisons="comparison"></kink>
                     </div>
                 </div>
@@ -90,6 +95,13 @@
         comparing = false;
         highlighting: {[key: string]: boolean} = {};
         comparison: {[key: string]: KinkChoice} = {};
+
+        expandedCustoms = false;
+
+
+        toggleExpandedCustomKinks(): void {
+            this.expandedCustoms = !this.expandedCustoms;
+        }
 
         async compareKinks(): Promise<void> {
             if(this.comparing) {

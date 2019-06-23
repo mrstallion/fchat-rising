@@ -1,5 +1,5 @@
 <template>
-    <div class="infotag">
+    <div :class="tagClasses">
         <span class="infotag-label">{{label}}</span>
         <span v-if="!contactLink" class="infotag-value">{{value}}</span>
         <span v-if="contactLink" class="infotag-value"><a :href="contactLink">{{value}}</a></span>
@@ -10,13 +10,54 @@
     import {Component, Prop} from '@f-list/vue-ts';
     import Vue from 'vue';
     import {formatContactLink, formatContactValue} from './contact_utils';
+    import { Character, DisplayInfotag } from './interfaces';
+    // import { Character as CharacterInfo } from '../../interfaces';
     import {Store} from './data_store';
-    import {DisplayInfotag} from './interfaces';
+
 
     @Component
     export default class InfotagView extends Vue {
         @Prop({required: true})
         private readonly infotag!: DisplayInfotag;
+
+        @Prop({required: true})
+        private readonly selfCharacter!: Character;
+
+
+
+        get tagClasses() {
+            const styles = {
+                infotag: true,
+            };
+
+            //console.log('TAG', this.label, this.value, this.infotag);
+
+            return this.getCharacterCompatibilityStyles(styles, this.selfCharacter);
+        }
+
+
+        getCharacterCompatibilityStyles(styles: any, a: Character) {
+            if (a.character.name) {
+                styles.infotag = true;
+            }
+
+            // const c: CharacterInfo = this.selfCharacter.character;
+            // const t = this.infotag;
+
+           /* console.log(this.label, this.value, this.infotag.id, this.infotag, c.infotags);
+
+            switch (t.id) {
+                case InfotagView.TAGID_ORIENTATION:
+                    break;
+
+                default:
+                    // do nothing;
+                    break;
+            }*/
+
+            return styles;
+        }
+
 
         get label(): string {
             const infotag = Store.kinks.infotags[this.infotag.id];

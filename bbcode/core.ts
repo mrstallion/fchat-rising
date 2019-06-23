@@ -72,6 +72,7 @@ export class CoreBBCodeParser extends BBCodeParser {
             parent.appendChild(el);
             return el;
         }));
+
         this.addTag(new BBCodeTextTag('url', (parser, parent, param, content) => {
             const tagData = analyzeUrlTag(parser, param, content);
             const element = parser.createElement('span');

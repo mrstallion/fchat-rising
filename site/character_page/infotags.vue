@@ -3,7 +3,7 @@
         <div class="infotag-group col-sm-3" v-for="group in groupedInfotags" :key="group.id" style="margin-top:5px">
             <div class="infotag-title">{{group.name}}</div>
             <hr>
-            <infotag :infotag="infotag" v-for="infotag in group.infotags" :key="infotag.id"></infotag>
+            <infotag :infotag="infotag" v-for="infotag in group.infotags" :key="infotag.id" :selfCharacter="selfCharacter"></infotag>
         </div>
     </div>
 </template>
@@ -30,6 +30,8 @@
     export default class InfotagsView extends Vue {
         @Prop({required: true})
         private readonly character!: Character;
+        @Prop({required: true})
+        readonly selfCharacter!: Character;
 
         get groupedInfotags(): DisplayInfotagGroup[] {
             const groups = Store.kinks.infotag_groups;

@@ -2,12 +2,13 @@ import Axios from 'axios';
 import Vue from 'vue';
 import Editor from '../bbcode/Editor.vue';
 import {InlineDisplayMode} from '../bbcode/interfaces';
-import {initParser, standardParser} from '../bbcode/standard';
+import { initParser, standardParser } from '../bbcode/standard';
 import CharacterLink from '../components/character_link.vue';
 import CharacterSelect from '../components/character_select.vue';
 import {setCharacters} from '../components/character_select/character_list';
 import DateDisplay from '../components/date_display.vue';
 import SimplePager from '../components/simple_pager.vue';
+
 import {
     Character as CharacterInfo, CharacterImage, CharacterImageOld, CharacterInfotag, CharacterSettings, KinkChoice
 } from '../interfaces';
@@ -179,6 +180,7 @@ async function kinksGet(id: number): Promise<CharacterKink[]> {
         return {id: parseInt(key, 10), choice: <KinkChoice>(choice === 'fave' ? 'favorite' : choice)};
     });
 }
+
 
 export function init(characters: {[key: string]: number}): void {
     Utils.setDomains(parserSettings.siteDomain, parserSettings.staticDomain);

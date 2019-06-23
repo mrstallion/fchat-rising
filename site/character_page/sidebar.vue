@@ -38,12 +38,13 @@
                 <i class="far fa-envelope fa-fw"></i>Send Note</a>
             <div v-if="character.character.online_chat" @click="showInChat()" class="character-page-online-chat">Online In Chat</div>
 
-            <div class="contact-block">
-                <contact-method v-for="method in contactMethods" :method="method" :key="method.id"></contact-method>
-            </div>
-
             <div class="quick-info-block">
-                <infotag-item v-for="infotag in quickInfoItems" :infotag="infotag" :key="infotag.id"></infotag-item>
+                <infotag-item v-for="infotag in quickInfoItems" :infotag="infotag" :key="infotag.id" :selfCharacter="selfCharacter"></infotag-item>
+
+                <div class="contact-block">
+                    <contact-method v-for="method in contactMethods" :method="method" :key="method.id"></contact-method>
+                </div>
+
                 <div class="quick-info">
                     <span class="quick-info-label">Created</span>
                     <span class="quick-info-value"><date :time="character.character.created_at"></date></span>
@@ -141,6 +142,9 @@
         readonly character!: Character;
         @Prop()
         readonly oldApi?: true;
+        @Prop({required: true})
+        readonly selfCharacter!: Character;
+
         readonly shared: SharedStore = Store;
         readonly quickInfoIds: ReadonlyArray<number> = [1, 3, 2, 49, 9, 29, 15, 41, 25]; // Do not sort these.
         readonly avatarUrl = Utils.avatarURL;
