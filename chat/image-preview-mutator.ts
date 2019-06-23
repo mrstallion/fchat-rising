@@ -46,6 +46,7 @@ export class ImagePreviewMutator {
         this.add('www.youtube.com', this.getBaseJsMutatorScript('video'));
         this.add('instantfap.com', this.getBaseJsMutatorScript('#post img, #post video'));
         this.add('www.webmshare.com', this.getBaseJsMutatorScript('video'));
+        this.add('pornhub.com', this.getBaseJsMutatorScript('.mainPlayerDiv video, .photoImageSection img'));
 
         // this fixes videos only -- images are fine as is
         this.add('i.imgur.com', this.getBaseJsMutatorScript('video'));
