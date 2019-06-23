@@ -23,8 +23,9 @@ export class ImagePreviewMutator {
 
         const mutatorJs = this.mutators[urlDomain];
 
-        if (!mutatorJs)
-            return;
+        if (!mutatorJs) {
+            return this.mutators['default'];
+        }
 
         return `(() => { try { ${mutatorJs} } catch (err) { console.error(err); } })()`;
     }
@@ -34,6 +35,7 @@ export class ImagePreviewMutator {
     }
 
     protected init() {
+        this.add('default', this.getBaseJsMutatorScript('#image, #video, img, video'));
         this.add('e621.net', this.getBaseJsMutatorScript('#image, video'));
         this.add('e-hentai.org', this.getBaseJsMutatorScript('#img, video'));
         this.add('gelbooru.com', this.getBaseJsMutatorScript('#image, video'));
@@ -42,6 +44,8 @@ export class ImagePreviewMutator {
         this.add('gfycat.com', this.getBaseJsMutatorScript('video'));
         this.add('gfycatporn.com', this.getBaseJsMutatorScript('video'));
         this.add('www.youtube.com', this.getBaseJsMutatorScript('video'));
+        this.add('instantfap.com', this.getBaseJsMutatorScript('#post img, #post video'));
+        this.add('www.webmshare.com', this.getBaseJsMutatorScript('video'));
 
         // this fixes videos only -- images are fine as is
         this.add('i.imgur.com', this.getBaseJsMutatorScript('video'));

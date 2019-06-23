@@ -248,7 +248,7 @@
     .image-preview-external {
         position: absolute;
         width: 50%;
-        height: 50%;
+        height: 70%;
         top: 0;
         left: 0;
         pointer-events: none;
@@ -258,7 +258,7 @@
     .image-preview-local {
         position: absolute;
         width: 50%;
-        height: 50%;
+        height: 70%;
         top: 0;
         left: 0;
         pointer-events: none;
