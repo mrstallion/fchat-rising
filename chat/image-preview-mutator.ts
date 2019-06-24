@@ -19,13 +19,12 @@ export class ImagePreviewMutator {
         if (!urlDomain)
             return;
 
-        console.log('Domain is', urlDomain);
+        // console.log('Domain is', urlDomain);
 
-        const mutatorJs = this.mutators[urlDomain];
+        let mutatorJs = this.mutators[urlDomain];
 
-        if (!mutatorJs) {
-            return this.mutators['default'];
-        }
+        if (!mutatorJs)
+            mutatorJs = this.mutators['default'];
 
         return `(() => { try { ${mutatorJs} } catch (err) { console.error(err); } })()`;
     }
@@ -44,9 +43,14 @@ export class ImagePreviewMutator {
         this.add('gfycat.com', this.getBaseJsMutatorScript('video'));
         this.add('gfycatporn.com', this.getBaseJsMutatorScript('video'));
         this.add('www.youtube.com', this.getBaseJsMutatorScript('video'));
+        this.add('youtube.com', this.getBaseJsMutatorScript('video'));
         this.add('instantfap.com', this.getBaseJsMutatorScript('#post img, #post video'));
         this.add('www.webmshare.com', this.getBaseJsMutatorScript('video'));
+        this.add('webmshare.com', this.getBaseJsMutatorScript('video'));
         this.add('pornhub.com', this.getBaseJsMutatorScript('.mainPlayerDiv video, .photoImageSection img'));
+        this.add('www.sex.com', this.getBaseJsMutatorScript('.image_frame img, .image_frame video'));
+        this.add('sex.com', this.getBaseJsMutatorScript('.image_frame img, .image_frame video'));
+        this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript('picture img, picture video'));
 
         // this fixes videos only -- images are fine as is
         this.add('i.imgur.com', this.getBaseJsMutatorScript('video'));
@@ -75,7 +79,10 @@ export class ImagePreviewMutator {
 
     getBaseJsMutatorScript(imageSelector: string, skipElementRemove = false): string {
         return `const body = document.querySelector('body');
-        const img = document.querySelector('${imageSelector}');
+        const img = Array.from(document.querySelectorAll('${imageSelector}')).filter((i) => ((i.width !== 1) && (i.height !== 1))).shift() 
+        
+        if (!img) { return; }
+        
         const el = document.createElement('div');
         el.id = 'flistWrapper';
         
@@ -89,6 +96,10 @@ export class ImagePreviewMutator {
         el.append(img);
         body.append(el);
         body.class = '';
+        
+        console.log(el);
+        console.log(img);
+        console.log('${imageSelector}');
         
         body.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
             + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'

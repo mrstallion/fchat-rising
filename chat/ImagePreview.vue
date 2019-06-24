@@ -43,6 +43,8 @@
         private shouldDismiss = false;
         private visibleSince = 0;
 
+        private debug = false;
+
 
         @Hook('mounted')
         onMounted(): void {
@@ -67,7 +69,8 @@
             webview.addEventListener(
                 'dom-ready',
                 () => {
-                    // webview.openDevTools();
+                    if (this.debug)
+                        webview.openDevTools();
 
                     const url = webview.getURL();
 
@@ -126,6 +129,9 @@
         dismiss(url: string): void {
             if (this.url !== url)
                 return; // simply ignore
+
+            if (this.debug)
+                return;
 
             // console.log('DISMISS');
 
