@@ -497,10 +497,38 @@
         margin-bottom: 1rem;
         padding-bottom: 0;
         padding-top: 0.5rem;
-        max-width: 25rem;
+
+        .thumbnail {
+            width: 50px;
+            height: 50px;
+        }
+
+        &.minimized {
+            height: 0;
+            overflow: hidden;
+            background-color: transparent;
+
+            .vs, .scores {
+                display: none;
+            }
+        }
 
         h3 {
             font-size: 1.25rem;
+        }
+
+        .minimize-btn {
+            position: absolute;
+            display: block;
+            right: 0.5rem;
+            background-color: rgba(0,0,0,0.2);
+            padding: 0.4rem;
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: 4px;
+            z-index: 1000;
         }
 
         .scores {
@@ -511,7 +539,7 @@
 
             ul {
                 padding: 0;
-                padding-left: 0.5rem;
+                padding-left: 0rem;
                 list-style: none;
             }
 
