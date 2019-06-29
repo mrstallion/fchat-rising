@@ -20,7 +20,7 @@
 <script lang="ts">
     import {Component, Hook, Prop} from '@f-list/vue-ts';
     import Vue from 'vue';
-    import {EventBus} from './event-bus';
+    import {EventBus} from '../chat/event-bus';
     // import core from './core';
 
     @Component

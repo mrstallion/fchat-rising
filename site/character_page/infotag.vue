@@ -10,9 +10,10 @@
     import {Component, Prop} from '@f-list/vue-ts';
     import Vue from 'vue';
     import {formatContactLink, formatContactValue} from './contact_utils';
-    import { Character, DisplayInfotag } from './interfaces';
+    import { DisplayInfotag } from './interfaces';
     // import { Character as CharacterInfo } from '../../interfaces';
     import {Store} from './data_store';
+    import { MatchReport, TagId } from './matcher';
 
 
     @Component
@@ -21,39 +22,33 @@
         private readonly infotag!: DisplayInfotag;
 
         @Prop({required: true})
-        private readonly selfCharacter!: Character;
+        private readonly characterMatch!: MatchReport;
 
 
 
         get tagClasses() {
-            const styles = {
+            const styles: any = {
                 infotag: true,
             };
 
-            //console.log('TAG', this.label, this.value, this.infotag);
+            console.log(`Infotag ${this.infotag.id}: ${this.label}`);
 
-            return this.getCharacterCompatibilityStyles(styles, this.selfCharacter);
-        }
+            if ((this.characterMatch) && (this.infotag.id in this.characterMatch)) {
+                const n = this.characterMatch[this.infotag.id];
 
+                console.log(`Found match [${this.infotag.id} === ${TagId[this.infotag.id]}]: ${n}`);
 
-        getCharacterCompatibilityStyles(styles: any, a: Character) {
-            if (a.character.name) {
-                styles.infotag = true;
+                if (n >= 1)
+                    styles.match = true;
+                else if(n >= 0.5)
+                    styles.weakMatch = true;
+                else if(n === 0)
+                    styles.neutral = true;
+                else if(n <= -1)
+                    styles.mismatch = true;
+                else if(n <= -0.5)
+                    styles.weakMismatch = true;
             }
-
-            // const c: CharacterInfo = this.selfCharacter.character;
-            // const t = this.infotag;
-
-           /* console.log(this.label, this.value, this.infotag.id, this.infotag, c.infotags);
-
-            switch (t.id) {
-                case InfotagView.TAGID_ORIENTATION:
-                    break;
-
-                default:
-                    // do nothing;
-                    break;
-            }*/
 
             return styles;
         }

@@ -4,7 +4,7 @@ import {InlineImage} from '../interfaces';
 import { analyzeUrlTag, CoreBBCodeParser } from './core';
 import {InlineDisplayMode} from './interfaces';
 import {BBCodeCustomTag, BBCodeSimpleTag, BBCodeTextTag} from './parser';
-import UrlTagView from '../chat/UrlTagView.vue';
+import UrlTagView from './UrlTagView.vue';
 
 
 interface StandardParserSettings {

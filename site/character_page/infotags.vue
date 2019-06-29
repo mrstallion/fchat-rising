@@ -3,7 +3,7 @@
         <div class="infotag-group col-sm-3" v-for="group in groupedInfotags" :key="group.id" style="margin-top:5px">
             <div class="infotag-title">{{group.name}}</div>
             <hr>
-            <infotag :infotag="infotag" v-for="infotag in group.infotags" :key="infotag.id" :selfCharacter="selfCharacter"></infotag>
+            <infotag :infotag="infotag" v-for="infotag in group.infotags" :key="infotag.id" :characterMatch="characterMatch"></infotag>
         </div>
     </div>
 </template>
@@ -16,6 +16,7 @@
     import {Character, CONTACT_GROUP_ID, DisplayInfotag} from './interfaces';
 
     import InfotagView from './infotag.vue';
+    import { MatchReport } from './matcher';
 
     interface DisplayInfotagGroup {
         id: number
@@ -31,7 +32,7 @@
         @Prop({required: true})
         private readonly character!: Character;
         @Prop({required: true})
-        readonly selfCharacter!: Character;
+        readonly characterMatch!: MatchReport;
 
         get groupedInfotags(): DisplayInfotagGroup[] {
             const groups = Store.kinks.infotag_groups;

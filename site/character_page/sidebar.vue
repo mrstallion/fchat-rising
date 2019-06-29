@@ -39,7 +39,7 @@
             <div v-if="character.character.online_chat" @click="showInChat()" class="character-page-online-chat">Online In Chat</div>
 
             <div class="quick-info-block">
-                <infotag-item v-for="infotag in quickInfoItems" :infotag="infotag" :key="infotag.id" :selfCharacter="selfCharacter"></infotag-item>
+                <infotag-item v-for="infotag in quickInfoItems" :infotag="infotag" :key="infotag.id" :characterMatch="characterMatch"></infotag-item>
 
                 <div class="contact-block">
                     <contact-method v-for="method in contactMethods" :method="method" :key="method.id"></contact-method>
@@ -101,6 +101,7 @@
     import FriendDialog from './friend_dialog.vue';
     import InfotagView from './infotag.vue';
     import {Character, CONTACT_GROUP_ID, SharedStore} from './interfaces';
+    import { MatchReport } from './matcher';
     import MemoDialog from './memo_dialog.vue';
     import ReportDialog from './report_dialog.vue';
 
@@ -143,7 +144,7 @@
         @Prop()
         readonly oldApi?: true;
         @Prop({required: true})
-        readonly selfCharacter!: Character;
+        readonly characterMatch!: MatchReport;
 
         readonly shared: SharedStore = Store;
         readonly quickInfoIds: ReadonlyArray<number> = [1, 3, 2, 49, 9, 29, 15, 41, 25]; // Do not sort these.

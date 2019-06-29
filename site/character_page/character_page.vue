@@ -5,7 +5,7 @@
             <div class="alert alert-danger" v-show="error">{{error}}</div>
         </div>
         <div class="col-md-4 col-lg-3 col-xl-2" v-if="!loading && character">
-            <sidebar :character="character" :selfCharacter="selfCharacter" @memo="memo" @bookmarked="bookmarked" :oldApi="oldApi"></sidebar>
+            <sidebar :character="character" :characterMatch="characterMatch" @memo="memo" @bookmarked="bookmarked" :oldApi="oldApi"></sidebar>
         </div>
         <div class="col-md-8 col-lg-9 col-xl-10 profile-body" v-if="!loading && character">
             <div id="characterView">
@@ -40,7 +40,7 @@
                                     <character-kinks :character="character" :oldApi="oldApi" ref="tab0"></character-kinks>
                                 </div>
                                 <div role="tabpanel" class="tab-pane" :class="{active: tab === '1'}" id="infotags">
-                                    <character-infotags :character="character" ref="tab1"></character-infotags>
+                                    <character-infotags :character="character" ref="tab1" :characterMatch="characterMatch"></character-infotags>
                                 </div>
                                 <div role="tabpanel" class="tab-pane" id="groups" :class="{active: tab === '2'}" v-if="!oldApi">
                                     <character-groups :character="character" ref="tab2"></character-groups>
@@ -83,6 +83,8 @@
     import CharacterKinksView from './kinks.vue';
     import Sidebar from './sidebar.vue';
     import core from '../../chat/core';
+    import { Matcher, MatchReport } from './matcher';
+
 
     interface ShowableVueTab extends Vue {
         show?(): void
@@ -118,6 +120,9 @@
         tab = '0';
 
         selfCharacter: Character | undefined;
+
+        characterMatch: MatchReport | undefined;
+
 
         @Hook('beforeMount')
         beforeMount(): void {
@@ -159,6 +164,8 @@
 
                 await Promise.all(due);
             } catch(e) {
+                console.error(e);
+
                 this.error = Utils.isJSONError(e) ? <string>e.response.data.error : (<Error>e).message;
                 Utils.ajaxError(e, 'Failed to load character information.');
             }
@@ -177,13 +184,15 @@
 
 
         protected async loadSelfCharacter(): Promise<Character> {
-            console.log('SELF');
+            // console.log('SELF');
 
             const ownChar = core.characters.ownCharacter;
 
             this.selfCharacter = await methods.characterData(ownChar.name, -1);
 
-            console.log('SELF LOADED');
+            // console.log('SELF LOADED');
+
+            this.updateMatches();
 
             return this.selfCharacter;
         }
@@ -199,6 +208,18 @@
             this.character = await methods.characterData(this.name, this.characterid);
             standardParser.allowInlines = true;
             standardParser.inlines = this.character.character.inlines;
+
+            this.updateMatches();
+        }
+
+
+        private updateMatches(): void {
+            if ((!this.selfCharacter) || (!this.character)) {
+                return;
+            }
+
+            const matcher = new Matcher(this.selfCharacter.character, this.character.character);
+            this.characterMatch = matcher.match();
         }
     }
 </script>
@@ -419,5 +440,28 @@
                 padding-right: 10px;
             }
         }
+    }
+
+
+
+    .infotag {
+        &.match {
+            background-color: green;
+        }
+
+        &.mismatch {
+            background-color: red;
+        }
+
+
+        &.weakMatch {
+            background-color: rgba(0, 162, 0, 0.6);
+        }
+
+
+        &.weakMismatch {
+            background-color: rgba(255, 96, 0, 0.6);
+        }
+
     }
 </style>
