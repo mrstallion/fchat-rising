@@ -1,5 +1,7 @@
 import * as _ from 'lodash';
-import { Character } from '../../interfaces';
+import { Character, CharacterInfotag } from '../../interfaces';
+
+/* eslint-disable no-null-keyword */
 
 export enum TagId {
     Age = 1,
@@ -39,7 +41,6 @@ export enum Orientation {
     BiCurious = 128
 }
 
-
 export enum BodyType {
     Anthro = 122,
     Feral = 121,
@@ -54,27 +55,9 @@ export enum BodyType {
 export enum KinkPreference {
     Favorite = 1,
     Yes = 0.5,
-    Maybe = 0,
+    Maybe = -0.5,
     No = -1
 }
-
-type ScoringCallback = (you: Character, them: Character) => number;
-
-interface CompatibilityCollection {
-    [key: number]: ScoringCallback;
-}
-
-const orientationCompatibility: CompatibilityCollection = {
-    [Orientation.Straight]: (you: Character, them: Character) => Matcher.isCis(you, them) ? (Matcher.isSameSexCis(you, them) ? -1 : 1) : 0,
-    [Orientation.Gay]: (you: Character, them: Character) => Matcher.isCis(you, them) ? (Matcher.isSameSexCis(you, them) ? 1 : -1) : 0,
-    [Orientation.Bisexual]: (you: Character) => Matcher.isGenderedCis(you) ? 1 : 0,
-    [Orientation.Asexual]: () => 0,
-    [Orientation.Unsure]: () => 0,
-    [Orientation.BiMalePreference]: (you: Character, them: Character) => Matcher.isCis(you, them) ? (Matcher.isMaleCis(you) ? 1 : 0.5) : 0,
-    [Orientation.BiFemalePreference]: (you: Character, them: Character) => Matcher.isCis(you, them) ? (Matcher.isFemaleCis(you) ? 1 : 0.5) : 0,
-    [Orientation.Pansexual]: () => 1,
-    [Orientation.BiCurious]: (you: Character, them: Character) => Matcher.isCis(you, them) ? (Matcher.isSameSexCis(you, them) ? 0.5 : Matcher.isGenderedCis(you) ? 1 : 0) : 0
-};
 
 enum Kink {
     Females = 554,
@@ -91,9 +74,10 @@ enum Kink {
     UnderageCharacters = 207,
 
     AnthroCharacters = 587,
-    Humans = 609
-}
+    Humans = 609,
 
+    Mammals = 224
+}
 
 enum FurryPreference {
     FurriesOnly = 39,
@@ -118,11 +102,10 @@ const genderKinkMapping: GenderKinkIdMap = {
     [Gender.Transgender]: Kink.Transgenders
 };
 
-
  // if no species and 'no furry chareacters', === human
  // if no species and dislike 'antho characters' === human
 
- enum Species {
+enum Species {
     Human = 609,
     Equine = 236,
     Feline = 212,
@@ -138,23 +121,33 @@ const genderKinkMapping: GenderKinkIdMap = {
     Procyon = 325,
     Rodent = 283,
     Ursine = 326,
-    MarineMammal,
+    MarineMammal = 309,
     Primate = 613,
     Elf = 611,
     Orc = 615,
     Fish = 608,
     Reptile = 225,
     Anthro = 587,
-    Minotaur = 121212
+    Minotaur = 12121212
  }
 
 const nonAnthroSpecies = [Species.Human, Species.Elf, Species.Orc];
 
-// const mammalSpecies = [Species.Human, Species.Equine, Species.Feline, Species.Canine, Species.Vulpine, Species.Cervine, Species.Lapine, Species.Musteline, Species.Rodent, Species.Ursine, Species.MarineMammal, Species.Primate, Species.Elf, Species.Orc, Species.Anthro, Species.Minotaur];
+const mammalSpecies = [Species.Equine, Species.Feline, Species.Canine, Species.Vulpine, Species.Cervine, Species.Lapine, Species.Musteline, Species.Rodent, Species.Ursine, Species.MarineMammal, Species.Primate, Species.Elf, Species.Orc, Species.Anthro, Species.Minotaur];
 
 interface SpeciesMap {
     [key: number]: string[]
 }
+
+interface SpeciesStrMap {
+    [key: number]: string;
+}
+
+const speciesNames: SpeciesStrMap = {
+    [Species.MarineMammal]: 'marine mammals',
+    [Species.Elf]: 'elves',
+    [Species.Fish]: 'fishes'
+};
 
 const speciesMapping: SpeciesMap = {
     [Species.Human]: ['human', 'humanoid', 'angel', 'android'],
@@ -180,7 +173,7 @@ const speciesMapping: SpeciesMap = {
     [Species.Reptile]: ['chameleon', 'anole', 'alligator', 'snake', 'crocodile', 'lizard'],
     [Species.Anthro]: ['anthro', 'anthropomorphic'],
     [Species.Minotaur]: ['minotaur']
-}
+};
 
 interface KinkPreferenceMap {
     [key: string]: KinkPreference;
@@ -194,9 +187,76 @@ const kinkMapping: KinkPreferenceMap = {
 };
 
 export interface MatchReport {
-    [key: number]: number;
+    you: MatchResult;
+    them: MatchResult;
 }
 
+export interface MatchResultCharacterInfo {
+    species: Species | null;
+    gender: Gender | null;
+    orientation: Orientation | null;
+}
+
+export interface MatchResultScores {
+    [key: number]: Score;
+    [TagId.Orientation]: Score;
+    [TagId.Gender]: Score;
+    [TagId.Age]: Score;
+    [TagId.FurryPreference]: Score;
+    [TagId.Species]: Score;
+}
+
+export interface MatchResult {
+    you: Character,
+    them: Character,
+    scores: MatchResultScores;
+    info: MatchResultCharacterInfo;
+}
+
+export enum Scoring {
+    MATCH = 1,
+    WEAK_MATCH = 0.5,
+    NEUTRAL = 0,
+    WEAK_MISMATCH = 0.5,
+    MISMATCH = -1
+}
+
+export interface ScoreClassMap {
+    [key: number]: string;
+}
+
+const scoreClasses: ScoreClassMap = {
+    [Scoring.MATCH]: 'match',
+    [Scoring.WEAK_MATCH]: 'weak-match',
+    [Scoring.NEUTRAL]: 'neutral',
+    [Scoring.WEAK_MISMATCH]: 'weak-mismatch',
+    [Scoring.MISMATCH]: 'mismatch'
+};
+
+export class Score {
+    readonly score: Scoring;
+    readonly description: string;
+
+    constructor(score: Scoring, description: string = '') {
+        if ((score !== Scoring.NEUTRAL) && (description === ''))
+            throw new Error('Description must be provided if score is not neutral');
+
+        this.score = score;
+        this.description = description;
+    }
+
+    getRecommendedClass(): string {
+        return scoreClasses[this.score];
+    }
+}
+
+/**
+ * Answers the question: What YOU think about THEM
+ * Never what THEY think about YOU
+ *
+ * So, when comparing two characters, you have to run it twice (you, them / them, you)
+ * to get the full picture
+ */
 export class Matcher {
     you: Character;
     them: Character;
@@ -206,350 +266,300 @@ export class Matcher {
         this.them = them;
     }
 
-    match(): MatchReport {
+    static generateReport(you: Character, them: Character): MatchReport {
+        const youThem = new Matcher(you, them);
+        const themYou = new Matcher(them, you);
+
         return {
-            [TagId.Orientation]: this.resolveScore(TagId.Orientation, orientationCompatibility),
-            [TagId.Gender]: this.resolveGenderScore(),
-            [TagId.Age]: this.resolveAgeScore(),
-            [TagId.FurryPreference]: this.resolveFurryScore(),
-            [TagId.Species]: this.resolveSpeciesScore()
+            you: youThem.match(),
+            them: themYou.match()
+        };
+    }
+
+    match(): MatchResult {
+        return {
+            you: this.you,
+            them: this.them,
+
+            scores: {
+                [TagId.Orientation]: this.resolveOrientationScore(),
+                [TagId.Gender]: this.resolveGenderScore(),
+                [TagId.Age]: this.resolveAgeScore(),
+                [TagId.FurryPreference]: this.resolveFurryPairingsScore(),
+                [TagId.Species]: this.resolveSpeciesScore()
+            },
+
+            info: {
+                species: Matcher.species(this.you),
+                gender: Matcher.getTagValueList(TagId.Gender, this.you),
+                orientation: Matcher.getTagValueList(TagId.Orientation, this.you),
+            }
        };
     }
 
-    private resolveScore(tagId: number, compatibilityMap: any, you: Character = this.you, them: Character = this.them): number {
-        const v = Matcher.getTagValueList(tagId, this.them);
-
-        if ((!v) || (!(v in compatibilityMap)))
-            return 0;
-
-        return compatibilityMap[v](you, them);
-    }
-
-
-    private resolveSpeciesScore() {
+    private resolveOrientationScore(): Score {
         const you = this.you;
         const them = this.them;
 
-        const yourSpecies = Matcher.species(you);
+        const yourGender = Matcher.getTagValueList(TagId.Gender, you);
+        const theirGender = Matcher.getTagValueList(TagId.Gender, them);
+        const yourOrientation = Matcher.getTagValueList(TagId.Orientation, you);
+
+        if ((yourGender === null) || (theirGender === null) || (yourOrientation === null))
+            return new Score(Scoring.NEUTRAL);
+
+        // Question: If someone identifies themselves as 'straight cuntboy', how should they be matched? like a straight female?
+
+        // CIS
+        if (Matcher.isCisGender(yourGender)) {
+            if (yourGender === theirGender) {
+                // same sex CIS
+                if (yourOrientation === Orientation.Straight)
+                    return new Score(Scoring.MISMATCH, 'No <span>same sex</span>');
+
+                if (
+                    (yourOrientation === Orientation.Gay)
+                    || (yourOrientation === Orientation.Bisexual)
+                    || (yourOrientation === Orientation.Pansexual)
+                    || ((yourOrientation === Orientation.BiFemalePreference) && (theirGender === Gender.Female))
+                    || ((yourOrientation === Orientation.BiMalePreference) && (theirGender === Gender.Male))
+                )
+                    return new Score(Scoring.MATCH, 'Loves <span>same sex</span>');
+
+                if (
+                    (yourOrientation === Orientation.BiCurious)
+                    || ((yourOrientation === Orientation.BiFemalePreference) && (theirGender === Gender.Male))
+                    || ((yourOrientation === Orientation.BiMalePreference) && (theirGender === Gender.Female))
+                )
+                    return new Score(Scoring.WEAK_MATCH, 'Likes <span>same sex</span>');
+            } else if (Matcher.isCisGender(theirGender)) {
+                // straight CIS
+                if (yourOrientation === Orientation.Gay)
+                    return new Score(Scoring.MISMATCH, 'No <span>opposite sex</span>');
+
+                if (
+                    (yourOrientation === Orientation.Straight)
+                    || (yourOrientation === Orientation.Bisexual)
+                    || (yourOrientation === Orientation.BiCurious)
+                    || (yourOrientation === Orientation.Pansexual)
+                    || ((yourOrientation === Orientation.BiFemalePreference) && (theirGender === Gender.Female))
+                    || ((yourOrientation === Orientation.BiMalePreference) && (theirGender === Gender.Male))
+                )
+                    return new Score(Scoring.MATCH, 'Loves <span>opposite sex</span>');
+
+                if (
+                    ((yourOrientation === Orientation.BiFemalePreference) && (theirGender === Gender.Male))
+                    || ((yourOrientation === Orientation.BiMalePreference) && (theirGender === Gender.Female))
+                )
+                    return new Score(Scoring.WEAK_MATCH, 'Likes <span>opposite sex</span>');
+            }
+        }
+
+        // Can't do anything with Gender.None
+        return new Score(Scoring.NEUTRAL);
+    }
+
+    private formatKinkScore(score: KinkPreference, description: string): Score {
+        if (score === KinkPreference.No)
+            return new Score(Scoring.MISMATCH, `No <span>${description}</span>`);
+
+        if (score === KinkPreference.Maybe)
+            return new Score(Scoring.WEAK_MISMATCH, `Undecided on <span>${description}</span>`);
+
+        if (score === KinkPreference.Yes)
+            return new Score(Scoring.WEAK_MATCH, `Likes <span>${description}</span>`);
+
+        if (score === KinkPreference.Favorite)
+            return new Score(Scoring.MATCH, `Loves <span>${description}</span>`);
+
+        return new Score(Scoring.NEUTRAL);
+    }
+
+    private resolveSpeciesScore(): Score {
+        const you = this.you;
+        const them = this.them;
         const theirSpecies = Matcher.species(them);
 
-        if (
-            ((yourSpecies !== null) && (Matcher.hatesSpecies(them, yourSpecies))) ||
-            ((theirSpecies !== null) && (Matcher.hatesSpecies(you, theirSpecies)))
-        ) {
-            return -1;
+        if (theirSpecies === null)
+            return new Score(Scoring.NEUTRAL);
+
+        const speciesScore = Matcher.getKinkSpeciesPreference(you, theirSpecies);
+
+        if (speciesScore !== null) {
+            const speciesName = speciesNames[theirSpecies] || `${Species[theirSpecies].toLowerCase()}s`;
+
+            return this.formatKinkScore(speciesScore, speciesName);
         }
 
-        if (
-            ((yourSpecies !== null) && (Matcher.maybeSpecies(them, yourSpecies))) ||
-            ((theirSpecies !== null) && (Matcher.maybeSpecies(you, theirSpecies)))
-        ) {
-            return -0.5;
+        if (Matcher.isAnthro(them)) {
+            const anthroScore = Matcher.getKinkPreference(them, Kink.AnthroCharacters);
+
+            if (anthroScore !== null)
+                return this.formatKinkScore(anthroScore, 'anthros');
         }
 
-        if (
-            ((yourSpecies !== null) && (Matcher.likesSpecies(them, yourSpecies))) ||
-            ((theirSpecies !== null) && (Matcher.likesSpecies(you, theirSpecies)))
-        ) {
-            return 1;
+        if (Matcher.isMammal(them)) {
+            const mammalScore = Matcher.getKinkPreference(them, Kink.Mammals);
+
+            if (mammalScore !== null)
+                return this.formatKinkScore(mammalScore, 'mammals');
         }
 
-        return 0;
+        return new Score(Scoring.NEUTRAL);
     }
 
+    formatScoring(score: Scoring, description: string): Score {
+        let type = '';
 
-    private resolveFurryScore() {
+        switch (score) {
+            case Scoring.MISMATCH:
+                type = 'No';
+                break;
+
+            case Scoring.WEAK_MISMATCH:
+                type = 'Undecided on';
+                break;
+
+            case Scoring.WEAK_MATCH:
+                type = 'Likes';
+                break;
+
+            case Scoring.MATCH:
+                type = 'Loves';
+                break;
+        }
+
+        return new Score(score, `${type} <span>${description}</span>`);
+    }
+
+    private resolveFurryPairingsScore(): Score {
         const you = this.you;
         const them = this.them;
 
-        const youAreAnthro = Matcher.isAnthro(you);
         const theyAreAnthro = Matcher.isAnthro(them);
-
-        const youAreHuman = Matcher.isHuman(you);
         const theyAreHuman = Matcher.isHuman(them);
 
-        const yourScore = theyAreAnthro ? Matcher.furryLikeabilityScore(you) : theyAreHuman ? Matcher.humanLikeabilityScore(you) : 0;
-        const theirScore = youAreAnthro ? Matcher.furryLikeabilityScore(them) : youAreHuman ? Matcher.humanLikeabilityScore(them) : 0;
+        const score = theyAreAnthro
+            ? Matcher.furryLikeabilityScore(you)
+            : (theyAreHuman ? Matcher.humanLikeabilityScore(you) : Scoring.NEUTRAL);
 
-        return Math.min(yourScore || 0, theirScore || 0);
+        return this.formatScoring(score, theyAreAnthro ? 'furry pairings' : theyAreHuman ? 'human pairings' : '');
     }
 
-
-    static furryLikeabilityScore(c: Character): number | null {
-        const anthroKink = Matcher.getKinkPreference(c, Kink.AnthroCharacters);
-
-        if ((anthroKink === KinkPreference.Yes) || (anthroKink === KinkPreference.Favorite)) {
-            return 1;
-        }
-
-        if (anthroKink === KinkPreference.Maybe) {
-            return -0.5;
-        }
-
-        if (anthroKink === KinkPreference.No) {
-            return -1;
-        }
-
+    static furryLikeabilityScore(c: Character): Scoring {
         const furryPreference = Matcher.getTagValueList(TagId.FurryPreference, c);
 
         if (
             (furryPreference === FurryPreference.FursAndHumans) ||
             (furryPreference === FurryPreference.FurriesPreferredHumansOk) ||
             (furryPreference === FurryPreference.FurriesOnly)
-        ) {
-            return 1;
-        }
+        )
+            return Scoring.MATCH;
 
-        if (furryPreference === FurryPreference.HumansPreferredFurriesOk) {
-            return 0.5;
-        }
+        if (furryPreference === FurryPreference.HumansPreferredFurriesOk)
+            return Scoring.WEAK_MATCH;
 
-        if (furryPreference === FurryPreference.HumansOnly) {
-            return -1;
-        }
+        if (furryPreference === FurryPreference.HumansOnly)
+            return Scoring.MISMATCH;
 
-        return 0;
+        return Scoring.NEUTRAL;
     }
 
-
-    static humanLikeabilityScore(c: Character): number | null {
-        const humanKink = Matcher.getKinkPreference(c, Kink.Humans);
-
-        if ((humanKink === KinkPreference.Yes) || (humanKink === KinkPreference.Favorite)) {
-            return 1;
-        }
-
-        if (humanKink === KinkPreference.Maybe) {
-            return -0.5;
-        }
-
-        if (humanKink === KinkPreference.No) {
-            return -1;
-        }
-
+    static humanLikeabilityScore(c: Character): Scoring {
         const humanPreference = Matcher.getTagValueList(TagId.FurryPreference, c);
 
         if (
-            (humanPreference === FurryPreference.FursAndHumans) ||
-            (humanPreference === FurryPreference.HumansPreferredFurriesOk) ||
-            (humanPreference === FurryPreference.HumansOnly)
-        ) {
-            return 1;
-        }
+            (humanPreference === FurryPreference.FursAndHumans)
+            || (humanPreference === FurryPreference.HumansPreferredFurriesOk)
+            || (humanPreference === FurryPreference.HumansOnly)
+        )
+            return Scoring.MATCH;
 
-        if (humanPreference === FurryPreference.FurriesPreferredHumansOk) {
-            return 0.5;
-        }
+        if (humanPreference === FurryPreference.FurriesPreferredHumansOk)
+            return Scoring.WEAK_MATCH;
 
-        if (humanPreference === FurryPreference.FurriesOnly) {
-            return -1;
-        }
+        if (humanPreference === FurryPreference.FurriesOnly)
+            return Scoring.MISMATCH;
 
-        return 0;
+        return Scoring.NEUTRAL;
     }
 
-
-    static likesFurs(c: Character) {
-        const score = this.furryLikeabilityScore(c);
-
-        return (score !== null) ? (score > 0) : false;
-    }
-
-    static hatesFurs(c: Character) {
-        const score = this.furryLikeabilityScore(c);
-
-        return (score !== null) ? (score < 0) : false;
-    }
-
-
-    static likesHumans(c: Character) {
-        const score = this.humanLikeabilityScore(c);
-
-        return (score !== null) ? (score > 0) : false;
-    }
-
-
-    static hatesHumans(c: Character) {
-        const score = this.humanLikeabilityScore(c);
-
-        return (score !== null) ? (score < 0) : false;
-    }
-
-
-    private resolveAgeScore(): number {
+    private resolveAgeScore(): Score {
         const you = this.you;
         const them = this.them;
 
         const yourAgeTag = Matcher.getTagValue(TagId.Age, you);
         const theirAgeTag = Matcher.getTagValue(TagId.Age, them);
 
-        if ((!yourAgeTag) || (!theirAgeTag)) {
-            return 0;
-        }
+        if (!theirAgeTag)
+            return new Score(Scoring.NEUTRAL);
 
-        if ((!yourAgeTag.string) || (!theirAgeTag.string)) {
-            return 0;
-        }
+        if (!theirAgeTag.string)
+            return new Score(Scoring.NEUTRAL);
 
-        const yourAge = parseInt(yourAgeTag.string, 10);
         const theirAge = parseInt(theirAgeTag.string, 10);
 
-        if (
-            ((theirAge < 16) && (Matcher.hates(you, Kink.Ageplay))) ||
-            ((yourAge < 16) && (Matcher.hates(them, Kink.Ageplay))) ||
-            ((theirAge < 16) && (Matcher.has(you, Kink.Ageplay) === false)) ||
-            ((yourAge < 16) && (Matcher.has(them, Kink.Ageplay) === false)) ||
-            ((yourAge < theirAge) && (Matcher.hates(you, Kink.OlderCharacters))) ||
-            ((yourAge > theirAge) && (Matcher.hates(them, Kink.OlderCharacters))) ||
-            ((yourAge > theirAge) && (Matcher.hates(you, Kink.YoungerCharacters))) ||
-            ((yourAge < theirAge) && (Matcher.hates(them, Kink.YoungerCharacters))) ||
-            ((theirAge < 18) && (Matcher.hates(you, Kink.UnderageCharacters))) ||
-            ((yourAge < 18) && (Matcher.hates(them, Kink.UnderageCharacters)))
-        )
-            return -1;
+        const ageplayScore = Matcher.getKinkPreference(you, Kink.Ageplay);
+        const underageScore = Matcher.getKinkPreference(you, Kink.UnderageCharacters);
 
-        if (
-            ((theirAge < 18) && (Matcher.likes(you, Kink.UnderageCharacters))) ||
-            ((yourAge < 18) && (Matcher.likes(them, Kink.UnderageCharacters))) ||
-            ((yourAge > theirAge) && (Matcher.likes(you, Kink.YoungerCharacters))) ||
-            ((yourAge < theirAge) && (Matcher.likes(them, Kink.YoungerCharacters))) ||
-            ((yourAge < theirAge) && (Matcher.likes(you, Kink.OlderCharacters))) ||
-            ((yourAge > theirAge) && (Matcher.likes(them, Kink.OlderCharacters))) ||
-            ((theirAge < 16) && (Matcher.likes(you, Kink.Ageplay))) ||
-            ((yourAge < 16) && (Matcher.likes(them, Kink.Ageplay)))
-        )
-            return 1;
+        if ((theirAge < 16) && (ageplayScore !== null))
+            return this.formatKinkScore(ageplayScore, `ages of ${theirAge}`);
 
-        return 0;
+        if ((theirAge < 16) && (ageplayScore === null))
+            return this.formatKinkScore(KinkPreference.No, `ages of ${theirAge}`);
+
+        if ((theirAge < 18) && (underageScore !== null))
+            return this.formatKinkScore(underageScore, `ages of ${theirAge}`);
+
+        if ((yourAgeTag) && (yourAgeTag.string)) {
+            const olderCharactersScore = Matcher.getKinkPreference(you, Kink.OlderCharacters);
+            const youngerCharactersScore = Matcher.getKinkPreference(you, Kink.YoungerCharacters);
+
+            const yourAge = parseInt(yourAgeTag.string, 10);
+
+            if ((yourAge < theirAge) && (olderCharactersScore !== null))
+                return this.formatKinkScore(olderCharactersScore, 'older characters');
+
+            if ((yourAge > theirAge) && (youngerCharactersScore !== null))
+                return this.formatKinkScore(youngerCharactersScore, 'younger characters');
+        }
+
+        return new Score(Scoring.NEUTRAL);
     }
 
-    private resolveGenderScore() {
+    private resolveGenderScore(): Score {
         const you = this.you;
         const them = this.them;
 
-        const yourGender = Matcher.getTagValueList(TagId.Gender, you);
         const theirGender = Matcher.getTagValueList(TagId.Gender, them);
 
-        const yourGenderScore = Matcher.genderLikeabilityScore(them, yourGender);
-        const theirGenderScore = Matcher.genderLikeabilityScore(you, theirGender);
+        if (theirGender === null)
+            return new Score(Scoring.NEUTRAL);
 
-        const yourFinalScore = (yourGenderScore !== null) ? yourGenderScore : this.resolveScore(TagId.Orientation, orientationCompatibility, you, them);
-        const theirFinalScore = (theirGenderScore !== null) ? theirGenderScore : this.resolveScore(TagId.Orientation, orientationCompatibility, them, you);
+        const genderName = `${Gender[theirGender].toLowerCase()}s`;
+        const genderKinkScore = Matcher.getKinkGenderPreference(you, theirGender);
 
-        return Math.min(yourFinalScore, theirFinalScore);
+        if (genderKinkScore !== null)
+            return this.formatKinkScore(genderKinkScore, genderName);
+
+        return new Score(Scoring.NEUTRAL);
     }
 
-    static getTagValue(tagId: number, c: Character) {
+    static getTagValue(tagId: number, c: Character): CharacterInfotag | undefined {
         return c.infotags[tagId];
     }
 
-    static getTagValueList(tagId: number, c: Character): number | undefined {
+    static getTagValueList(tagId: number, c: Character): number | null {
         const t = this.getTagValue(tagId, c);
 
-        if ((!t) || (!t.list)) {
-            return;
-        }
+        if ((!t) || (!t.list))
+            return null;
 
         return t.list;
     }
 
-    // Considers males and females only
-    static isSameSexCis(a: Character, b: Character): boolean {
-        const aGender = this.getTagValueList(TagId.Gender, a);
-        const bGender = this.getTagValueList(TagId.Gender, b);
-
-        if ((aGender !== Gender.Male) && (aGender !== Gender.Female)) {
-            return false;
-        }
-
-        return ((aGender !== undefined) && (aGender === bGender));
-    }
-
-    // Considers
-    static isGenderedCis(c: Character): boolean {
-        const gender = this.getTagValueList(TagId.Gender, c);
-
-        return ((!!gender) && (gender !== Gender.None));
-    }
-
-    static isMaleCis(c: Character): boolean {
-        const gender = this.getTagValueList(TagId.Gender, c);
-
-        return (gender === Gender.Male);
-    }
-
-    static isFemaleCis(c: Character): boolean {
-        const gender = this.getTagValueList(TagId.Gender, c);
-
-        return (gender === Gender.Female);
-    }
-
-    static isCis(...characters: Character[]): boolean {
-        return _.every(characters, (c: Character) => ((Matcher.isMaleCis(c)) || (Matcher.isFemaleCis(c))));
-    }
-
-
-    static genderLikeabilityScore(c: Character, gender?: Gender): number | null {
-        if (gender === undefined) {
-            return null;
-        }
-
-        const byKink = Matcher.getKinkGenderPreference(c, gender);
-
-        if (byKink !== null) {
-            if ((byKink === KinkPreference.Yes) || (byKink === KinkPreference.Favorite)) {
-                return 1;
-            }
-
-            if (byKink === KinkPreference.Maybe) {
-                return -0.5;
-            }
-
-            if (byKink === KinkPreference.No) {
-                return -1;
-            }
-        }
-
-        if (this.isCis(c)) {
-            if ((gender !== Gender.Female) && (gender !== Gender.Male)) {
-                return -1;
-            }
-        }
-
-        return null;
-    }
-
-    static likesGender(c: Character, gender: Gender): boolean | null {
-        const byKink = Matcher.getKinkGenderPreference(c, gender);
-
-        if (byKink !== null)
-            return ((byKink === KinkPreference.Yes) || (byKink === KinkPreference.Favorite));
-
-        if ((Matcher.isCis(c)) && ((gender === Gender.Male) || (gender === Gender.Female)))
-            return gender !== this.getTagValueList(TagId.Gender, c);
-
-        return null;
-    }
-
-    static dislikesGender(c: Character, gender: Gender): boolean | null {
-        const byKink = Matcher.getKinkGenderPreference(c, gender);
-
-        if (byKink !== null)
-            return (byKink === KinkPreference.No);
-
-        if ((Matcher.isCis(c)) && ((gender === Gender.Male) || (gender === Gender.Female)))
-            return gender === this.getTagValueList(TagId.Gender, c);
-
-        return null;
-    }
-
-    static maybeGender(c: Character, gender: Gender): boolean | null {
-        const byKink = Matcher.getKinkGenderPreference(c, gender);
-
-        if (byKink !== null)
-            return (byKink === KinkPreference.Maybe);
-
-        return null;
+    static isCisGender(...genders: Gender[]): boolean {
+        return _.every(genders, (g: Gender) => ((g === Gender.Female) || (g === Gender.Male)));
     }
 
     static getKinkPreference(c: Character, kinkId: number): KinkPreference | null {
@@ -570,74 +580,40 @@ export class Matcher {
         return this.getKinkPreference(c, species);
     }
 
-    static likesSpecies(c: Character, species: Species): boolean | null {
-        const byKink = Matcher.getKinkSpeciesPreference(c, species);
-
-        if (byKink !== null)
-            return ((byKink === KinkPreference.Yes) || (byKink === KinkPreference.Favorite));
-
-        return null;
-    }
-
-    static maybeSpecies(c: Character, species: Species): boolean | null {
-        const byKink = Matcher.getKinkSpeciesPreference(c, species);
-
-        if (byKink !== null)
-            return (byKink === KinkPreference.Maybe);
-
-        return null;
-    }
-
-    static hatesSpecies(c: Character, species: Species): boolean | null {
-        const byKink = Matcher.getKinkSpeciesPreference(c, species);
-
-        if (byKink !== null)
-            return (byKink === KinkPreference.No);
-
-        return null;
-    }
-
-    static likes(c: Character, kinkId: Kink): boolean {
-        const r = Matcher.getKinkPreference(c, kinkId);
-
-        return ((r === KinkPreference.Favorite) || (r === KinkPreference.Yes));
-
-    }
-
-    static hates(c: Character, kinkId: Kink): boolean {
-        const r = Matcher.getKinkPreference(c, kinkId);
-
-        return (r === KinkPreference.No);
-
-    }
-
     static has(c: Character, kinkId: Kink): boolean {
         const r = Matcher.getKinkPreference(c, kinkId);
 
         return (r !== null);
     }
 
+    static isMammal(c: Character): boolean | null {
+        const species = Matcher.species(c);
+
+        if (species === null)
+            return null;
+
+        return (mammalSpecies.indexOf(species) >= 0);
+    }
+
     static isAnthro(c: Character): boolean | null {
         const bodyTypeId = this.getTagValueList(TagId.BodyType, c);
 
-        if (bodyTypeId === BodyType.Anthro) {
+        if (bodyTypeId === BodyType.Anthro)
             return true;
-        }
 
         const speciesId = this.species(c);
 
         if (!speciesId)
             return null;
 
-        return (nonAnthroSpecies.indexOf(parseInt(`${speciesId}`, 10)) < 0);
+        return (nonAnthroSpecies.indexOf(speciesId) < 0);
     }
 
     static isHuman(c: Character): boolean | null {
         const bodyTypeId = this.getTagValueList(TagId.BodyType, c);
 
-        if (bodyTypeId === BodyType.Human) {
+        if (bodyTypeId === BodyType.Human)
             return true;
-        }
 
         const speciesId = this.species(c);
 
@@ -650,9 +626,8 @@ export class Matcher {
 
         const mySpecies = this.getTagValue(TagId.Species, c);
 
-        if ((!mySpecies) || (!mySpecies.string)) {
+        if ((!mySpecies) || (!mySpecies.string))
             return Species.Human; // best guess
-        }
 
         const finalSpecies = mySpecies.string.toLowerCase();
 
@@ -671,6 +646,6 @@ export class Matcher {
             }
         );
 
-        return foundSpeciesId;
+        return (foundSpeciesId === null) ? null : parseInt(foundSpeciesId, 10);
     }
 }

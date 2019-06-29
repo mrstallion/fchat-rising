@@ -13,7 +13,7 @@
     import { DisplayInfotag } from './interfaces';
     // import { Character as CharacterInfo } from '../../interfaces';
     import {Store} from './data_store';
-    import { MatchReport, TagId } from './matcher';
+    import { MatchReport, Score, TagId } from './matcher';
 
 
     @Component
@@ -31,26 +31,33 @@
                 infotag: true,
             };
 
-            console.log(`Infotag ${this.infotag.id}: ${this.label}`);
+            // console.log(`Infotag ${this.infotag.id}: ${this.label}`);
+            const id = this.infotag.id;
 
-            if ((this.characterMatch) && (this.infotag.id in this.characterMatch)) {
-                const n = this.characterMatch[this.infotag.id];
+            if (this.characterMatch) {
+                const scores = this.theirInterestIsRelevant(id)
+                    ? this.characterMatch.them.scores
+                    : (this.yourInterestIsRelevant(id) ? this.characterMatch.you.scores : null);
 
-                console.log(`Found match [${this.infotag.id} === ${TagId[this.infotag.id]}]: ${n}`);
+                if (scores) {
+                    const score = scores[id] as Score;
 
-                if (n >= 1)
-                    styles.match = true;
-                else if(n >= 0.5)
-                    styles.weakMatch = true;
-                else if(n === 0)
-                    styles.neutral = true;
-                else if(n <= -1)
-                    styles.mismatch = true;
-                else if(n <= -0.5)
-                    styles.weakMismatch = true;
+                    styles[score.getRecommendedClass()] = true;
+                    styles['match-score'] = true;
+                }
             }
 
             return styles;
+        }
+
+
+        theirInterestIsRelevant(id: number): boolean {
+            return ((id === TagId.FurryPreference) || (id === TagId.Orientation));
+        }
+
+
+        yourInterestIsRelevant(id: number): boolean {
+            return ((id === TagId.Gender) || (id === TagId.Age) || (id === TagId.Species))
         }
 
 

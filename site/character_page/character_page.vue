@@ -4,10 +4,10 @@
             <div class="alert alert-info" v-show="loading">Loading character information.</div>
             <div class="alert alert-danger" v-show="error">{{error}}</div>
         </div>
-        <div class="col-md-4 col-lg-3 col-xl-2" v-if="!loading && character">
+        <div class="col-md-4 col-lg-3 col-xl-2" v-if="!loading && character && character.character && characterMatch && selfCharacter">
             <sidebar :character="character" :characterMatch="characterMatch" @memo="memo" @bookmarked="bookmarked" :oldApi="oldApi"></sidebar>
         </div>
-        <div class="col-md-8 col-lg-9 col-xl-10 profile-body" v-if="!loading && character">
+        <div class="col-md-8 col-lg-9 col-xl-10 profile-body" v-if="!loading && character && character.character && characterMatch && selfCharacter">
             <div id="characterView">
                 <div>
                     <div v-if="character.ban_reason" id="headerBanReason" class="alert alert-warning">
@@ -36,6 +36,7 @@
                         <div class="card-body">
                             <div class="tab-content">
                                 <div role="tabpanel" class="tab-pane" :class="{active: tab === '0'}" id="overview">
+                                    <match-report :characterMatch="characterMatch"></match-report>
                                     <div v-bbcode="character.character.description" style="margin-bottom: 10px"></div>
                                     <character-kinks :character="character" :oldApi="oldApi" ref="tab0"></character-kinks>
                                 </div>
@@ -84,6 +85,7 @@
     import Sidebar from './sidebar.vue';
     import core from '../../chat/core';
     import { Matcher, MatchReport } from './matcher';
+    import MatchReportView from './match-report.vue';
 
 
     interface ShowableVueTab extends Vue {
@@ -99,7 +101,8 @@
             'character-groups': GroupsView,
             'character-infotags': InfotagsView,
             'character-images': ImagesView,
-            'character-kinks': CharacterKinksView
+            'character-kinks': CharacterKinksView,
+            'match-report': MatchReportView
         }
     })
     export default class CharacterPage extends Vue {
@@ -147,9 +150,9 @@
             return this.load();
         }
 
-
         async load(mustLoad = true) {
             this.loading = true;
+            this.error = '';
 
             try {
                 const due: Promise<any>[] = [];
@@ -173,7 +176,6 @@
             this.loading = false;
         }
 
-
         memo(memo: {id: number, memo: string}): void {
             Vue.set(this.character!, 'memo', memo);
         }
@@ -181,7 +183,6 @@
         bookmarked(state: boolean): void {
             Vue.set(this.character!, 'bookmarked', state);
         }
-
 
         protected async loadSelfCharacter(): Promise<Character> {
             // console.log('SELF');
@@ -197,10 +198,9 @@
             return this.selfCharacter;
         }
 
-
         private async _getCharacter(): Promise<void> {
-            this.error = '';
             this.character = undefined;
+
             if(this.name === undefined || this.name.length === 0)
                 return;
 
@@ -218,8 +218,9 @@
                 return;
             }
 
-            const matcher = new Matcher(this.selfCharacter.character, this.character.character);
-            this.characterMatch = matcher.match();
+            this.characterMatch = Matcher.generateReport(this.selfCharacter.character, this.character.character);
+
+            console.log('Match', this.selfCharacter.character.name, this.character.character.name, this.characterMatch);
         }
     }
 </script>
@@ -445,23 +446,123 @@
 
 
     .infotag {
+        &.match-score {
+            padding-top: 2px;
+            padding-left: 4px;
+            padding-right: 4px;
+            margin-left: -4px;
+            margin-right: -4px;
+            border-radius: 2px;
+            padding-bottom: 2px;
+            margin-bottom: 1rem;
+
+            .infotag-value {
+                margin-bottom: 0;
+            }
+        }
+
         &.match {
-            background-color: green;
+            background-color: rgba(0, 255, 0, 0.5);
+            border: solid 1px rgba(0, 255, 0, 0.15);
         }
 
         &.mismatch {
-            background-color: red;
+            background-color: rgba(255, 0, 0, 0.6);
+            border: 1px solid rgba(255, 0, 0, 0.3);
         }
 
 
-        &.weakMatch {
-            background-color: rgba(0, 162, 0, 0.6);
+        &.weak-match {
+            background-color: rgba(0, 162, 0, 0.35);
+            border: 1px solid rgba(0, 162, 0, 0.15);
         }
 
 
-        &.weakMismatch {
-            background-color: rgba(255, 96, 0, 0.6);
+        &.weak-mismatch {
+            background-color: rgba(255, 225, 0, 0.6);
+            border: 1px solid rgba(255, 225, 0, 0.3);
+        }
+    }
+
+
+    .match-report {
+        display: flex;
+        flex-direction: row;
+        background-color: rgba(0,0,0,0.2);
+        /* width: 100%; */
+        margin-top: -1.2rem;
+        margin-left: -1.2rem;
+        margin-right: -1.2rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0;
+        padding-top: 0.5rem;
+        max-width: 25rem;
+
+        h3 {
+            font-size: 1.25rem;
         }
 
+        .scores {
+            float: left;
+            flex: 1;
+            margin-right: 1rem;
+            max-width: 25rem;
+
+            ul {
+                padding: 0;
+                padding-left: 0.5rem;
+                list-style: none;
+            }
+
+            .match-score {
+                font-size: 0.85rem;
+                border-radius: 2px;
+                margin-bottom: 4px;
+                padding: 2px;
+                padding-left: 4px;
+                padding-right: 4px;
+
+                span {
+                    color: white;
+                    font-weight: bold;
+                }
+
+                &.match {
+                    background-color: rgba(0, 255, 0, 0.5);
+                    border: solid 1px rgba(0, 255, 0, 0.15);
+                }
+
+                &.mismatch {
+                    background-color: rgba(255, 0, 0, 0.6);
+                    border: 1px solid rgba(255, 0, 0, 0.3);
+                }
+
+
+                &.weak-match {
+                    background-color: rgba(0, 162, 0, 0.35);
+                    border: 1px solid rgba(0, 162, 0, 0.15);
+                }
+
+
+                &.weak-mismatch {
+                    background-color: rgba(255, 225, 0, 0.6);
+                    border: 1px solid rgba(255, 225, 0, 0.3);
+                }
+            }
+        }
+
+        .vs {
+            margin-left: 1rem;
+            margin-right: 1rem;
+            text-align: center;
+            font-size: 5rem;
+            line-height: 0;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: auto;
+            margin-bottom: auto;
+            font-style: italic;
+            font-family: 'Times New Roman', Georgia, serif;
+        }
     }
 </style>

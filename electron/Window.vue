@@ -195,6 +195,9 @@
             tray.setToolTip(l('title'));
             tray.on('click', (_) => this.trayClicked(tab));
             const view = new electron.remote.BrowserView();
+
+            // view.webContents.openDevTools();
+
             view.setAutoResize({width: true, height: true});
             electron.ipcRenderer.send('tab-added', view.webContents.id);
             const tab = {active: false, view, user: undefined, hasNew: false, tray};
