@@ -217,7 +217,7 @@ export enum Scoring {
     MATCH = 1,
     WEAK_MATCH = 0.5,
     NEUTRAL = 0,
-    WEAK_MISMATCH = 0.5,
+    WEAK_MISMATCH = -0.5,
     MISMATCH = -1
 }
 
@@ -364,7 +364,7 @@ export class Matcher {
             return new Score(Scoring.MISMATCH, `No <span>${description}</span>`);
 
         if (score === KinkPreference.Maybe)
-            return new Score(Scoring.WEAK_MISMATCH, `Undecided on <span>${description}</span>`);
+            return new Score(Scoring.WEAK_MISMATCH, `Hesitant on <span>${description}</span>`);
 
         if (score === KinkPreference.Yes)
             return new Score(Scoring.WEAK_MATCH, `Likes <span>${description}</span>`);
@@ -417,7 +417,7 @@ export class Matcher {
                 break;
 
             case Scoring.WEAK_MISMATCH:
-                type = 'Undecided on';
+                type = 'Hesitant on';
                 break;
 
             case Scoring.WEAK_MATCH:
@@ -442,6 +442,9 @@ export class Matcher {
         const score = theyAreAnthro
             ? Matcher.furryLikeabilityScore(you)
             : (theyAreHuman ? Matcher.humanLikeabilityScore(you) : Scoring.NEUTRAL);
+
+        if (score === Scoring.WEAK_MATCH)
+            return new Score(score, theyAreAnthro ? 'Would prefer <span>humans</span>, ok with anthros' : 'Would prefer <span>anthros</span>, ok with humans');
 
         return this.formatScoring(score, theyAreAnthro ? 'furry pairings' : theyAreHuman ? 'human pairings' : '');
     }
