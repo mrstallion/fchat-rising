@@ -51,9 +51,7 @@ export class ImagePreviewMutator {
         this.add('www.sex.com', this.getBaseJsMutatorScript('.image_frame img, .image_frame video'));
         this.add('sex.com', this.getBaseJsMutatorScript('.image_frame img, .image_frame video'));
         this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript('picture img, picture video'));
-
-        // this fixes videos only -- images are fine as is
-        this.add('i.imgur.com', this.getBaseJsMutatorScript('video'));
+        this.add('i.imgur.com', this.getBaseJsMutatorScript('img, video'));
 
         this.add(
             'imgur.com',

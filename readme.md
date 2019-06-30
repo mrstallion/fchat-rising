@@ -14,14 +14,13 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
 *   Profile
     *    Kinks are auto-compared when profile is loaded
     *    Custom kink explanations can be expanded inline
-    *    Custom kinks are highlighted  
-    *    Gender, fur/human status, age, and sexual preference are highlighted if compatible or incompatible
+    *    Custom kinks are highlighted
+    *    Gender, anthro/human preference, age, and sexual preference are highlighted if compatible or incompatible
     *    Guestbook, friend, and group counts are visible on tabs
     *    Character pictures are expanded inline
     *    Cleaner presentation for the side bar details (age, etc.), sorted in most relevant order
     *    Less informative side bar details (views, contact) are separated and shown in a less prominent way
     *    Cleaner guestbook view
-    *    Link previews
 
 
 

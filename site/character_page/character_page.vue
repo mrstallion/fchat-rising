@@ -255,6 +255,17 @@
             p:last-child {
                 margin-bottom:0;
             }
+
+
+            &.comparison-result {
+                margin: -4px;
+                padding: 4px;
+                padding-top: 2px;
+                padding-bottom: 2px;
+                margin-top: 1px;
+                margin-bottom: 1px;
+                border-radius: 3px;
+            }
         }
     }
 
@@ -408,16 +419,16 @@
     }
 
     .character-images {
+        column-width: auto;
+        column-count: 2;
+        column-gap: 0.5rem;
+
         .character-image-wrapper {
             display: inline-block;
             background-color: rgba(0,0,0, 0.2);
             border-radius: 5px;
-            width: calc(50% - 20px);
             box-sizing: border-box;
             margin: 5px;
-            // float: left;
-            /* margin-bottom: auto; */
-            /* margin-top: auto; */
 
             a {
                 border: none;
@@ -459,28 +470,6 @@
             .infotag-value {
                 margin-bottom: 0;
             }
-        }
-
-        &.match {
-            background-color: rgba(0, 255, 0, 0.5);
-            border: solid 1px rgba(0, 255, 0, 0.15);
-        }
-
-        &.mismatch {
-            background-color: rgba(255, 0, 0, 0.6);
-            border: 1px solid rgba(255, 0, 0, 0.3);
-        }
-
-
-        &.weak-match {
-            background-color: rgba(0, 162, 0, 0.35);
-            border: 1px solid rgba(0, 162, 0, 0.15);
-        }
-
-
-        &.weak-mismatch {
-            background-color: rgba(255, 225, 0, 0.6);
-            border: 1px solid rgba(255, 225, 0, 0.3);
         }
     }
 
@@ -555,28 +544,6 @@
                     color: white;
                     font-weight: bold;
                 }
-
-                &.match {
-                    background-color: rgba(0, 255, 0, 0.5);
-                    border: solid 1px rgba(0, 255, 0, 0.15);
-                }
-
-                &.mismatch {
-                    background-color: rgba(255, 0, 0, 0.6);
-                    border: 1px solid rgba(255, 0, 0, 0.3);
-                }
-
-
-                &.weak-match {
-                    background-color: rgba(0, 162, 0, 0.35);
-                    border: 1px solid rgba(0, 162, 0, 0.15);
-                }
-
-
-                &.weak-mismatch {
-                    background-color: rgba(255, 225, 0, 0.6);
-                    border: 1px solid rgba(255, 225, 0, 0.3);
-                }
             }
         }
 
@@ -593,4 +560,46 @@
             font-family: 'Times New Roman', Georgia, serif;
         }
     }
+
+
+    .character-kinks-block .character-kink.comparison-favorite,
+    .match-report .scores .match-score.match,
+    .infotag.match {
+        background-color: rgb(0, 142, 0);
+        border: solid 1px rgb(0, 113, 0);
+
+        // background-color: #007700;
+        // border: 1px solid #003e00;
+    }
+
+    .character-kinks-block .character-kink.comparison-yes,
+    .match-report .scores .match-score.weak-match,
+    .infotag.weak-match {
+        background-color: rgb(0, 80, 0);
+        border: 1px solid rgb(0, 64, 0);
+
+        // background-color: #004200;
+        // border: 1px solid #002900;
+    }
+
+    .character-kinks-block .character-kink.comparison-maybe,
+    .match-report .scores .match-score.weak-mismatch,
+    .infotag.weak-mismatch {
+        background-color: rgb(152, 134, 0);
+        border: 1px solid rgb(142, 126, 0);
+
+        // border: 1px solid #613e00;
+        // background-color: #905d01;
+    }
+
+    .character-kinks-block .character-kink.comparison-no,
+    .match-report .scores .match-score.mismatch,
+    .infotag.mismatch {
+        background-color: rgb(171, 0, 0);
+        border: 1px solid rgb(128, 0, 0);
+
+        // border: 1px solid #420200;
+        // background-color: #710300;
+    }
+
 </style>

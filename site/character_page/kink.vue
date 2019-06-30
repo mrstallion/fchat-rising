@@ -65,8 +65,12 @@
             };
             classes[`kink-id-${this.kinkId}`] = true;
             classes[`kink-group-${this.kink.group}`] = true;
-            if(!this.kink.isCustom && typeof this.comparisons[this.kink.id] !== 'undefined')
+
+            if(!this.kink.isCustom && typeof this.comparisons[this.kink.id] !== 'undefined') {
+                classes['comparison-result'] = true;
                 classes[`comparison-${this.comparisons[this.kink.id]}`] = true;
+            }
+
             return classes;
         }
 
