@@ -392,14 +392,14 @@ export class Matcher {
         }
 
         if (Matcher.isAnthro(them)) {
-            const anthroScore = Matcher.getKinkPreference(them, Kink.AnthroCharacters);
+            const anthroScore = Matcher.getKinkPreference(you, Kink.AnthroCharacters);
 
             if (anthroScore !== null)
                 return this.formatKinkScore(anthroScore, 'anthros');
         }
 
         if (Matcher.isMammal(them)) {
-            const mammalScore = Matcher.getKinkPreference(them, Kink.Mammals);
+            const mammalScore = Matcher.getKinkPreference(you, Kink.Mammals);
 
             if (mammalScore !== null)
                 return this.formatKinkScore(mammalScore, 'mammals');
