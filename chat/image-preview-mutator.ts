@@ -34,7 +34,7 @@ export class ImagePreviewMutator {
     }
 
     protected init() {
-        this.add('default', this.getBaseJsMutatorScript('#image, #video, img, video'));
+        this.add('default', this.getBaseJsMutatorScript('#video, #image, video, img'));
         this.add('e621.net', this.getBaseJsMutatorScript('#image, video'));
         this.add('e-hentai.org', this.getBaseJsMutatorScript('#img, video'));
         this.add('gelbooru.com', this.getBaseJsMutatorScript('#image, video'));
@@ -51,7 +51,7 @@ export class ImagePreviewMutator {
         this.add('www.sex.com', this.getBaseJsMutatorScript('.image_frame img, .image_frame video'));
         this.add('sex.com', this.getBaseJsMutatorScript('.image_frame img, .image_frame video'));
         this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript('picture img, picture video'));
-        this.add('i.imgur.com', this.getBaseJsMutatorScript('img, video'));
+        this.add('i.imgur.com', this.getBaseJsMutatorScript('video, img'));
 
         this.add(
             'imgur.com',
