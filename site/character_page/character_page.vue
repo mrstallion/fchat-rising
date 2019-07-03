@@ -27,10 +27,10 @@
                             <tabs class="card-header-tabs" v-model="tab">
                                 <span>Overview</span>
                                 <span>Info</span>
-                                <span v-if="!oldApi">Groups</span>
-                                <span>Images ({{ character.character.image_count }})</span>
-                                <span v-if="character.settings.guestbook">Guestbook</span>
-                                <span v-if="character.is_self || character.settings.show_friends">Friends</span>
+                                <span v-if="!oldApi">Groups <span class="tab-count" v-if="groupCount !== null">({{ groupCount }})</span></span>
+                                <span>Images <span class="tab-count">({{ character.character.image_count }})</span></span>
+                                <span v-if="character.settings.guestbook">Guestbook <span class="tab-count" v-if="guestbookPostCount !== null">({{ guestbookPostCount }})</span></span>
+                                <span v-if="character.is_self || character.settings.show_friends">Friends <span class="tab-count" v-if="friendCount !== null">({{ friendCount }})</span></span>
                             </tabs>
                         </div>
                         <div class="card-body">
@@ -67,6 +67,8 @@
 </template>
 
 <script lang="ts">
+    import * as _ from 'lodash';
+
     import {Component, Hook, Prop, Watch} from '@f-list/vue-ts';
     import Vue from 'vue';
     import {standardParser} from '../../bbcode/standard';
@@ -122,6 +124,11 @@
         error = '';
         tab = '0';
 
+        guestbookPostCount: string | null = null;
+        friendCount: string | null = null;
+        groupCount: string | null = null;
+
+
         selfCharacter: Character | undefined;
 
         characterMatch: MatchReport | undefined;
@@ -157,6 +164,11 @@
             try {
                 const due: Promise<any>[] = [];
 
+                if(this.name === undefined || this.name.length === 0)
+                    return;
+
+                await methods.fieldsGet();
+
                 if ((this.selfCharacter === undefined) && (Utils.Settings.defaultCharacter >= 0)) {
                     due.push(this.loadSelfCharacter());
                 }
@@ -175,6 +187,60 @@
 
             this.loading = false;
         }
+
+
+        async countGuestbookPosts() {
+            try {
+                if ((!this.character) || (!_.get(this.character, 'settings.guestbook'))) {
+                    this.guestbookPostCount = null;
+                    return;
+                }
+
+                const guestbookState = await methods.guestbookPageGet(this.character.character.id, 1, false);
+
+                console.log('GUESTBOOK', guestbookState.posts);
+
+                this.guestbookPostCount = `${guestbookState.posts.length}${guestbookState.nextPage ? '+' : ''}`;
+            } catch (err) {
+                console.error(err);
+                this.guestbookPostCount = null;
+            }
+        }
+
+
+        async countGroups() {
+            try {
+                if ((!this.character) || (this.oldApi)) {
+                    this.groupCount = null;
+                    return;
+                }
+
+                const groups = await methods.groupsGet(this.character.character.id);
+
+                this.groupCount = `${groups.length}`;
+            } catch (err) {
+                console.error(err);
+                this.groupCount = null;
+            }
+        }
+
+
+        async countFriends() {
+            try {
+                if (!this.character) {
+                    this.friendCount = null;
+                    return;
+                }
+
+                const friends = await methods.friendsGet(this.character.character.id);
+
+                this.friendCount = `${friends.length}`;
+            } catch (err) {
+                console.error(err);
+                this.friendCount = null;
+            }
+        }
+
 
         memo(memo: {id: number, memo: string}): void {
             Vue.set(this.character!, 'memo', memo);
@@ -200,14 +266,18 @@
 
         private async _getCharacter(): Promise<void> {
             this.character = undefined;
+            this.friendCount = null;
+            this.groupCount = null;
+            this.guestbookPostCount = null;
 
-            if(this.name === undefined || this.name.length === 0)
-                return;
-
-            await methods.fieldsGet();
             this.character = await methods.characterData(this.name, this.characterid);
             standardParser.allowInlines = true;
             standardParser.inlines = this.character.character.inlines;
+
+            // no awaits on these on purpose
+            this.countGuestbookPosts();
+            this.countGroups();
+            this.countFriends();
 
             this.updateMatches();
         }
@@ -600,6 +670,11 @@
 
         // border: 1px solid #420200;
         // background-color: #710300;
+    }
+
+
+    .tab-count {
+        color: rgba(255, 255, 255, 0.5);
     }
 
 </style>

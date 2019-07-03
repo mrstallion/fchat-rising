@@ -6,9 +6,9 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
 ## Key Differences
 
 *   Ad auto-posting
-    *    Manage channel's ad settings in "Tab Settings"
-    *    Automatically repost ads every 11-18 minutes (randomized)
-    *    Auto-posting can rotate through multiple ads
+    *    Manage channel's ad settings via "Tab Settings"
+    *    Automatically re-post ads every 11-18 minutes (randomized) for up to 180 minutes
+    *    Rotate multiple ads on a single channel
 *   Link previews
     *    Hover cursor over any `[url]` to see a preview of it
 *   Profile
@@ -17,7 +17,7 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
     *    Custom kinks are highlighted
     *    Gender, anthro/human preference, age, and sexual preference are highlighted if compatible or incompatible
     *    Guestbook, friend, and group counts are visible on tabs
-    *    Character pictures are expanded inline
+    *    Character images are expanded inline
     *    Cleaner presentation for the side bar details (age, etc.), sorted in most relevant order
     *    Less informative side bar details (views, contact) are separated and shown in a less prominent way
     *    Cleaner guestbook view

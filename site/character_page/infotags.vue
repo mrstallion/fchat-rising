@@ -35,6 +35,10 @@
         readonly characterMatch!: MatchReport;
 
         get groupedInfotags(): DisplayInfotagGroup[] {
+            if ((!this.character) || (!this.character.character)) {
+                return [];
+            }
+
             const groups = Store.kinks.infotag_groups;
             const infotags = Store.kinks.infotags;
             const characterTags = this.character.character.infotags;
@@ -42,10 +46,10 @@
             const groupedTags = Utils.groupObjectBy(infotags, 'infotag_group');
             for(const groupId in groups) {
                 const group = groups[groupId]!;
-                const groupedInfotags = groupedTags[groupId];
-                if(groupedInfotags === undefined) continue;
+                const gits = groupedTags[groupId];
+                if(gits === undefined) continue;
                 const collectedTags: DisplayInfotag[] = [];
-                for(const infotag of groupedInfotags) {
+                for(const infotag of gits) {
                     const characterInfotag = characterTags[infotag.id];
                     if(typeof characterInfotag === 'undefined')
                         continue;
