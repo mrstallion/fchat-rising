@@ -11,6 +11,7 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
     *    Rotate multiple ads on a single channel
 *   Link previews
     *    Hover cursor over any `[url]` to see a preview of it
+    *    Middle click any `[url]` to turn the preview into a sticky / interactive mode
 *   Profile
     *    Kinks are auto-compared when profile is loaded
     *    Custom kink explanations can be expanded inline
@@ -22,6 +23,9 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
     *    Less informative side bar details (views, contact) are separated and shown in a less prominent way
     *    Cleaner guestbook view
 
+
+## Todo / Ideas
+*   Preview mode should allow detaching from the main window
 
 
 # F-List Exported

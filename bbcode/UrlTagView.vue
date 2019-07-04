@@ -10,6 +10,7 @@
             @mouseenter="show()"
             @mouseleave="dismiss()"
             @mouseout="dismiss()"
+            @click.middle.prevent="toggleStickyness()"
         >{{text}}</a>
         <span
             class="link-domain bbcode-pseudo"
@@ -50,6 +51,11 @@
 
         show(): void {
             EventBus.$emit('imagepreview-show', {url: this.url});
+        }
+
+
+        toggleStickyness(): void {
+            EventBus.$emit('imagepreview-toggle-stickyness', {url: this.url});
         }
     }
 </script>

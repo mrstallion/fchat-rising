@@ -1,36 +1,77 @@
 /* tslint:disable:quotemark */
 
+import * as _ from 'lodash';
+
 import { domain } from '../bbcode/core';
 
+export interface PreviewMutator {
+    match: string|RegExp;
+    injectJs: string;
+}
+
 export interface ImagePreviewMutatorCollection {
-    [key: string]: string;
+    [key: string]: PreviewMutator;
 }
 
 export class ImagePreviewMutator {
-    private mutators: ImagePreviewMutatorCollection = {};
+    private hostMutators: ImagePreviewMutatorCollection = {};
+    private regexMutators: PreviewMutator[] = [];
 
     constructor() {
         this.init();
     }
 
     getMutatorJsForSite(url: string): string | undefined {
+        let mutator = this.matchMutator(url);
+
+        if (!mutator)
+            mutator = this.hostMutators['default'];
+
+        return this.wrapJs(mutator.injectJs);
+    }
+
+
+    matchMutator(url: string): PreviewMutator | undefined {
         const urlDomain = domain(url);
 
         if (!urlDomain)
             return;
 
-        // console.log('Domain is', urlDomain);
+        if (urlDomain in this.hostMutators)
+            return this.hostMutators[urlDomain];
 
-        let mutatorJs = this.mutators[urlDomain];
+        return _.find(
+            this.regexMutators,
+            (m: PreviewMutator) => {
+                const match = m.match;
 
-        if (!mutatorJs)
-            mutatorJs = this.mutators['default'];
-
-        return `(() => { try { ${mutatorJs} } catch (err) { console.error(err); } })()`;
+                return (match instanceof RegExp) ? (urlDomain.match(match) !== null) : (match === urlDomain);
+            }
+        );
     }
 
-    protected add(domain: string, mutatorJs: string) {
-        this.mutators[domain] = mutatorJs;
+
+    protected wrapJs(mutatorJs: string) {
+        return `(() => { try { ${mutatorJs} } catch (err) { console.error('Mutator error', err); } })();`;
+    }
+
+
+    protected add(domain: string|RegExp, mutatorJs: string) {
+        if (domain instanceof RegExp) {
+            this.regexMutators.push(
+                {
+                    match: domain,
+                    injectJs: mutatorJs
+                }
+            );
+
+            return;
+        }
+
+        this.hostMutators[domain] = {
+            match: domain,
+            injectJs: mutatorJs
+        };
     }
 
     protected init() {
@@ -42,16 +83,19 @@ export class ImagePreviewMutator {
         this.add('danbooru.donmai.us', this.getBaseJsMutatorScript('#image, video'));
         this.add('gfycat.com', this.getBaseJsMutatorScript('video'));
         this.add('gfycatporn.com', this.getBaseJsMutatorScript('video'));
-        this.add('www.youtube.com', this.getBaseJsMutatorScript('video'));
         this.add('youtube.com', this.getBaseJsMutatorScript('video'));
         this.add('instantfap.com', this.getBaseJsMutatorScript('#post img, #post video'));
-        this.add('www.webmshare.com', this.getBaseJsMutatorScript('video'));
         this.add('webmshare.com', this.getBaseJsMutatorScript('video'));
         this.add('pornhub.com', this.getBaseJsMutatorScript('.mainPlayerDiv video, .photoImageSection img'));
-        this.add('www.sex.com', this.getBaseJsMutatorScript('.image_frame img, .image_frame video'));
         this.add('sex.com', this.getBaseJsMutatorScript('.image_frame img, .image_frame video'));
         this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript('picture img, picture video'));
         this.add('i.imgur.com', this.getBaseJsMutatorScript('video, img'));
+        this.add('postimg.cc', this.getBaseJsMutatorScript('#main-image, video'));
+        this.add('gifsauce.com', this.getBaseJsMutatorScript('video'));
+        this.add('motherless.com', this.getBaseJsMutatorScript('.content video, .content img'));
+        // this.add('beeg.com', this.getBaseJsMutatorScript('video'));
+
+        this.add(/^media[0-9]\.giphy\.com$/, this.getBaseJsMutatorScript('video, img[alt]'));
 
         this.add(
             'imgur.com',
@@ -65,7 +109,6 @@ export class ImagePreviewMutator {
             `
         );
 
-
         this.add(
             'rule34.xxx',
             `${this.getBaseJsMutatorScript('#image, video')}
@@ -75,49 +118,108 @@ export class ImagePreviewMutator {
         );
     }
 
-    getBaseJsMutatorScript(imageSelector: string, skipElementRemove = false): string {
+    getBaseJsMutatorScript(imageSelector: string, skipElementRemove: boolean = false): string {
         return `const body = document.querySelector('body');
-        const img = Array.from(document.querySelectorAll('${imageSelector}')).filter((i) => ((i.width !== 1) && (i.height !== 1))).shift() 
-        
-        if (!img) { return; }
-        
-        const el = document.createElement('div');
-        el.id = 'flistWrapper';
-        
-        el.style = 'width: 100% !important; height: 100% !important; position: absolute !important;'
-            + 'top: 0 !important; left: 0 !important; z-index: 100000 !important;'
-            + 'background-color: black !important; background-size: contain !important;'
-            + 'background-repeat: no-repeat !important; background-position: top left !important;'
-            + 'opacity: 1 !important; padding: 0 !important; border: 0 !important; margin: 0 !important;';
-        
-        img.remove();
-        el.append(img);
-        body.append(el);
-        body.class = '';
-        
-        console.log(el);
-        console.log(img);
-        console.log('${imageSelector}');
-        
-        body.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
-            + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
-            + 'top: 0 !important; left: 0 !important;';
-        
-        img.style = 'object-position: top left !important; object-fit: contain !important;'
-            + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
-            + 'margin: 0 !imporant; border: 0 !important; padding: 0 !important;';
-        
-        img.class = '';
-        el.class = '';
-        
-        if (img.play) { img.muted = true; img.play(); }
-        
-        
-        let removeList = [];
-        body.childNodes.forEach((el) => { if(el.id !== 'flistWrapper') { removeList.push(el); } });
-        ${skipElementRemove ? '' : 'removeList.forEach((el) => el.remove());'}
-        removeList = [];
+            const img = Array.from(document.querySelectorAll('${imageSelector}'))
+                .filter((i) => ((i.width !== 1) && (i.height !== 1))).shift()
+
+            if (!img) { return; }
+
+            const el = document.createElement('div');
+            el.id = 'flistWrapper';
+
+            el.style = 'width: 100% !important; height: 100% !important; position: absolute !important;'
+                + 'top: 0 !important; left: 0 !important; z-index: 100000 !important;'
+                + 'background-color: black !important; background-size: contain !important;'
+                + 'background-repeat: no-repeat !important; background-position: top left !important;'
+                + 'opacity: 1 !important; padding: 0 !important; border: 0 !important; margin: 0 !important;';
+
+            img.remove();
+            el.append(img);
+            body.append(el);
+            body.class = '';
+
+            // console.log(el);
+            // console.log(img);
+            // console.log('${imageSelector}');
+
+            body.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
+                + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
+                + 'top: 0 !important; left: 0 !important;';
+
+            img.style = 'object-position: top left !important; object-fit: contain !important;'
+                + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
+                + 'margin: 0 !imporant; border: 0 !important; padding: 0 !important;';
+
+            img.class = '';
+            el.class = '';
+
+            if (img.play) { img.muted = true; img.play(); }
+
+            let removeList = [];
+            body.childNodes.forEach((el) => { if((el.id !== 'flistWrapper') && (el.id !== 'flistError')) { removeList.push(el); } });
+            // ${skipElementRemove ? '' : 'removeList.forEach((el) => el.remove());'}
+            removeList = [];
         `;
     }
 
+    getErrorMutator(code: number, description: string): string {
+        const errorHtml = `
+            <div id="flistError" style="
+                width: 100% !important;
+                height: 100% !important;
+                background-color: black !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                z-index: 200000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                line-height: 100% !important;
+                border: 0 !important;
+                opacity: 1 !important;
+                text-align: center !important;
+            "><h1 style="
+                color: #FF4444 !important;
+                font-size: 45pt !important;
+                margin: 0 !important;
+                margin-top: 10pt !important;
+                line-height: 100% !important;
+                padding: 0 !important;
+                border: 0 !important;
+                background: none !important;
+                font-family: Helvetica, Arial, sans-serif !important;
+                font-weight: bold !important;
+            ">${code}</h1><p style="
+                max-width: 400px !important;
+                color: #ededed !important;
+                display: inline-block !important;
+                font-size: 15pt !important;
+                font-family: Helvetica, Arial, sans-serif !important;
+                font-weight: 300 !important;
+                border: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                margin-top: 5pt !important;
+                line-height: 130% !important;
+            ">${description}</p></div>
+        `;
+
+        return this.wrapJs(`
+            const range = document.createRange();
+            
+            range.selectNode(document.body);
+            
+            const error = range.createContextualFragment(\`${errorHtml}\`);
+            
+            document.body.appendChild(error);
+        `);
+    }
+
 }
+
+
+
+

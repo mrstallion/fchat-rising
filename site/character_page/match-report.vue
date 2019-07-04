@@ -1,6 +1,6 @@
 <template>
-    <div id="match-report" :class="{'match-report': true, minimized: minimized}" v-if="(haveScores(characterMatch.you) || haveScores(characterMatch.them))">
-        <a class="minimize-btn" @click="toggleMinimize()"><i :class="{fa: true, 'fa-plus': minimized, 'fa-minus': !minimized}"></i></a>
+    <div id="match-report" :class="{'match-report': true, minimized: isMinimized}" v-if="(haveScores(characterMatch.you) || haveScores(characterMatch.them))">
+        <a class="minimize-btn" @click="toggleMinimize()"><i :class="{fa: true, 'fa-plus': isMinimized, 'fa-minus': !isMinimized}"></i></a>
 
         <div class="scores you">
             <h3>
@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-    import { Component, Prop } from '@f-list/vue-ts';
+    import { Component, Prop, Watch } from '@f-list/vue-ts';
     import Vue from 'vue';
     import { MatchReport, MatchResult, Score, Scoring } from './matcher';
     import * as _ from 'lodash';
@@ -42,9 +42,20 @@
         @Prop({required: true})
         readonly characterMatch!: MatchReport;
 
+        @Prop({required: true})
+        minimized = false;
+
         readonly avatarUrl = Utils.avatarURL;
 
-        minimized = false;
+        isMinimized = false;
+
+
+
+        @Watch('isMinimized')
+        onMinimizedChange(): void {
+            this.isMinimized = this.minimized;
+        }
+
 
         getScoreClass(score: Score) {
             const classes: any = {};
@@ -74,7 +85,7 @@
 
 
         toggleMinimize() {
-            this.minimized = !this.minimized;
+            this.isMinimized = !this.isMinimized;
         }
     }
 

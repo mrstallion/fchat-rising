@@ -36,7 +36,7 @@
                         <div class="card-body">
                             <div class="tab-content">
                                 <div role="tabpanel" class="tab-pane" :class="{active: tab === '0'}" id="overview">
-                                    <match-report :characterMatch="characterMatch"></match-report>
+                                    <match-report :characterMatch="characterMatch" :minimized="character.is_self"></match-report>
                                     <div v-bbcode="character.character.description" style="margin-bottom: 10px"></div>
                                     <character-kinks :character="character" :oldApi="oldApi" ref="tab0"></character-kinks>
                                 </div>
@@ -198,8 +198,6 @@
 
                 const guestbookState = await methods.guestbookPageGet(this.character.character.id, 1, false);
 
-                console.log('GUESTBOOK', guestbookState.posts);
-
                 this.guestbookPostCount = `${guestbookState.posts.length}${guestbookState.nextPage ? '+' : ''}`;
             } catch (err) {
                 console.error(err);
@@ -227,7 +225,10 @@
 
         async countFriends() {
             try {
-                if (!this.character) {
+                if (
+                    (!this.character)
+                    || (!this.character.is_self) && (!this.character.settings.show_friends)
+                ) {
                     this.friendCount = null;
                     return;
                 }
@@ -274,12 +275,14 @@
             standardParser.allowInlines = true;
             standardParser.inlines = this.character.character.inlines;
 
+            console.log('LoadChar', this.name, this.character);
+
+            this.updateMatches();
+
             // no awaits on these on purpose
             this.countGuestbookPosts();
             this.countGroups();
             this.countFriends();
-
-            this.updateMatches();
         }
 
 

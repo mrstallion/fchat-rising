@@ -1,6 +1,13 @@
 <template>
     <!-- hiding elements instead of using 'v-if' is used here as an optimization -->
-    <div class="image-preview-wrapper" :style="{display: visible ? 'block' : 'none'}">
+    <div class="image-preview-wrapper" :class="{visible: visible, interactive: sticky}">
+        <div class="image-preview-toolbar" v-if="sticky || debug">
+            <a @click="toggleDevMode()" :class="{toggled: debug}" title="Debug Mode"><i class="fa fa-terminal"></i></a>
+            <a @click="toggleJsMode()" :class="{toggled: runJs}" title="Expand Images"><i class="fa fa-magic"></i></a>
+            <a @click="reloadUrl()" title="Reload Image"><i class="fa fa-redo-alt"></i></a>
+            <a @click="toggleStickyMode()" :class="{toggled: sticky}" title="Toggle Stickyness"><i class="fa fa-thumbtack"></i></a>
+        </div>
+
         <webview webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required" id="image-preview-ext" ref="imagePreviewExt" class="image-preview-external" :src="externalUrl" :style="{display: externalUrlVisible ? 'flex' : 'none'}"></webview>
         <div
             class="image-preview-local"
@@ -43,7 +50,9 @@
         private shouldDismiss = false;
         private visibleSince = 0;
 
-        private debug = false;
+        sticky = false;
+        runJs = true;
+        debug = false;
 
 
         @Hook('mounted')
@@ -52,6 +61,7 @@
                 'imagepreview-dismiss',
                 (eventData: any) => {
                     // console.log('Event dismiss', eventData.url);
+
                     this.dismiss(eventData.url);
                 }
             );
@@ -60,7 +70,16 @@
                 'imagepreview-show',
                 (eventData: any) => {
                     // console.log('Event show', eventData.url);
+
                     this.show(eventData.url);
+                }
+            );
+
+            EventBus.$on(
+                'imagepreview-toggle-stickyness',
+                (eventData: any) => {
+                    if ((this.url === eventData.url) && (this.visible))
+                        this.sticky = !this.sticky;
                 }
             );
 
@@ -68,23 +87,57 @@
 
             webview.addEventListener(
                 'dom-ready',
-                () => {
-                    if (this.debug)
-                        webview.openDevTools();
-
+                (event: any) => {
                     const url = webview.getURL();
-
                     const js = this.jsMutator.getMutatorJsForSite(url);
 
-                    if (js) {
+                    if (this.debug) {
+                        console.log('ImagePreview dom-ready', event, js);
+                        // webview.openDevTools();
+                    }
+
+                    if ((js) && (this.runJs))
                         webview.executeJavaScript(js);
+                }
+            );
+
+            webview.addEventListener(
+                'did-fail-load',
+                (event: any) => {
+                    const js = this.jsMutator.getErrorMutator(event.errorCode, event.errorDescription);
+
+                    if (this.debug) {
+                        console.log('ImagePreview did-fail-load', event, js);
+                    }
+
+                    if ((js) && (this.runJs) && (event.errorCode >= 400))
+                        webview.executeJavaScript(js);
+                }
+            );
+
+            webview.addEventListener(
+                'did-navigate',
+                (event: any) => {
+                    if (event.httpResponseCode >= 400) {
+                        const js = this.jsMutator.getErrorMutator(event.httpResponseCode, event.httpStatusText);
+
+                        if (this.debug) {
+                            console.log('ImagePreview did-navigate', event, js);
+                        }
+
+                        if ((js) && (this.runJs))
+                            webview.executeJavaScript(js);
                     }
                 }
             );
 
-            webview.getWebContents().on(
+            // webview.getWebContents().on(
+            webview.addEventListener(
                 'did-finish-load',
-                ()=> {
+                (event: any)=> {
+                    if (this.debug)
+                        console.log('ImagePreview did-finish-load', event);
+
                     webview.getWebContents().session.on(
                         'will-download',
                         (e: any) => {
@@ -93,6 +146,7 @@
                     );
                 }
             );
+
 
             setInterval(
                 () => {
@@ -107,7 +161,7 @@
         }
 
 
-        private hide(): void {
+        hide(): void {
             this.cancelExitTimer();
 
             this.url = null;
@@ -123,6 +177,8 @@
             this.exitInterval = null;
 
             this.shouldDismiss = false;
+
+            this.sticky = false;
         }
 
 
@@ -130,7 +186,10 @@
             if (this.url !== url)
                 return; // simply ignore
 
-            if (this.debug)
+            // if (this.debug)
+            //    return;
+
+            if (this.sticky)
                 return;
 
             // console.log('DISMISS');
@@ -165,6 +224,9 @@
                 return;
 
             if ((this.url === url) && ((this.visible) || (this.interval)))
+                return;
+
+            if ((this.url) && (this.sticky) && (this.visible))
                 return;
 
             const due = ((url === this.exitUrl) && (this.exitInterval)) ? 0 : 100;
@@ -235,12 +297,46 @@
         }
 
         isExternalUrl(): boolean {
+            // 'f-list.net' is tested here on purpose, because keeps the character URLs from being previewed
             return !((this.domain === 'f-list.net') || (this.domain === 'static.f-list.net'));
         }
 
 
         isInternalUrl(): boolean {
             return !this.isExternalUrl();
+        }
+
+
+        toggleDevMode(): void {
+            this.debug = !this.debug;
+
+            if (this.debug) {
+                const webview = this.$refs.imagePreviewExt as any;
+
+                webview.openDevTools();
+            }
+        }
+
+
+        toggleStickyMode(): void {
+            this.sticky = !this.sticky;
+
+            if (!this.sticky)
+                this.hide();
+        }
+
+
+        toggleJsMode(): void {
+            this.runJs = !this.runJs;
+        }
+
+
+        reloadUrl(): void {
+            if (this.externalUrlVisible) {
+                const webview = this.$refs.imagePreviewExt as any;
+
+                webview.reload();
+            }
         }
     }
 </script>
@@ -251,30 +347,99 @@
     @import "~bootstrap/scss/variables";
     @import "~bootstrap/scss/mixins/breakpoints";
 
-    .image-preview-external {
-        position: absolute;
-        width: 50%;
-        height: 70%;
-        top: 0;
-        left: 0;
-        pointer-events: none;
-        background-color: black;
-    }
-
-    .image-preview-local {
-        position: absolute;
-        width: 50%;
-        height: 70%;
-        top: 0;
-        left: 0;
-        pointer-events: none;
-        background-size: contain;
-        background-position: top left;
-        background-repeat: no-repeat;
-        // background-color: black;
-    }
-
     .image-preview-wrapper {
         z-index: 10000;
+        display: none;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 50%;
+        height: 70%;
+        pointer-events: none;
+
+        &.visible {
+            display: block;
+        }
+
+        &.interactive {
+            pointer-events: auto;
+
+            .image-preview-local,
+            .image-preview-auto {
+                // pointer-events: auto;
+            }
+        }
+
+        .image-preview-external {
+            /* position: absolute;
+            width: 50%;
+            height: 70%;
+            top: 0;
+            left: 0; */
+            width: 100%;
+            height: 100%;
+            // pointer-events: none;
+            background-color: black;
+        }
+
+        .image-preview-local {
+            /* position: absolute;
+            width: 50%;
+            height: 70%;
+            top: 0;
+            left: 0; */
+            width: 100%;
+            height: 100%;
+            // pointer-events: none;
+            background-size: contain;
+            background-position: top left;
+            background-repeat: no-repeat;
+            // background-color: black;
+        }
+
+
+        .image-preview-toolbar {
+            position: absolute;
+            /* background-color: green; */
+            left: 0;
+            top: 0;
+            margin: 1rem;
+            height: 3.5rem;
+            display: flex;
+            -webkit-backdrop-filter: blur(10px);
+            flex-direction: row;
+            width: 15rem;
+            flex-wrap: nowrap;
+            background-color: rgba(77, 76, 116, 0.92);
+            border-radius: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem;
+            box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
+
+            a i.fa {
+                font-size: 1.25rem;
+                top: 50%;
+                position: relative;
+                transform: translateY(-50%);
+            }
+
+            a {
+                flex: 1;
+                text-align: center;
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                border-radius: 3px;
+                margin-right: 0.5rem;
+                background-color: rgba(0, 0, 0, 0.1);
+            }
+
+            a:last-child {
+                margin-right: 0;
+            }
+
+            .toggled {
+                background-color: rgba(255, 255, 255, 0.2);
+                box-shadow: 0 0 1px 0px rgba(255, 255, 255, 0.6);
+            }
+        }
     }
 </style>

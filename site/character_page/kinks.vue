@@ -143,11 +143,19 @@
 
         @Hook('mounted')
         async mounted(): Promise<void> {
+            if ((this.character) && (this.character.is_self)) {
+                return;
+            }
+
             await this.compareKinks();
         }
 
         @Watch('character')
         async characterChanged(): Promise<void> {
+            if ((this.character) && (this.character.is_self)) {
+                return;
+            }
+
             await this.compareKinks();
         }
 
