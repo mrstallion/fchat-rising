@@ -34,8 +34,10 @@
         readonly highlights!: {[key: number]: boolean};
         @Prop({required: true})
         readonly comparisons!: {[key: number]: string | undefined};
+
         @Prop({required: false})
-        expandedCustom: boolean = false;
+        // tslint:disable-next-line: vue-props
+        expandedCustom = false;
 
         listClosed = true;
         showTooltip = false;
@@ -61,7 +63,7 @@
                 'custom-kink': this.kink.isCustom,
                 highlighted: !this.kink.isCustom && this.highlights[this.kink.id],
                 subkink: this.kink.hasSubkinks,
-                'expanded-custom-kink': this.expandedCustom,
+                'expanded-custom-kink': this.expandedCustom
             };
             classes[`kink-id-${this.kinkId}`] = true;
             classes[`kink-group-${this.kink.group}`] = true;

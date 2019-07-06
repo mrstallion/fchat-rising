@@ -209,6 +209,8 @@
             if(!core.state.settings.showNeedsReply) return false;
             for(let i = conversation.messages.length - 1; i >= 0; --i) {
                 const sender = (<Partial<Conversation.ChatMessage>>conversation.messages[i]).sender;
+
+                // noinspection TypeScriptValidateTypes
                 if(sender !== undefined)
                     return sender !== core.characters.ownCharacter;
             }

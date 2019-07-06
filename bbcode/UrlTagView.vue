@@ -35,12 +35,12 @@
         @Prop({required: true})
         readonly domain!: string;
 
-        @Hook("beforeDestroy")
+        @Hook('beforeDestroy')
         beforeDestroy(): void {
             this.dismiss();
         }
 
-        @Hook("deactivated")
+        @Hook('deactivated')
         deactivate(): void {
             this.dismiss();
         }

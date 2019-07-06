@@ -17,6 +17,7 @@ function fixURL(url: string): string {
     return url.replace(/ /g, '%20');
 }
 
+// tslint:disable-next-line: max-line-length
 export function analyzeUrlTag(parser: BBCodeParser, param: string, content: string): {success: boolean, url?: string, domain?: string, textContent: string} {
     let url: string | undefined, textContent: string = content;
     let success = true;

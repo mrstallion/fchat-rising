@@ -20,6 +20,7 @@ import {
 import '../site/directives/vue-select'; //tslint:disable-line:no-import-side-effect
 import * as Utils from '../site/utils';
 import core from './core';
+import { EventBus } from './event-bus';
 
 const parserSettings = {
     siteDomain: 'https://www.f-list.net/',
@@ -66,7 +67,8 @@ async function characterData(name: string | undefined): Promise<Character> {
     }
     parserSettings.inlineDisplayMode = data.current_user.inline_mode;
     parserSettings.animatedIcons = core.state.settings.animatedEicons;
-    return {
+
+    const charData = {
         is_self: false,
         character: {
             id: data.id,
@@ -92,6 +94,10 @@ async function characterData(name: string | undefined): Promise<Character> {
         bookmarked: core.characters.get(data.name).isBookmarked,
         self_staff: false
     };
+
+    EventBus.$emit('character-data', charData);
+
+    return charData;
 }
 
 function contactMethodIconUrl(name: string): string {

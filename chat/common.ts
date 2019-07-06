@@ -77,6 +77,7 @@ export function messageToString(this: void | never, msg: Conversation.Message, t
 }
 
 export function getKey(e: KeyboardEvent): Keys {
+    // tslint:disable-next-line deprecation
     return e.keyCode;
 }
 

@@ -26,6 +26,10 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
 
 ## Todo / Ideas
 *   Preview mode should allow detaching from the main window
+*   Split chat view
+*   Improvements to log browsing
+*   Highlight ads from characters most interesting to you
+*   Fix broken BBCode, such as `[big]` in character profiles
 
 
 # F-List Exported

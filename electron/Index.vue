@@ -97,7 +97,9 @@
     const parent = electron.remote.getCurrentWindow().webContents;
 
     log.info('About to load keytar');
-    /*tslint:disable:no-any*///because this is hacky
+
+    /* tslint:disable: no-any no-unsafe-any */ //because this is hacky
+
     const keyStore = nativeRequire<{
         getPassword(account: string): Promise<string>
         setPassword(account: string, password: string): Promise<void>
@@ -257,6 +259,7 @@
         openProfileInBrowser(): void {
             electron.remote.shell.openExternal(`https://www.f-list.net/c/${this.profileName}`);
 
+            // tslint:disable-next-line: no-any no-unsafe-any
             (this.$refs.profileViewer as any).hide();
         }
 
@@ -268,6 +271,7 @@
 
             conversation.show();
 
+            // tslint:disable-next-line: no-any no-unsafe-any
             (this.$refs.profileViewer as any).hide();
         }
 

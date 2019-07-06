@@ -54,7 +54,7 @@
         @Prop()
         readonly classes?: string;
         @Prop()
-        readonly value?: string;
+        readonly value?: string | undefined;
         @Prop()
         readonly disabled?: boolean;
         @Prop()
@@ -66,7 +66,8 @@
         preview = false;
         previewWarnings: ReadonlyArray<string> = [];
         previewResult = '';
-        text = this.value !== undefined ? this.value : '';
+        // tslint:disable-next-line: no-unnecessary-type-assertion
+        text: string = (this.value !== undefined ? this.value : '') as string;
         element!: HTMLTextAreaElement;
         sizer!: HTMLTextAreaElement;
         maxHeight!: number;
@@ -191,14 +192,19 @@
         apply(button: EditorButton): void {
             // Allow emitted variations for custom buttons.
             this.$once('insert', (startText: string, endText: string) => this.applyText(startText, endText));
+            // noinspection TypeScriptValidateTypes
             if(button.handler !== undefined)
                 return button.handler.call(this, this);
             if(button.startText === undefined)
                 button.startText = `[${button.tag}]`;
             if(button.endText === undefined)
                 button.endText = `[/${button.tag}]`;
-            if(this.text.length + button.startText.length + button.endText.length > this.maxlength) return;
-            this.applyText(button.startText, button.endText);
+
+            const ebl = button.endText ? button.endText.length : 0;
+            const sbl = button.startText ? button.startText.length : 0;
+
+            if(this.text.length + sbl + ebl > this.maxlength) return;
+            this.applyText(button.startText || '', button.endText || '');
             this.lastInput = Date.now();
         }
 
@@ -278,6 +284,7 @@
                 this.previewWarnings = [];
                 this.previewResult = '';
                 const previewElement = (<BBCodeElement>targetElement.firstChild);
+                // noinspection TypeScriptValidateTypes
                 if(previewElement.cleanup !== undefined) previewElement.cleanup();
                 if(targetElement.firstChild !== null) targetElement.removeChild(targetElement.firstChild);
             } else {

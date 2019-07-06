@@ -157,25 +157,23 @@
             return this.load();
         }
 
-        async load(mustLoad = true) {
+        async load(mustLoad: boolean = true): Promise<void> {
             this.loading = true;
             this.error = '';
 
             try {
-                const due: Promise<any>[] = [];
+                const due: Promise<void>[] = [];
 
                 if(this.name === undefined || this.name.length === 0)
                     return;
 
                 await methods.fieldsGet();
 
-                if ((this.selfCharacter === undefined) && (Utils.Settings.defaultCharacter >= 0)) {
+                if ((this.selfCharacter === undefined) && (Utils.Settings.defaultCharacter >= 0))
                     due.push(this.loadSelfCharacter());
-                }
 
-                if((mustLoad === true) || (this.character === undefined)) {
+                if((mustLoad) || (this.character === undefined))
                     due.push(this._getCharacter());
-                }
 
                 await Promise.all(due);
             } catch(e) {
@@ -189,7 +187,7 @@
         }
 
 
-        async countGuestbookPosts() {
+        async countGuestbookPosts(): Promise<void> {
             try {
                 if ((!this.character) || (!_.get(this.character, 'settings.guestbook'))) {
                     this.guestbookPostCount = null;
@@ -206,7 +204,7 @@
         }
 
 
-        async countGroups() {
+        async countGroups(): Promise<void> {
             try {
                 if ((!this.character) || (this.oldApi)) {
                     this.groupCount = null;
@@ -223,7 +221,7 @@
         }
 
 
-        async countFriends() {
+        async countFriends(): Promise<void> {
             try {
                 if (
                     (!this.character)
@@ -251,7 +249,7 @@
             Vue.set(this.character!, 'bookmarked', state);
         }
 
-        protected async loadSelfCharacter(): Promise<Character> {
+        protected async loadSelfCharacter(): Promise<void> {
             // console.log('SELF');
 
             const ownChar = core.characters.ownCharacter;
@@ -261,8 +259,6 @@
             // console.log('SELF LOADED');
 
             this.updateMatches();
-
-            return this.selfCharacter;
         }
 
         private async _getCharacter(): Promise<void> {
@@ -279,17 +275,22 @@
 
             this.updateMatches();
 
-            // no awaits on these on purpose
+            // No awaits on these on purpose:
+
+            // tslint:disable-next-line no-floating-promises
             this.countGuestbookPosts();
+
+            // tslint:disable-next-line no-floating-promises
             this.countGroups();
+
+            // tslint:disable-next-line no-floating-promises
             this.countFriends();
         }
 
 
         private updateMatches(): void {
-            if ((!this.selfCharacter) || (!this.character)) {
+            if ((!this.selfCharacter) || (!this.character))
                 return;
-            }
 
             this.characterMatch = Matcher.generateReport(this.selfCharacter.character, this.character.character);
 

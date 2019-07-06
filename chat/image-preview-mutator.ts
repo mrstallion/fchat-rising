@@ -2,10 +2,10 @@
 
 import * as _ from 'lodash';
 
-import { domain } from '../bbcode/core';
+import { domain as extractDomain } from '../bbcode/core';
 
 export interface PreviewMutator {
-    match: string|RegExp;
+    match: string | RegExp;
     injectJs: string;
 }
 
@@ -13,12 +13,21 @@ export interface ImagePreviewMutatorCollection {
     [key: string]: PreviewMutator;
 }
 
+
 export class ImagePreviewMutator {
+    // tslint:disable: prefer-function-over-method
     private hostMutators: ImagePreviewMutatorCollection = {};
     private regexMutators: PreviewMutator[] = [];
+    private debug: boolean;
 
-    constructor() {
+    constructor(debug: boolean) {
         this.init();
+
+        this.debug = debug;
+    }
+
+    setDebug(debug: boolean): void {
+        this.debug = debug;
     }
 
     getMutatorJsForSite(url: string): string | undefined {
@@ -30,9 +39,8 @@ export class ImagePreviewMutator {
         return this.wrapJs(mutator.injectJs);
     }
 
-
     matchMutator(url: string): PreviewMutator | undefined {
-        const urlDomain = domain(url);
+        const urlDomain = extractDomain(url);
 
         if (!urlDomain)
             return;
@@ -50,13 +58,11 @@ export class ImagePreviewMutator {
         );
     }
 
-
-    protected wrapJs(mutatorJs: string) {
+    protected wrapJs(mutatorJs: string): string {
         return `(() => { try { ${mutatorJs} } catch (err) { console.error('Mutator error', err); } })();`;
     }
 
-
-    protected add(domain: string|RegExp, mutatorJs: string) {
+    protected add(domain: string | RegExp, mutatorJs: string): void {
         if (domain instanceof RegExp) {
             this.regexMutators.push(
                 {
@@ -74,7 +80,7 @@ export class ImagePreviewMutator {
         };
     }
 
-    protected init() {
+    protected init(): void {
         this.add('default', this.getBaseJsMutatorScript('#video, #image, video, img'));
         this.add('e621.net', this.getBaseJsMutatorScript('#image, video'));
         this.add('e-hentai.org', this.getBaseJsMutatorScript('#img, video'));
@@ -97,6 +103,7 @@ export class ImagePreviewMutator {
 
         this.add(/^media[0-9]\.giphy\.com$/, this.getBaseJsMutatorScript('video, img[alt]'));
 
+        // tslint:disable max-line-length
         this.add(
             'imgur.com',
             `
@@ -118,10 +125,14 @@ export class ImagePreviewMutator {
         );
     }
 
-    getBaseJsMutatorScript(imageSelector: string, skipElementRemove: boolean = false): string {
+    getBaseJsMutatorScript(elSelector: string, skipElementRemove: boolean = false): string {
         return `const body = document.querySelector('body');
-            const img = Array.from(document.querySelectorAll('${imageSelector}'))
-                .filter((i) => ((i.width !== 1) && (i.height !== 1))).shift()
+            let selected = Array.from(document.querySelectorAll('${elSelector}'))
+                .filter((i) => ((i.width !== 1) && (i.height !== 1)));
+
+            const img = selected.shift();
+
+            ${this.debug ? `console.log('Selector', '${elSelector}'); console.log('Selected', selected); console.log('Img', img);` : ''}
 
             if (!img) { return; }
 
@@ -139,10 +150,6 @@ export class ImagePreviewMutator {
             body.append(el);
             body.class = '';
 
-            // console.log(el);
-            // console.log(img);
-            // console.log('${imageSelector}');
-
             body.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
                 + 'top: 0 !important; left: 0 !important;';
@@ -154,11 +161,16 @@ export class ImagePreviewMutator {
             img.class = '';
             el.class = '';
 
+            ${this.debug ? "console.log('Wrapper', el);" : ''}
+
             if (img.play) { img.muted = true; img.play(); }
 
             let removeList = [];
-            body.childNodes.forEach((el) => { if((el.id !== 'flistWrapper') && (el.id !== 'flistError')) { removeList.push(el); } });
-            // ${skipElementRemove ? '' : 'removeList.forEach((el) => el.remove());'}
+            const safeIds = ['flistWrapper', 'flistError', 'flistHider'];
+
+            body.childNodes.forEach((el) => ((safeIds.indexOf(el.id) < 0) ? removeList.push(el) : true)
+
+            ${skipElementRemove ? '' : 'removeList.forEach((el) => el.remove());'}
             removeList = [];
         `;
     }
@@ -207,19 +219,40 @@ export class ImagePreviewMutator {
             ">${description}</p></div>
         `;
 
+        return this.injectHtmlJs(errorHtml);
+    }
+
+    protected injectHtmlJs(html: string): string {
         return this.wrapJs(`
             const range = document.createRange();
-            
+
             range.selectNode(document.body);
-            
-            const error = range.createContextualFragment(\`${errorHtml}\`);
-            
+
+            const error = range.createContextualFragment(\`${html}\`);
+
             document.body.appendChild(error);
         `);
     }
 
+    getHideMutator(): string {
+        return this.injectHtmlJs(`
+            <div id="flistHider" style="
+                width: 100% !important;
+                height: 100% !important;
+                background-color: black !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                z-index: 300000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                line-height: 100% !important;
+                border: 0 !important;
+                opacity: 1 !important;
+                text-align: center !important;
+            "></div>
+        `);
+    }
 }
-
-
-
-

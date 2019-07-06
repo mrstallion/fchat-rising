@@ -20,81 +20,91 @@
 <script lang="ts">
     import {Component, Hook} from '@f-list/vue-ts';
     import Vue from 'vue';
-    import {EventBus} from './event-bus';
+    import { EventBus, EventBusEvent } from './event-bus';
     import {domain} from '../bbcode/core';
     import {ImagePreviewMutator} from './image-preview-mutator';
-    import {Point, screen} from 'electron';
+    import {Point, screen, WebviewTag} from 'electron';
+    import Timer = NodeJS.Timer;
+
+
+    interface DidFailLoadEvent extends Event {
+        errorCode: number;
+        errorDescription: string;
+    }
+
+    interface DidNavigateEvent extends Event {
+        httpResponseCode: number;
+        httpStatusText: string;
+    }
+
 
     @Component
     export default class ImagePreview extends Vue {
         private readonly MinTimePreviewVisible = 500;
 
-        public visible: boolean = false;
+        visible = false;
 
-        public externalUrlVisible: boolean = false;
-        public internalUrlVisible: boolean = false;
+        externalUrlVisible = false;
+        internalUrlVisible = false;
 
-        public externalUrl: string | null = null;
-        public internalUrl: string | null = null;
+        externalUrl: string | null = null;
+        internalUrl: string | null = null;
 
-        public url: string | null = null;
-        public domain: string | undefined;
+        url: string | null = null;
+        domain: string | undefined;
 
-        private jsMutator = new ImagePreviewMutator();
-        private interval: any = null;
+        sticky = false;
+        runJs = true;
+        debug = false;
 
-        private exitInterval: any = null;
+        private jsMutator = new ImagePreviewMutator(this.debug);
+        private interval: Timer | null = null;
+
+        private exitInterval: Timer | null = null;
         private exitUrl: string | null = null;
 
         private initialCursorPosition: Point | null = null;
         private shouldDismiss = false;
         private visibleSince = 0;
 
-        sticky = false;
-        runJs = true;
-        debug = false;
-
-
         @Hook('mounted')
         onMounted(): void {
             EventBus.$on(
                 'imagepreview-dismiss',
-                (eventData: any) => {
+                (eventData: EventBusEvent) => {
                     // console.log('Event dismiss', eventData.url);
 
-                    this.dismiss(eventData.url);
+                    this.dismiss(eventData.url as string);
                 }
             );
 
             EventBus.$on(
                 'imagepreview-show',
-                (eventData: any) => {
+                (eventData: EventBusEvent) => {
                     // console.log('Event show', eventData.url);
 
-                    this.show(eventData.url);
+                    this.show(eventData.url as string);
                 }
             );
 
             EventBus.$on(
                 'imagepreview-toggle-stickyness',
-                (eventData: any) => {
-                    if ((this.url === eventData.url) && (this.visible))
+                (eventData: EventBusEvent) => {
+                    if ((this.url === (eventData.url as string)) && (this.visible))
                         this.sticky = !this.sticky;
                 }
             );
 
-            const webview = this.$refs.imagePreviewExt as any;
+            const webview = this.$refs.imagePreviewExt as WebviewTag;
 
             webview.addEventListener(
                 'dom-ready',
-                (event: any) => {
+                (event: EventBusEvent) => {
                     const url = webview.getURL();
                     const js = this.jsMutator.getMutatorJsForSite(url);
 
-                    if (this.debug) {
+                    if (this.debug)
                         console.log('ImagePreview dom-ready', event, js);
-                        // webview.openDevTools();
-                    }
 
                     if ((js) && (this.runJs))
                         webview.executeJavaScript(js);
@@ -103,27 +113,29 @@
 
             webview.addEventListener(
                 'did-fail-load',
-                (event: any) => {
-                    const js = this.jsMutator.getErrorMutator(event.errorCode, event.errorDescription);
+                (event: Event) => {
+                    const e = event as DidFailLoadEvent;
 
-                    if (this.debug) {
+                    const js = this.jsMutator.getErrorMutator(e.errorCode, e.errorDescription);
+
+                    if (this.debug)
                         console.log('ImagePreview did-fail-load', event, js);
-                    }
 
-                    if ((js) && (this.runJs) && (event.errorCode >= 400))
+                    if ((js) && (this.runJs) && (e.errorCode >= 400))
                         webview.executeJavaScript(js);
                 }
             );
 
             webview.addEventListener(
                 'did-navigate',
-                (event: any) => {
-                    if (event.httpResponseCode >= 400) {
-                        const js = this.jsMutator.getErrorMutator(event.httpResponseCode, event.httpStatusText);
+                (event: Event) => {
+                    const e = event as DidNavigateEvent;
 
-                        if (this.debug) {
+                    if (e.httpResponseCode >= 400) {
+                        const js = this.jsMutator.getErrorMutator(e.httpResponseCode, e.httpStatusText);
+
+                        if (this.debug)
                             console.log('ImagePreview did-navigate', event, js);
-                        }
 
                         if ((js) && (this.runJs))
                             webview.executeJavaScript(js);
@@ -134,13 +146,13 @@
             // webview.getWebContents().on(
             webview.addEventListener(
                 'did-finish-load',
-                (event: any)=> {
+                (event: Event) => {
                     if (this.debug)
                         console.log('ImagePreview did-finish-load', event);
 
                     webview.getWebContents().session.on(
                         'will-download',
-                        (e: any) => {
+                        (e: Event) => {
                             e.preventDefault();
                         }
                     );
@@ -160,18 +172,23 @@
             );
         }
 
-
         hide(): void {
             this.cancelExitTimer();
 
             this.url = null;
             this.visible = false;
 
+            if (this.externalUrlVisible) {
+                const webview = this.$refs.imagePreviewExt as WebviewTag;
+
+                webview.executeJavaScript(this.jsMutator.getHideMutator());
+            }
+
             this.internalUrlVisible = false;
             this.externalUrlVisible = false;
 
-            this.externalUrl = 'about:blank';
-            this.internalUrl = 'about:blank';
+            // this.externalUrl = null; // 'about:blank';
+            this.internalUrl = null; // 'about:blank';
 
             this.exitUrl = null;
             this.exitInterval = null;
@@ -180,7 +197,6 @@
 
             this.sticky = false;
         }
-
 
         dismiss(url: string): void {
             if (this.url !== url)
@@ -210,12 +226,12 @@
             // This timeout makes the preview window disappear with a slight delay, which helps UX
             // when dealing with situations such as quickly scrolling text that moves the cursor away
             // from the link
+            // tslint:disable-next-line no-unnecessary-type-assertion
             this.exitInterval = setTimeout(
                 () => this.hide(),
                 due
-            );
+            ) as Timer;
         }
-
 
         show(url: string): void {
             // console.log('SHOW');
@@ -239,6 +255,7 @@
 
             // This timer makes sure that just by accidentally brushing across a link won't show (blink) the preview
             // -- you actually have to pause on it
+            // tslint:disable-next-line no-unnecessary-type-assertion
             this.interval = setTimeout(
                 () => {
                     const isInternal = this.isInternalUrl();
@@ -257,7 +274,7 @@
                     this.initialCursorPosition = screen.getCursorScreenPoint();
                 },
                 due
-            );
+            ) as Timer;
         }
 
         hasMouseMovedSince(): boolean {
@@ -301,22 +318,21 @@
             return !((this.domain === 'f-list.net') || (this.domain === 'static.f-list.net'));
         }
 
-
         isInternalUrl(): boolean {
             return !this.isExternalUrl();
         }
 
-
         toggleDevMode(): void {
             this.debug = !this.debug;
 
+            this.jsMutator.setDebug(this.debug);
+
             if (this.debug) {
-                const webview = this.$refs.imagePreviewExt as any;
+                const webview = this.$refs.imagePreviewExt as WebviewTag;
 
                 webview.openDevTools();
             }
         }
-
 
         toggleStickyMode(): void {
             this.sticky = !this.sticky;
@@ -325,15 +341,13 @@
                 this.hide();
         }
 
-
         toggleJsMode(): void {
             this.runJs = !this.runJs;
         }
 
-
         reloadUrl(): void {
             if (this.externalUrlVisible) {
-                const webview = this.$refs.imagePreviewExt as any;
+                const webview = this.$refs.imagePreviewExt as WebviewTag;
 
                 webview.reload();
             }

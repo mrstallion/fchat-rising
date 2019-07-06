@@ -32,10 +32,15 @@
 
 <script lang="ts">
     import { Component, Prop, Watch } from '@f-list/vue-ts';
-    import Vue from 'vue';
-    import { MatchReport, MatchResult, Score, Scoring } from './matcher';
     import * as _ from 'lodash';
+    import Vue from 'vue';
     import * as Utils from '../utils';
+    import { MatchReport, MatchResult, Score, Scoring } from './matcher';
+
+    export interface CssClassMap {
+        [key: string]: boolean;
+    }
+
 
     @Component
     export default class MatchReportView extends Vue {
@@ -43,22 +48,19 @@
         readonly characterMatch!: MatchReport;
 
         @Prop({required: true})
-        minimized = false;
+        readonly minimized = false;
 
         readonly avatarUrl = Utils.avatarURL;
 
         isMinimized = false;
-
-
 
         @Watch('isMinimized')
         onMinimizedChange(): void {
             this.isMinimized = this.minimized;
         }
 
-
-        getScoreClass(score: Score) {
-            const classes: any = {};
+        getScoreClass(score: Score): CssClassMap {
+            const classes: CssClassMap = {};
 
             classes[score.getRecommendedClass()] = true;
             classes['match-score'] = true;
@@ -73,18 +75,15 @@
             );
         }
 
-
-        shouldShowScore(score: Score) {
+        shouldShowScore(score: Score): boolean {
             return (score.score !== Scoring.NEUTRAL);
         }
-
 
         getScores(result: MatchResult): Score[] {
             return _.map(result.scores, (s: Score) => (s));
         }
 
-
-        toggleMinimize() {
+        toggleMinimize(): void {
             this.isMinimized = !this.isMinimized;
         }
     }

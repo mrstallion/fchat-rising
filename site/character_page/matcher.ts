@@ -133,10 +133,12 @@ enum Species {
 
 const nonAnthroSpecies = [Species.Human, Species.Elf, Species.Orc];
 
-const mammalSpecies = [Species.Equine, Species.Feline, Species.Canine, Species.Vulpine, Species.Cervine, Species.Lapine, Species.Musteline, Species.Rodent, Species.Ursine, Species.MarineMammal, Species.Primate, Species.Elf, Species.Orc, Species.Anthro, Species.Minotaur];
+const mammalSpecies = [Species.Equine, Species.Feline, Species.Canine, Species.Vulpine, Species.Cervine, Species.Lapine,
+    Species.Musteline, Species.Rodent, Species.Ursine, Species.MarineMammal, Species.Primate, Species.Elf, Species.Orc,
+    Species.Anthro, Species.Minotaur];
 
 interface SpeciesMap {
-    [key: number]: string[]
+    [key: number]: string[];
 }
 
 interface SpeciesStrMap {
@@ -152,7 +154,8 @@ const speciesNames: SpeciesStrMap = {
 const speciesMapping: SpeciesMap = {
     [Species.Human]: ['human', 'humanoid', 'angel', 'android'],
     [Species.Equine]: ['horse', 'stallion', 'mare', 'filly', 'equine', 'shire', 'donkey', 'mule', 'zebra', 'centaur', 'pony' ],
-    [Species.Feline]: ['cat', 'kitten', 'catgirl', 'neko', 'tiger', 'puma', 'lion', 'lioness', 'tigress', 'feline', 'jaguar', 'cheetah', 'lynx', 'leopard'],
+    [Species.Feline]: ['cat', 'kitten', 'catgirl', 'neko', 'tiger', 'puma', 'lion', 'lioness',
+        'tigress', 'feline', 'jaguar', 'cheetah', 'lynx', 'leopard'],
     [Species.Canine]: ['dog', 'wolf', 'dingo', 'coyote', 'jackal', 'canine', 'doberman', 'husky'],
     [Species.Vulpine]: ['fox', 'fennec', 'kitsune', 'vulpine', 'vixen'],
     [Species.Avian]: ['bird', 'gryphon', 'phoenix', 'roc', 'chimera', 'avian'],
@@ -292,7 +295,7 @@ export class Matcher {
             info: {
                 species: Matcher.species(this.you),
                 gender: Matcher.getTagValueList(TagId.Gender, this.you),
-                orientation: Matcher.getTagValueList(TagId.Orientation, this.you),
+                orientation: Matcher.getTagValueList(TagId.Orientation, this.you)
             }
        };
     }
@@ -311,6 +314,7 @@ export class Matcher {
         // Question: If someone identifies themselves as 'straight cuntboy', how should they be matched? like a straight female?
 
         // CIS
+        // tslint:disable-next-line curly
         if (Matcher.isCisGender(yourGender)) {
             if (yourGender === theirGender) {
                 // same sex CIS
@@ -359,7 +363,8 @@ export class Matcher {
         return new Score(Scoring.NEUTRAL);
     }
 
-    private formatKinkScore(score: KinkPreference, description: string): Score {
+
+    static formatKinkScore(score: KinkPreference, description: string): Score {
         if (score === KinkPreference.No)
             return new Score(Scoring.MISMATCH, `No <span>${description}</span>`);
 
@@ -388,21 +393,21 @@ export class Matcher {
         if (speciesScore !== null) {
             const speciesName = speciesNames[theirSpecies] || `${Species[theirSpecies].toLowerCase()}s`;
 
-            return this.formatKinkScore(speciesScore, speciesName);
+            return Matcher.formatKinkScore(speciesScore, speciesName);
         }
 
         if (Matcher.isAnthro(them)) {
             const anthroScore = Matcher.getKinkPreference(you, Kink.AnthroCharacters);
 
             if (anthroScore !== null)
-                return this.formatKinkScore(anthroScore, 'anthros');
+                return Matcher.formatKinkScore(anthroScore, 'anthros');
         }
 
         if (Matcher.isMammal(them)) {
             const mammalScore = Matcher.getKinkPreference(you, Kink.Mammals);
 
             if (mammalScore !== null)
-                return this.formatKinkScore(mammalScore, 'mammals');
+                return Matcher.formatKinkScore(mammalScore, 'mammals');
         }
 
         return new Score(Scoring.NEUTRAL);
@@ -444,7 +449,12 @@ export class Matcher {
             : (theyAreHuman ? Matcher.humanLikeabilityScore(you) : Scoring.NEUTRAL);
 
         if (score === Scoring.WEAK_MATCH)
-            return new Score(score, theyAreAnthro ? 'Would prefer <span>humans</span>, ok with anthros' : 'Would prefer <span>anthros</span>, ok with humans');
+            return new Score(
+                score,
+                theyAreAnthro
+                    ? 'Would prefer <span>humans</span>, ok with anthros'
+                    : 'Would prefer <span>anthros</span>, ok with humans'
+            );
 
         return this.formatScoring(score, theyAreAnthro ? 'furry pairings' : theyAreHuman ? 'human pairings' : '');
     }
@@ -506,13 +516,13 @@ export class Matcher {
         const underageScore = Matcher.getKinkPreference(you, Kink.UnderageCharacters);
 
         if ((theirAge < 16) && (ageplayScore !== null))
-            return this.formatKinkScore(ageplayScore, `ages of ${theirAge}`);
+            return Matcher.formatKinkScore(ageplayScore, `ages of ${theirAge}`);
 
         if ((theirAge < 16) && (ageplayScore === null))
-            return this.formatKinkScore(KinkPreference.No, `ages of ${theirAge}`);
+            return Matcher.formatKinkScore(KinkPreference.No, `ages of ${theirAge}`);
 
         if ((theirAge < 18) && (underageScore !== null))
-            return this.formatKinkScore(underageScore, `ages of ${theirAge}`);
+            return Matcher.formatKinkScore(underageScore, `ages of ${theirAge}`);
 
         if ((yourAgeTag) && (yourAgeTag.string)) {
             const olderCharactersScore = Matcher.getKinkPreference(you, Kink.OlderCharacters);
@@ -521,10 +531,10 @@ export class Matcher {
             const yourAge = parseInt(yourAgeTag.string, 10);
 
             if ((yourAge < theirAge) && (olderCharactersScore !== null))
-                return this.formatKinkScore(olderCharactersScore, 'older characters');
+                return Matcher.formatKinkScore(olderCharactersScore, 'older characters');
 
             if ((yourAge > theirAge) && (youngerCharactersScore !== null))
-                return this.formatKinkScore(youngerCharactersScore, 'younger characters');
+                return Matcher.formatKinkScore(youngerCharactersScore, 'younger characters');
         }
 
         return new Score(Scoring.NEUTRAL);
@@ -543,7 +553,7 @@ export class Matcher {
         const genderKinkScore = Matcher.getKinkGenderPreference(you, theirGender);
 
         if (genderKinkScore !== null)
-            return this.formatKinkScore(genderKinkScore, genderName);
+            return Matcher.formatKinkScore(genderKinkScore, genderName);
 
         return new Score(Scoring.NEUTRAL);
     }
@@ -635,20 +645,21 @@ export class Matcher {
         const finalSpecies = mySpecies.string.toLowerCase();
 
         _.each(
-            speciesMapping as any,
-            (keywords: string[], speciesId: Species) => {
+            speciesMapping,
+            (keywords: string[], speciesId: string) => {
                 _.each(
                     keywords,
                     (k: string) => {
                         if ((k.length > match.length) && (finalSpecies.indexOf(k) >= 0)) {
                             match = k;
-                            foundSpeciesId = speciesId;
+                            foundSpeciesId = parseInt(speciesId, 10);
                         }
                     }
                 );
             }
         );
 
+        // tslint:disable-next-line: strict-type-predicates
         return (foundSpeciesId === null) ? null : parseInt(foundSpeciesId, 10);
     }
 }

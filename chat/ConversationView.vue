@@ -75,7 +75,7 @@
 
             <div v-show="adAutoPostNextAd" class="next">
                 <h5>{{l('admgr.comingNext')}}</h5>
-                <div>{{(adAutoPostNextAd ? adAutoPostNextAd.substr(0, 50) : '')}}...</div>
+                <div>{{(adAutoPostNextAd ? adAutoPostNextAd.substr(0, 64) : '')}}...</div>
             </div>
 
             <a class="btn btn-sm btn-outline-primary renew-autoposts" @click="renewAutoPosting()">{{l('admgr.renew')}}</a>
@@ -147,7 +147,7 @@
     import {Keys} from '../keys';
     import {BBCodeView, Editor} from './bbcode';
     import CommandHelp from './CommandHelp.vue';
-    import { characterImage, getByteLength, getKey } from "./common";
+    import { characterImage, getByteLength, getKey } from './common';
     import ConversationSettings from './ConversationSettings.vue';
     import core from './core';
     import {Channel, channelModes, Character, Conversation, Settings} from './interfaces';
@@ -419,22 +419,20 @@
 
 
         toggleAutoPostAds(): void {
-            if(this.isAutopostingAds()) {
+            if(this.isAutopostingAds())
                 this.stopAutoPostAds();
-            } else {
+            else
                 this.conversation.adManager.start();
-            }
 
             this.refreshAutoPostingTimer();
         }
 
 
-        refreshAutoPostingTimer() {
-            if (this.autoPostingUpdater) {
+        refreshAutoPostingTimer(): void {
+            if (this.autoPostingUpdater)
                 window.clearInterval(this.autoPostingUpdater);
-            }
 
-            if(this.isAutopostingAds() === false) {
+            if (!this.isAutopostingAds()) {
                 this.adAutoPostUpdate = null;
                 this.adAutoPostNextAd = null;
                 return;
@@ -473,6 +471,7 @@
 
 
         hasSFC(message: Conversation.Message): message is Conversation.SFCMessage {
+            // noinspection TypeScriptValidateTypes
             return (<Partial<Conversation.SFCMessage>>message).sfc !== undefined;
         }
 

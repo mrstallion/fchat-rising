@@ -45,6 +45,7 @@
         @Prop()
         readonly title?: string;
         filter = '';
+        // noinspection TypeScriptValidateTypes
         selected: object | object[] | undefined = this.value !== undefined ? this.value : (this.multiple !== undefined ? [] : undefined);
         keepOpen = false;
 

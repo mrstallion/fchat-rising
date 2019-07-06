@@ -12,10 +12,7 @@
       "statements"
     ],
     "comment-format": false,
-    "curly": [
-      true,
-      "as-needed"
-    ],
+    "curly": false,
     "eofline": false,
     "linebreak-style": false,
     "trailing-comma": [
@@ -57,10 +54,7 @@
     "await-promise": [true, "AxiosPromise"],
     "comment-format": false,
     "completed-docs": false,
-    "curly": [
-      true,
-      "as-needed"
-    ],
+    "curly": false,
     "cyclomatic-complexity": false,
     "eofline": false,
     "file-name-casing": false,
@@ -84,6 +78,7 @@
     "no-angle-bracket-type-assertion": false,
     "no-bitwise": false,
     "no-conditional-assignment": false,
+    "no-consecutive-blank-lines": [true, 2],
     "no-console": false,
     "no-default-export": false,
     "no-default-import": false,
@@ -99,6 +94,7 @@
     "no-magic-numbers": false,
     "no-namespace": false,
     "no-non-null-assertion": false,
+    "no-null-keyword": false,
     "no-parameter-properties": false,
     "no-parameter-reassignment": false,
     "no-string-literal": false,
@@ -119,6 +115,7 @@
       true,
       "allow-declarations"
     ],
+    "ordered-imports": false,
     "prefer-function-over-method": [
       true,
       "allow-public"
@@ -138,8 +135,9 @@
       true,
       "never"
     ],
-    "strict-boolean-expressions": [true, "allow-boolean-or-undefined"],
+    "strict-boolean-expressions": false,
     "switch-default": false,
+    "switch-final-break": false,
     "trailing-comma": [
       true,
       {

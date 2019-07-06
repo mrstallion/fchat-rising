@@ -1,4 +1,5 @@
 import { Conversation } from './interfaces';
+import Timer = NodeJS.Timer;
 
 export class AdManager {
     static readonly POSTING_PERIOD = 3 * 60 * 60 * 1000;
@@ -13,7 +14,7 @@ export class AdManager {
     private nextPostDue?: Date;
     private expireDue?: Date;
     private firstPost?: Date;
-    private interval?: any;
+    private interval?: Timer;
 
     constructor(conversation: Conversation) {
         this.conversation = conversation;
@@ -43,12 +44,13 @@ export class AdManager {
         this.adIndex = this.adIndex + 1;
         this.nextPostDue = new Date(Date.now() + nextInMs);
 
+        // tslint:disable-next-line: no-unnecessary-type-assertion
         this.interval = setTimeout(
             async() => {
                 await this.sendNextPost();
             },
             nextInMs
-        );
+        ) as Timer;
     }
 
     getAds(): string[] {
@@ -85,6 +87,7 @@ export class AdManager {
         this.nextPostDue = new Date(Date.now() + initialWait);
         this.expireDue = new Date(Date.now() + AdManager.POSTING_PERIOD);
 
+        // tslint:disable-next-line: no-unnecessary-type-assertion
         this.interval = setTimeout(
             async() => {
                 this.firstPost = new Date();
@@ -92,7 +95,7 @@ export class AdManager {
                 await this.sendNextPost();
             },
             initialWait
-        );
+        ) as Timer;
     }
 
     stop(): void {

@@ -35,9 +35,8 @@
         readonly characterMatch!: MatchReport;
 
         get groupedInfotags(): DisplayInfotagGroup[] {
-            if ((!this.character) || (!this.character.character)) {
+            if ((!this.character) || (!this.character.character))
                 return [];
-            }
 
             const groups = Store.kinks.infotag_groups;
             const infotags = Store.kinks.infotags;

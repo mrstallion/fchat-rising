@@ -7,7 +7,7 @@ import ChannelView from './ChannelTagView.vue';
 import {characterImage} from './common';
 import core from './core';
 import {Character} from './interfaces';
-import UrlView from '../bbcode/UrlTagView.vue';
+import {default as UrlView} from '../bbcode/UrlTagView.vue';
 import UserView from './user_view';
 
 export const BBCodeView: Component = {

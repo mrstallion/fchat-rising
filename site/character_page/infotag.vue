@@ -13,7 +13,8 @@
     import { DisplayInfotag } from './interfaces';
     // import { Character as CharacterInfo } from '../../interfaces';
     import {Store} from './data_store';
-    import { MatchReport, Score, TagId } from './matcher';
+    import { MatchReport, TagId } from './matcher';
+    import { CssClassMap } from './match-report.vue';
 
 
     @Component
@@ -24,11 +25,9 @@
         @Prop({required: true})
         private readonly characterMatch!: MatchReport;
 
-
-
-        get tagClasses() {
-            const styles: any = {
-                infotag: true,
+        get tagClasses(): CssClassMap {
+            const styles: CssClassMap = {
+                infotag: true
             };
 
             // console.log(`Infotag ${this.infotag.id}: ${this.label}`);
@@ -40,7 +39,7 @@
                     : (this.yourInterestIsRelevant(id) ? this.characterMatch.you.scores : null);
 
                 if (scores) {
-                    const score = scores[id] as Score;
+                    const score = scores[id];
 
                     styles[score.getRecommendedClass()] = true;
                     styles['match-score'] = true;
@@ -57,7 +56,7 @@
 
 
         yourInterestIsRelevant(id: number): boolean {
-            return ((id === TagId.Gender) || (id === TagId.Age) || (id === TagId.Species))
+            return ((id === TagId.Gender) || (id === TagId.Age) || (id === TagId.Species));
         }
 
 
