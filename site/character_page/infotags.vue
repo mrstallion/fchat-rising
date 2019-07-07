@@ -16,7 +16,7 @@
     import {Character, CONTACT_GROUP_ID, DisplayInfotag} from './interfaces';
 
     import InfotagView from './infotag.vue';
-    import { MatchReport } from './matcher';
+    import { MatchReport } from '../../learn/matcher';
 
     interface DisplayInfotagGroup {
         id: number

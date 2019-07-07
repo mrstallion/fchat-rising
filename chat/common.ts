@@ -94,7 +94,7 @@ export class Message implements Conversation.ChatMessage {
     readonly id = ++messageId;
     isHighlight = false;
 
-    score?: number;
+    score = 0;
 
     constructor(readonly type: Conversation.Message.Type, readonly sender: Character, readonly text: string,
                 readonly time: Date = new Date()) {
@@ -105,6 +105,8 @@ export class Message implements Conversation.ChatMessage {
 export class EventMessage implements Conversation.EventMessage {
     readonly id = ++messageId;
     readonly type = Conversation.Message.Type.Event;
+
+    readonly score = 0;
 
     constructor(readonly text: string, readonly time: Date = new Date()) {
     }

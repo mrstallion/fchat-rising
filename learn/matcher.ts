@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Character, CharacterInfotag } from '../../interfaces';
+import { Character, CharacterInfotag } from '../interfaces';
 
 /* eslint-disable no-null-keyword */
 
@@ -79,13 +79,12 @@ enum Kink {
     Mammals = 224
 }
 
-enum FurryPreference {
+export enum FurryPreference {
     FurriesOnly = 39,
     FursAndHumans = 40,
     HumansOnly = 41,
     HumansPreferredFurriesOk = 150,
     FurriesPreferredHumansOk = 149
-
 }
 
 interface GenderKinkIdMap {
@@ -105,7 +104,7 @@ const genderKinkMapping: GenderKinkIdMap = {
  // if no species and 'no furry chareacters', === human
  // if no species and dislike 'antho characters' === human
 
-enum Species {
+export enum Species {
     Human = 609,
     Equine = 236,
     Feline = 212,
@@ -230,7 +229,10 @@ export interface MatchResult {
     them: Character,
     scores: MatchResultScores;
     info: MatchResultCharacterInfo;
-    total: number
+    total: number;
+
+    yourAnalysis: CharacterAnalysis;
+    theirAnalysis: CharacterAnalysis;
 }
 
 export enum Scoring {
@@ -274,6 +276,39 @@ export class Score {
     }
 }
 
+
+export class CharacterAnalysis {
+    readonly character: Character;
+
+    readonly gender: Gender | null;
+    readonly orientation: Orientation | null;
+    readonly species: Species | null;
+    readonly furryPreference: FurryPreference | null;
+    readonly age: number | null;
+
+    readonly isAnthro: boolean | null;
+    readonly isHuman: boolean | null;
+    readonly isMammal: boolean | null;
+
+    constructor(c: Character) {
+        this.character = c;
+
+        this.gender = Matcher.getTagValueList(TagId.Gender, c);
+        this.orientation = Matcher.getTagValueList(TagId.Orientation, c);
+        this.species = Matcher.species(c);
+        this.furryPreference = Matcher.getTagValueList(TagId.FurryPreference, c);
+
+        const ageTag = Matcher.getTagValue(TagId.Age, c);
+
+        this.age = ((ageTag) && (ageTag.string)) ? parseInt(ageTag.string, 10) : null;
+
+        this.isAnthro = Matcher.isAnthro(c);
+        this.isHuman = Matcher.isHuman(c);
+        this.isMammal = Matcher.isMammal(c);
+    }
+}
+
+
 /**
  * Answers the question: What YOU think about THEM
  * Never what THEY think about YOU
@@ -282,17 +317,27 @@ export class Score {
  * to get the full picture
  */
 export class Matcher {
-    you: Character;
-    them: Character;
+    readonly you: Character;
+    readonly them: Character;
 
-    constructor(you: Character, them: Character) {
+    readonly yourAnalysis: CharacterAnalysis;
+    readonly theirAnalysis: CharacterAnalysis;
+
+
+    constructor(you: Character, them: Character, yourAnalysis?: CharacterAnalysis, theirAnalysis?: CharacterAnalysis) {
         this.you = you;
         this.them = them;
+
+        this.yourAnalysis = yourAnalysis || new CharacterAnalysis(you);
+        this.theirAnalysis = theirAnalysis || new CharacterAnalysis(them);
     }
 
     static generateReport(you: Character, them: Character): MatchReport {
-        const youThem = new Matcher(you, them);
-        const themYou = new Matcher(them, you);
+        const yourAnalysis = new CharacterAnalysis(you);
+        const theirAnalysis = new CharacterAnalysis(them);
+
+        const youThem = new Matcher(you, them, yourAnalysis, theirAnalysis);
+        const themYou = new Matcher(them, you, theirAnalysis, yourAnalysis);
 
         return {
             you: youThem.match(),
@@ -300,11 +345,14 @@ export class Matcher {
         };
     }
 
-
     match(): MatchResult {
-        const data = {
+        const data: MatchResult = {
             you: this.you,
             them: this.them,
+
+            yourAnalysis: this.yourAnalysis,
+            theirAnalysis: this.theirAnalysis,
+
             total: 0,
 
             scores: {
@@ -332,29 +380,19 @@ export class Matcher {
     }
 
     private resolveOrientationScore(): Score {
-        const you = this.you;
-        const them = this.them;
-
-        const yourGender = Matcher.getTagValueList(TagId.Gender, you);
-        const theirGender = Matcher.getTagValueList(TagId.Gender, them);
-        const yourOrientation = Matcher.getTagValueList(TagId.Orientation, you);
-
-        if ((yourGender === null) || (theirGender === null) || (yourOrientation === null))
-            return new Score(Scoring.NEUTRAL);
-
         // Question: If someone identifies themselves as 'straight cuntboy', how should they be matched? like a straight female?
 
-        return Matcher.scoreOrientationByGender(you, theirGender);
+        return Matcher.scoreOrientationByGender(this.yourAnalysis.gender, this.yourAnalysis.orientation, this.theirAnalysis.gender);
     }
 
 
-    static scoreOrientationByGender(you: Character, theirGender: Gender): Score {
-        const yourGender = Matcher.getTagValueList(TagId.Gender, you);
-        const yourOrientation = Matcher.getTagValueList(TagId.Orientation, you);
+    static scoreOrientationByGender(yourGender: Gender | null, yourOrientation: Orientation | null, theirGender: Gender | null): Score {
+        if ((yourGender === null) || (theirGender === null) || (yourOrientation === null))
+            return new Score(Scoring.NEUTRAL);
 
         // CIS
         // tslint:disable-next-line curly
-        if ((yourGender !== null) && (Matcher.isCisGender(yourGender))) {
+        if (Matcher.isCisGender(yourGender)) {
             if (yourGender === theirGender) {
                 // same sex CIS
                 if (yourOrientation === Orientation.Straight)
@@ -420,8 +458,8 @@ export class Matcher {
 
     private resolveSpeciesScore(): Score {
         const you = this.you;
-        const them = this.them;
-        const theirSpecies = Matcher.species(them);
+        const theirAnalysis = this.theirAnalysis;
+        const theirSpecies = theirAnalysis.species;
 
         if (theirSpecies === null)
             return new Score(Scoring.NEUTRAL);
@@ -434,14 +472,14 @@ export class Matcher {
             return Matcher.formatKinkScore(speciesScore, speciesName);
         }
 
-        if (Matcher.isAnthro(them)) {
+        if (theirAnalysis.isAnthro) {
             const anthroScore = Matcher.getKinkPreference(you, Kink.AnthroCharacters);
 
             if (anthroScore !== null)
                 return Matcher.formatKinkScore(anthroScore, 'anthros');
         }
 
-        if (Matcher.isMammal(them)) {
+        if (theirAnalysis.isMammal) {
             const mammalScore = Matcher.getKinkPreference(you, Kink.Mammals);
 
             if (mammalScore !== null)
@@ -450,6 +488,7 @@ export class Matcher {
 
         return new Score(Scoring.NEUTRAL);
     }
+
 
     formatScoring(score: Scoring, description: string): Score {
         let type = '';
@@ -477,10 +516,8 @@ export class Matcher {
 
     private resolveFurryPairingsScore(): Score {
         const you = this.you;
-        const them = this.them;
-
-        const theyAreAnthro = Matcher.isAnthro(them);
-        const theyAreHuman = Matcher.isHuman(them);
+        const theyAreAnthro = this.theirAnalysis.isAnthro;
+        const theyAreHuman = this.theirAnalysis.isHuman;
 
         const score = theyAreAnthro
             ? Matcher.furryLikeabilityScore(you)
@@ -537,18 +574,10 @@ export class Matcher {
 
     private resolveAgeScore(): Score {
         const you = this.you;
-        const them = this.them;
+        const theirAge = this.theirAnalysis.age;
 
-        const yourAgeTag = Matcher.getTagValue(TagId.Age, you);
-        const theirAgeTag = Matcher.getTagValue(TagId.Age, them);
-
-        if (!theirAgeTag)
+        if (theirAge === null)
             return new Score(Scoring.NEUTRAL);
-
-        if (!theirAgeTag.string)
-            return new Score(Scoring.NEUTRAL);
-
-        const theirAge = parseInt(theirAgeTag.string, 10);
 
         const ageplayScore = Matcher.getKinkPreference(you, Kink.Ageplay);
         const underageScore = Matcher.getKinkPreference(you, Kink.UnderageCharacters);
@@ -562,11 +591,11 @@ export class Matcher {
         if ((theirAge < 18) && (underageScore !== null))
             return Matcher.formatKinkScore(underageScore, `ages of ${theirAge}`);
 
-        if ((yourAgeTag) && (yourAgeTag.string)) {
+        const yourAge = this.yourAnalysis.age;
+
+        if (yourAge !== null) {
             const olderCharactersScore = Matcher.getKinkPreference(you, Kink.OlderCharacters);
             const youngerCharactersScore = Matcher.getKinkPreference(you, Kink.YoungerCharacters);
-
-            const yourAge = parseInt(yourAgeTag.string, 10);
 
             if ((yourAge < theirAge) && (olderCharactersScore !== null))
                 return Matcher.formatKinkScore(olderCharactersScore, 'older characters');
@@ -580,9 +609,8 @@ export class Matcher {
 
     private resolveGenderScore(): Score {
         const you = this.you;
-        const them = this.them;
 
-        const theirGender = Matcher.getTagValueList(TagId.Gender, them);
+        const theirGender = this.theirAnalysis.gender;
 
         if (theirGender === null)
             return new Score(Scoring.NEUTRAL);
@@ -609,7 +637,7 @@ export class Matcher {
         return t.list;
     }
 
-    static isCisGender(...genders: Gender[]): boolean {
+    static isCisGender(...genders: Gender[] | null[]): boolean {
         return _.every(genders, (g: Gender) => ((g === Gender.Female) || (g === Gender.Male)));
     }
 

@@ -3,6 +3,7 @@ const path = require('path');
 const pkg = require(path.join(__dirname, 'package.json'));
 const fs = require('fs');
 const child_process = require('child_process');
+const _ = require('lodash');
 
 function mkdir(dir) {
     try {
@@ -30,12 +31,33 @@ function mkdir(dir) {
 
 const distDir = path.join(__dirname, 'dist');
 const isBeta = pkg.version.indexOf('beta') !== -1;
-const spellcheckerPath = 'spellchecker/build/Release/spellchecker.node', keytarPath = 'keytar/build/Release/keytar.node';
 const modules = path.join(__dirname, 'app', 'node_modules');
-mkdir(path.dirname(path.join(modules, spellcheckerPath)));
-mkdir(path.dirname(path.join(modules, keytarPath)));
-fs.copyFileSync(require.resolve(spellcheckerPath), path.join(modules, spellcheckerPath));
-fs.copyFileSync(require.resolve(keytarPath), path.join(modules, keytarPath));
+
+// const spellcheckerPath = 'spellchecker/build/Release/spellchecker.node',
+//     keytarPath = 'keytar/build/Release/keytar.node',
+//     integerPath = 'integer/build/Release/integer.node',
+//     betterSqlite3 = 'better-sqlite3/build/Release/better_sqlite3.node';
+//
+// mkdir(path.dirname(path.join(modules, spellcheckerPath)));
+// mkdir(path.dirname(path.join(modules, keytarPath)));
+// fs.copyFileSync(require.resolve(spellcheckerPath), path.join(modules, spellcheckerPath));
+// fs.copyFileSync(require.resolve(keytarPath), path.join(modules, keytarPath));
+
+const includedPaths = [
+    'spellchecker/build/Release/spellchecker.node',
+    'keytar/build/Release/keytar.node',
+    'integer/build/Release/integer.node',
+    'better-sqlite3/build/Release/better_sqlite3.node'
+];
+
+_.each(
+    includedPaths,
+    (p) => {
+        mkdir(path.dirname(path.join(modules, p)));
+        fs.copyFileSync(require.resolve(p), path.join(modules, p));
+    }
+);
+
 
 
 require('electron-packager')({

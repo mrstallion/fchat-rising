@@ -14,7 +14,7 @@ export namespace Conversation {
         readonly text: string
         readonly time: Date
 
-        score?: number;
+        score: number;
     }
 
     export interface EventMessage extends BaseMessage {

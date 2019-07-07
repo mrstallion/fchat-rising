@@ -1,7 +1,7 @@
 import core from '../chat/core';
 import { Character as CharacterFChatInf } from '../fchat';
-import { Character } from '../site/character_page/interfaces';
-import { Matcher } from '../site/character_page/matcher';
+import { Character as ComplexCharacter } from '../site/character_page/interfaces';
+import { Matcher, TagId } from './matcher';
 import { AdCache } from './ad-cache';
 import { ProfileCacheQueueEntry } from './cache-manager';
 
@@ -11,9 +11,9 @@ export class CharacterProfiler {
     static readonly ADVERTISEMENT_POTENTIAL_RAGE = 50 * 60 * 1000;
 
     protected adCache: AdCache;
-    protected me: Character;
+    protected me: ComplexCharacter;
 
-    constructor(me: Character, adCache: AdCache) {
+    constructor(me: ComplexCharacter, adCache: AdCache) {
         this.me = me;
         this.adCache = adCache;
     }
@@ -48,14 +48,16 @@ export class CharacterProfiler {
     }
 
 
-    getInterestScoreForGender(me: Character, c: CharacterFChatInf.Character): number {
+    getInterestScoreForGender(me: ComplexCharacter, c: CharacterFChatInf.Character): number {
         const g = Matcher.strToGender(c.gender);
 
         if (g === null) {
             return 0;
         }
 
-        const score = Matcher.scoreOrientationByGender(me.character, g);
+        const myGender = Matcher.getTagValueList(TagId.Gender, me.character);
+        const myOrientation = Matcher.getTagValueList(TagId.Orientation, me.character);
+        const score = Matcher.scoreOrientationByGender(myGender, myOrientation, g);
 
         return score.score;
     }

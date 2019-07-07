@@ -13,7 +13,7 @@
     import { DisplayInfotag } from './interfaces';
     // import { Character as CharacterInfo } from '../../interfaces';
     import {Store} from './data_store';
-    import { MatchReport, TagId } from './matcher';
+    import { MatchReport, TagId } from '../../learn/matcher';
     import { CssClassMap } from './match-report.vue';
 
 

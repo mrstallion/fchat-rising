@@ -1,4 +1,4 @@
-# F-Chat Rising
+# F-Chat Ascending
 
 This repository contains a modified version of the mainline F-Chat 3.0 client.
 
@@ -9,6 +9,8 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
     *    Manage channel's ad settings via "Tab Settings"
     *    Automatically re-post ads every 11-18 minutes (randomized) for up to 180 minutes
     *    Rotate multiple ads on a single channel
+*   Ad Rating
+    *    LFP ads are automatically rated and matched against your profile
 *   Link previews
     *    Hover cursor over any `[url]` to see a preview of it
     *    Middle click any `[url]` to turn the preview into a sticky / interactive mode

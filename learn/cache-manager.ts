@@ -4,11 +4,12 @@ import { ChannelAdEvent, ChannelMessageEvent, CharacterDataEvent, EventBus } fro
 import { Conversation } from '../chat/interfaces';
 import { methods } from '../site/character_page/data_store';
 import { Character } from '../site/character_page/interfaces';
-import { Gender } from '../site/character_page/matcher';
+import { Gender } from './matcher';
 import { AdCache } from './ad-cache';
 import { ChannelConversationCache } from './channel-conversation-cache';
 import { CharacterProfiler } from './character-profiler';
 import { ProfileCache } from './profile-cache';
+import { SqliteStore } from './sqlite-store';
 import Timer = NodeJS.Timer;
 import ChannelConversation = Conversation.ChannelConversation;
 import Message = Conversation.Message;
@@ -23,7 +24,7 @@ export interface ProfileCacheQueueEntry {
 
 
 export class CacheManager {
-    static readonly PROFILE_QUERY_DELAY = 3000; //1 * 1000;
+    static readonly PROFILE_QUERY_DELAY = 1 * 1000; //1 * 1000;
 
     adCache: AdCache = new AdCache();
     profileCache: ProfileCache = new ProfileCache();
@@ -34,12 +35,14 @@ export class CacheManager {
     protected profileTimer: Timer | null = null;
     protected characterProfiler: CharacterProfiler | undefined;
 
+    protected profileStore = new SqliteStore();
+
 
     queueForFetching(name: string): void {
-        const key = ProfileCache.nameKey(name);
-
-        if (this.profileCache.has(key))
+        if (this.profileCache.get(name))
             return;
+
+        const key = ProfileCache.nameKey(name);
 
         if (!!_.find(this.queue, (q: ProfileCacheQueueEntry) => (q.key === key)))
             return;
@@ -132,6 +135,9 @@ export class CacheManager {
     start(): void {
         this.stop();
 
+        this.profileStore.start();
+        this.profileCache.setStore(this.profileStore);
+
         EventBus.$on(
             'character-data',
             (data: CharacterDataEvent) => {
@@ -189,8 +195,14 @@ export class CacheManager {
                     const next = this.consumeNextInQueue();
 
                     if (next) {
-                        // console.log('Learn fetch', next.name, next.score);
-                        await this.fetchProfile(next.name);
+                        try {
+                            // console.log('Learn fetch', next.name, next.score);
+                            await this.fetchProfile(next.name);
+                        } catch (err) {
+                            console.error('Profile queue error', err);
+
+                            this.queue.push(next); // return to queue
+                        }
                     }
 
                     scheduleNextFetch();
@@ -207,6 +219,8 @@ export class CacheManager {
             clearTimeout(this.profileTimer);
             this.profileTimer = null;
         }
+
+        this.profileStore.stop();
 
         // should do some $off here
     }

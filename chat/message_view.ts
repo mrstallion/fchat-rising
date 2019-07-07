@@ -1,7 +1,7 @@
-import { Component, Prop, Watch } from '@f-list/vue-ts';
+import { Component, Hook, Prop } from '@f-list/vue-ts';
 import {CreateElement, default as Vue, VNode, VNodeChildrenArrayContents} from 'vue';
 import {Channel} from '../fchat';
-import { Score, Scoring } from '../site/character_page/matcher';
+import { Score, Scoring } from '../learn/matcher';
 import {BBCodeView} from './bbcode';
 import {formatTime} from './common';
 import core from './core';
@@ -16,6 +16,15 @@ const userPostfix: {[key: number]: string | undefined} = {
 @Component({
     render(this: MessageView, createElement: CreateElement): VNode {
         const message = this.message;
+
+        // setTimeout(
+        //     () => {
+        //         console.log('Now scoring high!', message.text.substr(0, 64));
+        //         message.score = Scoring.MATCH;
+        //     },
+        //     5000
+        // );
+
         const children: VNodeChildrenArrayContents =
             [createElement('span', {staticClass: 'message-time'}, `[${formatTime(message.time)}] `)];
         const separators = core.connection.isOpen ? core.state.settings.messageSeparators : false;
@@ -59,22 +68,47 @@ export default class MessageView extends Vue {
 
     scoreClasses = this.getMessageScoreClasses(this.message);
 
-    @Watch('message.score')
+    scoreWatcher: (() => void) | null = ((this.message.type === Conversation.Message.Type.Ad) && (this.message.score === 0))
+        ? this.$watch('message.score', () => this.scoreUpdate())
+        : null;
+
+
+    @Hook('beforeDestroy')
+    onBeforeDestroy(): void {
+        console.log('onbeforedestroy');
+
+        if (this.scoreWatcher) {
+            console.log('onbeforedestroy killed');
+
+            this.scoreWatcher(); // stop watching
+            this.scoreWatcher = null;
+        }
+    }
+
+    // @Watch('message.score')
     scoreUpdate(): void {
-        console.log('Message score update', this.message.score, this.message.text);
+        const oldClasses = this.scoreClasses;
 
         this.scoreClasses = this.getMessageScoreClasses(this.message);
 
-        this.$forceUpdate();
+        if (this.scoreClasses !== oldClasses) {
+           this.$forceUpdate();
+        }
+
+        if (this.scoreWatcher) {
+            console.log('watch killed');
+
+            this.scoreWatcher(); // stop watching
+            this.scoreWatcher = null;
+        }
     }
 
-
     getMessageScoreClasses(message: Conversation.Message): string {
-        if ((!('score' in message)) || (message.score === undefined) || (message.score === 0)) {
+        if (message.score === 0) {
             return '';
         }
 
-        console.log('Score was', message.score);
+        // console.log('Score was', message.score);
 
         return `message-score ${Score.getClasses(message.score as Scoring)}`;
 

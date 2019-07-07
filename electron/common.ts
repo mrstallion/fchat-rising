@@ -2,7 +2,7 @@ import * as electron from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export const defaultHost = 'wss://chat.f-list.net:9799';
+export const defaultHost = 'wss://chat.f-list.net/chat2';
 
 export class GeneralSettings {
     account = '';

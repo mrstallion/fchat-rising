@@ -101,7 +101,7 @@
     import FriendDialog from './friend_dialog.vue';
     import InfotagView from './infotag.vue';
     import {Character, CONTACT_GROUP_ID, SharedStore} from './interfaces';
-    import { MatchReport } from './matcher';
+    import { MatchReport } from '../../learn/matcher';
     import MemoDialog from './memo_dialog.vue';
     import ReportDialog from './report_dialog.vue';
 

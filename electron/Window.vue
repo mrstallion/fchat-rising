@@ -84,6 +84,7 @@
 
         @Hook('mounted')
         mounted(): void {
+            // top bar devtools
             // browserWindow.webContents.openDevTools();
 
             this.addTab();
@@ -196,7 +197,8 @@
             tray.on('click', (_) => this.trayClicked(tab));
             const view = new electron.remote.BrowserView();
 
-            // view.webContents.openDevTools();
+            // tab devtools
+            view.webContents.openDevTools();
 
             view.setAutoResize({width: true, height: true});
             electron.ipcRenderer.send('tab-added', view.webContents.id);

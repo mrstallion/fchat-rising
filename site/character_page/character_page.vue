@@ -86,7 +86,7 @@
     import CharacterKinksView from './kinks.vue';
     import Sidebar from './sidebar.vue';
     import core from '../../chat/core';
-    import { Matcher, MatchReport } from './matcher';
+    import { Matcher, MatchReport } from '../../learn/matcher';
     import MatchReportView from './match-report.vue';
 
 

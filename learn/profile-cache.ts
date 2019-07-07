@@ -2,8 +2,9 @@ import * as _ from 'lodash';
 
 import core from '../chat/core';
 import { Character } from '../site/character_page/interfaces';
-import { Matcher, Score, Scoring } from '../site/character_page/matcher';
+import { Matcher, Score, Scoring } from './matcher';
 import { Cache } from './cache';
+import { SqliteStore } from './sqlite-store';
 
 export interface CharacterCacheRecord {
     character: Character;
@@ -13,9 +14,38 @@ export interface CharacterCacheRecord {
 }
 
 export class ProfileCache extends Cache<CharacterCacheRecord> {
-    register(c: Character): CharacterCacheRecord {
+    protected store?: SqliteStore;
+
+
+    setStore(store: SqliteStore): void {
+        this.store = store;
+    }
+
+
+    get(name: string, skipStore: boolean = false): CharacterCacheRecord | null {
+        const v = super.get(name);
+
+        if ((v !== null) || (!this.store) || (skipStore)) {
+            return v;
+        }
+
+        const pd = this.store.getProfile(name);
+
+        if (!pd) {
+            return null;
+        }
+
+        return this.register(pd.profileData, true);
+    }
+
+
+    register(c: Character, skipStore: boolean = false): CharacterCacheRecord {
         const k = Cache.nameKey(c.character.name);
         const score = ProfileCache.score(c);
+
+        if ((this.store) && (!skipStore)) {
+            this.store.storeProfile(c);
+        }
 
         if (k in this.cache) {
             const rExisting = this.cache[k];
