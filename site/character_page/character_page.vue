@@ -90,6 +90,8 @@
     import MatchReportView from './match-report.vue';
 
 
+    const CHARACTER_CACHE_EXPIRE = 4 * 60 * 60 * 1000;
+
     interface ShowableVueTab extends Vue {
         show?(): void
     }
@@ -252,13 +254,31 @@
         protected async loadSelfCharacter(): Promise<void> {
             // console.log('SELF');
 
-            const ownChar = core.characters.ownCharacter;
+            // const ownChar = core.characters.ownCharacter;
 
-            this.selfCharacter = await methods.characterData(ownChar.name, -1);
+            // this.selfCharacter = await methods.characterData(ownChar.name, -1);
+            this.selfCharacter = core.characters.ownProfile;
 
             // console.log('SELF LOADED');
 
             this.updateMatches();
+        }
+
+        private async fetchCharacter(): Promise<Character> {
+            if (!this.name) {
+                throw new Error('A man must have a name');
+            }
+
+            // tslint:disable-next-line: await-promise
+            const cachedCharacter = await core.cache.profileCache.get(this.name);
+
+            if (cachedCharacter) {
+                if (Date.now() - cachedCharacter.lastFetched.getTime() <= CHARACTER_CACHE_EXPIRE) {
+                    return cachedCharacter.character;
+                }
+            }
+
+            return methods.characterData(this.name, this.characterid, false);
         }
 
         private async _getCharacter(): Promise<void> {
@@ -267,11 +287,16 @@
             this.groupCount = null;
             this.guestbookPostCount = null;
 
-            this.character = await methods.characterData(this.name, this.characterid);
+            if (!this.name) {
+                return;
+            }
+
+            this.character = await this.fetchCharacter();
+
             standardParser.allowInlines = true;
             standardParser.inlines = this.character.character.inlines;
 
-            console.log('LoadChar', this.name, this.character);
+            // console.log('LoadChar', this.name, this.character);
 
             this.updateMatches();
 
@@ -294,7 +319,7 @@
 
             this.characterMatch = Matcher.generateReport(this.selfCharacter.character, this.character.character);
 
-            console.log('Match', this.selfCharacter.character.name, this.character.character.name, this.characterMatch);
+            // console.log('Match', this.selfCharacter.character.name, this.character.character.name, this.characterMatch);
         }
     }
 </script>

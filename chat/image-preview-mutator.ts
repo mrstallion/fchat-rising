@@ -168,7 +168,7 @@ export class ImagePreviewMutator {
             let removeList = [];
             const safeIds = ['flistWrapper', 'flistError', 'flistHider'];
 
-            body.childNodes.forEach((el) => ((safeIds.indexOf(el.id) < 0) ? removeList.push(el) : true)
+            body.childNodes.forEach((el) => ((safeIds.indexOf(el.id) < 0) ? removeList.push(el) : true));
 
             ${skipElementRemove ? '' : 'removeList.forEach((el) => el.remove());'}
             removeList = [];
@@ -254,5 +254,15 @@ export class ImagePreviewMutator {
                 text-align: center !important;
             "></div>
         `);
+    }
+
+    getReShowMutator(): string {
+        return this.wrapJs(
+            `
+            const el = document.querySelector('#flistHider');
+
+            if (el) { el.remove(); }
+            `
+        );
     }
 }

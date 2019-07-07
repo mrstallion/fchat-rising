@@ -30,6 +30,8 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
 *   Improvements to log browsing
 *   Highlight ads from characters most interesting to you
 *   Fix broken BBCode, such as `[big]` in character profiles
+*   Ad cache, so you can find your chat partners ads easily (channel names too)
+*   Which channels my chart partner is on?
 
 
 # F-List Exported

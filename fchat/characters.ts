@@ -1,5 +1,8 @@
+import core from '../chat/core';
+import { methods } from '../site/character_page/data_store';
 import {decodeHTML} from './common';
 import {Character as Interfaces, Connection} from './interfaces';
+import { Character as CharacterProfile } from '../site/character_page/interfaces';
 
 class Character implements Interfaces.Character {
     gender: Interfaces.Gender = 'None';
@@ -16,7 +19,10 @@ class Character implements Interfaces.Character {
 
 class State implements Interfaces.State {
     characters: {[key: string]: Character | undefined} = {};
+
     ownCharacter: Character = <any>undefined; /*tslint:disable-line:no-any*///hack
+    ownProfile: CharacterProfile = <any>undefined; /*tslint:disable-line:no-any*///hack
+
     friends: Character[] = [];
     bookmarks: Character[] = [];
     ignoreList: string[] = [];
@@ -48,6 +54,12 @@ class State implements Interfaces.State {
         }
         character.status = status;
         character.statusText = decodeHTML(text);
+    }
+
+    async resolveOwnProfile(): Promise<void> {
+        await methods.fieldsGet();
+
+        this.ownProfile = await methods.characterData(this.ownCharacter.name, -1, false);
     }
 }
 
@@ -108,9 +120,18 @@ export default function(this: void, connection: Connection): Interfaces.State {
     connection.onMessage('FLN', (data) => {
         state.setStatus(state.get(data.character), 'offline', '');
     });
-    connection.onMessage('NLN', (data) => {
+    connection.onMessage('NLN', async(data) => {
         const character = state.get(data.identity);
-        if(data.identity === connection.character) state.ownCharacter = character;
+
+        if(data.identity === connection.character) {
+            state.ownCharacter = character;
+
+            await state.resolveOwnProfile();
+
+            // tslint:disable-next-line no-unnecessary-type-assertion
+            core.cache.setProfile(state.ownProfile as CharacterProfile);
+        }
+
         character.name = data.identity;
         character.gender = data.gender;
         state.setStatus(character, data.status, '');

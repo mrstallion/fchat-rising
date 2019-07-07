@@ -592,4 +592,51 @@
             flex-basis: 100%;
         }
     }
+
+
+
+    .message.message-score {
+        padding-left: 5px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        &.match {
+            border-left: 12px solid #027b02;
+            background-color: rgba(1, 76, 1, 0.45);
+        }
+
+        &.weak-match {
+            border-left: 12px solid #015a01;
+            background-color: rgba(0, 58, 0, 0.35);
+        }
+
+        &.weak-mismatch {
+            background-color: rgba(208, 188, 0, 0.0);
+            border-left: 12px solid rgb(138, 123, 0);
+
+            .bbcode {
+                filter: grayscale(0.7);
+            }
+
+            .bbcode,
+            .user-view,
+            .message-time {
+                opacity: 0.4;
+            }
+        }
+
+        &.mismatch {
+            border-left: 12px solid #841a1a;
+
+            .bbcode {
+                filter: grayscale(0.8);
+            }
+
+            .bbcode,
+            .user-view,
+            .message-time {
+                opacity: 0.3;
+            }
+        }
+    }
+
 </style>

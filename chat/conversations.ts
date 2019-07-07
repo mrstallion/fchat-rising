@@ -7,6 +7,7 @@ import {Channel, Character, Conversation as Interfaces} from './interfaces';
 import l from './localize';
 import {CommandContext, isAction, isCommand, isWarn, parse as parseCommand} from './slash_commands';
 import MessageType = Interfaces.Message.Type;
+import {EventBus} from '../chat/event-bus';
 
 function createMessage(this: void, type: MessageType, sender: Character, text: string, time?: Date): Message {
     if(type === MessageType.Message && isAction(text)) {
@@ -549,6 +550,7 @@ export default function(this: void): Interfaces.State {
         const char = core.characters.get(data.character);
         if(char.isIgnored) return connection.send('IGN', {action: 'notify', character: data.character});
         const message = createMessage(MessageType.Message, char, decodeHTML(data.message), time);
+        EventBus.$emit('private-message', { message });
         const conv = state.getPrivate(char);
         await conv.addMessage(message);
     });
@@ -558,6 +560,7 @@ export default function(this: void): Interfaces.State {
         if(conversation === undefined) return core.channels.leave(data.channel);
         if(char.isIgnored && !isOp(conversation)) return;
         const message = createMessage(MessageType.Message, char, decodeHTML(data.message), time);
+        EventBus.$emit('channel-message', { message, channel: conversation });
         await conversation.addMessage(message);
 
         const words = conversation.settings.highlightWords.slice();
@@ -586,7 +589,18 @@ export default function(this: void): Interfaces.State {
         const conv = state.channelMap[data.channel.toLowerCase()];
         if(conv === undefined) return core.channels.leave(data.channel);
         if((char.isIgnored || core.state.hiddenUsers.indexOf(char.name) !== -1) && !isOp(conv)) return;
-        await conv.addMessage(new Message(MessageType.Ad, char, decodeHTML(data.message), time));
+        const msg = new Message(MessageType.Ad, char, decodeHTML(data.message), time);
+
+        if (core.characters.ownProfile) {
+            const p = core.cache.profileCache.get(char.name);
+
+            if (p) {
+                msg.score = p.matchScore;
+            }
+        }
+
+        EventBus.$emit('channel-ad', { message: msg, channel: conv });
+        await conv.addMessage(msg);
     });
     connection.onMessage('RLL', async(data, time) => {
         const sender = core.characters.get(data.character);

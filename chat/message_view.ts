@@ -1,6 +1,7 @@
-import {Component, Prop} from '@f-list/vue-ts';
+import { Component, Prop, Watch } from '@f-list/vue-ts';
 import {CreateElement, default as Vue, VNode, VNodeChildrenArrayContents} from 'vue';
 import {Channel} from '../fchat';
+import { Score, Scoring } from '../site/character_page/matcher';
 import {BBCodeView} from './bbcode';
 import {formatTime} from './common';
 import core from './core';
@@ -21,7 +22,8 @@ const userPostfix: {[key: number]: string | undefined} = {
         /*tslint:disable-next-line:prefer-template*///unreasonable here
         let classes = `message message-${Conversation.Message.Type[message.type].toLowerCase()}` + (separators ? ' message-block' : '') +
             (message.type !== Conversation.Message.Type.Event && message.sender.name === core.connection.character ? ' message-own' : '') +
-            ((this.classes !== undefined) ? ` ${this.classes}` : '');
+            ((this.classes !== undefined) ? ` ${this.classes}` : '') +
+            ` ${this.scoreClasses}`;
         if(message.type !== Conversation.Message.Type.Event) {
             children.push((message.type === Conversation.Message.Type.Action) ? '*' : '',
                 createElement(UserView, {props: {character: message.sender, channel: this.channel}}),
@@ -54,4 +56,41 @@ export default class MessageView extends Vue {
     readonly channel?: Channel;
     @Prop
     readonly logs?: true;
+
+    scoreClasses = this.getMessageScoreClasses(this.message);
+
+    @Watch('message.score')
+    scoreUpdate(): void {
+        console.log('Message score update', this.message.score, this.message.text);
+
+        this.scoreClasses = this.getMessageScoreClasses(this.message);
+
+        this.$forceUpdate();
+    }
+
+
+    getMessageScoreClasses(message: Conversation.Message): string {
+        if ((!('score' in message)) || (message.score === undefined) || (message.score === 0)) {
+            return '';
+        }
+
+        console.log('Score was', message.score);
+
+        return `message-score ${Score.getClasses(message.score as Scoring)}`;
+
+        // const baseClass = message.score > 0 ? 'message-score-positive' : 'message-score-negative';
+        //
+        // const score = Math.abs(message.score);
+        //
+        // let scoreStrength = 'message-score-normal';
+        //
+        // if (score > 3) {
+        //     scoreStrength = 'message-score-high';
+        // } else if (score > 1.5) {
+        //     scoreStrength = 'message-score-medium';
+        // }
+        //
+        // return `message-score ${baseClass} ${scoreStrength}`;
+    }
+
 }

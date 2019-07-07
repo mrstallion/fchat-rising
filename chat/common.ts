@@ -94,6 +94,8 @@ export class Message implements Conversation.ChatMessage {
     readonly id = ++messageId;
     isHighlight = false;
 
+    score?: number;
+
     constructor(readonly type: Conversation.Message.Type, readonly sender: Character, readonly text: string,
                 readonly time: Date = new Date()) {
         if(Conversation.Message.Type[type] === undefined) throw new Error('Unknown type'); //tslint:disable-line

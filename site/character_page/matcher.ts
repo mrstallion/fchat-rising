@@ -178,6 +178,22 @@ const speciesMapping: SpeciesMap = {
     [Species.Minotaur]: ['minotaur']
 };
 
+
+interface FchatGenderMap {
+    [key: string]: Gender;
+}
+
+const fchatGenderMap: FchatGenderMap = {
+    None: Gender.None,
+    Male: Gender.Male,
+    Female: Gender.Female,
+    Shemale: Gender.Shemale,
+    Herm: Gender.Herm,
+    'Male-Herm': Gender.MaleHerm,
+    'Cunt-boy': Gender.Cuntboy,
+    Transgender: Gender.Transgender
+};
+
 interface KinkPreferenceMap {
     [key: string]: KinkPreference;
 }
@@ -214,6 +230,7 @@ export interface MatchResult {
     them: Character,
     scores: MatchResultScores;
     info: MatchResultCharacterInfo;
+    total: number
 }
 
 export enum Scoring {
@@ -249,7 +266,11 @@ export class Score {
     }
 
     getRecommendedClass(): string {
-        return scoreClasses[this.score];
+        return Score.getClasses(this.score);
+    }
+
+    static getClasses(score: Scoring): string {
+        return scoreClasses[score];
     }
 }
 
@@ -279,10 +300,12 @@ export class Matcher {
         };
     }
 
+
     match(): MatchResult {
-        return {
+        const data = {
             you: this.you,
             them: this.them,
+            total: 0,
 
             scores: {
                 [TagId.Orientation]: this.resolveOrientationScore(),
@@ -297,7 +320,15 @@ export class Matcher {
                 gender: Matcher.getTagValueList(TagId.Gender, this.you),
                 orientation: Matcher.getTagValueList(TagId.Orientation, this.you)
             }
-       };
+        };
+
+        data.total = _.reduce(
+            data.scores,
+            (accum: number, s: Score) => (accum + s.score),
+            0
+        );
+
+        return data;
     }
 
     private resolveOrientationScore(): Score {
@@ -313,9 +344,17 @@ export class Matcher {
 
         // Question: If someone identifies themselves as 'straight cuntboy', how should they be matched? like a straight female?
 
+        return Matcher.scoreOrientationByGender(you, theirGender);
+    }
+
+
+    static scoreOrientationByGender(you: Character, theirGender: Gender): Score {
+        const yourGender = Matcher.getTagValueList(TagId.Gender, you);
+        const yourOrientation = Matcher.getTagValueList(TagId.Orientation, you);
+
         // CIS
         // tslint:disable-next-line curly
-        if (Matcher.isCisGender(yourGender)) {
+        if ((yourGender !== null) && (Matcher.isCisGender(yourGender))) {
             if (yourGender === theirGender) {
                 // same sex CIS
                 if (yourOrientation === Orientation.Straight)
@@ -359,7 +398,6 @@ export class Matcher {
             }
         }
 
-        // Can't do anything with Gender.None
         return new Score(Scoring.NEUTRAL);
     }
 
@@ -661,5 +699,18 @@ export class Matcher {
 
         // tslint:disable-next-line: strict-type-predicates
         return (foundSpeciesId === null) ? null : parseInt(foundSpeciesId, 10);
+    }
+
+
+    static strToGender(fchatGenderStr: string | undefined): Gender | null {
+        if (fchatGenderStr === undefined) {
+            return null;
+        }
+
+        if (fchatGenderStr in fchatGenderMap) {
+            return fchatGenderMap[fchatGenderStr];
+        }
+
+        return null;
     }
 }

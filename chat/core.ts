@@ -1,4 +1,5 @@
 import Vue, {WatchHandler} from 'vue';
+import { CacheManager } from '../learn/cache-manager';
 import BBCodeParser from './bbcode';
 import {Settings as SettingsImpl} from './common';
 import {Channel, Character, Connection, Conversation, Logs, Notifications, Settings, State as StateInterface} from './interfaces';
@@ -60,6 +61,7 @@ const data = {
     channels: <Channel.State | undefined>undefined,
     characters: <Character.State | undefined>undefined,
     notifications: <Notifications | undefined>undefined,
+    cache: <CacheManager | undefined>undefined,
     register(this: void | never, module: 'characters' | 'conversations' | 'channels',
              subState: Channel.State | Character.State | Conversation.State): void {
         Vue.set(vue, module, subState);
@@ -85,6 +87,10 @@ export function init(this: void, connection: Connection, logsClass: new() => Log
     data.logs = new logsClass();
     data.settingsStore = new settingsClass();
     data.notifications = new notificationsClass();
+    data.cache = new CacheManager();
+
+    data.cache.start();
+
     connection.onEvent('connecting', async() => {
         await data.reloadSettings();
         data.bbCodeParser = createBBCodeParser();
@@ -101,6 +107,8 @@ export interface Core {
     readonly channels: Channel.State
     readonly bbCodeParser: BBCodeParser
     readonly notifications: Notifications
+    readonly cache: CacheManager
+
     register(module: 'conversations', state: Conversation.State): void
     register(module: 'channels', state: Channel.State): void
     register(module: 'characters', state: Character.State): void

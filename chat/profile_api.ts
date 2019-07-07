@@ -29,7 +29,10 @@ const parserSettings = {
     inlineDisplayMode: InlineDisplayMode.DISPLAY_ALL
 };
 
-async function characterData(name: string | undefined): Promise<Character> {
+
+// tslint:disable-next-line: ban-ts-ignore
+// @ts-ignore
+async function characterData(name: string | undefined, id: number = -1, skipEvent: boolean = false): Promise<Character> {
     const data = await core.connection.queryApi<CharacterInfo & {
         badges: string[]
         customs_first: boolean
@@ -95,7 +98,8 @@ async function characterData(name: string | undefined): Promise<Character> {
         self_staff: false
     };
 
-    EventBus.$emit('character-data', charData);
+    if (!skipEvent)
+        EventBus.$emit('character-data', { character: charData });
 
     return charData;
 }

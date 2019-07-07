@@ -95,7 +95,7 @@
                 }
             );
 
-            const webview = this.$refs.imagePreviewExt as WebviewTag;
+            const webview = this.getWebview();
 
             webview.addEventListener(
                 'dom-ready',
@@ -179,7 +179,7 @@
             this.visible = false;
 
             if (this.externalUrlVisible) {
-                const webview = this.$refs.imagePreviewExt as WebviewTag;
+                const webview = this.getWebview();
 
                 webview.executeJavaScript(this.jsMutator.getHideMutator());
             }
@@ -263,10 +263,21 @@
                     this.internalUrlVisible = isInternal;
                     this.externalUrlVisible = !isInternal;
 
-                    if (isInternal)
+                    if (isInternal) {
                         this.internalUrl = this.url;
-                    else
+                    } else {
+                        const webview = this.getWebview();
+
+                        try {
+                            if (webview.getURL() === this.url) {
+                                webview.executeJavaScript(this.jsMutator.getReShowMutator());
+                            }
+                        } catch (err) {
+                            console.log('Webview reuse error', err);
+                        }
+
                         this.externalUrl = this.url;
+                    }
 
                     this.visible = true;
                     this.visibleSince = Date.now();
@@ -328,7 +339,7 @@
             this.jsMutator.setDebug(this.debug);
 
             if (this.debug) {
-                const webview = this.$refs.imagePreviewExt as WebviewTag;
+                const webview = this.getWebview();
 
                 webview.openDevTools();
             }
@@ -347,10 +358,15 @@
 
         reloadUrl(): void {
             if (this.externalUrlVisible) {
-                const webview = this.$refs.imagePreviewExt as WebviewTag;
+                const webview = this.getWebview();
 
                 webview.reload();
             }
+        }
+
+
+        getWebview(): WebviewTag {
+            return this.$refs.imagePreviewExt as WebviewTag;
         }
     }
 </script>

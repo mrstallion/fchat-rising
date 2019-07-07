@@ -13,6 +13,8 @@ export namespace Conversation {
         readonly type: Message.Type
         readonly text: string
         readonly time: Date
+
+        score?: number;
     }
 
     export interface EventMessage extends BaseMessage {

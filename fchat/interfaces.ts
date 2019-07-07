@@ -1,3 +1,5 @@
+import { Character as CharacterProfile } from '../site/character_page/interfaces';
+
 //tslint:disable:no-shadowed-variable
 export namespace Connection {
     export type ClientCommands = {
@@ -164,6 +166,8 @@ export namespace Character {
         readonly opList: ReadonlyArray<string>
         readonly friendList: ReadonlyArray<string>
         readonly bookmarkList: ReadonlyArray<string>
+
+        readonly ownProfile: CharacterProfile;
 
         get(name: string): Character
     }

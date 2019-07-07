@@ -22,7 +22,7 @@ export interface StoreMethods {
 
     characterBlock?(id: number, block: boolean, reason?: string): Promise<void>
     characterCustomKinkAdd(id: number, name: string, description: string, choice: KinkChoice): Promise<void>
-    characterData(name: string | undefined, id: number | undefined): Promise<Character>
+    characterData(name: string | undefined, id: number | undefined, skipEvent: boolean | undefined): Promise<Character>
     characterDelete(id: number): Promise<void>
     characterDuplicate(id: number, name: string): Promise<DuplicateResult>
     characterFriends(id: number): Promise<FriendsByCharacter>
