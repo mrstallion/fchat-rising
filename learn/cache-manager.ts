@@ -23,7 +23,7 @@ export interface ProfileCacheQueueEntry {
 
 
 export class CacheManager {
-    static readonly PROFILE_QUERY_DELAY = 1000; //1 * 1000;
+    static readonly PROFILE_QUERY_DELAY = 3000; //1 * 1000;
 
     adCache: AdCache = new AdCache();
     profileCache: ProfileCache = new ProfileCache();
@@ -76,7 +76,7 @@ export class CacheManager {
                 _.each(
                     ch.messages, (m: Conversation.Message) => {
                         if ((m.type === Message.Type.Ad) && (m.sender) && (m.sender.name === c.character.name)) {
-                            console.log('Update score', score, ch.name, m.sender.name, m.text, m.id);
+                            // console.log('Update score', score, ch.name, m.sender.name, m.text, m.id);
 
                             m.score = score;
                         }
