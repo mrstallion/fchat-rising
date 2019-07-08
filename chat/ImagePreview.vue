@@ -40,7 +40,7 @@
 
     @Component
     export default class ImagePreview extends Vue {
-        private readonly MinTimePreviewVisible = 500;
+        private readonly MinTimePreviewVisible = 100;
 
         visible = false;
 

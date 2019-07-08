@@ -26,7 +26,7 @@ const userPostfix: {[key: number]: string | undefined} = {
         // );
 
         const children: VNodeChildrenArrayContents =
-            [createElement('span', {staticClass: 'message-time'}, `[${formatTime(message.time)}] `)];
+            [createElement('span', {staticClass: 'message-time'}, `${formatTime(message.time)}`)];
         const separators = core.connection.isOpen ? core.state.settings.messageSeparators : false;
         /*tslint:disable-next-line:prefer-template*///unreasonable here
         let classes = `message message-${Conversation.Message.Type[message.type].toLowerCase()}` + (separators ? ' message-block' : '') +
@@ -104,27 +104,11 @@ export default class MessageView extends Vue {
     }
 
     getMessageScoreClasses(message: Conversation.Message): string {
-        if (message.score === 0) {
+        if (message.type !== Conversation.Message.Type.Ad) {
             return '';
         }
 
-        // console.log('Score was', message.score);
-
         return `message-score ${Score.getClasses(message.score as Scoring)}`;
-
-        // const baseClass = message.score > 0 ? 'message-score-positive' : 'message-score-negative';
-        //
-        // const score = Math.abs(message.score);
-        //
-        // let scoreStrength = 'message-score-normal';
-        //
-        // if (score > 3) {
-        //     scoreStrength = 'message-score-high';
-        // } else if (score > 1.5) {
-        //     scoreStrength = 'message-score-medium';
-        // }
-        //
-        // return `message-score ${baseClass} ${scoreStrength}`;
     }
 
 }

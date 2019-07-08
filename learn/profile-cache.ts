@@ -126,8 +126,11 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
 
         // const score =  Math.min(m.them.total, m.you.total); // mul * (Math.abs(m.you.total) + Math.abs(m.them.total));
 
+        const yourScores = _.values(m.you.scores);
+        const theirScores = _.values(m.them.scores);
+
         const finalScore = _.reduce(
-            _.concat(_.values(m.them.scores), _.values(m.you.scores)),
+            _.concat(yourScores, theirScores),
             (accum: Scoring | null, score: Score) => {
                 if (accum === null) {
                     return (score.score !== Scoring.NEUTRAL) ? score.score : null;
@@ -137,6 +140,25 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
             },
             null
         );
+
+
+        if ((finalScore !== null) && (finalScore > 0)) {
+            // Manage edge cases where high score may not be ideal
+
+            // Nothing to score
+            if ((yourScores.length === 0) || (theirScores.length === 0)) {
+                // can't know
+                return Scoring.NEUTRAL;
+            }
+
+            // Only neutral scores given
+            if (
+                (_.every(yourScores, (n: Scoring) => n === Scoring.NEUTRAL)) ||
+                (_.every(theirScores, (n: Scoring) => n === Scoring.NEUTRAL))
+            ) {
+                return Scoring.NEUTRAL;
+            }
+        }
 
         // console.log('Profile score', c.character.name, score, m.you.total, m.them.total,
         //    m.you.total + m.them.total, m.you.total * m.them.total);

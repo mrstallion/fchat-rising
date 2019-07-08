@@ -128,6 +128,7 @@
         settings!: GeneralSettings;
         importProgress = 0;
         profileName = '';
+        adName = '';
         fixCharacters: ReadonlyArray<string> = [];
         fixCharacter = '';
 
@@ -141,11 +142,13 @@
 
             electron.ipcRenderer.on('settings',
                 (_: Event, settings: GeneralSettings) => core.state.generalSettings = this.settings = settings);
+
             electron.ipcRenderer.on('open-profile', (_: Event, name: string) => {
                 const profileViewer = <Modal>this.$refs['profileViewer'];
                 this.profileName = name;
                 profileViewer.show();
             });
+
             electron.ipcRenderer.on('fix-logs', async() => {
                 this.fixCharacters = await new SettingsStore().getAvailableCharacters();
                 this.fixCharacter = this.fixCharacters[0];

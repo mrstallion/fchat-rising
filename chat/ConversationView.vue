@@ -13,6 +13,10 @@
                     </a>
                     <a href="#" @click.prevent="reportDialog.report()" class="btn">
                         <span class="fa fa-exclamation-triangle"></span><span class="btn-text">{{l('chat.report')}}</span></a>
+
+                    <a href="#" @click.prevent="showAds()" class="btn">
+                        <span class="fa fa-ad"></span><span class="btn-text">Ads</span>
+                    </a>
                 </div>
                 <div style="overflow:auto;max-height:50px">
                     {{l('status.' + conversation.character.status)}}
@@ -136,6 +140,7 @@
         <settings ref="settingsDialog" :conversation="conversation"></settings>
         <logs ref="logsDialog" :conversation="conversation"></logs>
         <manage-channel ref="manageDialog" v-if="isChannel(conversation)" :channel="conversation.channel"></manage-channel>
+        <ad-view ref="adViewer" v-if="isPrivate(conversation)" :character="conversation.character"></ad-view>
     </div>
 </template>
 
@@ -145,6 +150,7 @@
     import {EditorButton, EditorSelection} from '../bbcode/editor';
     import {isShowing as anyDialogsShown} from '../components/Modal.vue';
     import {Keys} from '../keys';
+    import AdView from './AdView.vue';
     import {BBCodeView, Editor} from './bbcode';
     import CommandHelp from './CommandHelp.vue';
     import { characterImage, getByteLength, getKey } from './common';
@@ -162,7 +168,8 @@
     @Component({
         components: {
             user: UserView, 'bbcode-editor': Editor, 'manage-channel': ManageChannel, settings: ConversationSettings,
-            logs: Logs, 'message-view': MessageView, bbcode: BBCodeView, 'command-help': CommandHelp
+            logs: Logs, 'message-view': MessageView, bbcode: BBCodeView, 'command-help': CommandHelp,
+            'ad-view': AdView
         }
     })
     export default class ConversationView extends Vue {
@@ -400,6 +407,10 @@
             (<ManageChannel>this.$refs['manageDialog']).show();
         }
 
+        showAds(): void {
+            (<AdView>this.$refs['adViewer']).show();
+        }
+
 
         isAutopostingAds(): boolean {
             return this.conversation.adManager.isActive();
@@ -593,7 +604,36 @@
         }
     }
 
+    .message-time,
+    .message .message-time,
+    .ad-viewer .message-time {
+        background-color: #4f4f61;
+        color: #dadada;
+        border-radius: 3px;
+        padding-left: 3px;
+        padding-right: 3px;
+        padding-bottom: 2px;
+        padding-top: 1px;
+        margin-right: 3px;
+        font-size: 80%;
+    }
 
+    .ad-viewer {
+       display: block;
+
+        h3 {
+            font-size: 12pt;
+
+            .message-time {
+                padding-bottom: 1px;
+            }
+        }
+
+        .border-bottom {
+            margin-bottom: 15px;
+            border-width: 1px;
+        }
+    }
 
     .message {
         &.message-event {
@@ -614,6 +654,20 @@
                 border-left: 12px solid #015a01;
                 background-color: rgba(0, 58, 0, 0.35);
             }
+
+            &.neutral {
+                border-left: 12px solid #555;
+
+                .bbcode {
+                    filter: grayscale(0.5);
+                }
+
+                .bbcode,
+                .user-view,
+                .message-time {
+                    opacity: 0.6;
+                }
+            };
 
             &.weak-mismatch {
                 background-color: rgba(208, 188, 0, 0.0);

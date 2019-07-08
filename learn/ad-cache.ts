@@ -12,7 +12,8 @@ export interface AdPosting extends AdCachedPosting {
 
 export class AdCacheRecord {
     protected name: string;
-    protected posts: AdCachedPosting[] = [];
+
+    readonly posts: AdCachedPosting[] = [];
 
     constructor(name: string, posting?: AdPosting) {
         this.name = name;
