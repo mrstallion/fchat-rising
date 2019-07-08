@@ -198,7 +198,7 @@
             const view = new electron.remote.BrowserView();
 
             // tab devtools
-            view.webContents.openDevTools();
+            // view.webContents.openDevTools();
 
             view.setAutoResize({width: true, height: true});
             electron.ipcRenderer.send('tab-added', view.webContents.id);
