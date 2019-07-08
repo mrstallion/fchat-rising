@@ -29,6 +29,11 @@
  * @version 3.0
  * @see {@link https://github.com/f-list/exported|GitHub repo}
  */
+
+// import { DebugLogger } from './debug-logger';
+// // @ts-ignore
+// const dl = new DebugLogger('chat');
+
 import Axios from 'axios';
 import {exec, execSync} from 'child_process';
 import * as electron from 'electron';

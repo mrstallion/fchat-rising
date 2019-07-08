@@ -10,7 +10,7 @@ import ChannelConversation = Conversation.ChannelConversation;
  * 'imagepreview-toggle-stickyness': {url: string}
  * 'character-data': {character: Character}
  * 'private-message': {message: Message}
- * 'channel-ad': {message: Message, channel: Conversation}
+ * 'channel-ad': {message: Message, channel: Conversation, profile: ComplexCharacter | undefined}
  * 'channel-message': {message: Message, channel: Conversation}
  */
 

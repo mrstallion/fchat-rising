@@ -29,6 +29,11 @@
  * @version 3.0
  * @see {@link https://github.com/f-list/exported|GitHub repo}
  */
+
+// import { DebugLogger } from './debug-logger';
+// // @ts-ignore
+// const dl = new DebugLogger('main');
+
 import * as electron from 'electron';
 import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 import * as fs from 'fs';

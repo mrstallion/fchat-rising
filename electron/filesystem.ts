@@ -66,15 +66,15 @@ export function checkIndex(this: void, index: Index, message: Message, key: stri
         index[key] = item = {name, index: {}, offsets: []};
         const nameLength = Buffer.byteLength(name);
         buffer = Buffer.allocUnsafe(nameLength + 8);
-        buffer.writeUInt8(nameLength, 0, noAssert);
+        buffer.writeUInt8(nameLength, 0);
         buffer.write(name, 1);
         offset = nameLength + 1;
     }
     const newValue = typeof size === 'function' ? size() : size;
     item.index[date] = item.offsets.length;
     item.offsets.push(newValue);
-    buffer.writeUInt16LE(date, offset, noAssert);
-    buffer.writeUIntLE(newValue, offset + 2, 5, noAssert);
+    buffer.writeUInt16LE(date, offset);
+    buffer.writeUIntLE(newValue, offset + 2, 5);
     return buffer;
 }
 
@@ -83,25 +83,27 @@ export function serializeMessage(message: Message): {serialized: Buffer, size: n
     const senderLength = Buffer.byteLength(name);
     const messageLength = Buffer.byteLength(message.text);
     const buffer = Buffer.allocUnsafe(senderLength + messageLength + 10);
-    buffer.writeUInt32LE(message.time.getTime() / 1000, 0, noAssert);
-    buffer.writeUInt8(message.type, 4, noAssert);
-    buffer.writeUInt8(senderLength, 5, noAssert);
+    buffer.writeUInt32LE(message.time.getTime() / 1000, 0);
+    buffer.writeUInt8(message.type, 4);
+    buffer.writeUInt8(senderLength, 5);
     buffer.write(name, 6);
     let offset = senderLength + 6;
-    buffer.writeUInt16LE(messageLength, offset, noAssert);
+    buffer.writeUInt16LE(messageLength, offset);
     buffer.write(message.text, offset += 2);
-    buffer.writeUInt16LE(offset += messageLength, offset, noAssert);
+    buffer.writeUInt16LE(offset += messageLength, offset);
     return {serialized: buffer, size: offset + 2};
 }
 
 function deserializeMessage(buffer: Buffer, offset: number = 0,
                             characterGetter: (name: string) => Character = (name) => core.characters.get(name),
+                            // tslint:disable-next-line ban-ts-ignore
+                            // @ts-ignore
                             unsafe: boolean = noAssert): {size: number, message: Conversation.Message} {
-    const time = buffer.readUInt32LE(offset, unsafe);
-    const type = buffer.readUInt8(offset += 4, unsafe);
-    const senderLength = buffer.readUInt8(offset += 1, unsafe);
+    const time = buffer.readUInt32LE(offset);
+    const type = buffer.readUInt8(offset += 4);
+    const senderLength = buffer.readUInt8(offset += 1);
     const sender = buffer.toString('utf8', offset += 1, offset += senderLength);
-    const messageLength = buffer.readUInt16LE(offset, unsafe);
+    const messageLength = buffer.readUInt16LE(offset);
     const text = buffer.toString('utf8', offset += 2, offset + messageLength);
     const message = new MessageImpl(type, characterGetter(sender), text, new Date(time * 1000));
     return {message, size: senderLength + messageLength + 10};
@@ -126,7 +128,7 @@ export function fixLogs(character: string): void {
         const indexFd = fs.openSync(indexPath, 'r+');
         fs.readSync(indexFd, buffer, 0, 1, 0);
         let pos = 0, lastDay = 0;
-        const nameEnd = buffer.readUInt8(0, noAssert) + 1;
+        const nameEnd = buffer.readUInt8(0) + 1;
         fs.ftruncateSync(indexFd, nameEnd);
         fs.readSync(indexFd, buffer, 0, nameEnd, null); //tslint:disable-line:no-null-keyword
         const size = (fs.fstatSync(fd)).size;
@@ -141,8 +143,8 @@ export function fixLogs(character: string): void {
                 const time = deserialized.message.time;
                 const day = Math.floor(time.getTime() / dayMs - time.getTimezoneOffset() / 1440);
                 if(day > lastDay) {
-                    buffer.writeUInt16LE(day, 0, noAssert);
-                    buffer.writeUIntLE(pos, 2, 5, noAssert);
+                    buffer.writeUInt16LE(day, 0);
+                    buffer.writeUIntLE(pos, 2, 5);
                     fs.writeSync(indexFd, buffer, 0, 7);
                     lastDay = day;
                 }
@@ -166,7 +168,7 @@ function loadIndex(name: string): Index {
         if(file.substr(-4) === '.idx')
             try {
                 const content = fs.readFileSync(path.join(dir, file));
-                let offset = content.readUInt8(0, noAssert) + 1;
+                let offset = content.readUInt8(0) + 1;
                 const item: IndexItem = {
                     name: content.toString('utf8', 1, offset),
                     index: {},
@@ -175,7 +177,7 @@ function loadIndex(name: string): Index {
                 for(; offset < content.length; offset += 7) {
                     const key = content.readUInt16LE(offset);
                     item.index[key] = item.offsets.length;
-                    item.offsets.push(content.readUIntLE(offset + 2, 5, noAssert));
+                    item.offsets.push(content.readUIntLE(offset + 2, 5));
                 }
                 index[file.slice(0, -4).toLowerCase()] = item;
             } catch(e) {

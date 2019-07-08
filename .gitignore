@@ -5,3 +5,7 @@ node_modules/
 /webchat/dist
 
 .idea/
+
+
+.DS_Store
+

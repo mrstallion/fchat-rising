@@ -1,4 +1,4 @@
-interface CacheCollection<RecordType> {
+export interface CacheCollection<RecordType> {
     [key: string]: RecordType
 }
 

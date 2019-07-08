@@ -9,7 +9,7 @@ import { AdCache } from './ad-cache';
 import { ChannelConversationCache } from './channel-conversation-cache';
 import { CharacterProfiler } from './character-profiler';
 import { ProfileCache } from './profile-cache';
-import { SqliteStore } from './sqlite-store';
+import { IndexedStore } from './store/indexed';
 import Timer = NodeJS.Timer;
 import ChannelConversation = Conversation.ChannelConversation;
 import Message = Conversation.Message;
@@ -35,12 +35,14 @@ export class CacheManager {
     protected profileTimer: Timer | null = null;
     protected characterProfiler: CharacterProfiler | undefined;
 
-    protected profileStore = new SqliteStore();
+    protected profileStore?: IndexedStore;
 
 
-    queueForFetching(name: string): void {
-        if (this.profileCache.get(name))
-            return;
+    queueForFetching(name: string, skipCacheCheck: boolean = false): void {
+        if (!skipCacheCheck) {
+            if (this.profileCache.get(name))
+                return;
+        }
 
         const key = ProfileCache.nameKey(name);
 
@@ -63,7 +65,7 @@ export class CacheManager {
 
             const c = await methods.characterData(name, -1, true);
 
-            const r = this.profileCache.register(c);
+            const r = await this.profileCache.register(c);
 
             this.updateAdScoringForProfile(c, r.matchScore);
         } catch (err) {
@@ -90,7 +92,7 @@ export class CacheManager {
     }
 
 
-    addProfile(character: string | Character): void {
+    async addProfile(character: string | Character): Promise<void> {
         if (typeof character === 'string') {
             // console.log('Learn discover', character);
 
@@ -98,7 +100,7 @@ export class CacheManager {
             return;
         }
 
-        this.profileCache.register(character);
+        await this.profileCache.register(character);
     }
 
 
@@ -132,22 +134,24 @@ export class CacheManager {
         return this.characterProfiler ? this.characterProfiler.calculateInterestScoreForQueueEntry(e) : 0;
     }
 
-    start(): void {
-        this.stop();
 
-        this.profileStore.start();
+    async start(): Promise<void> {
+        await this.stop();
+
+        this.profileStore = await IndexedStore.open();
+
         this.profileCache.setStore(this.profileStore);
 
         EventBus.$on(
             'character-data',
-            (data: CharacterDataEvent) => {
-                this.addProfile(data.character);
+            async(data: CharacterDataEvent) => {
+                await this.addProfile(data.character);
             }
         );
 
         EventBus.$on(
             'channel-message',
-            (data: ChannelMessageEvent) => {
+            async(data: ChannelMessageEvent) => {
                 const message = data.message;
                 const channel = data.channel;
 
@@ -160,7 +164,7 @@ export class CacheManager {
                     }
                 );
 
-                this.addProfile(message.sender.name);
+                await this.addProfile(message.sender.name);
             }
         );
 
@@ -179,7 +183,11 @@ export class CacheManager {
                     }
                 );
 
-                this.addProfile(message.sender.name);
+                if (!data.profile) {
+                    this.queueForFetching(message.sender.name, true);
+                }
+
+                // this.addProfile(message.sender.name);
             }
         );
 
@@ -214,15 +222,18 @@ export class CacheManager {
         scheduleNextFetch();
     }
 
-    stop(): void {
+
+    async stop(): Promise<void> {
         if (this.profileTimer) {
             clearTimeout(this.profileTimer);
             this.profileTimer = null;
         }
 
-        this.profileStore.stop();
+        if (this.profileStore) {
+            await this.profileStore.stop();
+        }
 
-        // should do some $off here
+        // should do some $off here?
     }
 
 

@@ -70,13 +70,15 @@
 </template>
 
 <script lang="ts">
+    import * as _ from 'lodash';
     import {Component, Prop, Watch, Hook} from '@f-list/vue-ts';
     import Vue from 'vue';
+    import core from '../../chat/core';
     import {Kink, KinkChoice} from '../../interfaces';
     import * as Utils from '../utils';
     import CopyCustomMenu from './copy_custom_menu.vue';
     import {methods, Store} from './data_store';
-    import {Character, DisplayKink, KinkGroup} from './interfaces';
+    import { Character, CharacterKink, DisplayKink, KinkGroup } from './interfaces';
     import KinkView from './kink.vue';
 
     @Component({
@@ -103,7 +105,47 @@
             this.expandedCustoms = !this.expandedCustoms;
         }
 
-        async compareKinks(): Promise<void> {
+
+        // iterateThroughAllKinks(c: Character, cb: (
+
+
+        resolveKinkChoice(c: Character, kinkValue: string | number | undefined): string | null {
+            if (typeof kinkValue === 'string') {
+                return kinkValue;
+            }
+
+            if (typeof kinkValue === 'number') {
+                const custom = c.character.customs[kinkValue];
+
+                if (custom) {
+                    return custom.choice;
+                }
+            }
+
+            return null;
+        }
+
+        convertCharacterKinks(c: Character): CharacterKink[] {
+            return _.filter(
+                _.map(
+                    c.character.kinks,
+                    (kinkValue: string | number | undefined, kinkId: string) => {
+                        const resolvedChoice = this.resolveKinkChoice(c, kinkValue);
+
+                        if (!resolvedChoice)
+                            return null;
+
+                        return {
+                            id: parseInt(kinkId, 10),
+                            choice: resolvedChoice as KinkChoice
+                        };
+                    }
+                ),
+                (v) => (v !== null)
+            ) as CharacterKink[];
+        }
+
+        async compareKinks(overridingCharacter?: Character): Promise<void> {
             if(this.comparing) {
                 this.comparison = {};
                 this.comparing = false;
@@ -114,7 +156,10 @@
             try {
                 this.loading = true;
                 this.comparing = true;
-                const kinks = await methods.kinksGet(this.characterToCompare);
+
+                const kinks = overridingCharacter
+                    ? this.convertCharacterKinks(overridingCharacter)
+                    : await methods.kinksGet(this.characterToCompare);
 
                 const toAssign: {[key: number]: KinkChoice} = {};
                 for(const kink of kinks)
@@ -146,7 +191,7 @@
             if ((this.character) && (this.character.is_self))
                 return;
 
-            await this.compareKinks();
+            await this.compareKinks(core.characters.ownProfile);
         }
 
         @Watch('character')
@@ -154,7 +199,7 @@
             if ((this.character) && (this.character.is_self))
                 return;
 
-            await this.compareKinks();
+            await this.compareKinks(core.characters.ownProfile);
         }
 
         get kinkGroups(): {[key: string]: KinkGroup | undefined} {

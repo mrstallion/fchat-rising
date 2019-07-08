@@ -45,16 +45,22 @@ const modules = path.join(__dirname, 'app', 'node_modules');
 
 const includedPaths = [
     'spellchecker/build/Release/spellchecker.node',
-    'keytar/build/Release/keytar.node',
-    'integer/build/Release/integer.node',
-    'better-sqlite3/build/Release/better_sqlite3.node'
+    'keytar/build/Release/keytar.node'
 ];
 
 _.each(
     includedPaths,
     (p) => {
-        mkdir(path.dirname(path.join(modules, p)));
-        fs.copyFileSync(require.resolve(p), path.join(modules, p));
+        let from = p;
+        let to = p;
+
+        if (_.isArray(p)) {
+            from = p[0];
+            to = p[1];
+        }
+
+        mkdir(path.dirname(path.join(modules, to)));
+        fs.copyFileSync(require.resolve(from), path.join(modules, to));
     }
 );
 

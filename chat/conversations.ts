@@ -1,5 +1,6 @@
 import {queuedJoin} from '../fchat/channels';
 import {decodeHTML} from '../fchat/common';
+import { CharacterCacheRecord } from '../learn/profile-cache';
 import { AdManager } from './ad-manager';
 import { characterImage, ConversationSettings, EventMessage, Message, messageToString } from './common';
 import core from './core';
@@ -591,15 +592,18 @@ export default function(this: void): Interfaces.State {
         if((char.isIgnored || core.state.hiddenUsers.indexOf(char.name) !== -1) && !isOp(conv)) return;
         const msg = new Message(MessageType.Ad, char, decodeHTML(data.message), time);
 
+        // this is done here so that the message will be rendered correctly when cache is hit
+        let p: CharacterCacheRecord | undefined;
+
         if (core.characters.ownProfile) {
-            const p = core.cache.profileCache.get(char.name);
+            p = await core.cache.profileCache.get(char.name) || undefined;
 
             if (p) {
                 msg.score = p.matchScore;
             }
         }
 
-        EventBus.$emit('channel-ad', { message: msg, channel: conv });
+        EventBus.$emit('channel-ad', { message: msg, channel: conv, profile: p });
         await conv.addMessage(msg);
     });
     connection.onMessage('RLL', async(data, time) => {

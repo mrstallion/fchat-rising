@@ -1,5 +1,5 @@
 <template>
-    <div class="row character-page" id="pageBody">
+    <div class="row character-page" id="pageBody" ref="pageBody">
         <div class="col-12" style="min-height:0">
             <div class="alert alert-info" v-show="loading">Loading character information.</div>
             <div class="alert alert-danger" v-show="error">{{error}}</div>
@@ -72,6 +72,7 @@
     import {Component, Hook, Prop, Watch} from '@f-list/vue-ts';
     import Vue from 'vue';
     import {standardParser} from '../../bbcode/standard';
+    import { CharacterCacheRecord } from '../../learn/profile-cache';
     import * as Utils from '../utils';
     import {methods, Store} from './data_store';
     import {Character, SharedStore} from './interfaces';
@@ -89,8 +90,8 @@
     import { Matcher, MatchReport } from '../../learn/matcher';
     import MatchReportView from './match-report.vue';
 
-
-    const CHARACTER_CACHE_EXPIRE = 4 * 60 * 60 * 1000;
+    const CHARACTER_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000;
+    const CHARACTER_COUNT_CACHE_EXPIRE = 10 * 24 * 60 * 60 * 1000;
 
     interface ShowableVueTab extends Vue {
         show?(): void
@@ -126,9 +127,9 @@
         error = '';
         tab = '0';
 
-        guestbookPostCount: string | null = null;
-        friendCount: string | null = null;
-        groupCount: string | null = null;
+        guestbookPostCount: number | null = null;
+        friendCount: number | null = null;
+        groupCount: number | null = null;
 
 
         selfCharacter: Character | undefined;
@@ -139,11 +140,15 @@
         @Hook('beforeMount')
         beforeMount(): void {
             this.shared.authenticated = this.authenticated;
+
+            console.log('Beforemount');
         }
 
         @Hook('mounted')
         async mounted(): Promise<void> {
             await this.load(false);
+
+            console.log('mounted');
         }
 
         @Watch('tab')
@@ -156,7 +161,21 @@
         @Watch('name')
         async onCharacterSet(): Promise<void> {
             this.tab = '0';
-            return this.load();
+            await this.load();
+
+            // Kludge kluge
+            this.$nextTick(
+                () => {
+                    const el = document.querySelector('.modal .profile-viewer .modal-body');
+
+                    if (!el) {
+                        console.error('Could not find modal body for profile view');
+                        return;
+                    }
+
+                    el.scrollTo(0, 0);
+                }
+            );
         }
 
         async load(mustLoad: boolean = true): Promise<void> {
@@ -198,7 +217,8 @@
 
                 const guestbookState = await methods.guestbookPageGet(this.character.character.id, 1, false);
 
-                this.guestbookPostCount = `${guestbookState.posts.length}${guestbookState.nextPage ? '+' : ''}`;
+                this.guestbookPostCount = guestbookState.posts.length;
+                // `${guestbookState.posts.length}${guestbookState.nextPage ? '+' : ''}`;
             } catch (err) {
                 console.error(err);
                 this.guestbookPostCount = null;
@@ -215,7 +235,7 @@
 
                 const groups = await methods.groupsGet(this.character.character.id);
 
-                this.groupCount = `${groups.length}`;
+                this.groupCount = groups.length; // `${groups.length}`;
             } catch (err) {
                 console.error(err);
                 this.groupCount = null;
@@ -235,11 +255,28 @@
 
                 const friends = await methods.friendsGet(this.character.character.id);
 
-                this.friendCount = `${friends.length}`;
+                this.friendCount = friends.length; // `${friends.length}`;
             } catch (err) {
                 console.error(err);
                 this.friendCount = null;
             }
+        }
+
+
+        async updateCounts(name: string): Promise<void> {
+            await this.countGuestbookPosts();
+            await this.countFriends();
+            await this.countGroups();
+
+            await core.cache.profileCache.registerCount(
+                name,
+                {
+                    lastCounted: Date.now() / 1000,
+                    groupCount: this.groupCount,
+                    friendCount: this.friendCount,
+                    guestbookCount: this.guestbookPostCount
+                }
+            );
         }
 
 
@@ -264,7 +301,7 @@
             this.updateMatches();
         }
 
-        private async fetchCharacter(): Promise<Character> {
+        private async fetchCharacterCache(): Promise<CharacterCacheRecord | null> {
             if (!this.name) {
                 throw new Error('A man must have a name');
             }
@@ -274,11 +311,11 @@
 
             if (cachedCharacter) {
                 if (Date.now() - cachedCharacter.lastFetched.getTime() <= CHARACTER_CACHE_EXPIRE) {
-                    return cachedCharacter.character;
+                    return cachedCharacter;
                 }
             }
 
-            return methods.characterData(this.name, this.characterid, false);
+            return null;
         }
 
         private async _getCharacter(): Promise<void> {
@@ -291,25 +328,32 @@
                 return;
             }
 
-            this.character = await this.fetchCharacter();
+            const cache = await this.fetchCharacterCache();
+
+            this.character = (cache)
+                ? cache.character
+                : await methods.characterData(this.name, this.characterid, false);
 
             standardParser.allowInlines = true;
             standardParser.inlines = this.character.character.inlines;
 
+            if (
+                (cache)
+                && (cache.counts)
+                && (cache.counts.lastCounted)
+                && ((Date.now() / 1000) - cache.counts.lastCounted < CHARACTER_COUNT_CACHE_EXPIRE)
+            ) {
+                this.guestbookPostCount = cache.counts.guestbookCount;
+                this.friendCount = cache.counts.friendCount;
+                this.groupCount = cache.counts.groupCount;
+            } else {
+                // No awaits on these on purpose:
+                // tslint:disable-next-line no-floating-promises
+                this.updateCounts(this.name);
+            }
+
             // console.log('LoadChar', this.name, this.character);
-
             this.updateMatches();
-
-            // No awaits on these on purpose:
-
-            // tslint:disable-next-line no-floating-promises
-            this.countGuestbookPosts();
-
-            // tslint:disable-next-line no-floating-promises
-            this.countGroups();
-
-            // tslint:disable-next-line no-floating-promises
-            this.countFriends();
         }
 
 

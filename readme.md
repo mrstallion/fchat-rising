@@ -34,6 +34,7 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
 *   Fix broken BBCode, such as `[big]` in character profiles
 *   Ad cache, so you can find your chat partners ads easily (channel names too)
 *   Which channels my chart partner is on?
+*   Profile doesn't scroll back up
 
 
 # F-List Exported
@@ -51,6 +52,15 @@ All necessary files to build F-Chat 3.0 as an Electron, mobile or web applicatio
  - Change into the `electron` directory.
  - Run `yarn build`/`yarn watch` to build assets. They are placed into the `app` directory.
  - Run `yarn start` to start the app in debug mode. Use `Ctrl+Shift+I` to open the Chromium debugger.
+
+
+### Building on Windows
+
+```
+npm install --global --production windows-build-tools
+npm install --global --production --vs2015 --add-python-to-path windows-build-tools
+npm install --global --production --add-python-to-path windows-build-tools node-gyp
+```
 
 ### Packaging
 See https://electron.atom.io/docs/tutorial/application-distribution/

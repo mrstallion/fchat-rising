@@ -1,50 +1,90 @@
 import * as _ from 'lodash';
 
 import core from '../chat/core';
-import { Character } from '../site/character_page/interfaces';
+import { Character as ComplexCharacter } from '../site/character_page/interfaces';
+import { AsyncCache } from './async-cache';
 import { Matcher, Score, Scoring } from './matcher';
-import { Cache } from './cache';
-import { SqliteStore } from './sqlite-store';
+import { PermanentIndexedStore } from './store/sql-store';
+
+export interface CountRecord {
+    groupCount: number | null;
+    friendCount: number | null;
+    guestbookCount: number | null;
+    lastCounted: number | null;
+}
 
 export interface CharacterCacheRecord {
-    character: Character;
+    character: ComplexCharacter;
     lastFetched: Date;
     added: Date;
     matchScore: number;
+    counts?: CountRecord;
 }
 
-export class ProfileCache extends Cache<CharacterCacheRecord> {
-    protected store?: SqliteStore;
+export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
+    protected store?: PermanentIndexedStore;
 
 
-    setStore(store: SqliteStore): void {
+    setStore(store: PermanentIndexedStore): void {
         this.store = store;
     }
 
 
-    get(name: string, skipStore: boolean = false): CharacterCacheRecord | null {
-        const v = super.get(name);
+    async get(name: string, skipStore: boolean = false): Promise<CharacterCacheRecord | null> {
+        const key = AsyncCache.nameKey(name);
 
-        if ((v !== null) || (!this.store) || (skipStore)) {
-            return v;
+        if (key in this.cache) {
+            return this.cache[key];
+        } else {
+            if ((!this.store) || (skipStore)) {
+                return null;
+            }
         }
 
-        const pd = this.store.getProfile(name);
+        const pd = await this.store.getProfile(name);
 
         if (!pd) {
             return null;
         }
 
-        return this.register(pd.profileData, true);
+        const cacheRecord = await this.register(pd.profileData, true);
+
+        cacheRecord.lastFetched = new Date(pd.lastFetched * 1000);
+        cacheRecord.added = new Date(pd.firstSeen * 1000);
+
+        cacheRecord.counts = {
+            lastCounted: pd.lastCounted,
+            groupCount: pd.groupCount,
+            friendCount: pd.friendCount,
+            guestbookCount: pd.guestbookCount
+        };
+
+        return cacheRecord;
     }
 
 
-    register(c: Character, skipStore: boolean = false): CharacterCacheRecord {
-        const k = Cache.nameKey(c.character.name);
+    async registerCount(name: string, counts: CountRecord): Promise<void> {
+        const record = await this.get(name);
+
+        if (!record) {
+            // coward's way out
+            return;
+        }
+
+        record.counts = counts;
+
+        if (this.store) {
+            await this.store.updateProfileCounts(name, counts.guestbookCount, counts.friendCount, counts.groupCount);
+        }
+    }
+
+
+    async register(c: ComplexCharacter, skipStore: boolean = false): Promise<CharacterCacheRecord> {
+        const k = AsyncCache.nameKey(c.character.name);
         const score = ProfileCache.score(c);
 
         if ((this.store) && (!skipStore)) {
-            this.store.storeProfile(c);
+            await this.store.storeProfile(c);
         }
 
         if (k in this.cache) {
@@ -70,8 +110,13 @@ export class ProfileCache extends Cache<CharacterCacheRecord> {
     }
 
 
-    static score(c: Character): number {
+    static score(c: ComplexCharacter): number {
         const you = core.characters.ownProfile;
+
+        if (!you) {
+            return 0;
+        }
+
         const m = Matcher.generateReport(you.character, c.character);
 
         // let mul = Math.sign(Math.min(m.you.total, m.them.total));

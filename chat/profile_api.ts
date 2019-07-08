@@ -33,6 +33,8 @@ const parserSettings = {
 // tslint:disable-next-line: ban-ts-ignore
 // @ts-ignore
 async function characterData(name: string | undefined, id: number = -1, skipEvent: boolean = false): Promise<Character> {
+    // console.log('CharacterDataquery', name);
+
     const data = await core.connection.queryApi<CharacterInfo & {
         badges: string[]
         customs_first: boolean

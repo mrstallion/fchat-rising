@@ -645,7 +645,23 @@ export class Matcher {
         if (!(kinkId in c.kinks))
             return null;
 
-        return kinkMapping[c.kinks[kinkId] as string];
+        const kinkVal = c.kinks[kinkId];
+
+        if (kinkVal === undefined) {
+            return null;
+        }
+
+        if (typeof kinkVal === 'string') {
+            return kinkMapping[c.kinks[kinkId] as string];
+        }
+
+        const custom = c.customs[kinkVal];
+
+        if (!custom) {
+            return null;
+        }
+
+        return kinkMapping[custom.choice];
     }
 
     static getKinkGenderPreference(c: Character, gender: Gender): KinkPreference | null {

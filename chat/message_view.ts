@@ -75,10 +75,10 @@ export default class MessageView extends Vue {
 
     @Hook('beforeDestroy')
     onBeforeDestroy(): void {
-        console.log('onbeforedestroy');
+        // console.log('onbeforedestroy');
 
         if (this.scoreWatcher) {
-            console.log('onbeforedestroy killed');
+            // console.log('onbeforedestroy killed');
 
             this.scoreWatcher(); // stop watching
             this.scoreWatcher = null;
@@ -96,7 +96,7 @@ export default class MessageView extends Vue {
         }
 
         if (this.scoreWatcher) {
-            console.log('watch killed');
+            // console.log('watch killed');
 
             this.scoreWatcher(); // stop watching
             this.scoreWatcher = null;

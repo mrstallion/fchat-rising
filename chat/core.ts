@@ -89,6 +89,7 @@ export function init(this: void, connection: Connection, logsClass: new() => Log
     data.notifications = new notificationsClass();
     data.cache = new CacheManager();
 
+    // tslint:disable-next-line no-floating-promises
     data.cache.start();
 
     connection.onEvent('connecting', async() => {
