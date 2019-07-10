@@ -56,7 +56,7 @@ export default class AdView extends CustomDialog {
 
         const cache = core.cache.adCache.get(this.character.name);
 
-        this.messages = (cache) ? _.takeRight(cache.posts, 20) : [];
+        this.messages = (cache) ? _.takeRight(cache.posts, 10).reverse() : [];
     }
 
 

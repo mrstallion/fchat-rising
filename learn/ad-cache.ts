@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { Cache } from './cache';
 
 export interface AdCachedPosting {
@@ -13,7 +14,7 @@ export interface AdPosting extends AdCachedPosting {
 export class AdCacheRecord {
     protected name: string;
 
-    readonly posts: AdCachedPosting[] = [];
+    posts: AdCachedPosting[] = [];
 
     constructor(name: string, posting?: AdPosting) {
         this.name = name;
@@ -30,6 +31,8 @@ export class AdCacheRecord {
                 message: ad.message
             }
         );
+
+        this.posts = _.takeRight(this.posts, 25);
     }
 
 

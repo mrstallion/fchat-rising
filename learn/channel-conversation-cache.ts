@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { Cache } from './cache';
 import { AdCachedPosting, AdCacheRecord, AdCache } from './ad-cache';
 

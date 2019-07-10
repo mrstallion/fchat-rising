@@ -647,12 +647,17 @@
 
             &.match {
                 border-left: 12px solid #027b02;
-                background-color: rgba(1, 76, 1, 0.45);
+                background-color: rgba(1, 115, 1, 0.45);
             }
 
             &.weak-match {
                 border-left: 12px solid #015a01;
-                background-color: rgba(0, 58, 0, 0.35);
+                background-color: rgba(0, 70, 0, 0.4);
+
+                .bbcode {
+                    filter: grayscale(0.25);
+                    opacity: 0.77;
+                }
             }
 
             &.neutral {
@@ -680,7 +685,7 @@
                 .bbcode,
                 .user-view,
                 .message-time {
-                    opacity: 0.4;
+                    opacity: 0.55;
                 }
             }
 
