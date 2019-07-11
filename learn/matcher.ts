@@ -593,7 +593,7 @@ export class Matcher {
 
         const yourAge = this.yourAnalysis.age;
 
-        if (yourAge !== null) {
+        if ((yourAge !== null) && (yourAge > 0) && (theirAge > 0) && (yourAge <= 80) && (theirAge <= 80)) {
             const olderCharactersScore = Matcher.getKinkPreference(you, Kink.OlderCharacters);
             const youngerCharactersScore = Matcher.getKinkPreference(you, Kink.YoungerCharacters);
 
