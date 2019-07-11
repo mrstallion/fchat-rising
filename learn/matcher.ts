@@ -596,11 +596,12 @@ export class Matcher {
         if ((yourAge !== null) && (yourAge > 0) && (theirAge > 0) && (yourAge <= 80) && (theirAge <= 80)) {
             const olderCharactersScore = Matcher.getKinkPreference(you, Kink.OlderCharacters);
             const youngerCharactersScore = Matcher.getKinkPreference(you, Kink.YoungerCharacters);
+            const ageDifference = Math.abs(yourAge - theirAge);
 
-            if ((yourAge < theirAge) && (olderCharactersScore !== null))
+            if ((yourAge < theirAge) && (olderCharactersScore !== null) && (ageDifference >= 4))
                 return Matcher.formatKinkScore(olderCharactersScore, 'older characters');
 
-            if ((yourAge > theirAge) && (youngerCharactersScore !== null))
+            if ((yourAge > theirAge) && (youngerCharactersScore !== null) && (ageDifference <= 4))
                 return Matcher.formatKinkScore(youngerCharactersScore, 'younger characters');
         }
 
