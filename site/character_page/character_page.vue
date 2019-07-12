@@ -141,14 +141,14 @@
         beforeMount(): void {
             this.shared.authenticated = this.authenticated;
 
-            console.log('Beforemount');
+            // console.log('Beforemount');
         }
 
         @Hook('mounted')
         async mounted(): Promise<void> {
             await this.load(false);
 
-            console.log('mounted');
+            // console.log('mounted');
         }
 
         @Watch('tab')

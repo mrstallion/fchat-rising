@@ -36,7 +36,7 @@ export class ImagePreviewMutator {
         if (!mutator)
             mutator = this.hostMutators['default'];
 
-        return this.wrapJs(mutator.injectJs);
+        return this.wrapJs(mutator.injectJs) + this.getReShowMutator();
     }
 
     matchMutator(url: string): PreviewMutator | undefined {
@@ -253,15 +253,27 @@ export class ImagePreviewMutator {
                 opacity: 1 !important;
                 text-align: center !important;
             "></div>
-        `);
+        `) + this.wrapJs(
+            `
+                window.__flistUnhide = () => {
+                    const elements = document.querySelectorAll('#flistHider');
+
+                    if (elements) {
+                        elements.forEach( (el) => el.remove() );
+                    }
+                };
+            `
+        );
     }
 
     getReShowMutator(): string {
         return this.wrapJs(
             `
-            const el = document.querySelector('#flistHider');
+            const elements = document.querySelectorAll('#flistHider');
 
-            if (el) { el.remove(); }
+            if (elements) {
+                elements.forEach( (el) => el.remove() );
+            }
             `
         );
     }

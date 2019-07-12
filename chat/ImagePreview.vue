@@ -18,6 +18,7 @@
 </template>
 
 <script lang="ts">
+    import * as _ from 'lodash';
     import {Component, Hook} from '@f-list/vue-ts';
     import Vue from 'vue';
     import { EventBus, EventBusEvent } from './event-bus';
@@ -50,6 +51,8 @@
         externalUrl: string | null = null;
         internalUrl: string | null = null;
 
+        lastExternalUrl = '';
+
         url: string | null = null;
         domain: string | undefined;
 
@@ -74,7 +77,7 @@
                 (eventData: EventBusEvent) => {
                     // console.log('Event dismiss', eventData.url);
 
-                    this.dismiss(eventData.url as string);
+                    this.dismiss(eventData.url as string, eventData.force as boolean);
                 }
             );
 
@@ -110,6 +113,7 @@
                         webview.executeJavaScript(js);
                 }
             );
+
 
             webview.addEventListener(
                 'did-fail-load',
@@ -160,19 +164,41 @@
             );
 
 
+            _.each(
+                ['did-start-loading', 'load-commit', 'will-navigate', 'did-navigate', 'did-navigate-in-page', 'update-target-url'],
+                (en: string) => {
+                    webview.addEventListener(
+                        en,
+                        (event: Event) => {
+                            if (this.debug)
+                                console.log(`ImagePreview ${en}`, event);
+                        }
+                    );
+                }
+            );
+
+
             setInterval(
                 () => {
                     if (((this.visible) && (!this.exitInterval) && (!this.shouldDismiss)) || (this.interval))
                         this.initialCursorPosition = screen.getCursorScreenPoint();
 
-                    if ((this.visible) && (this.shouldDismiss) && (this.hasMouseMovedSince()) && (!this.exitInterval) && (!this.interval))
+                    if ((this.visible) && (this.shouldDismiss) && (this.hasMouseMovedSince()) && (!this.exitInterval) && (!this.interval)) {
+                        if (this.debug) {
+                            console.log('ImagePreview: call hide from interval');
+                        }
+
                         this.hide();
+                    }
                 },
                 10
             );
         }
 
         hide(): void {
+            if (this.debug)
+                console.log('ImagePreview: hide', this.externalUrlVisible, this.internalUrlVisible);
+
             this.cancelExitTimer();
 
             this.url = null;
@@ -180,6 +206,9 @@
 
             if (this.externalUrlVisible) {
                 const webview = this.getWebview();
+
+                if (this.debug)
+                    console.log('ImagePreview: exec hide mutator');
 
                 webview.executeJavaScript(this.jsMutator.getHideMutator());
             }
@@ -198,7 +227,11 @@
             this.sticky = false;
         }
 
-        dismiss(url: string): void {
+        dismiss(url: string, force: boolean = false): void {
+            if (this.debug) {
+                console.log('ImagePreview: dismiss', url);
+            }
+
             if (this.url !== url)
                 return; // simply ignore
 
@@ -220,8 +253,11 @@
             this.exitUrl = this.url;
             this.shouldDismiss = true;
 
-            if (!this.hasMouseMovedSince())
+            if ((!this.hasMouseMovedSince()) && (!force))
                 return;
+
+            if (this.debug)
+                console.log('ImagePreview: dismiss.exec', this.externalUrlVisible, this.internalUrlVisible, url);
 
             // This timeout makes the preview window disappear with a slight delay, which helps UX
             // when dealing with situations such as quickly scrolling text that moves the cursor away
@@ -234,16 +270,37 @@
         }
 
         show(url: string): void {
+            if (this.debug)
+                console.log('ImagePreview: show', this.externalUrlVisible, this.internalUrlVisible,
+                this.visible, this.hasMouseMovedSince(), !!this.interval, this.sticky, url);
+
             // console.log('SHOW');
 
-            if ((this.visible) && (!this.hasMouseMovedSince()))
+            if ((this.visible) && (!this.exitInterval) && (!this.hasMouseMovedSince())) {
+                if (this.debug) {
+                    console.log('ImagePreview: show cancel: visible & not moved');
+                }
                 return;
+            }
 
-            if ((this.url === url) && ((this.visible) || (this.interval)))
-                return;
+            if ((this.url === url) && ((this.visible) || (this.interval))) {
+                if (this.debug) {
+                    console.log('ImagePreview: same url');
+                }
 
-            if ((this.url) && (this.sticky) && (this.visible))
                 return;
+            }
+
+            if ((this.url) && (this.sticky) && (this.visible)) {
+                if (this.debug) {
+                    console.log('ImagePreview: sticky visible');
+                }
+
+                return;
+            }
+
+            if (this.debug)
+                console.log('ImagePreview: show.exec', url);
 
             const due = ((url === this.exitUrl) && (this.exitInterval)) ? 0 : 100;
 
@@ -258,6 +315,9 @@
             // tslint:disable-next-line no-unnecessary-type-assertion
             this.interval = setTimeout(
                 () => {
+                    if (this.debug)
+                        console.log('ImagePreview: show.timeout', this.url);
+
                     const isInternal = this.isInternalUrl();
 
                     this.internalUrlVisible = isInternal;
@@ -269,14 +329,22 @@
                         const webview = this.getWebview();
 
                         try {
-                            if (webview.getURL() === this.url) {
+                            if ((webview.getURL() === this.url) || (this.url === this.lastExternalUrl)) {
+                                if (this.debug)
+                                    console.log('ImagePreview: exec re-show mutator');
+
                                 webview.executeJavaScript(this.jsMutator.getReShowMutator());
+                            } else {
+                                if (this.debug)
+                                    console.log('ImagePreview: skip re-show because urls don\'t match', this.url, webview.getURL());
                             }
+
                         } catch (err) {
-                            console.log('Webview reuse error', err);
+                            console.error('ImagePreview: Webview reuse error', err);
                         }
 
                         this.externalUrl = this.url;
+                        this.lastExternalUrl = this.url as string;
                     }
 
                     this.visible = true;
@@ -297,7 +365,7 @@
 
                 return ((p.x !== this.initialCursorPosition.x) || (p.y !== this.initialCursorPosition.y));
             } catch (err) {
-                console.error(err);
+                console.error('ImagePreview', err);
                 return true;
             }
         }
