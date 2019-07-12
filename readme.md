@@ -5,6 +5,9 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
 
 ## Key Differences
 
+*   Ads view
+    *    Highlight ads from characters most interesting to you / hide ads from characters clearly incompatible
+    *    View recent ads from a character on any channel to which you subscribe
 *   Ad auto-posting
     *    Manage channel's ad settings via "Tab Settings"
     *    Automatically re-post ads every 11-18 minutes (randomized) for up to 180 minutes
@@ -30,11 +33,8 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
 *   Preview mode should allow detaching from the main window
 *   Split chat view
 *   Improvements to log browsing
-*   Highlight ads from characters most interesting to you
 *   Fix broken BBCode, such as `[big]` in character profiles
-*   Ad cache, so you can find your chat partners ads easily (channel names too)
 *   Which channels my chart partner is on?
-*   Profile doesn't scroll back up
 
 
 # F-List Exported
