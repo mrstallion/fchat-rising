@@ -1,12 +1,16 @@
 /* tslint:disable:quotemark */
 
 import * as _ from 'lodash';
+import * as urlHelper from 'url';
+
 
 import { domain as extractDomain } from '../bbcode/core';
 
 export interface PreviewMutator {
     match: string | RegExp;
     injectJs: string;
+
+    urlMutator?(url: string): string;
 }
 
 export interface ImagePreviewMutatorCollection {
@@ -29,6 +33,17 @@ export class ImagePreviewMutator {
     setDebug(debug: boolean): void {
         this.debug = debug;
     }
+
+
+    mutateUrl(url: string): string {
+        const mutator = this.matchMutator(url);
+
+        if ((!mutator) || (!mutator.urlMutator))
+            return url;
+
+        return mutator.urlMutator(url);
+    }
+
 
     getMutatorJsForSite(url: string): string | undefined {
         let mutator = this.matchMutator(url);
@@ -62,12 +77,13 @@ export class ImagePreviewMutator {
         return `(() => { try { ${mutatorJs} } catch (err) { console.error('Mutator error', err); } })();`;
     }
 
-    protected add(domain: string | RegExp, mutatorJs: string): void {
+    protected add(domain: string | RegExp, mutatorJs: string, urlMutator?: (url: string) => string): void {
         if (domain instanceof RegExp) {
             this.regexMutators.push(
                 {
                     match: domain,
-                    injectJs: mutatorJs
+                    injectJs: mutatorJs,
+                    urlMutator
                 }
             );
 
@@ -76,7 +92,8 @@ export class ImagePreviewMutator {
 
         this.hostMutators[domain] = {
             match: domain,
-            injectJs: mutatorJs
+            injectJs: mutatorJs,
+            urlMutator
         };
     }
 
@@ -99,8 +116,6 @@ export class ImagePreviewMutator {
         this.add('postimg.cc', this.getBaseJsMutatorScript('#main-image, video'));
         this.add('gifsauce.com', this.getBaseJsMutatorScript('video'));
         this.add('motherless.com', this.getBaseJsMutatorScript('.content video, .content img'));
-        // this.add('beeg.com', this.getBaseJsMutatorScript('video'));
-
         this.add(/^media[0-9]\.giphy\.com$/, this.getBaseJsMutatorScript('video, img[alt]'));
 
         // tslint:disable max-line-length
@@ -122,6 +137,25 @@ export class ImagePreviewMutator {
                 const content = document.querySelector('#content');
                 content.remove();
             `
+        );
+
+
+        this.add(
+            'hentai-foundry.com',
+            this.getBaseJsMutatorScript('main video, main img'),
+            (url: string): string => {
+                const u = urlHelper.parse(url, true);
+
+                if (!u)
+                    return url;
+
+                // tslint:disable-next-line no-any
+                (u.query as any).enterAgree = 1;
+
+                delete u.search;
+
+                return urlHelper.format(u);
+            }
         );
     }
 
@@ -152,7 +186,7 @@ export class ImagePreviewMutator {
 
             body.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
-                + 'top: 0 !important; left: 0 !important;';
+                + 'top: 0 !important; left: 0 !important; position: absolute !important';
 
             img.style = 'object-position: top left !important; object-fit: contain !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'

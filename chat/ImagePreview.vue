@@ -8,7 +8,8 @@
             <a @click="toggleStickyMode()" :class="{toggled: sticky}" title="Toggle Stickyness"><i class="fa fa-thumbtack"></i></a>
         </div>
 
-        <webview webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required" id="image-preview-ext" ref="imagePreviewExt" class="image-preview-external" :src="externalUrl" :style="{display: externalUrlVisible ? 'flex' : 'none'}"></webview>
+        <webview src="about:blank" webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required" id="image-preview-ext" ref="imagePreviewExt" class="image-preview-external" :style="{display: externalUrlVisible ? 'flex' : 'none'}"></webview>
+
         <div
             class="image-preview-local"
             :style="{backgroundImage: `url(${internalUrl})`, display: internalUrlVisible ? 'block' : 'none'}"
@@ -93,7 +94,9 @@
             EventBus.$on(
                 'imagepreview-toggle-stickyness',
                 (eventData: EventBusEvent) => {
-                    if ((this.url === (eventData.url as string)) && (this.visible))
+                    const eventUrl = this.jsMutator.mutateUrl(eventData.url as string);
+
+                    if ((this.url === eventUrl) && (this.visible))
                         this.sticky = !this.sticky;
                 }
             );
@@ -227,7 +230,9 @@
             this.sticky = false;
         }
 
-        dismiss(url: string, force: boolean = false): void {
+        dismiss(initialUrl: string, force: boolean = false): void {
+            const url = this.jsMutator.mutateUrl(initialUrl);
+
             if (this.debug) {
                 console.log('ImagePreview: dismiss', url);
             }
@@ -269,7 +274,9 @@
             ) as Timer;
         }
 
-        show(url: string): void {
+        show(initialUrl: string): void {
+            const url = this.jsMutator.mutateUrl(initialUrl);
+
             if (this.debug)
                 console.log('ImagePreview: show', this.externalUrlVisible, this.internalUrlVisible,
                 this.visible, this.hasMouseMovedSince(), !!this.interval, this.sticky, url);
@@ -336,7 +343,9 @@
                                 webview.executeJavaScript(this.jsMutator.getReShowMutator());
                             } else {
                                 if (this.debug)
-                                    console.log('ImagePreview: skip re-show because urls don\'t match', this.url, webview.getURL());
+                                    console.log('ImagePreview: must load; skip re-show because urls don\'t match', this.url, webview.getURL());
+
+                                webview.loadURL(this.url as string);
                             }
 
                         } catch (err) {

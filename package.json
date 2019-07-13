@@ -9,6 +9,7 @@
     "@f-list/vue-ts": "^1.0.2",
     "@fortawesome/fontawesome-free": "^5.6.1",
     "@types/lodash": "^4.14.119",
+    "@types/qs": "^6.5.3",
     "@types/sortablejs": "^1.7.0",
     "@types/sqlite3": "^3.1.5",
     "@vue/devtools": "^5.1.0",

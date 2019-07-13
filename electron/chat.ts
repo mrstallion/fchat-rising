@@ -40,6 +40,7 @@ import * as electron from 'electron';
 import * as path from 'path';
 import * as qs from 'querystring';
 import {getKey} from '../chat/common';
+import { EventBus } from '../chat/event-bus';
 import l from '../chat/localize';
 import {setupRaven} from '../chat/vue-raven';
 import {Keys} from '../keys';
@@ -131,6 +132,13 @@ webContents.on('context-menu', (_, props) => {
                     electron.clipboard.writeBookmark(props.linkText, props.linkURL);
                 else
                     electron.clipboard.writeText(props.linkURL);
+            }
+        });
+        menuTemplate.push({
+            id: 'toggleStickyness',
+            label: 'Toggle Sticky Preview',
+            click(): void {
+                EventBus.$emit('imagepreview-toggle-stickyness', {url: props.linkURL});
             }
         });
         if(process.platform === 'win32')
