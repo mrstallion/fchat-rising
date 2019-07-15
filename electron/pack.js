@@ -76,6 +76,10 @@ require('electron-packager')({
     osxSign: process.argv.length > 2 ? {identity: process.argv[2]} : false,
     prune: false
 }).then((appPaths) => {
+    if (process.env.SKIP_INSTALLER) {
+        return;
+    }
+
     if(process.platform === 'win32') {
         console.log('Creating Windows installer');
         const icon = path.join(__dirname, 'build', 'icon.ico');
