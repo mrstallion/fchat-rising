@@ -30,6 +30,17 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
     }
 
 
+    getSync(name: string): CharacterCacheRecord | null {
+        const key = AsyncCache.nameKey(name);
+
+        if (key in this.cache) {
+            return this.cache[key];
+        }
+
+        return null;
+    }
+
+
     async get(name: string, skipStore: boolean = false): Promise<CharacterCacheRecord | null> {
         const key = AsyncCache.nameKey(name);
 

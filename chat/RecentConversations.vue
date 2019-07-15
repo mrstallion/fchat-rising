@@ -24,7 +24,7 @@
     import core from './core';
     import {Character, Conversation} from './interfaces';
     import l from './localize';
-    import UserView from './user_view';
+    import UserView from './UserView.vue';
 
     @Component({
         components: {'user-view': UserView, 'channel-view': ChannelView, modal: Modal, tabs: Tabs}

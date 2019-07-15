@@ -21,6 +21,9 @@
                 <span class="far fa-fw fa-sticky-note"></span>{{l('user.memo')}}</a>
             <a tabindex="-1" href="#" @click.prevent="setBookmarked()" class="list-group-item list-group-item-action">
                 <span class="far fa-fw fa-bookmark"></span>{{l('user.' + (character.isBookmarked ? 'unbookmark' : 'bookmark'))}}</a>
+            <a tabindex="-1" href="#" @click.prevent="showAdLogs()" class="list-group-item list-group-item-action" :class="{ disabled: !hasAdLogs()}">
+                <span class="far fa-fw fa-ad"></span>Show ad log
+            </a>
             <a tabindex="-1" href="#" @click.prevent="setHidden()" class="list-group-item list-group-item-action" v-show="!isChatOp">
                 <span class="fa fa-fw fa-eye-slash"></span>{{l('user.' + (isHidden ? 'unhide' : 'hide'))}}</a>
             <a tabindex="-1" href="#" @click.prevent="report()" class="list-group-item list-group-item-action" style="border-top-width:1px">
@@ -36,6 +39,7 @@
             <div style="float:right;text-align:right;">{{getByteLength(memo)}} / 1000</div>
             <textarea class="form-control" v-model="memo" :disabled="memoLoading" maxlength="1000"></textarea>
         </modal>
+        <ad-view ref="adViewDialog" :character="character" v-if="character"></ad-view>
     </div>
 </template>
 
@@ -43,6 +47,7 @@
     import {Component, Prop} from '@f-list/vue-ts';
     import Vue from 'vue';
     import Modal from '../components/Modal.vue';
+    import AdView from './AdView.vue';
     import {BBCodeView} from './bbcode';
     import {characterImage, errorToString, getByteLength, profileLink} from './common';
     import core from './core';
@@ -51,7 +56,7 @@
     import ReportDialog from './ReportDialog.vue';
 
     @Component({
-        components: {bbcode: BBCodeView, modal: Modal}
+        components: {bbcode: BBCodeView, modal: Modal, 'ad-view': AdView}
     })
     export default class UserMenu extends Vue {
         @Prop({required: true})
@@ -118,6 +123,30 @@
         updateMemo(): void {
             core.connection.queryApi('character-memo-save.php', {target: this.memoId, note: this.memo})
                 .catch((e: object) => alert(errorToString(e)));
+        }
+
+
+        showAdLogs(): void {
+            if (!this.hasAdLogs()) {
+                return;
+            }
+
+            (<AdView>this.$refs['adViewDialog']).show();
+        }
+
+
+        hasAdLogs(): boolean {
+            if (!this.character) {
+                return false;
+            }
+
+            const cache = core.cache.adCache.get(this.character.name);
+
+            if (!cache) {
+                return false;
+            }
+
+            return (cache.count() > 0);
         }
 
         get isChannelMod(): boolean {

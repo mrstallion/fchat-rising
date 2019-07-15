@@ -4,7 +4,7 @@
             <img :src="characterImage" style="height:60px;width:60px;margin-right:10px" v-if="settings.showAvatars"/>
             <div style="flex:1;position:relative;display:flex;flex-direction:column">
                 <div>
-                    <user :character="conversation.character"></user>
+                    <user :character="conversation.character" :match="true"></user>
                     <a href="#" @click.prevent="showLogs()" class="btn">
                         <span class="fa fa-file-alt"></span> <span class="btn-text">{{l('logs.title')}}</span>
                     </a>
@@ -16,6 +16,10 @@
 
                     <a href="#" @click.prevent="showAds()" class="btn">
                         <span class="fa fa-ad"></span><span class="btn-text">Ads</span>
+                    </a>
+
+                    <a href="#" @click.prevent="showChannels()" class="btn">
+                        <span class="fa fa-tv"></span><span class="btn-text">Channels</span>
                     </a>
                 </div>
                 <div style="overflow:auto;max-height:50px">
@@ -140,7 +144,8 @@
         <settings ref="settingsDialog" :conversation="conversation"></settings>
         <logs ref="logsDialog" :conversation="conversation"></logs>
         <manage-channel ref="manageDialog" v-if="isChannel(conversation)" :channel="conversation.channel"></manage-channel>
-        <ad-view ref="adViewer" v-if="isPrivate(conversation)" :character="conversation.character"></ad-view>
+        <ad-view ref="adViewer" v-if="isPrivate(conversation) && conversation.character" :character="conversation.character"></ad-view>
+        <channel-list ref="channelList" v-if="isPrivate(conversation)" :character="conversation.character"></channel-list>
     </div>
 </template>
 
@@ -163,13 +168,14 @@
     import MessageView from './message_view';
     import ReportDialog from './ReportDialog.vue';
     import {isCommand} from './slash_commands';
-    import UserView from './user_view';
+    import UserView from './UserView.vue';
+    import UserChannelList from './UserChannelList.vue';
 
     @Component({
         components: {
             user: UserView, 'bbcode-editor': Editor, 'manage-channel': ManageChannel, settings: ConversationSettings,
             logs: Logs, 'message-view': MessageView, bbcode: BBCodeView, 'command-help': CommandHelp,
-            'ad-view': AdView
+            'ad-view': AdView, 'channel-list': UserChannelList
         }
     })
     export default class ConversationView extends Vue {
@@ -411,6 +417,10 @@
             (<AdView>this.$refs['adViewer']).show();
         }
 
+        showChannels(): void {
+            (<UserChannelList>this.$refs['channelList']).show();
+        }
+
 
         isAutopostingAds(): boolean {
             return this.conversation.adManager.isActive();
@@ -632,6 +642,43 @@
         .border-bottom {
             margin-bottom: 15px;
             border-width: 1px;
+        }
+    }
+
+
+    .user-view {
+        .match-found {
+            margin-left: 3px;
+            padding-left: 2px;
+            padding-right: 2px;
+            border-radius: 3px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 75%;
+            padding-top: 0;
+            padding-bottom: 0;
+            text-align: center;
+            display: inline-block;
+            text-transform: uppercase;
+
+            &.match {
+                background-color: rgb(0, 142, 0);
+                border: solid 1px rgb(0, 113, 0);
+            }
+
+            &.weak-match {
+                background-color: rgb(0, 80, 0);
+                border: 1px solid rgb(0, 64, 0);
+            }
+
+            &.weak-mismatch {
+                background-color: rgb(152, 134, 0);
+                border: 1px solid rgb(142, 126, 0);
+            }
+
+            &.mismatch {
+                background-color: rgb(171, 0, 0);
+                border: 1px solid rgb(128, 0, 0);
+            }
         }
     }
 

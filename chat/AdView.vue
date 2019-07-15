@@ -1,7 +1,7 @@
 <template>
    <modal :buttons="false" ref="dialog" @open="onOpen" @close="onClose" style="width:98%" dialogClass="ads-dialog">
         <template slot="title">
-            Channel Ads for {{character.name}}
+            Channel Ads for <user :character="character">{{character.name}}</user>
         </template>
 
        <div class="row ad-viewer" ref="pageBody">
@@ -25,9 +25,10 @@ import { Character } from '../fchat/interfaces';
 import { AdCachedPosting } from '../learn/ad-cache';
 import core from './core';
 import {formatTime} from './common';
+import UserView from './UserView.vue';
 
 @Component({
-    components: {modal: Modal}
+    components: {modal: Modal, user: UserView}
 })
 export default class AdView extends CustomDialog {
     @Prop({required: true})

@@ -3,7 +3,7 @@ import core from '../chat/core';
 import { ChannelAdEvent, ChannelMessageEvent, CharacterDataEvent, EventBus } from '../chat/event-bus';
 import { Conversation } from '../chat/interfaces';
 import { methods } from '../site/character_page/data_store';
-import { Character } from '../site/character_page/interfaces';
+import { Character as ComplexCharacter } from '../site/character_page/interfaces';
 import { Gender } from './matcher';
 import { AdCache } from './ad-cache';
 import { ChannelConversationCache } from './channel-conversation-cache';
@@ -74,7 +74,15 @@ export class CacheManager {
     }
 
 
-    updateAdScoringForProfile(c: Character, score: number): void {
+    updateAdScoringForProfile(c: ComplexCharacter, score: number): void {
+        EventBus.$emit(
+            'character-score',
+            {
+                character: c,
+                score
+            }
+        );
+
         _.each(
             core.conversations.channelConversations,
             (ch: ChannelConversation) => {
@@ -92,7 +100,7 @@ export class CacheManager {
     }
 
 
-    async addProfile(character: string | Character): Promise<void> {
+    async addProfile(character: string | ComplexCharacter): Promise<void> {
         if (typeof character === 'string') {
             // console.log('Learn discover', character);
 
@@ -237,7 +245,7 @@ export class CacheManager {
     }
 
 
-    setProfile(c: Character): void {
+    setProfile(c: ComplexCharacter): void {
         this.characterProfiler = new CharacterProfiler(c, this.adCache);
     }
 }

@@ -30,7 +30,7 @@
     import core from './core';
     import {Character, userStatuses} from './interfaces';
     import l from './localize';
-    import {getStatusIcon} from './user_view';
+    import {getStatusIcon} from './UserView.vue';
 
     @Component({
         components: {modal: Modal, editor: Editor, dropdown: Dropdown}

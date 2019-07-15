@@ -8,7 +8,7 @@ import {characterImage} from './common';
 import core from './core';
 import {Character} from './interfaces';
 import {default as UrlView} from '../bbcode/UrlTagView.vue';
-import UserView from './user_view';
+import UserView from './UserView.vue';
 
 export const BBCodeView: Component = {
     functional: true,

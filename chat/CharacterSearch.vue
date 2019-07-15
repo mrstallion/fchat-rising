@@ -36,7 +36,7 @@
     import core from './core';
     import {Character, Connection} from './interfaces';
     import l from './localize';
-    import UserView from './user_view';
+    import UserView from './UserView.vue';
 
     type Options = {
         kinks: Kink[],

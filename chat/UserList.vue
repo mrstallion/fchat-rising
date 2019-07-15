@@ -36,7 +36,7 @@
     import {Channel, Character, Conversation} from './interfaces';
     import l from './localize';
     import Sidebar from './Sidebar.vue';
-    import UserView from './user_view';
+    import UserView from './UserView.vue';
 
     @Component({
         components: {user: UserView, sidebar: Sidebar, tabs: Tabs}

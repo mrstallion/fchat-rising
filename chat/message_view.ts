@@ -6,7 +6,7 @@ import {BBCodeView} from './bbcode';
 import {formatTime} from './common';
 import core from './core';
 import {Conversation} from './interfaces';
-import UserView from './user_view';
+import UserView from './UserView.vue';
 
 const userPostfix: {[key: number]: string | undefined} = {
     [Conversation.Message.Type.Message]: ': ',

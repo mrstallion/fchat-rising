@@ -25,7 +25,11 @@
                     {{conversations.consoleTab.name}}
                 </a>
             </div>
+
+
             {{l('chat.pms')}}
+            <div @click.prevent="showAddPmPartner()" class="pm-add"><a href="#"><span class="fas fa-plus"></span></a></div>
+
             <div class="list-group conversation-nav" ref="privateConversations">
                 <a v-for="conversation in conversations.privateConversations" href="#" @click.prevent="conversation.show()"
                     :class="getClasses(conversation)" :data-character="conversation.character.name" data-touch="false"
@@ -91,6 +95,7 @@
         <user-menu ref="userMenu" :reportDialog="$refs['reportDialog']"></user-menu>
         <recent-conversations ref="recentDialog"></recent-conversations>
         <image-preview ref="imagePreview"></image-preview>
+        <add-pm-partner ref="addPmPartnerDialog"></add-pm-partner>
     </div>
 </template>
 
@@ -107,12 +112,13 @@
     import core from './core';
     import {Character, Connection, Conversation} from './interfaces';
     import l from './localize';
+    import PmPartnerAdder from './PmPartnerAdder.vue';
     import RecentConversations from './RecentConversations.vue';
     import ReportDialog from './ReportDialog.vue';
     import SettingsView from './SettingsView.vue';
     import Sidebar from './Sidebar.vue';
     import StatusSwitcher from './StatusSwitcher.vue';
-    import {getStatusIcon} from './user_view';
+    import {getStatusIcon} from './UserView.vue';
     import UserList from './UserList.vue';
     import UserMenu from './UserMenu.vue';
     import ImagePreview from './ImagePreview.vue';
@@ -128,7 +134,8 @@
             'user-list': UserList, channels: ChannelList, 'status-switcher': StatusSwitcher, 'character-search': CharacterSearch,
             settings: SettingsView, conversation: ConversationView, 'report-dialog': ReportDialog, sidebar: Sidebar,
             'user-menu': UserMenu, 'recent-conversations': RecentConversations,
-            'image-preview': ImagePreview
+            'image-preview': ImagePreview,
+            'add-pm-partner': PmPartnerAdder
         }
     })
     export default class ChatView extends Vue {
@@ -294,6 +301,10 @@
             (<StatusSwitcher>this.$refs['statusDialog']).show();
         }
 
+        showAddPmPartner(): void {
+            (<PmPartnerAdder>this.$refs['addPmPartnerDialog']).show();
+        }
+
         userMenuHandle(e: MouseEvent | TouchEvent): void {
             (<UserMenu>this.$refs['userMenu']).handleEvent(e);
         }
@@ -327,6 +338,12 @@
 
     .bbcode, .message, .profile-viewer {
         user-select: text;
+    }
+
+    .pm-add {
+        font-size: 90%;
+        float: right;
+        margin-right: 5px;
     }
 
     .list-group.conversation-nav {
