@@ -10,23 +10,29 @@
             <filterable-select v-for="item in listItems" :multiple="true"
                 v-model="data[item]" :placeholder="l('filter')" :title="l('characterSearch.' + item)" :options="options[item]" :key="item">
             </filterable-select>
+
+            <div v-if="searchString" class="search-string">
+                Searching for <span>{{searchString}}</span>
+            </div>
+
+            <button class="btn btn-outline-secondary" @click.prevent="reset()">Reset</button>
         </div>
         <div v-else-if="results" class="results">
             <h4>{{l('characterSearch.results')}}</h4>
             <div v-for="character in results" :key="character.name" :class="'status-' + character.status">
                 <template v-if="character.status === 'looking'" v-once>
                     <img :src="characterImage(character.name)" v-if="showAvatars"/>
-                    <user :character="character" :showStatus="true"></user>
+                    <user :character="character" :showStatus="true" :match="true"></user>
                     <bbcode :text="character.statusText"></bbcode>
                 </template>
-                <user v-else :character="character" :showStatus="true" v-once></user>
+                <user v-else :character="character" :showStatus="true" :match="true" v-once></user>
             </div>
         </div>
     </modal>
 </template>
 
 <script lang="ts">
-    import {Component, Hook} from '@f-list/vue-ts';
+    import { Component, Hook, Watch } from '@f-list/vue-ts';
     import Axios from 'axios';
     import CustomDialog from '../components/custom_dialog';
     import FilterableSelect from '../components/FilterableSelect.vue';
@@ -37,6 +43,7 @@
     import {Character, Connection} from './interfaces';
     import l from './localize';
     import UserView from './UserView.vue';
+    import * as _ from 'lodash';
 
     type Options = {
         kinks: Kink[],
@@ -78,6 +85,8 @@
         data: Data = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: []};
         listItems: ReadonlyArray<keyof Data> = ['genders', 'orientations', 'languages', 'furryprefs', 'roles', 'positions'];
 
+        searchString = '';
+
         @Hook('created')
         async created(): Promise<void> {
             if(options === undefined)
@@ -114,6 +123,21 @@
             });
         }
 
+
+        @Watch('data', { deep: true })
+        onDataChange(): void {
+            this.searchString = _.join(
+                _.map(
+                    _.flatten(_.map(this.data as any)),
+                    (v) => {
+                        return _.get(v, 'name', v);
+                    }
+                ),
+                ', '
+            );
+        }
+
+
         filterKink(filter: RegExp, kink: Kink): boolean {
             if(this.data.kinks.length >= 5)
                 return this.data.kinks.indexOf(kink) !== -1;
@@ -123,6 +147,12 @@
         get showAvatars(): boolean {
             return core.state.settings.showAvatars;
         }
+
+
+        reset(): void {
+            this.data = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: []};
+        }
+
 
         submit(): void {
             if(this.results !== undefined) {
@@ -160,6 +190,17 @@
                 margin-right: 5px;
                 width: 50px;
             }
+        }
+
+        .search-string {
+            margin-bottom: 1rem;
+            margin-top: 1rem;
+            margin-left: 0.5rem;
+            font-size: 80%;
+        }
+
+        .search-string span {
+            font-weight: bold;
         }
     }
 </style>

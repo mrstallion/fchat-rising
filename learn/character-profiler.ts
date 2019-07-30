@@ -30,7 +30,10 @@ export class CharacterProfiler {
         const friendlyScore = this.getInterestScoreForFriendlies(c);
 
         // tslint:disable-next-line: number-literal-format binary-expression-operand-order
-        return ((1.0 * genderScore) + (1.0 * statusScore) + (1.0 * adScore) + (1.0 * friendlyScore));
+
+        const score = ((1.0 * genderScore) + (1.0 * statusScore) + (1.0 * adScore) + (1.0 * friendlyScore));
+
+        return (c.status === 'looking') ? score + 10.0 : score;
     }
 
 

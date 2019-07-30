@@ -38,10 +38,14 @@ export class CacheManager {
     protected profileStore?: IndexedStore;
 
 
-    queueForFetching(name: string, skipCacheCheck: boolean = false): void {
+    async queueForFetching(name: string, skipCacheCheck: boolean = false): Promise<void> {
         if (!skipCacheCheck) {
-            if (this.profileCache.get(name))
+            const c = await this.profileCache.get(name);
+
+            if (c) {
+                this.updateAdScoringForProfile(c.character, c.matchScore);
                 return;
+            }
         }
 
         const key = ProfileCache.nameKey(name);
@@ -57,6 +61,8 @@ export class CacheManager {
         };
 
         this.queue.push(entry);
+
+        // console.log('AddProfileForFetching', name, this.queue.length);
     }
 
     async fetchProfile(name: string): Promise<void> {
@@ -104,7 +110,7 @@ export class CacheManager {
         if (typeof character === 'string') {
             // console.log('Learn discover', character);
 
-            this.queueForFetching(character);
+            await this.queueForFetching(character);
             return;
         }
 
@@ -131,11 +137,17 @@ export class CacheManager {
         }
 
         // re-score
-        _.each(this.queue, (e: ProfileCacheQueueEntry) => this.calculateScore(e));
+        _.each(this.queue, (e: ProfileCacheQueueEntry) => e.score = this.calculateScore(e));
 
         this.queue = _.sortBy(this.queue, 'score');
 
-        return this.queue.pop() as ProfileCacheQueueEntry;
+        console.log('QUEUE', _.map(this.queue, (q) => `${q.name}: ${q.score}`));
+
+        const entry = this.queue.pop() as ProfileCacheQueueEntry;
+
+        // console.log('PopFromQueue', entry.name, this.queue.length);
+
+        return entry;
     }
 
     calculateScore(e: ProfileCacheQueueEntry): number {
@@ -178,7 +190,7 @@ export class CacheManager {
 
         EventBus.$on(
             'channel-ad',
-            (data: ChannelAdEvent) => {
+            async(data: ChannelAdEvent) => {
                 const message = data.message;
                 const channel = data.channel;
 
@@ -192,7 +204,7 @@ export class CacheManager {
                 );
 
                 if (!data.profile) {
-                    this.queueForFetching(message.sender.name, true);
+                    await this.queueForFetching(message.sender.name, true);
                 }
 
                 // this.addProfile(message.sender.name);

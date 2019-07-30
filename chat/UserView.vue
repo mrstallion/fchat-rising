@@ -75,8 +75,10 @@ export default class UserView extends Vue {
 
             // tslint:disable-next-line no-unsafe-any no-any
             this.scoreWatcher = (event: any): void => {
+                // console.log('scoreWatcher', event);
+
                 // tslint:disable-next-line no-unsafe-any no-any
-                if ((event.character) && (event.character.name === this.character.name)) {
+                if ((event.character) && (event.character.character.name === this.character.name)) {
                     this.update();
 
                     if (this.scoreWatcher) {
@@ -112,7 +114,7 @@ export default class UserView extends Vue {
         this.statusClass = null;
         this.matchClass = null;
 
-        if (this.match) console.log('Update');
+        // if (this.match) console.log('Update', this.character.name);
 
         if(this.character.isChatOp) {
             this.rankIcon = 'far fa-gem';
@@ -127,7 +129,7 @@ export default class UserView extends Vue {
         if ((this.showStatus) || (this.character.status === 'crown'))
             this.statusClass = `fa-fw ${getStatusIcon(this.character.status)}`;
 
-        if (this.match) console.log('Update prematch');
+        // if (this.match) console.log('Update prematch', this.character.name);
 
         if (this.match) {
             const cache = core.cache.profileCache.getSync(this.character.name);
@@ -135,12 +137,17 @@ export default class UserView extends Vue {
             if (cache) {
                 this.matchClass = `match-found ${Score.getClasses(cache.matchScore)}`;
                 this.matchScore = cache.matchScore;
+
+                // console.log('Found match data', this.character.name, cache.matchScore);
             } else {
+                // console.log('Need match data', this.character.name);
+
+                /* tslint:disable-next-line no-floating-promises */
                 core.cache.addProfile(this.character.name);
             }
         }
 
-        if (this.match) console.log('Update post match');
+        // if (this.match) console.log('Update post match', this.character.name);
 
         const gender = this.character.gender !== undefined ? this.character.gender.toLowerCase() : 'none';
 
@@ -150,7 +157,7 @@ export default class UserView extends Vue {
 
         this.userClass = `user-view gender-${gender}${isBookmark ? ' user-bookmark' : ''}`;
 
-        if (this.match) console.log('Update done');
+        // if (this.match) console.log('Update done');
     }
 
 

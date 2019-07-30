@@ -27,6 +27,10 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
     *    Cleaner presentation for the side bar details (age, etc.), sorted in most relevant order
     *    Less informative side bar details (views, contact) are separated and shown in a less prominent way
     *    Cleaner guestbook view
+*   Character Search
+    *    Display pairing score on search results
+    *    Current search filters are listed on the search dialog
+    *    Search filters can be reset
 
 
 ## Todo / Ideas
