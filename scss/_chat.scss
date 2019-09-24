@@ -189,7 +189,7 @@
 }
 
 .messages-both {
-  .message-ad {
+  .message-ad:not(.message-score) {
     background-color: theme-color-level("info", -4);
     padding: 0 2px 2px 2px;
     box-shadow: $gray-500 -2px -2px 2px inset;

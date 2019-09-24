@@ -44,6 +44,7 @@
     import l from './localize';
     import UserView from './UserView.vue';
     import * as _ from 'lodash';
+    import {EventBus} from './event-bus';
 
     type Options = {
         kinks: Kink[],
@@ -57,6 +58,26 @@
     function sort(x: Character, y: Character): number {
         if(x.status === 'looking' && y.status !== 'looking') return -1;
         if(x.status !== 'looking' && y.status === 'looking') return 1;
+
+        const xc = core.cache.profileCache.getSync(x.name);
+        const yc = core.cache.profileCache.getSync(y.name);
+
+        if (xc && !yc) {
+            return -1;
+        }
+
+        if (!xc && yc) {
+            return 1;
+        }
+
+        if (xc && yc) {
+            if (xc.matchScore > yc.matchScore)
+                return -1;
+
+            if (xc.matchScore < yc.matchScore)
+                return 1;
+        }
+
         if(x.name < y.name) return -1;
         if(x.name > y.name) return 1;
         return 0;
@@ -86,6 +107,10 @@
         listItems: ReadonlyArray<keyof Data> = ['genders', 'orientations', 'languages', 'furryprefs', 'roles', 'positions'];
 
         searchString = '';
+
+        // tslint:disable-next-line no-any
+        scoreWatcher: ((event: any) => void) | null = null;
+
 
         @Hook('created')
         async created(): Promise<void> {
@@ -121,6 +146,43 @@
                 this.results = data.characters.map((x) => core.characters.get(x))
                     .filter((x) => core.state.hiddenUsers.indexOf(x.name) === -1 && !x.isIgnored).sort(sort);
             });
+
+            if (this.scoreWatcher) {
+                EventBus.$off('character-score', this.scoreWatcher);
+            }
+
+            // tslint:disable-next-line no-unsafe-any no-any
+            this.scoreWatcher = (event: any): void => {
+                // console.log('scoreWatcher', event);
+
+                if (
+                    (this.results)
+                    // tslint:disable-next-line no-unsafe-any no-any
+                    && (event.character)
+                    // tslint:disable-next-line no-unsafe-any no-any
+                    && (_.find(this.results, (c: Character) => c.name === event.character.character.name))
+                ) {
+                    this.results = this.results.sort(sort);
+                }
+            };
+
+            EventBus.$on(
+                'character-score',
+                this.scoreWatcher
+            );
+        }
+
+
+        @Hook('beforeDestroy')
+        beforeDestroy(): void {
+            if (this.scoreWatcher) {
+                EventBus.$off(
+                    'character-score',
+                    this.scoreWatcher
+                );
+
+                delete this.scoreWatcher;
+            }
         }
 
 
@@ -128,10 +190,10 @@
         onDataChange(): void {
             this.searchString = _.join(
                 _.map(
+                    // tslint:disable-next-line no-unsafe-any no-any
                     _.flatten(_.map(this.data as any)),
-                    (v) => {
-                        return _.get(v, 'name', v);
-                    }
+                    // tslint:disable-next-line no-unsafe-any no-any
+                    (v) => _.get(v, 'name', v)
                 ),
                 ', '
             );

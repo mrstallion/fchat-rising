@@ -693,13 +693,15 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
             &.match {
-                border-left: 12px solid #027b02;
-                background-color: rgba(1, 115, 1, 0.45);
+                border-left: 12px solid #048a04;
+                background-color: rgba(0, 110, 0, 0.47);
+                // border-left: 12px solid #027b02;
+                // background-color: rgba(1, 115, 1, 0.45);
             }
 
             &.weak-match {
-                border-left: 12px solid #015a01;
-                background-color: rgba(0, 70, 0, 0.4);
+                border-left: 12px solid #014a01;
+                background-color: rgba(0, 79, 0, 0.4);
 
                 .bbcode {
                     filter: grayscale(0.25);

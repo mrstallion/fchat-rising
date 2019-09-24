@@ -141,7 +141,7 @@ export class CacheManager {
 
         this.queue = _.sortBy(this.queue, 'score');
 
-        console.log('QUEUE', _.map(this.queue, (q) => `${q.name}: ${q.score}`));
+        // console.log('QUEUE', _.map(this.queue, (q) => `${q.name}: ${q.score}`));
 
         const entry = this.queue.pop() as ProfileCacheQueueEntry;
 
