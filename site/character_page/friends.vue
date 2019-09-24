@@ -16,6 +16,7 @@
     import * as Utils from '../utils';
     import {methods} from './data_store';
     import {Character, CharacterFriend} from './interfaces';
+    import core from '../../chat/core';
 
     @Component
     export default class FriendsView extends Vue {
@@ -35,7 +36,7 @@
                 this.error = '';
                 this.shown = true;
                 this.loading = true;
-                this.friends = await methods.friendsGet(this.character.character.id);
+                this.friends = await this.resolveFriends();
             } catch(e) {
                 this.shown = false;
                 if(Utils.isJSONError(e))
@@ -43,6 +44,16 @@
                 Utils.ajaxError(e, 'Unable to load friends.');
             }
             this.loading = false;
+        }
+
+        async resolveFriends(): Promise<CharacterFriend[]> {
+            const c = await core.cache.profileCache.get(this.character.character.name);
+
+            if ((c) && (c.meta) && (c.meta.friends)) {
+                return c.meta.friends;
+            }
+
+            return methods.friendsGet(this.character.character.id);
         }
     }
 </script>

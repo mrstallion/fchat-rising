@@ -30,9 +30,10 @@
     import Vue from 'vue';
     import * as Utils from '../utils';
     import {methods, Store} from './data_store';
-    import {Character, GuestbookPost} from './interfaces';
+    import {Character, GuestbookPost, GuestbookState} from './interfaces';
 
     import GuestbookPostView from './guestbook_post.vue';
+    import core from '../../chat/core';
 
     @Component({
         components: {'guestbook-post': GuestbookPostView}
@@ -73,7 +74,7 @@
         async getPage(): Promise<void> {
             try {
                 this.loading = true;
-                const guestbookState = await methods.guestbookPageGet(this.character.character.id, this.page, this.unapprovedOnly);
+                const guestbookState = await this.resolvePage();
                 this.posts = guestbookState.posts;
                 this.hasNextPage = guestbookState.nextPage;
                 this.canEdit = guestbookState.canEdit;
@@ -103,8 +104,20 @@
             }
         }
 
+        async resolvePage(): Promise<GuestbookState> {
+            if (this.page === 1) {
+                const c = await core.cache.profileCache.get(this.character.character.name);
+
+                if ((c) && (c.meta) && (c.meta.guestbook)) {
+                    return c.meta.guestbook;
+                }
+            }
+
+            return methods.guestbookPageGet(this.character.character.id, this.page, this.unapprovedOnly);
+        }
+
         async show(): Promise<void> {
-            return this.getPage();
+            await this.getPage();
         }
     }
 </script>

@@ -36,6 +36,7 @@
     import * as Utils from '../utils';
     import {methods} from './data_store';
     import {Character} from './interfaces';
+    import core from '../../chat/core';
 
     @Component
     export default class ImagesView extends Vue {
@@ -58,7 +59,7 @@
                 this.error = '';
                 this.shown = true;
                 this.loading = true;
-                this.images = await methods.imagesGet(this.character.character.id);
+                this.images = await this.resolveImages();
             } catch(e) {
                 this.shown = false;
                 if(Utils.isJSONError(e))
@@ -66,6 +67,16 @@
                 Utils.ajaxError(e, 'Unable to load images.');
             }
             this.loading = false;
+        }
+
+        async resolveImages(): Promise<CharacterImage[]> {
+            const c = await core.cache.profileCache.get(this.character.character.name);
+
+            if ((c) && (c.meta) && (c.meta.images)) {
+                return c.meta.images;
+            }
+
+            return methods.imagesGet(this.character.character.id);
         }
 
         handleImageClick(e: MouseEvent, image: CharacterImage): void {

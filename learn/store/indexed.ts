@@ -1,8 +1,9 @@
 import * as _ from 'lodash';
 
-import { Character as ComplexCharacter } from '../../site/character_page/interfaces';
+import {Character as ComplexCharacter, CharacterFriend, CharacterGroup, GuestbookState} from '../../site/character_page/interfaces';
 import { CharacterAnalysis } from '../matcher';
 import { PermanentIndexedStore, ProfileRecord } from './sql-store';
+import {CharacterImage} from '../../interfaces';
 
 
 async function promisifyRequest<T>(req: IDBRequest): Promise<T> {
@@ -82,14 +83,21 @@ export class IndexedStore implements PermanentIndexedStore {
             age: ca.age,
             domSubRole: null, // domSubRole
             position: null, // position
-            lastCounted: null,
-            guestbookCount: null,
-            friendCount: null,
-            groupCount: null
+
+            lastMetaFetched: null,
+            guestbook: null,
+            images: null,
+            friends: null,
+            groups: null
+
+            // lastCounted: null,
+            // guestbookCount: null,
+            // friendCount: null,
+            // groupCount: null
         };
 
         return (existing)
-            ? _.merge(existing, data, _.pick(existing, ['firstSeen', 'lastCounted', 'guestbookCount', 'friendCount', 'groupCount']))
+            ? _.merge(existing, data, _.pick(existing, ['firstSeen', 'lastMetaFetched', 'guestbook', 'images', 'friends', 'groups']))
             : data;
     }
 
@@ -127,6 +135,41 @@ export class IndexedStore implements PermanentIndexedStore {
                 guestbookCount,
                 friendCount,
                 groupCount
+            }
+        );
+
+        const tx = this.db.transaction(IndexedStore.STORE_NAME, 'readwrite');
+        const store = tx.objectStore(IndexedStore.STORE_NAME);
+        const putRequest = store.put(data);
+
+        // tslint:disable-next-line no-any
+        await promisifyRequest<any>(putRequest);
+
+        // console.log('IDX update counts', name, data);
+    }
+
+
+    async updateProfileMeta(
+        name: string,
+        images: CharacterImage[] | null,
+        guestbook: GuestbookState | null,
+        friends: CharacterFriend[] | null,
+        groups: CharacterGroup[] | null
+    ): Promise<void> {
+        const existing = await this.getProfile(name);
+
+        if (!existing) {
+            return;
+        }
+
+        const data = _.merge(
+            existing,
+            {
+                lastFetched: Math.round(Date.now() / 1000),
+                guestbook,
+                friends,
+                groups,
+                images
             }
         );
 

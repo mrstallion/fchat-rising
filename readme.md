@@ -1,24 +1,31 @@
-# F-Chat Ascending
+# F-Chat Rising
 
-This repository contains a modified version of the mainline F-Chat 3.0 client.
+This repository contains a heavily customized version of the mainline F-Chat 3.0 client.
 
 
 ## Key Differences
 
+1. **Profile matching** automatically compares your profile with others to determine with whom you are compatible.
+1. **Automatic ad posting** repeatedly posts and rotates ads on selected channels.
+1. **Link previews** pop up to show a preview of the image when you hover your mouse over a link.
+
+
+### Details
+
 *   Ads view
     *    Highlight ads from characters most interesting to you
-    *    View a character's recent ads
+    *    View characters' recent ads
 *   Ad auto-posting
-    *    Manage channel's ad settings via "Tab Settings"
+    *    Manage channel ad settings via "Tab Settings"
     *    Automatically re-post ads every 11-18 minutes (randomized) for up to 180 minutes
-    *    Rotate multiple ads on a single channel
+    *    Rotate multiple ads on a single channel by saving multiple ads in "Tab Settings"
 *   Ad ratings
     *    LFP ads are automatically rated and matched against your profile
 *   Link previews
     *    Hover cursor over any `[url]` to see a preview of it
     *    Middle click any `[url]` to turn the preview into a sticky / interactive mode
 *   Profile
-    *    Kinks are auto-compared when profile is loaded
+    *    Kinks are auto-compared when viewing character profile
     *    Custom kink explanations can be expanded inline
     *    Custom kinks are highlighted
     *    Gender, anthro/human preference, age, and sexual preference are highlighted if compatible or incompatible
@@ -28,12 +35,26 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
     *    Less informative side bar details (views, contact) are separated and shown in a less prominent way
     *    Cleaner guestbook view
 *   Character Search
-    *    Display pairing score on search results
-    *    Current search filters are listed on the search dialog
+    *    Search results are sorted based on match scores
+    *    Display match score in search results
+    *    Current search filters are listed in the search dialog
     *    Search filters can be reset
+*   General
+    *    Character profiles, guestbooks, friend lists, and image lists are cached for faster access.
+    *    Open conversation dialog for typing in a character name
+
+
+## FAQ
+
+1. Non-binary gender preference matches rely on kink preferences.
+1. 'Underage' kink is considered to apply to characters aged 16 or above.
+1. 'Ageplay' kink is considered to apply to characters aged 16 or below.
+1. 'Older characters' and 'younger characters' kink preferences are interpreted as age difference of 5+ years.
 
 
 ## Todo / Ideas
+
+*   Collect data on ads / responses to determine which ads work best
 *   Preview mode should allow detaching from the main window
 *   Split chat view
 *   Improvements to log browsing
@@ -41,9 +62,11 @@ This repository contains a modified version of the mainline F-Chat 3.0 client.
 *   Which channels my chart partner is on?
 *   Reposition ad settings and toggle
 *   Cache image list, guestbook pages
+*   Save character status messages
 *   Bug: Invalid Ticket
 *   Bug: Posting on the same second
 *   Bug: Images tab count is off
+
 
 
 # F-List Exported
@@ -66,9 +89,7 @@ All necessary files to build F-Chat 3.0 as an Electron, mobile or web applicatio
 ### Building on Windows
 
 ```
-npm install --global --production windows-build-tools
-npm install --global --production --vs2015 --add-python-to-path windows-build-tools
-npm install --global --production --add-python-to-path windows-build-tools node-gyp
+npm install --global --production --vs2015 --add-python-to-path windows-build-tools node-gyp
 ```
 
 ### Packaging

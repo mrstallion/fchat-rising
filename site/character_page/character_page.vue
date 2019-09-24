@@ -27,10 +27,10 @@
                             <tabs class="card-header-tabs" v-model="tab">
                                 <span>Overview</span>
                                 <span>Info</span>
-                                <span v-if="!oldApi">Groups <span class="tab-count" v-if="groupCount !== null">({{ groupCount }})</span></span>
+                                <span v-if="!oldApi">Groups <span class="tab-count" v-if="groups !== null">({{ groups.length }})</span></span>
                                 <span>Images <span class="tab-count">({{ character.character.image_count }})</span></span>
-                                <span v-if="character.settings.guestbook">Guestbook <span class="tab-count" v-if="guestbookPostCount !== null">({{ guestbookPostCount }})</span></span>
-                                <span v-if="character.is_self || character.settings.show_friends">Friends <span class="tab-count" v-if="friendCount !== null">({{ friendCount }})</span></span>
+                                <span v-if="character.settings.guestbook">Guestbook <span class="tab-count" v-if="guestbook !== null">({{ guestbook.posts.length }})</span></span>
+                                <span v-if="character.is_self || character.settings.show_friends">Friends <span class="tab-count" v-if="friends !== null">({{ friends.length }})</span></span>
                             </tabs>
                         </div>
                         <div class="card-body">
@@ -75,7 +75,7 @@
     import { CharacterCacheRecord } from '../../learn/profile-cache';
     import * as Utils from '../utils';
     import {methods, Store} from './data_store';
-    import {Character, SharedStore} from './interfaces';
+    import {Character, CharacterFriend, CharacterGroup, GuestbookState, SharedStore} from './interfaces';
 
     import DateDisplay from '../../components/date_display.vue';
     import Tabs from '../../components/tabs';
@@ -89,9 +89,10 @@
     import core from '../../chat/core';
     import { Matcher, MatchReport } from '../../learn/matcher';
     import MatchReportView from './match-report.vue';
+    import {CharacterImage} from '../../interfaces';
 
-    const CHARACTER_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000;
-    const CHARACTER_COUNT_CACHE_EXPIRE = 10 * 24 * 60 * 60 * 1000;
+    const CHARACTER_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 7 days (milliseconds)
+    const CHARACTER_META_CACHE_EXPIRE = 10 * 24 * 60 * 60 * 1000; // 10 days (milliseconds)
 
     interface ShowableVueTab extends Vue {
         show?(): void
@@ -127,10 +128,14 @@
         error = '';
         tab = '0';
 
-        guestbookPostCount: number | null = null;
+        /* guestbookPostCount: number | null = null;
         friendCount: number | null = null;
-        groupCount: number | null = null;
+        groupCount: number | null = null; */
 
+        guestbook: GuestbookState | null = null;
+        friends: CharacterFriend[] | null = null;
+        groups: CharacterGroup[] | null = null;
+        images: CharacterImage[] | null = null;
 
         selfCharacter: Character | undefined;
 
@@ -178,7 +183,13 @@
             );
         }
 
-        async load(mustLoad: boolean = true): Promise<void> {
+
+        async reload(): Promise<void> {
+            await this.load(true, true);
+        }
+
+
+        async load(mustLoad: boolean = true, skipCache: boolean = false): Promise<void> {
             this.loading = true;
             this.error = '';
 
@@ -194,7 +205,7 @@
                     due.push(this.loadSelfCharacter());
 
                 if((mustLoad) || (this.character === undefined))
-                    due.push(this._getCharacter());
+                    due.push(this._getCharacter(skipCache));
 
                 await Promise.all(due);
             } catch(e) {
@@ -208,73 +219,83 @@
         }
 
 
-        async countGuestbookPosts(): Promise<void> {
+        async updateGuestbook(): Promise<void> {
             try {
                 if ((!this.character) || (!_.get(this.character, 'settings.guestbook'))) {
-                    this.guestbookPostCount = null;
+                    this.guestbook = null;
                     return;
                 }
 
-                const guestbookState = await methods.guestbookPageGet(this.character.character.id, 1, false);
-
-                this.guestbookPostCount = guestbookState.posts.length;
-                // `${guestbookState.posts.length}${guestbookState.nextPage ? '+' : ''}`;
+                this.guestbook = await methods.guestbookPageGet(this.character.character.id, 1, false);
             } catch (err) {
                 console.error(err);
-                this.guestbookPostCount = null;
+                this.guestbook = null;
             }
         }
 
 
-        async countGroups(): Promise<void> {
+        async updateGroups(): Promise<void> {
             try {
                 if ((!this.character) || (this.oldApi)) {
-                    this.groupCount = null;
+                    this.groups = null;
                     return;
                 }
 
-                const groups = await methods.groupsGet(this.character.character.id);
-
-                this.groupCount = groups.length; // `${groups.length}`;
+                this.groups = await methods.groupsGet(this.character.character.id);
             } catch (err) {
-                console.error(err);
-                this.groupCount = null;
+                console.error('Update groups', err);
+                this.groups = null;
             }
         }
 
 
-        async countFriends(): Promise<void> {
+        async updateFriends(): Promise<void> {
             try {
                 if (
                     (!this.character)
                     || (!this.character.is_self) && (!this.character.settings.show_friends)
                 ) {
-                    this.friendCount = null;
+                    this.friends = null;
                     return;
                 }
 
-                const friends = await methods.friendsGet(this.character.character.id);
-
-                this.friendCount = friends.length; // `${friends.length}`;
+                this.friends = await methods.friendsGet(this.character.character.id);
             } catch (err) {
-                console.error(err);
-                this.friendCount = null;
+                console.error('Update friends', err);
+                this.friends = null;
             }
         }
 
 
-        async updateCounts(name: string): Promise<void> {
-            await this.countGuestbookPosts();
-            await this.countFriends();
-            await this.countGroups();
+        async updateImages(): Promise<void> {
+            try {
+                if (!this.character) {
+                    this.images = null;
+                    return;
+                }
 
-            await core.cache.profileCache.registerCount(
+                this.images = await methods.imagesGet(this.character.character.id);
+            } catch (err) {
+                console.error('Update images', err);
+                this.images = null;
+            }
+        }
+
+
+        async updateMeta(name: string): Promise<void> {
+            await this.updateImages();
+            await this.updateGuestbook();
+            await this.updateFriends();
+            await this.updateGroups();
+
+            await core.cache.profileCache.registerMeta(
                 name,
                 {
-                    lastCounted: Date.now() / 1000,
-                    groupCount: this.groupCount,
-                    friendCount: this.friendCount,
-                    guestbookCount: this.guestbookPostCount
+                    lastFetched: new Date(),
+                    groups: this.groups,
+                    friends: this.friends,
+                    guestbook: this.guestbook,
+                    images: this.images
                 }
             );
         }
@@ -318,11 +339,12 @@
             return null;
         }
 
-        private async _getCharacter(): Promise<void> {
+        private async _getCharacter(skipCache: boolean = false): Promise<void> {
             this.character = undefined;
-            this.friendCount = null;
-            this.groupCount = null;
-            this.guestbookPostCount = null;
+            this.friends = null;
+            this.groups = null;
+            this.guestbook = null;
+            this.images = null;
 
             if (!this.name) {
                 return;
@@ -330,7 +352,7 @@
 
             const cache = await this.fetchCharacterCache();
 
-            this.character = (cache)
+            this.character = (cache && !skipCache)
                 ? cache.character
                 : await methods.characterData(this.name, this.characterid, false);
 
@@ -338,18 +360,19 @@
             standardParser.inlines = this.character.character.inlines;
 
             if (
-                (cache)
-                && (cache.counts)
-                && (cache.counts.lastCounted)
-                && ((Date.now() / 1000) - cache.counts.lastCounted < CHARACTER_COUNT_CACHE_EXPIRE)
+                (cache && !skipCache)
+                && (cache.meta)
+                && (cache.meta.lastFetched)
+                && (Date.now() - cache.meta.lastFetched.getTime() < CHARACTER_META_CACHE_EXPIRE)
             ) {
-                this.guestbookPostCount = cache.counts.guestbookCount;
-                this.friendCount = cache.counts.friendCount;
-                this.groupCount = cache.counts.groupCount;
+                this.guestbook = cache.meta.guestbook;
+                this.friends = cache.meta.friends;
+                this.groups = cache.meta.groups;
+                this.images = cache.meta.images;
             } else {
                 // No awaits on these on purpose:
                 // tslint:disable-next-line no-floating-promises
-                this.updateCounts(this.name);
+                this.updateMeta(this.name);
             }
 
             // console.log('LoadChar', this.name, this.character);

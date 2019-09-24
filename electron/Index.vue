@@ -48,11 +48,12 @@
             </div>
         </modal>
         <modal :buttons="false" ref="profileViewer" dialogClass="profile-viewer">
-            <character-page :authenticated="true" :oldApi="true" :name="profileName" :image-preview="true"></character-page>
+            <character-page :authenticated="true" :oldApi="true" :name="profileName" :image-preview="true" ref="characterPage"></character-page>
             <template slot="title">
                 {{profileName}}
                 <a class="btn" @click="openProfileInBrowser"><i class="fa fa-external-link-alt"/></a>
                 <a class="btn" @click="openConversation"><i class="fa fa-comment"></i></a>
+                <a class="btn" @click="reloadCharacter"><i class="fa fa-sync" /></a>
             </template>
         </modal>
         <modal :action="l('fixLogs.action')" ref="fixLogsModal" @submit="fixLogs" buttonClass="btn-danger">
@@ -278,6 +279,12 @@
 
             // tslint:disable-next-line: no-any no-unsafe-any
             (this.$refs.profileViewer as any).hide();
+        }
+
+
+        reloadCharacter(): void {
+            // tslint:disable-next-line: no-any no-unsafe-any
+            (this.$refs.characterPage as any).reload();
         }
 
         get styling(): string {

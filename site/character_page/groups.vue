@@ -16,6 +16,7 @@
     import * as Utils from '../utils';
     import {methods} from './data_store';
     import {Character, CharacterGroup} from './interfaces';
+    import core from '../../chat/core';
 
     @Component
     export default class GroupsView extends Vue {
@@ -36,7 +37,7 @@
                 this.error = '';
                 this.shown = true;
                 this.loading = true;
-                this.groups = await methods.groupsGet(this.character.character.id);
+                this.groups = await this.resolveGroups();
             } catch(e) {
                 this.shown = false;
                 if(Utils.isJSONError(e))
@@ -44,6 +45,16 @@
                 Utils.ajaxError(e, 'Unable to load groups.');
             }
             this.loading = false;
+        }
+
+        async resolveGroups(): Promise<CharacterGroup[]> {
+            const c = await core.cache.profileCache.get(this.character.character.name);
+
+            if ((c) && (c.meta) && (c.meta.groups)) {
+                return c.meta.groups;
+            }
+
+            return methods.groupsGet(this.character.character.id);
         }
     }
 </script>

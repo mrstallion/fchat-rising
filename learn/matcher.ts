@@ -588,7 +588,7 @@ export class Matcher {
         if ((theirAge < 16) && (ageplayScore === null))
             return Matcher.formatKinkScore(KinkPreference.No, `ages of ${theirAge}`);
 
-        if ((theirAge < 18) && (underageScore !== null))
+        if ((theirAge < 18) && (theirAge >= 16) && (underageScore !== null))
             return Matcher.formatKinkScore(underageScore, `ages of ${theirAge}`);
 
         const yourAge = this.yourAnalysis.age;
@@ -742,8 +742,7 @@ export class Matcher {
             }
         );
 
-        // tslint:disable-next-line: strict-type-predicates
-        return (foundSpeciesId === null) ? null : parseInt(foundSpeciesId, 10);
+        return foundSpeciesId;
     }
 
 
