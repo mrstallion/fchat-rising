@@ -8,11 +8,11 @@
             <a @click="toggleStickyMode()" :class="{toggled: sticky}" title="Toggle Stickyness"><i class="fa fa-thumbtack"></i></a>
         </div>
 
-        <webview src="about:blank" webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required" id="image-preview-ext" ref="imagePreviewExt" class="image-preview-external" :style="{display: externalUrlVisible ? 'flex' : 'none'}"></webview>
+        <webview src="about:blank" webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required" id="image-preview-ext" ref="imagePreviewExt" class="image-preview-external" :style="{display: externalPreviewHelper.isVisible() ? 'flex' : 'none'}"></webview>
 
         <div
             class="image-preview-local"
-            :style="{backgroundImage: `url(${internalUrl})`, display: internalUrlVisible ? 'block' : 'none'}"
+            :style="{backgroundImage: `url(${localPreviewHelper.getUrl()})`, display: localPreviewHelper.isVisible() ? 'block' : 'none'}"
         >
         </div>
     </div>
@@ -40,19 +40,112 @@
     }
 
 
+    abstract class ImagePreviewHelper {
+        protected visible = false;
+        protected url: string | null = 'about:blank';
+        protected parent: ImagePreview;
+
+        abstract show(url: string): void;
+        abstract hide(): void;
+        abstract match(domainName: string): boolean;
+
+        constructor(parent: ImagePreview) {
+            this.parent = parent;
+        }
+
+        isVisible(): boolean {
+            return this.visible;
+        }
+
+        getUrl(): string | null {
+            return this.url;
+        }
+    }
+
+
+    class LocalImagePreviewHelper extends ImagePreviewHelper {
+        hide(): void {
+            this.visible = false;
+            this.url = null;
+        }
+
+
+        show(url: string): void {
+            this.visible = true;
+            this.url = url;
+        }
+
+
+        match(domainName: string): boolean {
+            return ((domainName === 'f-list.net') || (domainName === 'static.f-list.net'));
+        }
+    }
+
+
+    class ExternalImagePreviewHelper extends ImagePreviewHelper {
+        protected lastExternalUrl: string | null = null;
+
+        protected allowCachedUrl = true;
+
+        hide(): void {
+            const wasVisible = this.visible;
+
+            if (this.parent.debug)
+                console.log('ImagePreview: exec hide mutator');
+
+            if (wasVisible) {
+                const webview = this.parent.getWebview();
+
+                if (this.allowCachedUrl) {
+                    webview.executeJavaScript(this.parent.jsMutator.getHideMutator());
+                } else {
+                    webview.loadURL('about:blank');
+                }
+
+                this.visible = false;
+            }
+        }
+
+
+        show(url: string): void {
+            const webview = this.parent.getWebview();
+
+            try {
+                if ((this.allowCachedUrl) && ((webview.getURL() === url) || (url === this.lastExternalUrl))) {
+                    if (this.parent.debug)
+                        console.log('ImagePreview: exec re-show mutator');
+
+                    webview.executeJavaScript(this.parent.jsMutator.getReShowMutator());
+                } else {
+                    if (this.parent.debug)
+                        console.log('ImagePreview: must load; skip re-show because urls don\'t match', this.url, webview.getURL());
+
+                    webview.loadURL(url);
+                }
+
+            } catch (err) {
+                console.error('ImagePreview: Webview reuse error', err);
+            }
+
+            this.url = url;
+            this.lastExternalUrl = url;
+            this.visible = true;
+        }
+
+        match(domainName: string): boolean {
+            return !((domainName === 'f-list.net') || (domainName === 'static.f-list.net'));
+        }
+    }
+
+
     @Component
     export default class ImagePreview extends Vue {
         private readonly MinTimePreviewVisible = 100;
 
         visible = false;
 
-        externalUrlVisible = false;
-        internalUrlVisible = false;
-
-        externalUrl: string | null = null;
-        internalUrl: string | null = null;
-
-        lastExternalUrl = '';
+        externalPreviewHelper = new ExternalImagePreviewHelper(this);
+        localPreviewHelper = new LocalImagePreviewHelper(this);
 
         url: string | null = null;
         domain: string | undefined;
@@ -61,7 +154,8 @@
         runJs = true;
         debug = false;
 
-        private jsMutator = new ImagePreviewMutator(this.debug);
+        jsMutator = new ImagePreviewMutator(this.debug);
+
         private interval: Timer | null = null;
 
         private exitInterval: Timer | null = null;
@@ -104,16 +198,31 @@
             const webview = this.getWebview();
 
             webview.addEventListener(
-                'dom-ready',
+                'update-target-url', // 'did-navigate', // 'dom-ready',
                 (event: EventBusEvent) => {
                     const url = webview.getURL();
-                    const js = this.jsMutator.getMutatorJsForSite(url);
+                    const js = this.jsMutator.getMutatorJsForSite(url, 'update-target-url');
+
+                    if (this.debug)
+                        console.log('ImagePreview update-target', event, js);
+
+                    if ((js) && (this.runJs))
+                        webview.executeJavaScript(js);
+                }
+            );
+
+
+            webview.addEventListener(
+                'dom-ready', // 'did-navigate', // 'dom-ready',
+                (event: EventBusEvent) => {
+                    const url = webview.getURL();
+                    const js = this.jsMutator.getMutatorJsForSite(url, 'dom-ready');
 
                     if (this.debug)
                         console.log('ImagePreview dom-ready', event, js);
 
                     if ((js) && (this.runJs))
-                        webview.executeJavaScript(js);
+                        webview.executeJavaScript(js, true);
                 }
             );
 
@@ -168,13 +277,13 @@
 
 
             _.each(
-                ['did-start-loading', 'load-commit', 'will-navigate', 'did-navigate', 'did-navigate-in-page', 'update-target-url'],
+                ['did-start-loading', 'load-commit', 'dom-ready', 'will-navigate', 'did-navigate', 'did-navigate-in-page', 'update-target-url'],
                 (en: string) => {
                     webview.addEventListener(
                         en,
                         (event: Event) => {
                             if (this.debug)
-                                console.log(`ImagePreview ${en}`, event);
+                                console.log(`ImagePreview ${en} ${Date.now()}`, event);
                         }
                     );
                 }
@@ -200,27 +309,15 @@
 
         hide(): void {
             if (this.debug)
-                console.log('ImagePreview: hide', this.externalUrlVisible, this.internalUrlVisible);
+                console.log('ImagePreview: hide', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible());
 
             this.cancelExitTimer();
 
             this.url = null;
             this.visible = false;
 
-            if (this.externalUrlVisible) {
-                const webview = this.getWebview();
-
-                if (this.debug)
-                    console.log('ImagePreview: exec hide mutator');
-
-                webview.executeJavaScript(this.jsMutator.getHideMutator());
-            }
-
-            this.internalUrlVisible = false;
-            this.externalUrlVisible = false;
-
-            // this.externalUrl = null; // 'about:blank';
-            this.internalUrl = null; // 'about:blank';
+            this.localPreviewHelper.hide();
+            this.externalPreviewHelper.hide();
 
             this.exitUrl = null;
             this.exitInterval = null;
@@ -262,7 +359,7 @@
                 return;
 
             if (this.debug)
-                console.log('ImagePreview: dismiss.exec', this.externalUrlVisible, this.internalUrlVisible, url);
+                console.log('ImagePreview: dismiss.exec', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible(), url);
 
             // This timeout makes the preview window disappear with a slight delay, which helps UX
             // when dealing with situations such as quickly scrolling text that moves the cursor away
@@ -278,7 +375,7 @@
             const url = this.jsMutator.mutateUrl(initialUrl);
 
             if (this.debug)
-                console.log('ImagePreview: show', this.externalUrlVisible, this.internalUrlVisible,
+                console.log('ImagePreview: show', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible(),
                 this.visible, this.hasMouseMovedSince(), !!this.interval, this.sticky, url);
 
             // console.log('SHOW');
@@ -325,36 +422,13 @@
                     if (this.debug)
                         console.log('ImagePreview: show.timeout', this.url);
 
-                    const isInternal = this.isInternalUrl();
+                    this.localPreviewHelper.match(this.domain as string)
+                        ? this.localPreviewHelper.show(this.url as string)
+                        : this.localPreviewHelper.hide();
 
-                    this.internalUrlVisible = isInternal;
-                    this.externalUrlVisible = !isInternal;
-
-                    if (isInternal) {
-                        this.internalUrl = this.url;
-                    } else {
-                        const webview = this.getWebview();
-
-                        try {
-                            if ((webview.getURL() === this.url) || (this.url === this.lastExternalUrl)) {
-                                if (this.debug)
-                                    console.log('ImagePreview: exec re-show mutator');
-
-                                webview.executeJavaScript(this.jsMutator.getReShowMutator());
-                            } else {
-                                if (this.debug)
-                                    console.log('ImagePreview: must load; skip re-show because urls don\'t match', this.url, webview.getURL());
-
-                                webview.loadURL(this.url as string);
-                            }
-
-                        } catch (err) {
-                            console.error('ImagePreview: Webview reuse error', err);
-                        }
-
-                        this.externalUrl = this.url;
-                        this.lastExternalUrl = this.url as string;
-                    }
+                    this.externalPreviewHelper.match(this.domain as string)
+                        ? this.externalPreviewHelper.show(this.url as string)
+                        : this.externalPreviewHelper.hide();
 
                     this.visible = true;
                     this.visibleSince = Date.now();
@@ -401,14 +475,14 @@
             return this.url;
         }
 
-        isExternalUrl(): boolean {
+        /* isExternalUrl(): boolean {
             // 'f-list.net' is tested here on purpose, because keeps the character URLs from being previewed
             return !((this.domain === 'f-list.net') || (this.domain === 'static.f-list.net'));
         }
 
         isInternalUrl(): boolean {
             return !this.isExternalUrl();
-        }
+        }*/
 
         toggleDevMode(): void {
             this.debug = !this.debug;
@@ -434,13 +508,12 @@
         }
 
         reloadUrl(): void {
-            if (this.externalUrlVisible) {
+            if (this.externalPreviewHelper.isVisible()) {
                 const webview = this.getWebview();
 
                 webview.reload();
             }
         }
-
 
         getWebview(): WebviewTag {
             return this.$refs.imagePreviewExt as WebviewTag;

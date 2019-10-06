@@ -666,6 +666,10 @@
             .vs, .scores {
                 display: none;
             }
+
+            .minimize-btn {
+                opacity: 0.6;
+            }
         }
 
         h3 {
@@ -689,12 +693,19 @@
         .scores {
             float: left;
             flex: 1;
-            margin-right: 1rem;
+            margin: 0;
             max-width: 25rem;
+
+            &.you {
+                margin-right: 1rem;
+           }
+
+            &.them {
+                margin-left: 1rem;
+            }
 
             ul {
                 padding: 0;
-                padding-left: 0rem;
                 list-style: none;
             }
 

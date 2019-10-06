@@ -1,6 +1,6 @@
 <template>
     <div id="match-report" :class="{'match-report': true, minimized: isMinimized}" v-if="(haveScores(characterMatch.you) || haveScores(characterMatch.them))">
-        <a class="minimize-btn" @click="toggleMinimize()"><i :class="{fa: true, 'fa-plus': isMinimized, 'fa-minus': !isMinimized}"></i></a>
+        <a class="minimize-btn" @click.prevent="toggleMinimize()"><i :class="{fa: true, 'fa-plus': isMinimized, 'fa-minus': !isMinimized}"></i></a>
 
         <div class="scores you">
             <h3>
@@ -54,7 +54,7 @@
 
         isMinimized = false;
 
-        @Watch('isMinimized')
+        @Watch('minimized')
         onMinimizedChange(): void {
             this.isMinimized = this.minimized;
         }

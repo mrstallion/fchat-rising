@@ -9,6 +9,7 @@ import { domain as extractDomain } from '../bbcode/core';
 export interface PreviewMutator {
     match: string | RegExp;
     injectJs: string;
+    eventName: string;
 
     urlMutator?(url: string): string;
 }
@@ -45,11 +46,14 @@ export class ImagePreviewMutator {
     }
 
 
-    getMutatorJsForSite(url: string): string | undefined {
+    getMutatorJsForSite(url: string, eventName: string): string | undefined {
         let mutator = this.matchMutator(url);
 
         if (!mutator)
             mutator = this.hostMutators['default'];
+
+        if (mutator.eventName !== eventName)
+            return;
 
         return this.wrapJs(mutator.injectJs) + this.getReShowMutator();
     }
@@ -77,13 +81,19 @@ export class ImagePreviewMutator {
         return `(() => { try { ${mutatorJs} } catch (err) { console.error('Mutator error', err); } })();`;
     }
 
-    protected add(domain: string | RegExp, mutatorJs: string, urlMutator?: (url: string) => string): void {
+    protected add(
+        domain: string | RegExp,
+        mutatorJs: string,
+        urlMutator?: (url: string) => string,
+        eventName: string = 'update-target-url'
+    ): void {
         if (domain instanceof RegExp) {
             this.regexMutators.push(
                 {
                     match: domain,
                     injectJs: mutatorJs,
-                    urlMutator
+                    urlMutator,
+                    eventName
                 }
             );
 
@@ -93,30 +103,34 @@ export class ImagePreviewMutator {
         this.hostMutators[domain] = {
             match: domain,
             injectJs: mutatorJs,
-            urlMutator
+            urlMutator,
+            eventName
         };
     }
 
     protected init(): void {
-        this.add('default', this.getBaseJsMutatorScript('#video, #image, video, img'));
-        this.add('e621.net', this.getBaseJsMutatorScript('#image, video'));
-        this.add('e-hentai.org', this.getBaseJsMutatorScript('#img, video'));
-        this.add('gelbooru.com', this.getBaseJsMutatorScript('#image, video'));
-        this.add('chan.sankakucomplex.com', this.getBaseJsMutatorScript('#image, video'));
-        this.add('danbooru.donmai.us', this.getBaseJsMutatorScript('#image, video'));
-        this.add('gfycat.com', this.getBaseJsMutatorScript('video'));
-        this.add('gfycatporn.com', this.getBaseJsMutatorScript('video'));
-        this.add('youtube.com', this.getBaseJsMutatorScript('video'));
-        this.add('instantfap.com', this.getBaseJsMutatorScript('#post img, #post video'));
-        this.add('webmshare.com', this.getBaseJsMutatorScript('video'));
-        this.add('pornhub.com', this.getBaseJsMutatorScript('.mainPlayerDiv video, .photoImageSection img'));
-        this.add('sex.com', this.getBaseJsMutatorScript('.image_frame img, .image_frame video'));
-        this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript('picture img, picture video'));
-        this.add('i.imgur.com', this.getBaseJsMutatorScript('video, img'));
-        this.add('postimg.cc', this.getBaseJsMutatorScript('#main-image, video'));
-        this.add('gifsauce.com', this.getBaseJsMutatorScript('video'));
-        this.add('motherless.com', this.getBaseJsMutatorScript('.content video, .content img'));
-        this.add(/^media[0-9]\.giphy\.com$/, this.getBaseJsMutatorScript('video, img[alt]'));
+        this.add('default', this.getBaseJsMutatorScript(['#video, video', '#image, img']));
+        this.add('e621.net', this.getBaseJsMutatorScript(['video', '#image']));
+        this.add('e-hentai.org', this.getBaseJsMutatorScript(['video', '#img']));
+        this.add('gelbooru.com', this.getBaseJsMutatorScript(['video', '#image']));
+        this.add('chan.sankakucomplex.com', this.getBaseJsMutatorScript(['video', '#image']));
+        this.add('danbooru.donmai.us', this.getBaseJsMutatorScript(['video', '#image']));
+        this.add('gfycat.com', this.getBaseJsMutatorScript(['video']), undefined, 'dom-ready');
+        this.add('gfycatporn.com', this.getBaseJsMutatorScript(['video']), undefined, 'dom-ready');
+        this.add('youtube.com', this.getBaseJsMutatorScript(['video']), undefined, 'dom-ready');
+        this.add('instantfap.com', this.getBaseJsMutatorScript(['#post video', '#post img']));
+        this.add('webmshare.com', this.getBaseJsMutatorScript(['video']));
+        this.add('pornhub.com', this.getBaseJsMutatorScript(['.mainPlayerDiv video', '.photoImageSection img']));
+        this.add('sex.com', this.getBaseJsMutatorScript(['.image_frame video', '.image_frame img']));
+        this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript(['picture video', 'picture img']));
+        this.add('i.imgur.com', this.getBaseJsMutatorScript(['video', 'img']));
+        this.add('postimg.cc', this.getBaseJsMutatorScript(['video', '#main-image']));
+        this.add('gifsauce.com', this.getBaseJsMutatorScript(['video']));
+        this.add('motherless.com', this.getBaseJsMutatorScript(['.content video', '.content img']));
+        this.add(/^media[0-9]\.giphy\.com$/, this.getBaseJsMutatorScript(['video', 'img[alt]']));
+        this.add('giphy.com', this.getBaseJsMutatorScript(['video', 'a > div > img']));
+        this.add(/^media[0-9]\.tenor\.com$/, this.getBaseJsMutatorScript(['#view .file video', '#view .file img']));
+        this.add('tenor.com', this.getBaseJsMutatorScript(['#view video', '#view img']));
 
         // tslint:disable max-line-length
         this.add(
@@ -124,7 +138,7 @@ export class ImagePreviewMutator {
             `
                 const imageCount = $('.post-container video, .post-container img').length;
 
-                ${this.getBaseJsMutatorScript('.post-container video, .post-container img', true)}
+                ${this.getBaseJsMutatorScript(['.post-container video', '.post-container img'], true)}
 
                 if(imageCount > 1)
                     $('#flistWrapper').append('<div id="imageCount" style="position: absolute; bottom: 0; right: 0; background: green; border: 2px solid lightgreen; width: 5rem; height: 5rem; font-size: 2rem; font-weight: bold; color: white; border-radius: 5rem; margin: 0.75rem;"><div style="position: absolute; top: 50%; left: 50%; transform: translateY(-50%) translateX(-50%);">+' + (imageCount - 1) + '</div></div>');
@@ -133,16 +147,19 @@ export class ImagePreviewMutator {
 
         this.add(
             'rule34.xxx',
-            `${this.getBaseJsMutatorScript('#image, video')}
+            `${this.getBaseJsMutatorScript(['video', '#image'])}
                 const content = document.querySelector('#content');
-                content.remove();
-            `
+
+                if (content) content.remove();
+            `,
+            undefined,
+            'dom-ready'
         );
 
 
         this.add(
             'hentai-foundry.com',
-            this.getBaseJsMutatorScript('main video, main img'),
+            this.getBaseJsMutatorScript(['main video', 'main img']),
             (url: string): string => {
                 const u = urlHelper.parse(url, true);
 
@@ -159,14 +176,23 @@ export class ImagePreviewMutator {
         );
     }
 
-    getBaseJsMutatorScript(elSelector: string, skipElementRemove: boolean = false): string {
+    getBaseJsMutatorScript(elSelector: string[], skipElementRemove: boolean = false): string {
         return `const body = document.querySelector('body');
-            let selected = Array.from(document.querySelectorAll('${elSelector}'))
-                .filter((i) => ((i.width !== 1) && (i.height !== 1)));
+            const selectors = ${JSON.stringify(elSelector)};
+
+            // writing this out because sometimes .map and .reduce are overridden
+            let selected = [];
+
+            for (selector of selectors) {
+                const selectedElements = (Array.from(document.querySelectorAll(selector)).filter((i) => ((i.width !== 1) && (i.height !== 1))));
+                selected = selected.concat(selectedElements);
+            }
+
+            ${true /*this.debug*/ ? `console.log('Selector', '${elSelector}'); console.log('Selected', selected);` : ''}
 
             const img = selected.shift();
 
-            ${this.debug ? `console.log('Selector', '${elSelector}'); console.log('Selected', selected); console.log('Img', img);` : ''}
+            ${true /*this.debug*/ ? `console.log('Img', img);` : ''}
 
             if (!img) { return; }
 
@@ -179,7 +205,18 @@ export class ImagePreviewMutator {
                 + 'background-repeat: no-repeat !important; background-position: top left !important;'
                 + 'opacity: 1 !important; padding: 0 !important; border: 0 !important; margin: 0 !important;';
 
-            img.remove();
+            try {
+                img.remove();
+            } catch(err) {
+                console.error('Failed remove()', err);
+
+                try {
+                    img.parentNode.removeChild(img);
+                } catch(err2) {
+                    console.error('Failed removeChild()', err2);
+                }
+            }
+
             el.append(img);
             body.append(el);
             body.class = '';
@@ -197,7 +234,33 @@ export class ImagePreviewMutator {
 
             ${this.debug ? "console.log('Wrapper', el);" : ''}
 
-            if (img.play) { img.muted = true; img.play(); }
+            document.addEventListener('DOMContentLoaded', (event) => {
+                ${true /*this.debug*/ ? "console.log('on DOMContentLoaded');" : ''}
+
+                if (
+                    (img.play)
+                    && ((!img.paused) && (!img.ended) && (!(img.currentTime > 0)))
+                )
+                { img.muted = true; img.play(); }
+            });
+
+            document.addEventListener('load', (event) => {
+                ${true /*this.debug*/ ? "console.log('on load');" : ''}
+
+                if (
+                    (img.play)
+                    && ((!img.paused) && (!img.ended) && (!(img.currentTime > 0)))
+                )
+                { img.muted = true; img.play(); }
+            });
+
+
+            try {
+                if (img.play) { img.muted = true; img.play(); }
+            } catch (err) {
+                console.error('Failed img.play()', err);
+            }
+
 
             let removeList = [];
             const safeIds = ['flistWrapper', 'flistError', 'flistHider'];
