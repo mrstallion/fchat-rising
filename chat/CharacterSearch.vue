@@ -19,7 +19,7 @@
         </div>
         <div v-else-if="results" class="results">
             <h4>{{l('characterSearch.results')}}</h4>
-            <div v-for="character in results" :key="character.name" :class="'status-' + character.status">
+            <div v-for="character in results" :key="character.name" class="search-result" :class="'status-' + character.status">
                 <template v-if="character.status === 'looking'" v-once>
                     <img :src="characterImage(character.name)" v-if="showAvatars"/>
                     <user :character="character" :showStatus="true" :match="true"></user>
@@ -242,6 +242,9 @@
         .results {
             .user-view {
                 display: block;
+            }
+            & > .search-result {
+                clear: both;
             }
             & > .status-looking {
                 margin-bottom: 5px;

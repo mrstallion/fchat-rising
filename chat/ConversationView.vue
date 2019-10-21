@@ -55,6 +55,10 @@
                         <a :class="isChannel(conversation) ? {active: conversation.mode == mode, disabled: conversation.channel.mode != 'both'} : undefined"
                             class="nav-link" href="#" @click.prevent="setMode(mode)">{{l('channel.mode.' + mode)}}</a>
                     </li>
+                    <li>
+                        <a @click.prevent="toggleNonMatchingAds()" :class="{active: showNonMatchingAds, disabled: !showNonMatchingAds}" v-show="(conversation.mode == 'both' || conversation.mode == 'ads')"
+                            class="nav-link" href="#">Non-Matching</a>
+                    </li>
                 </ul>
             </div>
             <div style="z-index:5;position:absolute;left:0;right:0;max-height:60%;overflow:auto"
@@ -88,8 +92,8 @@
 
             <a class="btn btn-sm btn-outline-primary renew-autoposts" @click="renewAutoPosting()">{{l('admgr.renew')}}</a>
         </div>
-        <div class="border-top messages" :class="isChannel(conversation) ? 'messages-' + conversation.mode : undefined" ref="messages"
-            @scroll="onMessagesScroll" style="flex:1;overflow:auto;margin-top:2px">
+        <div class="border-top messages" :class="getMessageWrapperClasses()" ref="messages"
+             @scroll="onMessagesScroll" style="flex:1;overflow:auto;margin-top:2px">
             <template v-for="message in messages">
                 <message-view :message="message" :channel="isChannel(conversation) ? conversation.channel : undefined" :key="message.id"
                     :classes="message == conversation.lastRead ? 'last-read' : ''">
@@ -209,6 +213,7 @@
         adAutoPostNextAd: string | null = null;
         isChannel = Conversation.isChannel;
         isPrivate = Conversation.isPrivate;
+        showNonMatchingAds = true;
 
         @Hook('mounted')
         mounted(): void {
@@ -387,6 +392,27 @@
         setMode(mode: Channel.Mode): void {
             const conv = (<Conversation.ChannelConversation>this.conversation);
             if(conv.channel.mode === 'both') conv.mode = mode;
+        }
+
+
+        toggleNonMatchingAds(): void {
+            this.showNonMatchingAds = !this.showNonMatchingAds;
+        }
+
+
+        /* tslint:disable */
+        getMessageWrapperClasses(): any {
+            if (!this.isChannel(this.conversation)) {
+                return {};
+            }
+
+            const conv = <Conversation.ChannelConversation>this.conversation;
+            const classes:any = {};
+
+            classes['messages-' + conv.mode] = true;
+            classes['hide-non-matching'] = !this.showNonMatchingAds;
+
+            return classes;
         }
 
         acceptReport(sfc: {callid: number}): void {
@@ -679,6 +705,13 @@
                 background-color: rgb(171, 0, 0);
                 border: 1px solid rgb(128, 0, 0);
             }
+        }
+    }
+
+
+    .messages.hide-non-matching .message.message-score {
+        &.mismatch {
+            display: none;
         }
     }
 

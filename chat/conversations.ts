@@ -339,6 +339,8 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
         if(isAd)
             this.nextAd = Date.now() + core.connection.vars.lfrp_flood * 1000;
         else this.clearText();
+
+        core.cache.timeLastPost();
     }
 
     async sendAd(text: string): Promise<void> {

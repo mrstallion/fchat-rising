@@ -37,6 +37,16 @@ export class CacheManager {
 
     protected profileStore?: IndexedStore;
 
+    protected lastPost: Date = new Date();
+
+
+    timeLastPost(): void {
+        this.lastPost = new Date();
+    }
+
+    getLastPost(): Date {
+        return this.lastPost;
+    }
 
     async queueForFetching(name: string, skipCacheCheck: boolean = false): Promise<void> {
         if (!skipCacheCheck) {
@@ -65,7 +75,8 @@ export class CacheManager {
         // console.log('AddProfileForFetching', name, this.queue.length);
     }
 
-    async fetchProfile(name: string): Promise<void> {
+
+    async fetchProfile(name: string): Promise<ComplexCharacter | null> {
         try {
             await methods.fieldsGet();
 
@@ -74,8 +85,12 @@ export class CacheManager {
             const r = await this.profileCache.register(c);
 
             this.updateAdScoringForProfile(c, r.matchScore);
+
+            return c;
         } catch (err) {
             console.error('Failed to fetch profile for cache', name, err);
+
+            return null;
         }
     }
 

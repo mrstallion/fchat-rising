@@ -128,6 +128,11 @@
                 if(this.connected) core.notifications.playSound('logout');
                 this.connected = false;
                 this.connecting = false;
+
+                if (!isReconnect) {
+                    core.conversations.channelConversations.forEach((chanConv) => chanConv.adManager.stop());
+                }
+
                 document.title = l('title');
             });
             core.connection.onEvent('connecting', async() => {

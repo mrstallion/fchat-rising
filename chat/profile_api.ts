@@ -30,11 +30,22 @@ const parserSettings = {
 };
 
 
+import throat from 'throat';
+
+// Throttle queries so that only two profile requests can run at any given time
+const characterDataThroat = throat(2);
+
+
 // tslint:disable-next-line: ban-ts-ignore
 // @ts-ignore
 async function characterData(name: string | undefined, id: number = -1, skipEvent: boolean = false): Promise<Character> {
     // console.log('CharacterDataquery', name);
+    return characterDataThroat(async() => executeCharacterData(name, id, skipEvent));
+}
 
+// tslint:disable-next-line: ban-ts-ignore
+// @ts-ignore
+async function executeCharacterData(name: string | undefined, id: number = -1, skipEvent: boolean = false): Promise<Character> {
     const data = await core.connection.queryApi<CharacterInfo & {
         badges: string[]
         customs_first: boolean

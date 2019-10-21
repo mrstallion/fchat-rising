@@ -14,6 +14,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 
 *   Ads view
     *    Highlight ads from characters most interesting to you
+    *    Hide obviously unmatching ads
     *    View characters' recent ads
 *   Ad auto-posting
     *    Manage channel ad settings via "Tab Settings"
@@ -34,6 +35,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Cleaner presentation for the side bar details (age, etc.), sorted in most relevant order
     *    Less informative side bar details (views, contact) are separated and shown in a less prominent way
     *    Cleaner guestbook view
+    *    Profiles, images, guestbook posts, and groups are cached for faster view
 *   Character Search
     *    Search results are sorted based on match scores
     *    Display match score in search results
@@ -59,13 +61,10 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Split chat view
 *   Improvements to log browsing
 *   Fix broken BBCode, such as `[big]` in character profiles
-*   Which channels my chart partner is on?
 *   Reposition ad settings and toggle
-*   Cache image list, guestbook pages
 *   Save character status messages
-*   Bug: Invalid Ticket
-*   Bug: Posting on the same second
 *   Bug: Images tab count is off
+*   Logout cancels auto-ads
 
 
 

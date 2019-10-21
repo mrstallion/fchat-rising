@@ -1,11 +1,19 @@
+import core from './core';
 import { Conversation } from './interfaces';
 import Timer = NodeJS.Timer;
+
+import throat from 'throat';
+
+const adManagerThroat = throat(1);
+
 
 export class AdManager {
     static readonly POSTING_PERIOD = 3 * 60 * 60 * 1000;
     static readonly START_VARIANCE = 3 * 60 * 1000;
     static readonly POST_VARIANCE = 8 * 60 * 1000;
     static readonly POST_DELAY = 1.5 * 60 * 1000;
+
+    static readonly POST_MANUAL_THRESHOLD = 5 * 1000; // don't post anything within 5 seconds of other posts
 
     private conversation: Conversation;
 
@@ -24,6 +32,29 @@ export class AdManager {
         return this.active;
     }
 
+
+    // tslint:disable-next-line
+    private async delay(ms: number): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+
+    // This makes sure there is a 5s delay between channel posts
+    private async sendAdToChannel(msg: string, conv: Conversation.ChannelConversation): Promise<void> {
+        await adManagerThroat(
+            async() => {
+                const delta = Date.now() - core.cache.getLastPost().getTime();
+
+                if ((delta > 0) && (delta < AdManager.POST_MANUAL_THRESHOLD)) {
+                    await this.delay(delta);
+                }
+
+                await conv.sendAd(msg);
+            }
+        );
+    }
+
+
     private async sendNextPost(): Promise<void> {
         const msg = this.getNextAd();
 
@@ -34,7 +65,7 @@ export class AdManager {
 
         const chanConv = (<Conversation.ChannelConversation>this.conversation);
 
-        await chanConv.sendAd(msg);
+        await this.sendAdToChannel(msg, chanConv);
 
         // post next ad every 12 - 22 minutes
         const nextInMs = Math.max(0, (chanConv.nextAd - Date.now())) +
