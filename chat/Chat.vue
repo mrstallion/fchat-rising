@@ -130,7 +130,17 @@
                 this.connecting = false;
 
                 if (!isReconnect) {
-                    core.conversations.channelConversations.forEach((chanConv) => chanConv.adManager.stop());
+                    core.conversations.channelConversations.forEach(
+                        (chanConv) => {
+                            try {
+                                if (chanConv.adManager) {
+                                    chanConv.adManager.stop();
+                                }
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        }
+                    );
                 }
 
                 document.title = l('title');
