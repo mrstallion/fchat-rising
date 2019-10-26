@@ -178,6 +178,7 @@ export class ImagePreviewMutator {
 
     getBaseJsMutatorScript(elSelector: string[], skipElementRemove: boolean = false): string {
         return `const body = document.querySelector('body');
+            const html = document.querySelector('html');
             const selectors = ${JSON.stringify(elSelector)};
 
             // writing this out because sometimes .map and .reduce are overridden
@@ -203,7 +204,8 @@ export class ImagePreviewMutator {
                 + 'top: 0 !important; left: 0 !important; z-index: 100000 !important;'
                 + 'background-color: black !important; background-size: contain !important;'
                 + 'background-repeat: no-repeat !important; background-position: top left !important;'
-                + 'opacity: 1 !important; padding: 0 !important; border: 0 !important; margin: 0 !important;';
+                + 'opacity: 1 !important; padding: 0 !important; border: 0 !important; margin: 0 !important;'
+                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;';
 
             try {
                 img.remove();
@@ -223,14 +225,23 @@ export class ImagePreviewMutator {
 
             body.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
-                + 'top: 0 !important; left: 0 !important; position: absolute !important';
+                + 'top: 0 !important; left: 0 !important; position: absolute !important;'
+                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;';
 
             img.style = 'object-position: top left !important; object-fit: contain !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
-                + 'margin: 0 !imporant; border: 0 !important; padding: 0 !important;';
+                + 'margin: 0 !imporant; border: 0 !important; padding: 0 !important;'
+                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;';
 
             img.class = '';
             el.class = '';
+
+            html.class = '';
+
+            html.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
+                + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
+                + 'top: 0 !important; left: 0 !important; position: absolute !important;'
+                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;';
 
             ${this.debug ? "console.log('Wrapper', el);" : ''}
 
