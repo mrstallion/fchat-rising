@@ -6,6 +6,7 @@ import { Orientation, Gender, FurryPreference, Species } from '../matcher';
 import {Character as ComplexCharacter, CharacterFriend, CharacterGroup, GuestbookState} from '../../site/character_page/interfaces';
 import {CharacterImage} from '../../interfaces';
 
+// This design should be refactored; it's bad
 export interface ProfileRecord {
     id: string;
     name: string;

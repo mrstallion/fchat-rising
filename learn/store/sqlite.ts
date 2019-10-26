@@ -1,3 +1,7 @@
+/**
+ * Do not use
+ */
+
 // import * as Sqlite from 'sqlite';
 // import { Character as ComplexCharacter } from '../../site/character_page/interfaces';
 //

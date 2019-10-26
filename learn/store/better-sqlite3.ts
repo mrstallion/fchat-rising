@@ -1,3 +1,7 @@
+/**
+ * Do not use
+ */
+
 // // import { Database, Statement } from 'better-sqlite3';
 //
 // type Database = any;

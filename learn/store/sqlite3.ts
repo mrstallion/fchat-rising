@@ -1,3 +1,7 @@
+/**
+ * Do not use
+ */
+
 // type Sqlite3Statement = any;
 // type Sqlite3Database = any;
 //

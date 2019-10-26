@@ -7,7 +7,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 
 1. **Profile matching** automatically compares your profile with others to determine with whom you are compatible.
 1. **Automatic ad posting** repeatedly posts and rotates ads on selected channels.
-1. **Link previews** pop up to show a preview of the image when you hover your mouse over a link.
+1. **Link previews** pop up shows a preview of an image, when you hover your mouse over a link.
 
 
 ### Details
@@ -19,7 +19,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Ad auto-posting
     *    Manage channel ad settings via "Tab Settings"
     *    Automatically re-post ads every 11-18 minutes (randomized) for up to 180 minutes
-    *    Rotate multiple ads on a single channel by saving multiple ads in "Tab Settings"
+    *    Rotate multiple ads on a single channel by entering multiple ads in "Tab Settings"
 *   Ad ratings
     *    LFP ads are automatically rated and matched against your profile
 *   Link previews
@@ -46,11 +46,20 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Open conversation dialog for typing in a character name
 
 
+## How to Set Up Ads
+
+1. Open a conversation channel of your preference, such as `#LFRP`
+1. Click `Tab Settings`
+1. Enter one or more `Channel Auto-Posting Ads`
+1. Click `Save settings`
+1. Click `Auto-Post Ads`
+
+
 ## FAQ
 
+1. The more information you have in your profile (non-custom kinks in particular), the better the matching will be.
 1. Non-binary gender preference matches rely on kink preferences.
-1. 'Underage' kink is considered to apply to characters aged 16 or above.
-1. 'Ageplay' kink is considered to apply to characters aged 16 or below.
+1. 'Underage' kink is considered to apply to characters aged 16 or above; 'ageplay' kink is considered to apply to characters aged 16 or below.
 1. 'Older characters' and 'younger characters' kink preferences are interpreted as age difference of 5+ years.
 
 
@@ -64,8 +73,9 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Reposition ad settings and toggle
 *   Save character status messages
 *   Bug: Images tab count is off
-*   Logout cancels auto-ads
-
+*   Configuration dialog for the player to change match weighs, preview settings, etc.
+*   Conversation bot API
+*   Character comparison should consider D/s preference
 
 
 # F-List Exported
