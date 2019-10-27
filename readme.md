@@ -29,7 +29,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Kinks are auto-compared when viewing character profile
     *    Custom kink explanations can be expanded inline
     *    Custom kinks are highlighted
-    *    Gender, anthro/human preference, age, and sexual preference are highlighted if compatible or incompatible
+    *    Gender, anthro/human preference, age, sexual preference, and sub/dom preference are highlighted if compatible or incompatible
     *    Guestbook, friend, and group counts are visible on tabs
     *    Character images are expanded inline
     *    Cleaner presentation for the side bar details (age, etc.), sorted in most relevant order
@@ -43,7 +43,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Search filters can be reset
 *   General
     *    Character profiles, guestbooks, friend lists, and image lists are cached for faster access.
-    *    Open conversation dialog for typing in a character name
+    *    Conversation dialog can be opened by typing in a character name
 
 
 ## How to Set Up Ads
@@ -76,6 +76,8 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Configuration dialog for the player to change match weighs, preview settings, etc.
 *   Conversation bot API
 *   Character comparison should consider D/s preference
+*   Fix collapsible details on character view
+*   Filter unmatching ads is not channel specific -- it's either on everywhere or nowhere
 
 
 # F-List Exported

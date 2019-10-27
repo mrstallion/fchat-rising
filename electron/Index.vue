@@ -99,6 +99,25 @@
     const webContents = electron.remote.getCurrentWebContents();
     const parent = electron.remote.getCurrentWindow().webContents;
 
+    // Allow requests to imgur.com
+    const session = electron.remote.session;
+
+    /* tslint:disable:no-unsafe-any no-any no-unnecessary-type-assertion */
+    session!.defaultSession!.webRequest!.onBeforeSendHeaders(
+        {
+            urls: [
+                'https?://(api|i).imgur.com/*'
+            ]
+        },
+        (details: any, callback: any) => {
+            details.requestHeaders['Origin'] = null;
+            details.headers['Origin'] = null;
+
+            callback({requestHeaders: details.requestHeaders});
+        }
+    );
+
+
     log.info('About to load keytar');
 
     /* tslint:disable: no-any no-unsafe-any */ //because this is hacky

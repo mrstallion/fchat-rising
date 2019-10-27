@@ -51,7 +51,7 @@
 
 
         theirInterestIsRelevant(id: number): boolean {
-            return ((id === TagId.FurryPreference) || (id === TagId.Orientation));
+            return ((id === TagId.FurryPreference) || (id === TagId.Orientation) || (id === TagId.SubDomRole));
         }
 
 

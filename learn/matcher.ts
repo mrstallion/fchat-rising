@@ -9,7 +9,7 @@ export enum TagId {
     Gender = 3,
     Build = 13,
     FurryPreference = 29,
-    BdsmRole = 15,
+    SubDomRole = 15,
     Position = 41,
     BodyType = 51,
     ApparentAge = 64,
@@ -27,6 +27,14 @@ export enum Gender {
     Cuntboy = 69,
     None = 105,
     Shemale = 141
+}
+
+export enum SubDomRole {
+    AlwaysSubmissive = 7,
+    UsuallySubmissive = 8,
+    Switch = 9,
+    UsuallyDominant = 10,
+    AlwaysDominant = 11
 }
 
 export enum Orientation {
@@ -72,6 +80,8 @@ enum Kink {
     YoungerCharacters = 197,
     Ageplay = 196,
     UnderageCharacters = 207,
+
+    RoleReversal = 408,
 
     AnthroCharacters = 587,
     Humans = 609,
@@ -189,7 +199,7 @@ const fchatGenderMap: FchatGenderMap = {
     Shemale: Gender.Shemale,
     Herm: Gender.Herm,
     'Male-Herm': Gender.MaleHerm,
-    'Cunt-boy': Gender.Cuntboy,
+    'Cunt-Boy': Gender.Cuntboy,
     Transgender: Gender.Transgender
 };
 
@@ -285,6 +295,7 @@ export class CharacterAnalysis {
     readonly species: Species | null;
     readonly furryPreference: FurryPreference | null;
     readonly age: number | null;
+    readonly subDomRole: SubDomRole | null;
 
     readonly isAnthro: boolean | null;
     readonly isHuman: boolean | null;
@@ -297,6 +308,7 @@ export class CharacterAnalysis {
         this.orientation = Matcher.getTagValueList(TagId.Orientation, c);
         this.species = Matcher.species(c);
         this.furryPreference = Matcher.getTagValueList(TagId.FurryPreference, c);
+        this.subDomRole = Matcher.getTagValueList(TagId.SubDomRole, c);
 
         const ageTag = Matcher.getTagValue(TagId.Age, c);
 
@@ -360,7 +372,8 @@ export class Matcher {
                 [TagId.Gender]: this.resolveGenderScore(),
                 [TagId.Age]: this.resolveAgeScore(),
                 [TagId.FurryPreference]: this.resolveFurryPairingsScore(),
-                [TagId.Species]: this.resolveSpeciesScore()
+                [TagId.Species]: this.resolveSpeciesScore(),
+                [TagId.SubDomRole]: this.resolveSubDomScore()
             },
 
             info: {
@@ -610,7 +623,6 @@ export class Matcher {
 
     private resolveGenderScore(): Score {
         const you = this.you;
-
         const theirGender = this.theirAnalysis.gender;
 
         if (theirGender === null)
@@ -624,6 +636,72 @@ export class Matcher {
 
         return new Score(Scoring.NEUTRAL);
     }
+
+
+    private resolveSubDomScore(): Score {
+        const you = this.you;
+        const yourSubDomRole = this.yourAnalysis.subDomRole;
+        const theirSubDomRole = this.theirAnalysis.subDomRole;
+        const yourRoleReversalPreference = Matcher.getKinkPreference(you, Kink.RoleReversal);
+
+        if ((!yourSubDomRole) || (!theirSubDomRole))
+            return new Score(Scoring.NEUTRAL);
+
+        if ((yourSubDomRole === SubDomRole.AlwaysDominant) || (yourSubDomRole === SubDomRole.UsuallyDominant)) {
+            if (theirSubDomRole === SubDomRole.Switch)
+                return new Score(Scoring.WEAK_MATCH, `Likes <span>switches</span>`);
+
+            if ((theirSubDomRole === SubDomRole.AlwaysSubmissive) || (theirSubDomRole === SubDomRole.UsuallySubmissive))
+                return new Score(Scoring.MATCH, `Loves <span>submissives</span>`);
+
+            if (yourRoleReversalPreference === KinkPreference.Favorite)
+                return new Score(Scoring.MATCH, `Loves <span>role reversal</span>`);
+
+            if (yourRoleReversalPreference === KinkPreference.Yes)
+                return new Score(Scoring.MATCH, `Likes <span>role reversal</span>`);
+
+            if ((yourSubDomRole === SubDomRole.AlwaysDominant) && (theirSubDomRole === SubDomRole.AlwaysDominant))
+                return new Score(Scoring.MISMATCH, 'No <span>dominants</span>');
+
+            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant on <span>dominants</span>');
+        } else if ((yourSubDomRole === SubDomRole.AlwaysSubmissive) || (yourSubDomRole === SubDomRole.UsuallySubmissive)) {
+            if (theirSubDomRole === SubDomRole.Switch)
+                return new Score(Scoring.WEAK_MATCH, `Likes <span>switches</span>`);
+
+            if ((theirSubDomRole === SubDomRole.AlwaysDominant) || (theirSubDomRole === SubDomRole.UsuallyDominant))
+                return new Score(Scoring.MATCH, `Loves <span>dominants</span>`);
+
+            if (yourRoleReversalPreference === KinkPreference.Favorite)
+                return new Score(Scoring.MATCH, `Loves <span>role reversal</span>`);
+
+            if (yourRoleReversalPreference === KinkPreference.Yes)
+                return new Score(Scoring.MATCH, `Likes <span>role reversal</span>`);
+
+            if ((yourSubDomRole === SubDomRole.AlwaysSubmissive) && (theirSubDomRole === SubDomRole.AlwaysSubmissive))
+                return new Score(Scoring.MISMATCH, 'No <span>submissives</span>');
+
+            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant on <span>submissives</span>');
+        }
+
+        // You must be a switch
+        if (theirSubDomRole === SubDomRole.Switch)
+            return new Score(Scoring.MATCH, `Loves <span>switches</span>`);
+
+        // if (yourRoleReversalPreference === KinkPreference.Favorite)
+        //     return new Score(Scoring.MATCH, `Loves <span>role reversal</span>`);
+        //
+        // if (yourRoleReversalPreference === KinkPreference.Yes)
+        //     return new Score(Scoring.MATCH, `Likes <span>role reversal</span>`);
+
+        if ((theirSubDomRole === SubDomRole.AlwaysDominant) || (theirSubDomRole === SubDomRole.UsuallyDominant))
+            return new Score(Scoring.MATCH, `Loves <span>dominants</span>`);
+
+        if ((theirSubDomRole === SubDomRole.AlwaysSubmissive) || (theirSubDomRole === SubDomRole.UsuallySubmissive))
+            return new Score(Scoring.MATCH, `Loves <span>submissives</span>`);
+
+        return new Score(Scoring.NEUTRAL);
+    }
+
 
     static getTagValue(tagId: number, c: Character): CharacterInfotag | undefined {
         return c.infotags[tagId];

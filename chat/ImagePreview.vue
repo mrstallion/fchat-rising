@@ -49,6 +49,10 @@
     [url=https://www.sex.com/pin/38152484-she-likes-it-rough/]Test[/url]
 
     [url=https://www.sex.com/pin/57537179-cock-slapping-hungry-tongue/]Test[/url]
+
+    [url=https://imgur.com/gallery/ILsb94I]Imgur gallery[/url]
+
+    [url=https://imgur.com/CIKv6sA]Imgur image[/url]
     */
 
     import * as _ from 'lodash';
@@ -57,6 +61,7 @@
     import { EventBus, EventBusEvent } from './event-bus';
     import {domain} from '../bbcode/core';
     import {ImagePreviewMutator} from './image-preview-mutator';
+    import {ImageUrlMutator} from './image-url-mutator';
     import {Point, screen, WebviewTag} from 'electron';
     import Timer = NodeJS.Timer;
 
@@ -76,13 +81,15 @@
         protected visible = false;
         protected url: string | null = 'about:blank';
         protected parent: ImagePreview;
+        protected debug: boolean;
 
-        abstract show(url: string): void;
+        abstract show(url: string): Promise<void>;
         abstract hide(): void;
         abstract match(domainName: string): boolean;
 
         constructor(parent: ImagePreview) {
             this.parent = parent;
+            this.debug = parent.debug;
         }
 
         isVisible(): boolean {
@@ -91,6 +98,10 @@
 
         getUrl(): string | null {
             return this.url;
+        }
+
+        setDebug(debug: boolean): void {
+            this.debug = debug;
         }
     }
 
@@ -102,7 +113,7 @@
         }
 
 
-        show(url: string): void {
+        async show(url: string): Promise<void> {
             this.visible = true;
             this.url = url;
         }
@@ -118,6 +129,9 @@
         protected lastExternalUrl: string | null = null;
 
         protected allowCachedUrl = true;
+
+        protected urlMutator = new ImageUrlMutator(this.parent.debug);
+
 
         hide(): void {
             const wasVisible = this.visible;
@@ -139,20 +153,27 @@
         }
 
 
-        show(url: string): void {
+        setDebug(debug: boolean): void {
+            this.debug = debug;
+
+            this.urlMutator.setDebug(debug);
+        }
+
+
+        async show(url: string): Promise<void> {
             const webview = this.parent.getWebview();
 
             try {
                 if ((this.allowCachedUrl) && ((webview.getURL() === url) || (url === this.lastExternalUrl))) {
-                    if (this.parent.debug)
+                    if (this.debug)
                         console.log('ImagePreview: exec re-show mutator');
 
                     webview.executeJavaScript(this.parent.jsMutator.getReShowMutator());
                 } else {
-                    if (this.parent.debug)
+                    if (this.debug)
                         console.log('ImagePreview: must load; skip re-show because urls don\'t match', this.url, webview.getURL());
 
-                    webview.loadURL(url);
+                    webview.loadURL(await this.urlMutator.resolve(url));
                 }
 
             } catch (err) {
@@ -520,6 +541,8 @@
             this.debug = !this.debug;
 
             this.jsMutator.setDebug(this.debug);
+            this.localPreviewHelper.setDebug(this.debug);
+            this.externalPreviewHelper.setDebug(this.debug);
 
             if (this.debug) {
                 const webview = this.getWebview();
