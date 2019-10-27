@@ -318,15 +318,16 @@
                 (event: Event) => {
                     if (this.debug)
                         console.log('ImagePreview did-finish-load', event);
-
-                    webview.getWebContents().session.on(
-                        'will-download',
-                        (e: Event) => {
-                            e.preventDefault();
-                        }
-                    );
                 }
             );
+
+
+            /* webview.getWebContents().session.on(
+                'will-download',
+                (e: Event) => {
+                    e.preventDefault();
+                }
+            );*/
 
 
             _.each(

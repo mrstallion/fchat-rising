@@ -123,7 +123,6 @@ export class ImagePreviewMutator {
         this.add('pornhub.com', this.getBaseJsMutatorScript(['.mainPlayerDiv video', '.photoImageSection img']));
         this.add('sex.com', this.getBaseJsMutatorScript(['.image_frame video', '.image_frame img']));
         this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript(['picture video', 'picture img']));
-        this.add('i.imgur.com', this.getBaseJsMutatorScript(['video', 'img']));
         this.add('postimg.cc', this.getBaseJsMutatorScript(['video', '#main-image']));
         this.add('gifsauce.com', this.getBaseJsMutatorScript(['video']));
         this.add('motherless.com', this.getBaseJsMutatorScript(['.content video', '.content img']));
@@ -131,6 +130,23 @@ export class ImagePreviewMutator {
         this.add('giphy.com', this.getBaseJsMutatorScript(['video', 'a > div > img']));
         this.add(/^media[0-9]\.tenor\.com$/, this.getBaseJsMutatorScript(['#view .file video', '#view .file img']));
         this.add('tenor.com', this.getBaseJsMutatorScript(['#view video', '#view img']));
+
+        // tslint:disable max-line-length
+        this.add(
+            'i.imgur.com',
+            `
+                const imageCount = (new URL(window.location.href)).searchParams.get('flist_gallery_image_count');
+
+                ${this.getBaseJsMutatorScript(['video', 'img'])}
+
+                if(imageCount > 1) {
+                    ${this.injectHtmlJs('<div id="imageCount" style="z-index: 1000000; position: absolute; bottom: 0; right: 0; background: green; border: 2px solid lightgreen; width: 5rem; height: 5rem; font-size: 2rem; font-weight: bold; color: white; border-radius: 5rem; margin: 0.75rem;"><div id="imageCountInner" style="position: absolute; top: 50%; left: 50%; transform: translateY(-50%) translateX(-50%);"></div></div>')}
+
+                    const imageCountEl = document.getElementById('imageCountInner');
+                    imageCountEl.innerHTML = '+' + (imageCount - 1);
+                }
+            `
+        );
 
         // tslint:disable max-line-length
         this.add(
@@ -189,11 +205,11 @@ export class ImagePreviewMutator {
                 selected = selected.concat(selectedElements);
             }
 
-            ${true /*this.debug*/ ? `console.log('Selector', '${elSelector}'); console.log('Selected', selected);` : ''}
+            ${this.debug ? `console.log('Selector', '${elSelector}'); console.log('Selected', selected);` : ''}
 
             const img = selected.shift();
 
-            ${true /*this.debug*/ ? `console.log('Img', img);` : ''}
+            ${this.debug ? `console.log('Img', img);` : ''}
 
             if (!img) { return; }
 
@@ -246,7 +262,7 @@ export class ImagePreviewMutator {
             ${this.debug ? "console.log('Wrapper', el);" : ''}
 
             document.addEventListener('DOMContentLoaded', (event) => {
-                ${true /*this.debug*/ ? "console.log('on DOMContentLoaded');" : ''}
+                ${this.debug ? "console.log('on DOMContentLoaded');" : ''}
 
                 if (
                     (img.play)
@@ -256,7 +272,7 @@ export class ImagePreviewMutator {
             });
 
             document.addEventListener('load', (event) => {
-                ${true /*this.debug*/ ? "console.log('on load');" : ''}
+                ${this.debug ? "console.log('on load');" : ''}
 
                 if (
                     (img.play)
