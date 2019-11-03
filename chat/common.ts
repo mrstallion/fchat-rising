@@ -42,6 +42,10 @@ export class Settings implements ISettings {
     enterSend = true;
     colorBookmarks = false;
     bbCodeBar = true;
+
+    risingAdScore = true;
+    risingLinkPreview = true;
+    risingAutoCompareKinks = true;
 }
 
 

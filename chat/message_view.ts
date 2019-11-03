@@ -104,7 +104,7 @@ export default class MessageView extends Vue {
     }
 
     getMessageScoreClasses(message: Conversation.Message): string {
-        if (message.type !== Conversation.Message.Type.Ad) {
+        if ((!core.state.settings.risingAdScore) || (message.type !== Conversation.Message.Type.Ad)) {
             return '';
         }
 

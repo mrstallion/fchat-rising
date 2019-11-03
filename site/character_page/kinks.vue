@@ -2,12 +2,12 @@
     <div class="character-kinks-block" @contextmenu="contextMenu" @touchstart="contextMenu" @touchend="contextMenu">
         <div class="compare-highlight-block d-flex justify-content-between">
             <div class="expand-custom-kinks-block form-inline">
-                <button class="btn btn-primary" @click="toggleExpandedCustomKinks" :disabled="loading">Expand Custom Kinks</button>
+                <button class="btn btn-primary" @click="toggleExpandedCustomKinks" :disabled="loading">{{(expandedCustoms ? 'Collapse' : 'Expand')}} Custom Kinks</button>
             </div>
 
             <div v-if="shared.authenticated" class="quick-compare-block form-inline">
                 <character-select v-model="characterToCompare"></character-select>
-                <button class="btn btn-outline-secondary" @click="compareKinks" :disabled="loading || !characterToCompare">
+                <button class="btn btn-outline-secondary" @click="compareKinks()" :disabled="loading || !characterToCompare">
                     {{ compareButtonText }}
                 </button>
             </div>
@@ -19,7 +19,7 @@
                 </select>
             </div>
         </div>
-        <div class="form-row mt-3">
+        <div class="form-row mt-3" :class="{ highlighting: !!highlightGroup }">
             <div class="col-sm-6 col-lg-3">
                 <div class="card bg-light">
                     <div class="card-header">
@@ -97,6 +97,8 @@
         comparing = false;
         highlighting: {[key: string]: boolean} = {};
         comparison: {[key: string]: KinkChoice} = {};
+
+        _ = _;
 
         expandedCustoms = false;
 
@@ -191,7 +193,9 @@
             if ((this.character) && (this.character.is_self))
                 return;
 
-            await this.compareKinks(core.characters.ownProfile);
+            if (core.state.settings.risingAutoCompareKinks) {
+                await this.compareKinks(core.characters.ownProfile);
+            }
         }
 
         @Watch('character')
@@ -202,8 +206,16 @@
             await this.compareKinks(core.characters.ownProfile);
         }
 
-        get kinkGroups(): {[key: string]: KinkGroup | undefined} {
-            return this.shared.kinks.kink_groups;
+        get kinkGroups(): KinkGroup[] {
+            const groups = this.shared.kinks.kink_groups;
+
+            return _.sortBy(
+                _.filter(
+                    groups,
+                    (g) => (!_.isUndefined(g))
+                ),
+                'name'
+            ) as KinkGroup[];
         }
 
         get compareButtonText(): string {

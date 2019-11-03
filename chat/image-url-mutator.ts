@@ -61,7 +61,43 @@ export class ImageUrlMutator {
             }
         );
 
-        // must be AFTER gallery test
+        this.add(
+            /^https?:\/\/imgur.com\/a\/([a-zA-Z0-9]+)/,
+            async(url: string, match: RegExpMatchArray): Promise<string> => {
+                // Imgur Album
+                const albumId = match[1];
+
+                try {
+                    const result = await Axios.get(
+                        `https://api.imgur.com/3/album/${albumId}/images`,
+                        {
+                            headers: {
+                                Authorization: `Client-ID ${ImageUrlMutator.IMGUR_CLIENT_ID}`
+                            }
+                        }
+                    );
+
+                    const imageUrl = _.get(result, 'data.data.0.link', null);
+
+                    if (!imageUrl) {
+                        return url;
+                    }
+
+                    const imageCount = _.get(result, 'data.data.length', 1);
+
+                    if (this.debug)
+                        console.log('Imgur album', url, imageUrl, imageCount);
+
+                    return `${imageUrl}?flist_gallery_image_count=${imageCount}`;
+
+                } catch (err) {
+                    console.error('Imgur Album Failure', url, err);
+                    return url;
+                }
+            }
+        );
+
+        // must be AFTER gallery & album test
         this.add(
             /^https?:\/\/imgur.com\/([a-zA-Z0-9]+)/,
             async(url: string, match: RegExpMatchArray): Promise<string> => {

@@ -11,7 +11,7 @@
                     :highlights="highlights"></kink>
             </div>
         </template>
-        <div class="popover popover-top" v-if="((showTooltip) && ((!kink.isCustom) || (!expandedCustom)))" style="display:block;bottom:100%;top:initial;margin-bottom:5px">
+        <div class="popover popover-top" v-if="((showTooltip) && ((!kink.isCustom) || (!expandedCustom)))">
             <div class="arrow" style="left:10%"></div>
             <h5 class="popover-header">{{kink.name}}</h5>
             <div class="popover-body"><p>{{kink.description}}</p></div>

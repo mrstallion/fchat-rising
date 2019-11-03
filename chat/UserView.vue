@@ -113,6 +113,7 @@ export default class UserView extends Vue {
         this.rankIcon = null;
         this.statusClass = null;
         this.matchClass = null;
+        this.matchScore = null;
 
         // if (this.match) console.log('Update', this.character.name);
 
@@ -131,7 +132,7 @@ export default class UserView extends Vue {
 
         // if (this.match) console.log('Update prematch', this.character.name);
 
-        if (this.match) {
+        if ((core.state.settings.risingAdScore) && (this.match)) {
             const cache = core.cache.profileCache.getSync(this.character.name);
 
             if (cache) {

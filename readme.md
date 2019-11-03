@@ -72,11 +72,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Fix broken BBCode, such as `[big]` in character profiles
 *   Reposition ad settings and toggle
 *   Save character status messages
-*   Bug: Images tab count is off
-*   Configuration dialog for the player to change match weighs, preview settings, etc.
 *   Conversation bot API
-*   Character comparison should consider D/s preference
-*   Fix collapsible details on character view
 *   Filter unmatching ads is not channel specific -- it's either on everywhere or nowhere
 
 

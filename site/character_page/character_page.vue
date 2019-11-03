@@ -36,7 +36,7 @@
                         <div class="card-body">
                             <div class="tab-content">
                                 <div role="tabpanel" class="tab-pane" :class="{active: tab === '0'}" id="overview">
-                                    <match-report :characterMatch="characterMatch" :minimized="character.is_self"></match-report>
+                                    <match-report :characterMatch="characterMatch" :minimized="character.is_self" v-if="shouldShowMatch()"></match-report>
                                     <div v-bbcode="character.character.description" style="margin-bottom: 10px"></div>
                                     <character-kinks :character="character" :oldApi="oldApi" ref="tab0"></character-kinks>
                                 </div>
@@ -138,7 +138,6 @@
         images: CharacterImage[] | null = null;
 
         selfCharacter: Character | undefined;
-
         characterMatch: MatchReport | undefined;
 
 
@@ -183,6 +182,10 @@
             );
         }
 
+
+        shouldShowMatch(): boolean {
+            return core.state.settings.risingAdScore;
+        }
 
         async reload(): Promise<void> {
             await this.load(true, true);
@@ -409,9 +412,16 @@
 
         .character-kink {
             .popover {
+                display:block;
+                bottom:100%;
+                top:initial;
+                // margin-bottom:5px;
+
                 min-width: 200px;
                 margin-bottom: 0;
                 padding-bottom: 0;
+
+                opacity: 1;
             }
 
             p {
@@ -475,6 +485,29 @@
         .kink-name, i {
             color: #ededf6;
             font-weight: normal;
+        }
+
+        &.highlighted {
+            .kink-name, i {
+                font-weight: bold;
+                color: #ffffff;
+            }
+        }
+    }
+
+    .character-kinks-block {
+        .highlighting {
+            .character-kink.stock-kink {
+                .kink-name {
+                    opacity: 0.4;
+                }
+
+                &.highlighted {
+                    .kink-name {
+                        opacity: 1;
+                    }
+                }
+            }
         }
     }
 
@@ -739,44 +772,86 @@
     }
 
 
+    $scoreMatchBg: rgb(0, 142, 0);
+    $scoreMatchFg: rgb(0, 113, 0);
+    $scoreWeakMatchBg: rgb(0, 80, 0);
+    $scoreWeakMatchFg: rgb(0, 64, 0);
+    $scoreWeakMismatchBg: rgb(152, 134, 0);
+    $scoreWeakMismatchFg: rgb(142, 126, 0);
+    $scoreMismatchBg: rgb(171, 0, 0);
+    $scoreMismatchFg: rgb(128, 0, 0);
+
     .character-kinks-block .character-kink.comparison-favorite,
     .match-report .scores .match-score.match,
     .infotag.match {
-        background-color: rgb(0, 142, 0);
-        border: solid 1px rgb(0, 113, 0);
-
-        // background-color: #007700;
-        // border: 1px solid #003e00;
+        background-color: $scoreMatchBg;
+        border: solid 1px $scoreMatchFg;
     }
 
     .character-kinks-block .character-kink.comparison-yes,
     .match-report .scores .match-score.weak-match,
     .infotag.weak-match {
-        background-color: rgb(0, 80, 0);
-        border: 1px solid rgb(0, 64, 0);
-
-        // background-color: #004200;
-        // border: 1px solid #002900;
+        background-color: $scoreWeakMatchBg;
+        border: 1px solid $scoreWeakMatchFg;
     }
 
     .character-kinks-block .character-kink.comparison-maybe,
     .match-report .scores .match-score.weak-mismatch,
     .infotag.weak-mismatch {
-        background-color: rgb(152, 134, 0);
-        border: 1px solid rgb(142, 126, 0);
-
-        // border: 1px solid #613e00;
-        // background-color: #905d01;
+        background-color: $scoreWeakMismatchBg;
+        border: 1px solid $scoreWeakMismatchFg;
     }
 
     .character-kinks-block .character-kink.comparison-no,
     .match-report .scores .match-score.mismatch,
     .infotag.mismatch {
-        background-color: rgb(171, 0, 0);
-        border: 1px solid rgb(128, 0, 0);
+        background-color: $scoreMismatchBg;
+        border: 1px solid $scoreMismatchFg;
+    }
 
-        // border: 1px solid #420200;
-        // background-color: #710300;
+
+    .character-kinks-block .highlighting {
+        .character-kink {
+            &.comparison-favorite {
+                background-color: adjust-color($scoreMatchBg, $alpha: -0.6);
+                border-color: adjust-color($scoreMatchFg, $alpha: -0.6);
+
+                &.highlighted {
+                    background-color: $scoreMatchBg;
+                    border-color: $scoreMatchFg;
+                }
+            }
+
+            &.comparison-yes {
+                background-color: adjust-color($scoreWeakMatchBg, $alpha: -0.6);
+                border-color: adjust-color($scoreWeakMatchFg, $alpha: -0.6);
+
+                &.highlighted {
+                    background-color: $scoreWeakMatchBg;
+                    border-color: $scoreWeakMatchFg;
+                }
+            }
+
+            &.comparison-maybe {
+                background-color: adjust-color($scoreWeakMismatchBg, $alpha: -0.6);
+                border-color: adjust-color($scoreWeakMismatchFg, $alpha: -0.6);
+
+                &.highlighted {
+                    background-color: $scoreWeakMismatchBg;
+                    border-color: $scoreWeakMismatchFg;
+                }
+            }
+
+            &.comparison-no {
+                background-color: adjust-color($scoreMismatchBg, $alpha: -0.6);
+                border-color: adjust-color($scoreMismatchFg, $alpha: -0.6);
+
+                &.highlighted {
+                    background-color: $scoreMismatchBg;
+                    border-color: $scoreMismatchFg;
+                }
+            }
+        }
     }
 
 

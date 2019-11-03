@@ -1,7 +1,7 @@
 <template>
     <modal :action="l('settings.action')" @submit="submit" @open="load()" id="settings" dialogClass="w-100">
         <tabs style="flex-shrink:0;margin-bottom:10px" v-model="selectedTab"
-            :tabs="[l('settings.tabs.general'), l('settings.tabs.notifications'), l('settings.tabs.hideAds'), l('settings.tabs.import')]"></tabs>
+            :tabs="[l('settings.tabs.general'), l('settings.tabs.notifications'), 'Rising', l('settings.tabs.hideAds'), l('settings.tabs.import')]"></tabs>
         <div v-show="selectedTab === '0'">
             <div class="form-group">
                 <label class="control-label" for="disallowedTags">{{l('settings.disallowedTags')}}</label>
@@ -119,6 +119,24 @@
             </div>
         </div>
         <div v-show="selectedTab === '2'">
+            <div class="form-group">
+                <label class="control-label" for="risingAdScore">
+                    <input type="checkbox" id="risingAdScore" v-model="risingAdScore"/>
+                    Colorize ads, profiles, and names of compatible and incompatible characters
+                </label>
+
+                <label class="control-label" for="risingLinkPreview">
+                    <input type="checkbox" id="risingLinkPreview" v-model="risingLinkPreview"/>
+                    Show link previews when the mouse hovers over a link
+                </label>
+
+                <label class="control-label" for="risingAutoCompareKinks">
+                    <input type="checkbox" id="risingAutoCompareKinks" v-model="risingAutoCompareKinks"/>
+                    Automatically compare kinks when viewing a character profile
+                </label>
+            </div>
+        </div>
+        <div v-show="selectedTab === '3'">
             <template v-if="hidden.length">
                 <div v-for="(user, i) in hidden">
                     <span class="fa fa-times" style="cursor:pointer" @click.stop="hidden.splice(i, 1)"></span>
@@ -127,7 +145,7 @@
             </template>
             <template v-else>{{l('settings.hideAds.empty')}}</template>
         </div>
-        <div v-show="selectedTab === '3'" style="display:flex;padding-top:10px">
+        <div v-show="selectedTab === '4'" style="display:flex;padding-top:10px">
             <select id="import" class="form-control" v-model="importCharacter" style="flex:1;margin-right:10px">
                 <option value="">{{l('settings.import.selectCharacter')}}</option>
                 <option v-for="character in availableImports" :value="character">{{character}}</option>
@@ -175,6 +193,10 @@
         colorBookmarks!: boolean;
         bbCodeBar!: boolean;
 
+        risingAdScore!: boolean;
+        risingLinkPreview!: boolean;
+        risingAutoCompareKinks!: boolean;
+
         async load(): Promise<void> {
             const settings = core.state.settings;
             this.playSound = settings.playSound;
@@ -198,6 +220,10 @@
             this.colorBookmarks = settings.colorBookmarks;
             this.bbCodeBar = settings.bbCodeBar;
             this.availableImports = (await core.settingsStore.getAvailableCharacters()).filter((x) => x !== core.connection.character);
+
+            this.risingAdScore = settings.risingAdScore;
+            this.risingLinkPreview = settings.risingLinkPreview;
+            this.risingAutoCompareKinks = settings.risingAutoCompareKinks;
         }
 
         async doImport(): Promise<void> {
@@ -240,7 +266,11 @@
                 showNeedsReply: this.showNeedsReply,
                 enterSend: this.enterSend,
                 colorBookmarks: this.colorBookmarks,
-                bbCodeBar: this.bbCodeBar
+                bbCodeBar: this.bbCodeBar,
+
+                risingAdScore: this.risingAdScore,
+                risingLinkPreview: this.risingLinkPreview,
+                risingAutoCompareKinks: this.risingAutoCompareKinks
             };
             if(this.notifications) await core.notifications.requestPermission();
         }

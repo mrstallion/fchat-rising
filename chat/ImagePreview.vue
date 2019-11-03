@@ -53,11 +53,14 @@
     [url=https://imgur.com/gallery/ILsb94I]Imgur gallery[/url]
 
     [url=https://imgur.com/CIKv6sA]Imgur image[/url]
+
+    [url=https://imgur.com/a/nMafj]Imgur album[/url]
     */
 
     import * as _ from 'lodash';
     import {Component, Hook} from '@f-list/vue-ts';
     import Vue from 'vue';
+    import core from './core';
     import { EventBus, EventBusEvent } from './event-bus';
     import {domain} from '../bbcode/core';
     import {ImagePreviewMutator} from './image-preview-mutator';
@@ -224,7 +227,6 @@
                 'imagepreview-dismiss',
                 (eventData: EventBusEvent) => {
                     // console.log('Event dismiss', eventData.url);
-
                     this.dismiss(eventData.url as string, eventData.force as boolean);
                 }
             );
@@ -234,6 +236,10 @@
                 (eventData: EventBusEvent) => {
                     // console.log('Event show', eventData.url);
 
+                    if (!core.state.settings.risingLinkPreview) {
+                        return;
+                    }
+
                     this.show(eventData.url as string);
                 }
             );
@@ -241,6 +247,10 @@
             EventBus.$on(
                 'imagepreview-toggle-stickyness',
                 (eventData: EventBusEvent) => {
+                    if (!core.state.settings.risingLinkPreview) {
+                        return;
+                    }
+
                     const eventUrl = this.jsMutator.mutateUrl(eventData.url as string);
 
                     if ((this.url === eventUrl) && (this.visible))

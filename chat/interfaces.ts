@@ -181,6 +181,10 @@ export namespace Settings {
         readonly enterSend: boolean;
         readonly colorBookmarks: boolean;
         readonly bbCodeBar: boolean;
+
+        readonly risingAdScore: boolean;
+        readonly risingLinkPreview: boolean;
+        readonly risingAutoCompareKinks: boolean;
     }
 }
 

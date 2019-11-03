@@ -49,6 +49,10 @@ export class CacheManager {
     }
 
     async queueForFetching(name: string, skipCacheCheck: boolean = false): Promise<void> {
+        if (!core.state.settings.risingAdScore) {
+            return;
+        }
+
         if (!skipCacheCheck) {
             const c = await this.profileCache.get(name);
 

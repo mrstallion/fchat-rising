@@ -9,6 +9,7 @@
 <script lang="ts">
     import {Component, Prop} from '@f-list/vue-ts';
     import Vue from 'vue';
+    import core from '../../chat/core';
     import {formatContactLink, formatContactValue} from './contact_utils';
     import { DisplayInfotag } from './interfaces';
     // import { Character as CharacterInfo } from '../../interfaces';
@@ -33,7 +34,7 @@
             // console.log(`Infotag ${this.infotag.id}: ${this.label}`);
             const id = this.infotag.id;
 
-            if (this.characterMatch) {
+            if ((core.state.settings.risingAdScore) && (this.characterMatch)) {
                 const scores = this.theirInterestIsRelevant(id)
                     ? this.characterMatch.them.scores
                     : (this.yourInterestIsRelevant(id) ? this.characterMatch.you.scores : null);
