@@ -18,7 +18,11 @@
             <button class="btn btn-outline-secondary" @click.prevent="reset()">Reset</button>
         </div>
         <div v-else-if="results" class="results">
-            <h4>{{l('characterSearch.results')}}</h4>
+            <h4>
+                {{l('characterSearch.results')}}
+                <i class="fa fa-spinner search-spinner" v-if="!resultsComplete"></i>
+            </h4>
+
             <div v-for="character in results" :key="character.name" class="search-result" :class="'status-' + character.status">
                 <template v-if="character.status === 'looking'" v-once>
                     <img :src="characterImage(character.name)" v-if="showAvatars"/>
@@ -101,6 +105,7 @@
         kinksFilter = '';
         error = '';
         results: Character[] | undefined;
+        resultsComplete = false;
         characterImage = characterImage;
         options!: Data;
         data: Data = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: []};
@@ -145,6 +150,8 @@
             core.connection.onMessage('FKS', (data) => {
                 this.results = data.characters.map((x) => core.characters.get(x))
                     .filter((x) => core.state.hiddenUsers.indexOf(x.name) === -1 && !x.isIgnored).sort(sort);
+
+                this.resultsComplete = this.checkResultCompletion();
             });
 
             if (this.scoreWatcher) {
@@ -163,6 +170,7 @@
                     && (_.find(this.results, (c: Character) => c.name === event.character.character.name))
                 ) {
                     this.results = this.results.sort(sort);
+                    this.resultsComplete = this.checkResultCompletion();
                 }
             };
 
@@ -196,6 +204,14 @@
                     (v) => _.get(v, 'name', v)
                 ),
                 ', '
+            );
+        }
+
+
+        checkResultCompletion(): boolean {
+            return _.every(
+                this.results,
+                (c: Character) => (!!core.cache.profileCache.getSync(c.name))
             );
         }
 
@@ -267,5 +283,22 @@
         .search-string span {
             font-weight: bold;
         }
+
+        .search-spinner {
+            float: right;
+            animation: search-spin 4s linear infinite;
+        }
     }
+
+
+    @keyframes search-spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+
+    }
+
 </style>
