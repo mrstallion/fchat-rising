@@ -7,14 +7,14 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 
 1. **Profile matching** automatically compares your profile with others to determine with whom you are compatible.
 1. **Automatic ad posting** repeatedly posts and rotates ads on selected channels.
-1. **Link previews** pop up shows a preview of an image, when you hover your mouse over a link.
+1. **Link previews** pop up shows a preview of an image when you hover your mouse over a link.
 
 
-### Details
+### More Details
 
 *   Ads view
     *    Highlight ads from characters most interesting to you
-    *    Hide obviously unmatching ads
+    *    Hide clearly unmatched ads
     *    View characters' recent ads
 *   Ad auto-posting
     *    Manage channel ad settings via "Tab Settings"
@@ -36,6 +36,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Less informative side bar details (views, contact) are separated and shown in a less prominent way
     *    Cleaner guestbook view
     *    Profiles, images, guestbook posts, and groups are cached for faster view
+    *    Character view tabs (overview, images, etc.) stick to the top 
 *   Character Search
     *    Search results are sorted based on match scores
     *    Display match score in search results
@@ -44,6 +45,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   General
     *    Character profiles, guestbooks, friend lists, and image lists are cached for faster access.
     *    Conversation dialog can be opened by typing in a character name
+    *    Message search also checks character names
 
 
 ## How to Set Up Ads
@@ -57,10 +59,11 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 
 ## FAQ
 
-1. The more information you have in your profile (non-custom kinks in particular), the better the matching will be.
-1. Non-binary gender preference matches rely on kink preferences.
+1. The more information you have in your profile (**non-custom** kinks in particular), the better the matching quality will be.
+1. Non-binary gender preference matching relies on kinks. For example, if your non-binary character has a preference for females, make sure 'females' are listed as a favorite kink.
 1. 'Underage' kink is considered to apply to characters aged 16 or above; 'ageplay' kink is considered to apply to characters aged 16 or below.
 1. 'Older characters' and 'younger characters' kink preferences are interpreted as age difference of 5+ years.
+1. Comparison results will get faster over time, as more and more character data is cached.
 
 
 ## Todo / Ideas
@@ -68,10 +71,9 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Collect data on ads / responses to determine which ads work best
 *   Preview mode should allow detaching from the main window
 *   Split chat view
-*   Improvements to log browsing
-*   Fix broken BBCode, such as `[big]` in character profiles
+*   Improve log browsing
 *   Reposition ad settings and toggle
-*   Save character status messages
+*   Save character's status messages
 *   Conversation bot API
 *   Filter unmatching ads is not channel specific -- it's either on everywhere or nowhere
 
