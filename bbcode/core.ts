@@ -61,6 +61,7 @@ export class CoreBBCodeParser extends BBCodeParser {
         this.addTag(new BBCodeSimpleTag('s', 'del'));
         this.addTag(new BBCodeSimpleTag('noparse', 'span', [], []));
         this.addTag(new BBCodeSimpleTag('sub', 'sub', [], ['b', 'i', 'u', 's', 'color']));
+        this.addTag(new BBCodeSimpleTag('big', 'span', ['bigText'], ['b', 'i', 'u', 's', 'color']));
         this.addTag(new BBCodeSimpleTag('sup', 'sup', [], ['b', 'i', 'u', 's', 'color']));
         this.addTag(new BBCodeCustomTag('color', (parser, parent, param) => {
             const cregex = /^(red|blue|white|yellow|pink|gray|green|orange|purple|black|brown|cyan)$/;
