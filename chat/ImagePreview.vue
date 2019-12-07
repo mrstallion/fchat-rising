@@ -55,6 +55,8 @@
     [url=https://imgur.com/CIKv6sA]Imgur image[/url]
 
     [url=https://imgur.com/a/nMafj]Imgur album[/url]
+
+    [url=http://i.imgur.com/txEREOg.gifv]Imgur video[/url]
     */
 
     import * as _ from 'lodash';

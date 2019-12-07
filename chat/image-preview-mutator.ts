@@ -261,6 +261,24 @@ export class ImagePreviewMutator {
 
             ${this.debug ? "console.log('Wrapper', el);" : ''}
 
+            if ((!img.src) && (img.tagName) && (img.tagName.toUpperCase() === 'VIDEO')) {
+                ${this.debug ? "console.log('Nedds a content URL', img);" : ''}
+
+                const contentUrls = document.querySelectorAll('meta[itemprop="contentURL"]');
+
+                if ((contentUrls) && (contentUrls.length > 0)) {
+                    ${this.debug ? "console.log('Found content URLs', contentUrls);" : ''}
+
+                    const cu = contentUrls[0];
+
+                    if ((cu.attributes) && (cu.attributes.content) && (cu.attributes.content.value)) {
+                        ${this.debug ? "console.log('Content URL', cu.attributes.content.value);" : ''}
+
+                        img.src = cu.attributes.content.value;
+                    }
+                }
+            }
+
             document.addEventListener('DOMContentLoaded', (event) => {
                 ${this.debug ? "console.log('on DOMContentLoaded');" : ''}
 
