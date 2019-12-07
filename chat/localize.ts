@@ -24,6 +24,7 @@ const strings: {[key: string]: string | undefined} = {
     'admgr.activeHeader': 'Auto-Posting Ads',
     'admgr.comingNext': 'Coming Next',
     'admgr.renew': 'Renew',
+    'admgr.setup': 'Setup Ads',
     'admgr.toggleAutoPost': 'Auto-Post Ads',
     'consoleWarning.head': 'THIS IS THE DANGER ZONE.',
     'consoleWarning.body': `ANYTHING YOU WRITE OR PASTE IN HERE COULD BE USED TO STEAL YOUR PASSWORDS OR TAKE OVER YOUR ENTIRE COMPUTER. This is where happiness goes to die. If you aren't a developer or a special kind of daredevil, please get out of here!`,

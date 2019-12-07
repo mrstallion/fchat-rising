@@ -90,7 +90,8 @@
                 <div>{{(adAutoPostNextAd ? adAutoPostNextAd.substr(0, 64) : '')}}...</div>
             </div>
 
-            <a class="btn btn-sm btn-outline-primary renew-autoposts" @click="renewAutoPosting()">{{l('admgr.renew')}}</a>
+            <a class="btn btn-sm btn-outline-primary renew-autoposts" @click="renewAutoPosting()" v-if="!adsRequireSetup">{{l('admgr.renew')}}</a>
+            <a class="btn btn-sm btn-outline-primary renew-autoposts" @click="showSettings()" v-if="adsRequireSetup">{{l('admgr.setup')}}</a>
         </div>
         <div class="border-top messages" :class="getMessageWrapperClasses()" ref="messages"
              @scroll="onMessagesScroll" style="flex:1;overflow:auto;margin-top:2px">
@@ -174,6 +175,8 @@
     import {isCommand} from './slash_commands';
     import UserView from './UserView.vue';
     import UserChannelList from './UserChannelList.vue';
+    import * as _ from 'lodash';
+
 
     @Component({
         components: {
@@ -211,6 +214,7 @@
         autoPostingUpdater = 0;
         adAutoPostUpdate: string | null = null;
         adAutoPostNextAd: string | null = null;
+        adsRequireSetup = false;
         isChannel = Conversation.isChannel;
         isPrivate = Conversation.isPrivate;
         showNonMatchingAds = true;
@@ -281,7 +285,7 @@
         get messages(): ReadonlyArray<Conversation.Message | Conversation.SFCMessage> {
             if(this.search === '') return this.conversation.messages;
             const filter = new RegExp(this.search.replace(/[^\w]/gi, '\\$&'), 'i');
-            return this.conversation.messages.filter((x) => filter.test(x.text));
+            return this.conversation.messages.filter((x) => filter.test(x.text) || (filter.test(_.get(x, 'sender.name', '') as string)));
         }
 
         async sendButton(): Promise<void> {
@@ -337,7 +341,9 @@
         }
 
         @Watch('conversation.typingStatus')
-        typingStatusChanged(_: string, oldValue: string): void {
+        // tslint:disable-next-line: ban-ts-ignore
+        // @ts-ignore-next
+        typingStatusChanged(str: string, oldValue: string): void {
             if(oldValue === 'clear') this.keepScroll();
         }
 
@@ -504,10 +510,13 @@
                         diffMins,
                         diffSecs
                     ) + l('admgr.expiresIn', expDiffMins, expDiffSecs);
+
+                    this.adsRequireSetup = false;
                 } else {
                     this.adAutoPostNextAd = null;
 
                     this.adAutoPostUpdate = l('admgr.noAds');
+                    this.adsRequireSetup = true;
                 }
             };
 
