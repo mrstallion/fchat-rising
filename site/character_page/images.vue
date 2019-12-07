@@ -3,6 +3,10 @@
     <div class="character-images">
         <div v-show="loading" class="alert alert-info">Loading images.</div>
         <template v-if="!loading">
+            <div class="images-navigate-up">
+                <i class="fa fa-angle-up"></i>
+            </div>
+
             <!-- @click="handleImageClick($event, image)" -->
             <div v-for="image in images" :key="image.id" class="character-image-wrapper">
                 <a :href="imageUrl(image)" target="_blank">
@@ -10,16 +14,6 @@
                 </a>
                 <div class="image-description" v-if="!!image.description">{{image.description}}</div>
             </div>
-
-<!--            <div class="character-image col-6 col-sm-12 col-md-12" v-for="image in images" :key="image.id">-->
-<!--                <img :src="imageUrl(image)" :title="image.description">-->
-<!--            </div>-->
-<!--                -->
-
-<!--                <a :href="imageUrl(image)" target="_blank" @click="handleImageClick($event, image)">-->
-<!--                    <img :src="thumbUrl(image)" :title="image.description">-->
-<!--                </a>-->
-<!--            </div>-->
         </template>
         <div v-if="!loading && !images.length" class="alert alert-info">No images.</div>
         <div class="image-preview" v-show="previewImage" @click="previewImage = ''">

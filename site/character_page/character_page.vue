@@ -23,7 +23,7 @@
                     </div>
                     <div v-if="character.memo" id="headerCharacterMemo" class="alert alert-info">Memo: {{ character.memo.memo }}</div>
                     <div class="card bg-light">
-                        <div class="card-header">
+                        <div class="card-header character-card-header">
                             <tabs class="card-header-tabs" v-model="tab">
                                 <span>Overview</span>
                                 <span>Info</span>
@@ -857,6 +857,14 @@
 
     .tab-count {
         color: rgba(255, 255, 255, 0.5);
+    }
+
+
+    .character-card-header {
+        position: sticky;
+        top: 0;
+        z-index: 10000;
+        background: #2a2a54 !important;
     }
 
 </style>
