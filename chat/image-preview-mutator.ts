@@ -143,7 +143,10 @@ export class ImagePreviewMutator {
                     ${this.injectHtmlJs('<div id="imageCount" style="z-index: 1000000; position: absolute; bottom: 0; right: 0; background: green; border: 2px solid lightgreen; width: 5rem; height: 5rem; font-size: 2rem; font-weight: bold; color: white; border-radius: 5rem; margin: 0.75rem;"><div id="imageCountInner" style="position: absolute; top: 50%; left: 50%; transform: translateY(-50%) translateX(-50%);"></div></div>')}
 
                     const imageCountEl = document.getElementById('imageCountInner');
-                    imageCountEl.innerHTML = '+' + (imageCount - 1);
+                    
+                    if (imageCountEl) {
+                        imageCountEl.innerHTML = '+' + (imageCount - 1);
+                    }
                 }
             `
         );

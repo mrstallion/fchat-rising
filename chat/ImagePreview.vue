@@ -57,6 +57,11 @@
     [url=https://imgur.com/a/nMafj]Imgur album[/url]
 
     [url=http://i.imgur.com/txEREOg.gifv]Imgur video[/url]
+
+    [url=https://www.punishbang.com/videos/1898/tied-redhead-is-on-her-knees-and-can/]Test[/url]
+
+    [url=https://www.pornhub.com/view_video.php?viewkey=ph5b2c03dc1e23b]Test[/url]
+
     */
 
     import * as _ from 'lodash';
