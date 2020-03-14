@@ -114,7 +114,8 @@
     session!.defaultSession!.webRequest!.onBeforeSendHeaders(
         {
             urls: [
-                'https?://(api|i).imgur.com/*'
+                'https://(api|i).imgur.com/.*',
+                'http://(api|i).imgur.com/.*'
             ]
         },
         (details: any, callback: any) => {

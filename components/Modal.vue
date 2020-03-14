@@ -106,4 +106,8 @@
         margin-left: 0;
         margin-right: 0;
     }
+
+    .modal-body:focus {
+        outline: none !important;
+    }
 </style>

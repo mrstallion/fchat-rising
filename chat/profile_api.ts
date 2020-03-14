@@ -1,7 +1,8 @@
 import Axios from 'axios';
 import Vue from 'vue';
 import Editor from '../bbcode/Editor.vue';
-import {InlineDisplayMode} from '../bbcode/interfaces';
+import { BBCodeView } from '../bbcode/view';
+import {InlineDisplayMode} from '../interfaces';
 import {StandardBBCodeParser} from '../bbcode/standard';
 import CharacterLink from '../components/character_link.vue';
 import CharacterSelect from '../components/character_select.vue';

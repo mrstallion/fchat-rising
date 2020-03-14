@@ -26,7 +26,9 @@ export default abstract class ContextMenu extends Vue {
 
     private fixPosition(e: MouseEvent | Touch): void {
         const getMenuPosition = (input: number, direction: string): number => {
-            const win = (<Window & {[key: string]: number}>window)[`inner${direction}`];
+            const win = (window as unknown as any)[`inner${direction}`] as number;
+                // (<Window & {[key: string]: number}>window)[`inner${direction}`];
+
             const menu = (<HTMLElement & {[key: string]: number}>this.$refs['menu'])[`offset${direction}`];
             let position = input;
 

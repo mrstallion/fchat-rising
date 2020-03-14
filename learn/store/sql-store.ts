@@ -3,8 +3,8 @@
 // import core from '../../chat/core';
 
 import { Orientation, Gender, FurryPreference, Species } from '../matcher';
-import {Character as ComplexCharacter, CharacterFriend, CharacterGroup, GuestbookState} from '../../site/character_page/interfaces';
-import {CharacterImage} from '../../interfaces';
+import {Character as ComplexCharacter, CharacterGroup, Guestbook} from '../../site/character_page/interfaces';
+import { CharacterImage, SimpleCharacter } from '../../interfaces';
 
 // This design should be refactored; it's bad
 export interface ProfileRecord {
@@ -27,9 +27,9 @@ export interface ProfileRecord {
     // groupCount: number | null;
 
     lastMetaFetched: number | null;
-    guestbook: GuestbookState | null;
+    guestbook: Guestbook | null;
     images: CharacterImage[] | null;
-    friends: CharacterFriend[] | null;
+    friends: SimpleCharacter[] | null;
     groups: CharacterGroup[] | null;
 }
 
@@ -43,8 +43,8 @@ export interface PermanentIndexedStore {
     updateProfileMeta(
         name: string,
         images: CharacterImage[] | null,
-        guestbook: GuestbookState | null,
-        friends: CharacterFriend[] | null,
+        guestbook: Guestbook | null,
+        friends: SimpleCharacter[] | null,
         groups: CharacterGroup[] | null
     ): Promise<void>;
 

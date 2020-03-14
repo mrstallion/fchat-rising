@@ -1,18 +1,18 @@
 import * as _ from 'lodash';
 
 import core from '../chat/core';
-import {Character as ComplexCharacter, CharacterFriend, CharacterGroup, GuestbookState} from '../site/character_page/interfaces';
+import {Character as ComplexCharacter, CharacterGroup, Guestbook} from '../site/character_page/interfaces';
 import { AsyncCache } from './async-cache';
 import { Matcher, Score, Scoring } from './matcher';
 import { PermanentIndexedStore } from './store/sql-store';
-import {CharacterImage} from '../interfaces';
+import { CharacterImage, SimpleCharacter } from '../interfaces';
 
 
 export interface MetaRecord {
     images: CharacterImage[] | null;
     groups: CharacterGroup[] | null;
-    friends: CharacterFriend[] | null;
-    guestbook: GuestbookState | null;
+    friends: SimpleCharacter[] | null;
+    guestbook: Guestbook | null;
     lastFetched: Date | null;
 }
 

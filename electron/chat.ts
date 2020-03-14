@@ -49,6 +49,7 @@ import Connection from '../fchat/connection';
 import {Keys} from '../keys';
 import {GeneralSettings, nativeRequire} from './common';
 import {Logs, SettingsStore} from './filesystem';
+import Notifications from './notifications';
 import * as SlimcatImporter from './importer';
 import Index from './Index.vue';
 

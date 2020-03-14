@@ -1,9 +1,9 @@
 import * as _ from 'lodash';
 
-import {Character as ComplexCharacter, CharacterFriend, CharacterGroup, GuestbookState} from '../../site/character_page/interfaces';
+import {Character as ComplexCharacter, CharacterGroup, Guestbook} from '../../site/character_page/interfaces';
 import { CharacterAnalysis } from '../matcher';
 import { PermanentIndexedStore, ProfileRecord } from './sql-store';
-import {CharacterImage} from '../../interfaces';
+import { CharacterImage, SimpleCharacter } from '../../interfaces';
 
 
 async function promisifyRequest<T>(req: IDBRequest): Promise<T> {
@@ -152,8 +152,8 @@ export class IndexedStore implements PermanentIndexedStore {
     async updateProfileMeta(
         name: string,
         images: CharacterImage[] | null,
-        guestbook: GuestbookState | null,
-        friends: CharacterFriend[] | null,
+        guestbook: Guestbook | null,
+        friends: SimpleCharacter[] | null,
         groups: CharacterGroup[] | null
     ): Promise<void> {
         const existing = await this.getProfile(name);

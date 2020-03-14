@@ -207,7 +207,7 @@
         }
 
         get kinkGroups(): KinkGroup[] {
-            const groups = Store.kinks.kink_groups;
+            const groups = Store.shared.kinkGroups;
 
             return _.sortBy(
                 _.filter(

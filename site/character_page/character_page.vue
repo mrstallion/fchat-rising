@@ -78,7 +78,7 @@
     import { CharacterCacheRecord } from '../../learn/profile-cache';
     import * as Utils from '../utils';
     import {methods, Store} from './data_store';
-    import {Character, CharacterFriend, CharacterGroup, GuestbookState, SharedStore} from './interfaces';
+    import {Character, CharacterGroup, Guestbook, SharedStore} from './interfaces';
 
     import DateDisplay from '../../components/date_display.vue';
     import Tabs from '../../components/tabs';
@@ -92,7 +92,7 @@
     import core from '../../chat/core';
     import { Matcher, MatchReport } from '../../learn/matcher';
     import MatchReportView from './match-report.vue';
-    import {CharacterImage} from '../../interfaces';
+    import { CharacterImage, SimpleCharacter } from '../../interfaces';
 
     const CHARACTER_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 7 days (milliseconds)
     const CHARACTER_META_CACHE_EXPIRE = 10 * 24 * 60 * 60 * 1000; // 10 days (milliseconds)
@@ -138,8 +138,8 @@
         friendCount: number | null = null;
         groupCount: number | null = null; */
 
-        guestbook: GuestbookState | null = null;
-        friends: CharacterFriend[] | null = null;
+        guestbook: Guestbook | null = null;
+        friends: SimpleCharacter[] | null = null;
         groups: CharacterGroup[] | null = null;
         images: CharacterImage[] | null = null;
 
@@ -210,7 +210,7 @@
 
                 await methods.fieldsGet();
 
-                if ((this.selfCharacter === undefined) && (Utils.Settings.defaultCharacter >= 0))
+                if ((this.selfCharacter === undefined) && (Utils.settings.defaultCharacter >= 0))
                     due.push(this.loadSelfCharacter());
 
                 if((mustLoad) || (this.character === undefined))
@@ -235,7 +235,7 @@
                     return;
                 }
 
-                this.guestbook = await methods.guestbookPageGet(this.character.character.id, 1, false);
+                this.guestbook = await methods.guestbookPageGet(this.character.character.id, 1);
             } catch (err) {
                 console.error(err);
                 this.guestbook = null;
@@ -363,9 +363,8 @@
 
             this.character = (cache && !skipCache)
                 ? cache.character
-                : await methods.characterData(this.name, this.characterid, false);
+                : await methods.characterData(this.name, this.id, false);
 
-            standardParser.allowInlines = true;
             standardParser.inlines = this.character.character.inlines;
 
             if (

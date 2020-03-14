@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { BBCodeElement } from '../chat/bbcode';
+import { BBCodeElement } from './core';
 import {InlineDisplayMode, InlineImage} from '../interfaces';
 import * as Utils from '../site/utils';
 import {analyzeUrlTag, CoreBBCodeParser} from './core';
