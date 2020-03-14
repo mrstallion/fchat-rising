@@ -46,8 +46,8 @@
         async checkName(): Promise<boolean> {
             try {
                 this.checking = true;
-                const result = await methods.characterNameCheck(this.newName);
-                this.valid = result.valid;
+                await methods.characterNameCheck(this.newName);
+                this.valid = true;
                 this.errors = {};
                 return true;
             } catch(e) {
@@ -64,9 +64,8 @@
         async duplicate(): Promise<void> {
             try {
                 this.duplicating = true;
-                const result = await methods.characterDuplicate(this.character.character.id, this.newName);
+                await methods.characterDuplicate(this.character.character.id, this.newName);
                 this.hide();
-                window.location.assign(result.next);
             } catch(e) {
                 Utils.ajaxError(e, 'Unable to duplicate character');
                 this.valid = false;

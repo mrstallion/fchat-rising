@@ -189,9 +189,9 @@ export class BBCodeParser {
                         if(parent !== undefined)
                             parent.appendChild(document.createTextNode(input.substring(mark, selfAllowed ? tagStart : i + 1)));
                         return i;
-                    } else if(!selfAllowed)
-                        return mark - 1;
-                     else if(isAllowed(tagKey))
+                    }
+                    if(!selfAllowed) return mark - 1;
+                    if(isAllowed(tagKey))
                          this.warning(`Unexpected closing ${tagKey} tag. Needed ${self} tag instead.`);
                 } else if(isAllowed(tagKey)) this.warning(`Found closing ${tagKey} tag that was never opened.`);
             }

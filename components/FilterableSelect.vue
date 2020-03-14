@@ -1,11 +1,10 @@
 <template>
-    <dropdown class="filterable-select" :keepOpen="keepOpen">
+    <dropdown class="filterable-select" linkClass="custom-select" :keepOpen="true">
         <template slot="title" v-if="multiple">{{label}}</template>
         <slot v-else slot="title" :option="selected">{{label}}</slot>
 
         <div style="padding:10px;">
-            <input v-model="filter" class="form-control" :placeholder="placeholder" @mousedown.stop @focus="keepOpen = true"
-                @blur="keepOpen = false"/>
+            <input v-model="filter" class="form-control" :placeholder="placeholder" @mousedown.stop/>
         </div>
         <div class="dropdown-items">
             <template v-if="multiple">
@@ -32,22 +31,21 @@
         components: {dropdown: Dropdown}
     })
     export default class FilterableSelect extends Vue {
-        @Prop()
+        @Prop
         readonly placeholder?: string;
         @Prop({required: true})
         readonly options!: object[];
         @Prop({default: () => ((filter: RegExp, value: string) => filter.test(value))})
         readonly filterFunc!: (filter: RegExp, value: object) => boolean;
-        @Prop()
+        @Prop
         readonly multiple?: true;
-        @Prop()
+        @Prop
         readonly value?: object | object[];
-        @Prop()
+        @Prop
         readonly title?: string;
         filter = '';
         // noinspection TypeScriptValidateTypes
         selected: object | object[] | undefined = this.value !== undefined ? this.value : (this.multiple !== undefined ? [] : undefined);
-        keepOpen = false;
 
         @Watch('value')
         watchValue(newValue: object | object[] | undefined): void {
@@ -60,10 +58,8 @@
                 const index = selected.indexOf(item);
                 if(index === -1) selected.push(item);
                 else selected.splice(index, 1);
-            } else {
-                this.keepOpen = false;
+            } else
                 this.selected = item;
-            }
             this.$emit('input', this.selected);
         }
 
@@ -92,6 +88,7 @@
             max-height: 200px;
             overflow-y: auto;
         }
+
         button {
             display: flex;
             text-align: left

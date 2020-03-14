@@ -23,13 +23,13 @@
         readonly field!: string;
         @Prop({required: true})
         readonly errors!: {[key: string]: ReadonlyArray<string> | undefined};
-        @Prop()
+        @Prop
         readonly label?: string;
-        @Prop()
+        @Prop
         readonly id?: string;
         @Prop({default: false})
         readonly valid!: boolean;
-        @Prop()
+        @Prop
         readonly helptext?: string;
 
         get hasErrors(): boolean {

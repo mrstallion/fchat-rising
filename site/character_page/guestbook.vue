@@ -5,11 +5,12 @@
             <label v-show="canEdit" class="control-label">Unapproved only:
                 <input type="checkbox" v-model="unapprovedOnly"/>
             </label>
-            <simple-pager :next="hasNextPage" :prev="page > 1" @next="nextPage" @prev="previousPage"></simple-pager>
+            <simple-pager :next="hasNextPage" :prev="page > 1" @next="++page" @prev="--page"></simple-pager>
         </div>
         <template v-if="!loading">
             <div class="alert alert-info" v-show="posts.length === 0">No guestbook posts.</div>
-            <guestbook-post :post="post" :can-edit="canEdit" v-for="post in posts" :key="post.id" @reload="getPage"></guestbook-post>
+            <guestbook-post :character="character" :post="post" :can-edit="canEdit" v-for="post in posts" :key="post.id"
+                @reload="getPage"></guestbook-post>
             <div v-if="authenticated && !oldApi" class="form-horizontal">
                 <bbcode-editor v-model="newPost.message" :maxlength="5000" classes="form-control"></bbcode-editor>
                 <input type="checkbox" id="guestbookPostPrivate" v-model="newPost.privatePost"/>
@@ -20,7 +21,7 @@
             </div>
         </template>
         <div class="guestbook-controls">
-            <simple-pager :next="hasNextPage" :prev="page > 1" @next="nextPage" @prev="previousPage"></simple-pager>
+            <simple-pager :next="hasNextPage" :prev="page > 1" @next="++page" @prev="--page"></simple-pager>
         </div>
     </div>
 </template>
@@ -30,7 +31,7 @@
     import Vue from 'vue';
     import * as Utils from '../utils';
     import {methods, Store} from './data_store';
-    import {Character, GuestbookPost, GuestbookState} from './interfaces';
+    import {Character, GuestbookPost, Guestbook} from './interfaces';
 
     import GuestbookPostView from './guestbook_post.vue';
     import core from '../../chat/core';
@@ -41,14 +42,12 @@
     export default class GuestbookView extends Vue {
         @Prop({required: true})
         readonly character!: Character;
-        @Prop()
+        @Prop
         readonly oldApi?: true;
         loading = true;
         error = '';
         authenticated = Store.authenticated;
-
         posts: GuestbookPost[] = [];
-
         unapprovedOnly = false;
         page = 1;
         hasNextPage = false;
@@ -56,28 +55,18 @@
         newPost = {
             posting: false,
             privatePost: false,
-            character: Utils.Settings.defaultCharacter,
+            character: Utils.settings.defaultCharacter,
             message: ''
         };
 
-        async nextPage(): Promise<void> {
-            this.page += 1;
-            return this.getPage();
-        }
-
-        async previousPage(): Promise<void> {
-            this.page -= 1;
-            return this.getPage();
-        }
-
         @Watch('unapprovedOnly')
+        @Watch('page')
         async getPage(): Promise<void> {
             try {
                 this.loading = true;
                 const guestbookState = await this.resolvePage();
                 this.posts = guestbookState.posts;
-                this.hasNextPage = guestbookState.nextPage;
-                this.canEdit = guestbookState.canEdit;
+                this.hasNextPage =  (this.page + 1) * 10 < guestbookState.total;
             } catch(e) {
                 this.posts = [];
                 this.hasNextPage = false;
@@ -104,7 +93,7 @@
             }
         }
 
-        async resolvePage(): Promise<GuestbookState> {
+        async resolvePage(): Promise<Guestbook> {
             if (this.page === 1) {
                 const c = await core.cache.profileCache.get(this.character.character.name);
 
@@ -113,7 +102,8 @@
                 }
             }
 
-            return methods.guestbookPageGet(this.character.character.id, this.page, this.unapprovedOnly);
+            return methods.guestbookPageGet(this.character.character.id, (this.page - 1) * 10, 10, this.unapprovedOnly);
+            // return methods.guestbookPageGet(this.character.character.id, this.page, this.unapprovedOnly);
         }
 
         async show(): Promise<void> {

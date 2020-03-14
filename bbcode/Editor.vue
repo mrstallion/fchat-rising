@@ -38,26 +38,25 @@
 <script lang="ts">
     import {Component, Hook, Prop, Watch} from '@f-list/vue-ts';
     import Vue from 'vue';
-    import {BBCodeElement} from '../chat/bbcode';
     import {getKey} from '../chat/common';
     import {Keys} from '../keys';
-    import {CoreBBCodeParser, urlRegex} from './core';
+    import {BBCodeElement, CoreBBCodeParser, urlRegex} from './core';
     import {defaultButtons, EditorButton, EditorSelection} from './editor';
     import {BBCodeParser} from './parser';
 
     @Component
     export default class Editor extends Vue {
-        @Prop()
+        @Prop
         readonly extras?: EditorButton[];
         @Prop({default: 1000})
         readonly maxlength!: number;
-        @Prop()
+        @Prop
         readonly classes?: string;
-        @Prop()
+        @Prop
         readonly value?: string | undefined;
-        @Prop()
+        @Prop
         readonly disabled?: boolean;
-        @Prop()
+        @Prop
         readonly placeholder?: string;
         @Prop({default: true})
         readonly hasToolbar!: boolean;
@@ -262,7 +261,7 @@
         }
 
         onPaste(e: ClipboardEvent): void {
-            const data = e.clipboardData.getData('text/plain');
+            const data = e.clipboardData!.getData('text/plain');
             if(!this.isShiftPressed && urlRegex.test(data)) {
                 e.preventDefault();
                 this.applyText(`[url=${data}]`, '[/url]');

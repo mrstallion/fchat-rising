@@ -2,22 +2,20 @@ import Axios from 'axios';
 import Vue from 'vue';
 import Editor from '../bbcode/Editor.vue';
 import {InlineDisplayMode} from '../bbcode/interfaces';
-import { initParser, standardParser } from '../bbcode/standard';
+import {StandardBBCodeParser} from '../bbcode/standard';
 import CharacterLink from '../components/character_link.vue';
 import CharacterSelect from '../components/character_select.vue';
-import {setCharacters} from '../components/character_select/character_list';
 import DateDisplay from '../components/date_display.vue';
 import SimplePager from '../components/simple_pager.vue';
 
 import {
-    Character as CharacterInfo, CharacterImage, CharacterImageOld, CharacterInfotag, CharacterSettings, KinkChoice
+    Character as CharacterInfo, CharacterImage, CharacterImageOld, CharacterInfotag, CharacterSettings, Infotag, InfotagGroup, Kink,
+    KinkChoice, KinkGroup, ListItem, Settings, SimpleCharacter
 } from '../interfaces';
 import {registerMethod, Store} from '../site/character_page/data_store';
 import {
-    Character, CharacterFriend, CharacterKink, Friend, FriendRequest, FriendsByCharacter, GuestbookState, KinkChoiceFull,
-    SharedKinks
+    Character, CharacterKink, Friend, FriendRequest, FriendsByCharacter, Guestbook, GuestbookPost, KinkChoiceFull
 } from '../site/character_page/interfaces';
-import '../site/directives/vue-select'; //tslint:disable-line:no-import-side-effect
 import * as Utils from '../site/utils';
 import core from './core';
 import { EventBus } from './event-bus';
@@ -65,7 +63,7 @@ async function executeCharacterData(name: string | undefined, id: number = -1, s
     }>('character-data.php', {name});
     const newKinks: {[key: string]: KinkChoiceFull} = {};
     for(const key in data.kinks)
-        newKinks[key] = <KinkChoiceFull>(<string>data.kinks[key] === 'fave' ? 'favorite' : data.kinks[key]);
+        newKinks[key] = <KinkChoiceFull>(data.kinks[key] === 'fave' ? 'favorite' : data.kinks[key]);
     for(const key in data.custom_kinks) {
         const custom = data.custom_kinks[key];
         if((<'fave'>custom.choice) === 'fave') custom.choice = 'favorite';
@@ -77,12 +75,13 @@ async function executeCharacterData(name: string | undefined, id: number = -1, s
     const newInfotags: {[key: string]: CharacterInfotag} = {};
     for(const key in data.infotags) {
         const characterInfotag = data.infotags[key];
-        const infotag = Store.kinks.infotags[key];
-        if(infotag === undefined) continue;
+        const infotag = Store.shared.infotags[key];
+        if(!infotag) continue;
         newInfotags[key] = infotag.type === 'list' ? {list: parseInt(characterInfotag, 10)} : {string: characterInfotag};
     }
-    parserSettings.inlineDisplayMode = data.current_user.inline_mode;
-    parserSettings.animatedIcons = core.state.settings.animatedEicons;
+
+    Utils.settings.inlineDisplayMode = data.current_user.inline_mode;
+    Utils.settings.animateEicons = core.state.settings.animatedEicons;
 
     const charData = {
         is_self: false,
@@ -122,13 +121,22 @@ function contactMethodIconUrl(name: string): string {
 }
 
 async function fieldsGet(): Promise<void> {
-    if(Store.kinks !== undefined) return; //tslint:disable-line:strict-type-predicates
+    if(Store.shared !== undefined) return; //tslint:disable-line:strict-type-predicates
     try {
-        const fields = (await (Axios.get(`${Utils.siteDomain}json/api/mapping-list.php`))).data as SharedKinks & {
-            kinks: {[key: string]: {group_id: number}}
-            infotags: {[key: string]: {list: string, group_id: string}}
+        const fields = (await (Axios.get(`${Utils.siteDomain}json/api/mapping-list.php`))).data as {
+            listitems: {[key: string]: ListItem}
+            kinks: {[key: string]: Kink & {group_id: number}}
+            kink_groups: {[key: string]: KinkGroup}
+            infotags: {[key: string]: Infotag & {list: string, group_id: string}}
+            infotag_groups: {[key: string]: InfotagGroup & {id: string}}
         };
-        const kinks: SharedKinks = {kinks: {}, kink_groups: {}, infotags: {}, infotag_groups: {}, listitems: {}};
+        const kinks: {
+            listItems: {[key: string]: ListItem}
+            kinks: {[key: string]: Kink}
+            kinkGroups: {[key: string]: KinkGroup}
+            infotags: {[key: string]: Infotag}
+            infotagGroups: {[key: string]: InfotagGroup}
+        } = {kinks: {}, kinkGroups: {}, infotags: {}, infotagGroups: {}, listItems: {}};
         for(const id in fields.kinks) {
             const oldKink = fields.kinks[id];
             kinks.kinks[oldKink.id] = {
@@ -139,8 +147,8 @@ async function fieldsGet(): Promise<void> {
             };
         }
         for(const id in fields.kink_groups) {
-            const oldGroup = fields.kink_groups[id]!;
-            kinks.kink_groups[oldGroup.id] = {
+            const oldGroup = fields.kink_groups[id];
+            kinks.kinkGroups[oldGroup.id] = {
                 id: oldGroup.id,
                 name: oldGroup.name,
                 description: '',
@@ -156,12 +164,12 @@ async function fieldsGet(): Promise<void> {
                 validator: oldInfotag.list,
                 search_field: '',
                 allow_legacy: true,
-                infotag_group: oldInfotag.group_id
+                infotag_group: parseInt(oldInfotag.group_id, 10)
             };
         }
         for(const id in fields.listitems) {
-            const oldListItem = fields.listitems[id]!;
-            kinks.listitems[oldListItem.id] = {
+            const oldListItem = fields.listitems[id];
+            kinks.listItems[oldListItem.id] = {
                 id: oldListItem.id,
                 name: oldListItem.name,
                 value: oldListItem.value,
@@ -169,31 +177,33 @@ async function fieldsGet(): Promise<void> {
             };
         }
         for(const id in fields.infotag_groups) {
-            const oldGroup = fields.infotag_groups[id]!;
-            kinks.infotag_groups[oldGroup.id] = {
-                id: oldGroup.id,
+            const oldGroup = fields.infotag_groups[id];
+            kinks.infotagGroups[oldGroup.id] = {
+                id: parseInt(oldGroup.id, 10),
                 name: oldGroup.name,
                 description: oldGroup.description,
                 sort_order: oldGroup.id
             };
         }
-        Store.kinks = kinks;
+        Store.shared = kinks;
     } catch(e) {
         Utils.ajaxError(e, 'Error loading character fields');
         throw e;
     }
 }
 
-async function friendsGet(id: number): Promise<CharacterFriend[]> {
-    return (await core.connection.queryApi<{friends: CharacterFriend[]}>('character-friends.php', {id})).friends;
+async function friendsGet(id: number): Promise<SimpleCharacter[]> {
+    return (await core.connection.queryApi<{friends: SimpleCharacter[]}>('character-friends.php', {id})).friends;
 }
 
 async function imagesGet(id: number): Promise<CharacterImage[]> {
     return (await core.connection.queryApi<{images: CharacterImage[]}>('character-images.php', {id})).images;
 }
 
-async function guestbookGet(id: number, page: number): Promise<GuestbookState> {
-    return core.connection.queryApi<GuestbookState>('character-guestbook.php', {id, page: page - 1});
+async function guestbookGet(id: number, offset: number): Promise<Guestbook> {
+    const data = await core.connection.queryApi<{nextPage: boolean, posts: GuestbookPost[]}>('character-guestbook.php',
+        {id, page: offset / 10});
+    return {posts: data.posts, total: data.nextPage ? offset + 100 : offset};
 }
 
 async function kinksGet(id: number): Promise<CharacterKink[]> {
@@ -205,23 +215,18 @@ async function kinksGet(id: number): Promise<CharacterKink[]> {
 }
 
 
-export function init(characters: {[key: string]: number}): void {
+export function init(settings: Settings, characters: SimpleCharacter[]): void {
     Utils.setDomains(parserSettings.siteDomain, parserSettings.staticDomain);
-    initParser(parserSettings);
 
     Vue.component('character-select', CharacterSelect);
     Vue.component('character-link', CharacterLink);
     Vue.component('date-display', DateDisplay);
     Vue.component('simple-pager', SimplePager);
+    Vue.component('bbcode', BBCodeView(new StandardBBCodeParser()));
     Vue.component('bbcode-editor', Editor);
-    setCharacters(Object.keys(characters).map((name) => ({name, id: characters[name]})));
+    Utils.init(settings, characters);
     core.connection.onEvent('connecting', () => {
-        Utils.Settings.defaultCharacter = characters[core.connection.character];
-    });
-    Vue.directive('bbcode', (el, binding) => {
-        while(el.firstChild !== null)
-            el.removeChild(el.firstChild);
-        el.appendChild(standardParser.parseEverything(<string>binding.value));
+        Utils.settings.defaultCharacter = characters.find((x) => x.name === core.connection.character)!.id;
     });
     registerMethod('characterData', characterData);
     registerMethod('contactMethodIconUrl', contactMethodIconUrl);
@@ -234,12 +239,10 @@ export function init(characters: {[key: string]: number}): void {
     registerMethod('imageUrl', (image: CharacterImageOld) => image.url);
     registerMethod('memoUpdate', async(id: number, memo: string) => {
         await core.connection.queryApi('character-memo-save.php', {target: id, note: memo});
-        return {id, memo, updated_at: Date.now() / 1000};
     });
     registerMethod('imageThumbUrl', (image: CharacterImage) => `${Utils.staticDomain}images/charthumb/${image.id}.${image.extension}`);
     registerMethod('bookmarkUpdate', async(id: number, state: boolean) => {
         await core.connection.queryApi(`bookmark-${state ? 'add' : 'remove'}.php`, {id});
-        return state;
     });
     registerMethod('characterFriends', async(id: number) =>
         core.connection.queryApi<FriendsByCharacter>('character-friend-list.php', {id}));

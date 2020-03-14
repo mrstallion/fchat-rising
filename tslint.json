@@ -136,6 +136,7 @@
       "never"
     ],
     "strict-boolean-expressions": false,
+    "strict-comparisons": true,
     "switch-default": false,
     "switch-final-break": false,
     "trailing-comma": [

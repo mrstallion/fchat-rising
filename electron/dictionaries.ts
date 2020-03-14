@@ -4,11 +4,9 @@ import log from 'electron-log';  //tslint:disable-line:match-default-export-name
 import * as fs from 'fs';
 import * as path from 'path';
 import {promisify} from 'util';
-import {mkdir} from './common';
 
 const dictDir = path.join(electron.app.getPath('userData'), 'spellchecker');
-mkdir(dictDir);
-const requestConfig = {responseType: 'arraybuffer'};
+fs.mkdirSync(dictDir, {recursive: true});
 
 const downloadedPath = path.join(dictDir, 'downloaded.json');
 const downloadUrl = 'https://client.f-list.net/dicts/';
@@ -40,7 +38,8 @@ export async function ensureDictionary(lang: string): Promise<void> {
         const filePath = path.join(dictDir, `${lang}.${type}`);
         const downloaded = downloadedDictionaries[file.name];
         if(downloaded === undefined || downloaded.hash !== file.hash || !fs.existsSync(filePath)) {
-            await writeFile(filePath, Buffer.from((await Axios.get<string>(`${downloadUrl}${file.name}`, requestConfig)).data));
+            const dictionary = (await Axios.get<string>(`${downloadUrl}${file.name}`, {responseType: 'arraybuffer'})).data;
+            await writeFile(filePath, Buffer.from(dictionary));
             downloadedDictionaries[file.name] = file;
             await writeFile(downloadedPath, JSON.stringify(downloadedDictionaries));
         }

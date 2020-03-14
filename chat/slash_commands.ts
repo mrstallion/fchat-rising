@@ -37,16 +37,18 @@ export function parse(this: void | never, input: string, context: CommandContext
         for(let i = 0; i < command.params.length; ++i) {
             while(args[index] === ' ') ++index;
             const param = command.params[i];
-            if(index === -1)
+            if(index === -1) {
                 if(param.optional !== undefined) continue;
-                else return l('commands.tooFewParams');
+                return l('commands.tooFewParams');
+            }
             let delimiter = param.delimiter !== undefined ? param.delimiter : defaultDelimiters[param.type];
             if(delimiter === undefined) delimiter = ' ';
             const endIndex = delimiter.length > 0 ? args.indexOf(delimiter, index) : args.length;
             const value = args.substring(index, endIndex !== -1 ? endIndex : undefined);
-            if(value.length === 0)
+            if(value.length === 0) {
                 if(param.optional !== undefined) continue;
-                else return l('commands.tooFewParams');
+                return l('commands.tooFewParams');
+            }
             values[i] = value;
             switch(param.type) {
                 case ParamType.String:
@@ -141,12 +143,6 @@ const commands: {readonly [key: string]: Command | undefined} = {
     status: {
         exec: (_, status: Character.Status, statusmsg: string = '') => core.connection.send('STA', {status, statusmsg}),
         params: [{type: ParamType.Enum, options: userStatuses}, {type: ParamType.String, optional: true}]
-    },
-    ad: {
-        exec: (conv: ChannelConversation, message: string) =>
-            core.connection.send('LRP', {channel: conv.channel.id, message}),
-        context: CommandContext.Channel,
-        params: [{type: ParamType.String}]
     },
     roll: {
         exec: (conv: ChannelConversation | PrivateConversation, dice: string) => {

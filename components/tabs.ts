@@ -22,7 +22,8 @@ const Tabs = Vue.extend({
         return createElement('div', {staticClass: 'nav-tabs-scroll'},
             [createElement('ul', {staticClass: 'nav nav-tabs'}, keys.map((key) => createElement('li', {staticClass: 'nav-item'},
                 [createElement('a', {
-                    staticClass: 'nav-link', class: {active: this._v === key}, on: { click: () => this.$emit('input', key) }
+                    attrs: {href: '#'},
+                    staticClass: 'nav-link', class: {active: this._v === key}, on: {click: () => this.$emit('input', key)}
                 }, [children[key]!])])))]);
     }
 });

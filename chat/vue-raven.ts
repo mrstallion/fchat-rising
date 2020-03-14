@@ -47,6 +47,7 @@ function VueRaven(this: void, raven: Raven.RavenStatic): Raven.RavenStatic {
 //tslint:enable
 
 export function setupRaven(dsn: string, version: string): void {
+    return; //TODO sentry temporarily disabled
     Raven.config(dsn, {
         release: version,
         dataCallback: (data: {culprit?: string, exception?: {values: {stacktrace: {frames: {filename: string}[]}}[]}}) => {

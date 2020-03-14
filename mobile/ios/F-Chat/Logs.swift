@@ -121,7 +121,7 @@ class Logs: NSObject, WKScriptMessageHandler {
                 indexItem = IndexItem(conversation as String)
                 index![key] = indexItem
                 let cstring = conversation.utf8String
-                var length = strlen(cstring)
+                var length = strlen(cstring!)
                 write(indexFd.fileDescriptor, &length, 1)
                 write(indexFd.fileDescriptor, cstring, length)
             }
@@ -135,11 +135,11 @@ class Logs: NSObject, WKScriptMessageHandler {
         write(fd.fileDescriptor, &time, 4)
         write(fd.fileDescriptor, &type, 1)
         var cstring = sender.utf8String
-        var length = strlen(cstring)
+        var length = strlen(cstring!)
         write(fd.fileDescriptor, &length, 1)
         write(fd.fileDescriptor, cstring, length)
         cstring = text.utf8String
-        length = strlen(cstring)
+        length = strlen(cstring!)
         write(fd.fileDescriptor, &length, 2)
         write(fd.fileDescriptor, cstring, length)
         var size = fd.offsetInFile - start

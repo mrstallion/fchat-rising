@@ -5,30 +5,6 @@ const fs = require('fs');
 const child_process = require('child_process');
 const _ = require('lodash');
 
-function mkdir(dir) {
-    try {
-        fs.mkdirSync(dir);
-    } catch(e) {
-        if(!(e instanceof Error)) throw e;
-        switch(e.code) {
-            case 'ENOENT':
-                const dirname = path.dirname(dir);
-                if(dirname === dir) throw e;
-                mkdir(dirname);
-                mkdir(dir);
-                break;
-            default:
-                try {
-                    const stat = fs.statSync(dir);
-                    if(stat.isDirectory()) return;
-                } catch(e) {
-                    console.log(e);
-                }
-                throw e;
-        }
-    }
-}
-
 const distDir = path.join(__dirname, 'dist');
 const isBeta = pkg.version.indexOf('beta') !== -1;
 const modules = path.join(__dirname, 'app', 'node_modules');
@@ -60,7 +36,7 @@ _.each(
             to = p[1];
         }
 
-        mkdir(path.dirname(path.join(modules, to)));
+        fs.mkdirSync(path.dirname(path.join(modules, to)), {recursive: true});
         fs.copyFileSync(require.resolve(from), path.join(modules, to));
     }
 );
@@ -102,7 +78,7 @@ require('electron-packager')({
             setupExe: setupName,
             remoteReleases: 'https://client.f-list.net/win32/' + (isBeta ? '?channel=beta' : ''),
             signWithParams: process.argv.length > 3 ? `/a /f ${process.argv[2]} /p ${process.argv[3]} /fd sha256 /tr http://timestamp.digicert.com /td sha256` : undefined
-        }).catch((e) => console.log(`Error while creating installer: ${e.message}`));
+        }).catch((e) => console.error(`Error while creating installer: ${e.message}`));
     } else if(process.platform === 'darwin') {
         console.log('Creating Mac DMG');
         const target = path.join(distDir, `F-Chat.dmg`);
@@ -137,7 +113,7 @@ require('electron-packager')({
         fs.renameSync(path.join(appPaths[0], 'F-Chat'), path.join(appPaths[0], 'AppRun'));
         fs.copyFileSync(path.join(__dirname, 'build', 'icon.png'), path.join(appPaths[0], 'icon.png'));
         const libDir = path.join(appPaths[0], 'usr', 'lib'), libSource = path.join(__dirname, 'build', 'linux-libs');
-        mkdir(libDir);
+        fs.mkdirSync(libDir, {recursive: true});
         for(const file of fs.readdirSync(libSource))
             fs.copyFileSync(path.join(libSource, file), path.join(libDir, file));
         fs.symlinkSync(path.join(appPaths[0], 'icon.png'), path.join(appPaths[0], '.DirIcon'));
@@ -147,13 +123,13 @@ require('electron-packager')({
             const stream = fs.createWriteStream(downloaded);
             res.data.pipe(stream);
             stream.on('close', () => {
-                const args = [appPaths[0], 'fchat.AppImage', '-u', 'zsync|httpos://client.f-list.net/fchat.AppImage.zsync'];
+                const args = [appPaths[0], 'fchat.AppImage', '-u', 'zsync|https://client.f-list.net/fchat.AppImage.zsync'];
                 if(process.argv.length > 2) args.push('-s', '--sign-key', process.argv[2]);
                 else console.warn('Warning: Creating unsigned AppImage');
-                if(process.argv.length > 3) args.push('--sign-args', `--passphrase=${process.argv[3]}`);
+                if(process.argv.length > 3) args.push('--sign-args', `--no-tty --passphrase=${process.argv[3]}`);
                 fs.chmodSync(downloaded, 0o755);
                 child_process.spawn(downloaded, ['--appimage-extract'], {cwd: distDir}).on('close', () => {
-                    const child = child_process.spawn(path.join(distDir, 'squashfs-root', 'AppRun'), args, {cwd: distDir});
+                    const child = child_process.spawn(path.join(distDir, 'squashfs-root', 'AppRun'), args, {cwd: distDir, env: {ARCH: 'x86_64'}});
                     child.stdout.on('data', (data) => console.log(data.toString()));
                     child.stderr.on('data', (data) => console.error(data.toString()));
                 });

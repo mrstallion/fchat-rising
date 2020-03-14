@@ -124,21 +124,22 @@ export namespace Connection {
     export type EventHandler = (isReconnect: boolean) => Promise<void> | void;
 
     export interface Vars {
-        readonly chat_max: number
-        readonly priv_max: number
-        readonly lfrp_max: number
-        readonly cds_max: number
-        readonly lfrp_flood: number
-        readonly msg_flood: number
-        readonly sta_flood: number
-        readonly permissions: number
-        readonly icon_blacklist: ReadonlyArray<string>
+        chat_max: number
+        priv_max: number
+        lfrp_max: number
+        cds_max: number
+        lfrp_flood: number
+        msg_flood: number
+        sta_flood: number
+        permissions: number
+        icon_blacklist: ReadonlyArray<string>
     }
 
     export interface Connection {
         readonly character: string
-        readonly vars: Vars
+        readonly vars: Readonly<Vars>
         readonly isOpen: boolean
+        setCredentials(account: string, ticketProvider: TicketProvider | string): void
         connect(character: string): void
         close(keepState?: boolean): void
         onMessage<K extends keyof ServerCommands>(type: K, handler: CommandHandler<K>): void

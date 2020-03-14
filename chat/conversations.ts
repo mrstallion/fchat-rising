@@ -85,6 +85,7 @@ abstract class Conversation implements Interfaces.Conversation {
         }
     }
 
+    //tslint:disable-next-line:no-async-without-await
     abstract async addMessage(message: Interfaces.Message): Promise<void>;
 
     loadLastSent(): void {
@@ -188,7 +189,8 @@ class PrivateConversation extends Conversation implements Interfaces.PrivateConv
         if(this.character.status === 'offline') {
             this.errorText = l('chat.errorOffline', this.character.name);
             return;
-        } else if(this.character.isIgnored) {
+        }
+        if(this.character.isIgnored) {
             this.errorText = l('chat.errorIgnored', this.character.name);
             return;
         }
@@ -439,6 +441,7 @@ class State implements Interfaces.State {
     }
 
     show(conversation: Conversation): void {
+        if(conversation === this.selectedConversation) return;
         this.selectedConversation.onHide();
         conversation.unread = Interfaces.UnreadState.None;
         this.selectedConversation = conversation;
@@ -456,12 +459,9 @@ class State implements Interfaces.State {
         this.recentChannels = await core.settingsStore.get('recentChannels') || [];
         const settings = <{[key: string]: ConversationSettings}> await core.settingsStore.get('conversationSettings') || {};
         for(const key in settings) {
-            const settingsItem = new ConversationSettings();
-            for(const itemKey in settings[key])
-                settingsItem[<keyof ConversationSettings>itemKey] = settings[key][<keyof ConversationSettings>itemKey];
-            settings[key] = settingsItem;
+            settings[key] = Object.assign(new ConversationSettings(), settings[key]);
             const conv = this.byKey(key);
-            if(conv !== undefined) conv._settings = settingsItem;
+            if(conv !== undefined) conv._settings = settings[key];
         }
         this.settings = settings;
         //tslint:enable
@@ -478,11 +478,6 @@ async function addEventMessage(this: void, message: Interfaces.Message): Promise
 
 function isOfInterest(this: void, character: Character): boolean {
     return character.isFriend || character.isBookmarked || state.privateMap[character.name.toLowerCase()] !== undefined;
-}
-
-function isOp(conv: ChannelConversation): boolean {
-    const ownChar = core.characters.ownCharacter;
-    return ownChar.isChatOp || conv.channel.members[ownChar.name]!.rank > Channel.Rank.Member;
 }
 
 export default function(this: void): Interfaces.State {
@@ -561,7 +556,7 @@ export default function(this: void): Interfaces.State {
         const char = core.characters.get(data.character);
         const conversation = state.channelMap[data.channel.toLowerCase()];
         if(conversation === undefined) return core.channels.leave(data.channel);
-        if(char.isIgnored && !isOp(conversation)) return;
+        if(char.isIgnored) return;
         const message = createMessage(MessageType.Message, char, decodeHTML(data.message), time);
         EventBus.$emit('channel-message', { message, channel: conversation });
         await conversation.addMessage(message);
@@ -591,7 +586,8 @@ export default function(this: void): Interfaces.State {
         const char = core.characters.get(data.character);
         const conv = state.channelMap[data.channel.toLowerCase()];
         if(conv === undefined) return core.channels.leave(data.channel);
-        if((char.isIgnored || core.state.hiddenUsers.indexOf(char.name) !== -1) && !isOp(conv)) return;
+        if(char.isIgnored || core.state.hiddenUsers.indexOf(char.name) !== -1) return;
+
         const msg = new Message(MessageType.Ad, char, decodeHTML(data.message), time);
 
         // this is done here so that the message will be rendered correctly when cache is hit
@@ -606,6 +602,7 @@ export default function(this: void): Interfaces.State {
         }
 
         EventBus.$emit('channel-ad', { message: msg, channel: conv, profile: p });
+
         await conv.addMessage(msg);
     });
     connection.onMessage('RLL', async(data, time) => {
@@ -622,7 +619,7 @@ export default function(this: void): Interfaces.State {
             const channel = (<{channel: string}>data).channel.toLowerCase();
             const conversation = state.channelMap[channel];
             if(conversation === undefined) return core.channels.leave(channel);
-            if(sender.isIgnored && !isOp(conversation)) return;
+            if(sender.isIgnored) return;
             if(data.type === 'bottle' && data.target === core.connection.character) {
                 await core.notifications.notify(conversation, conversation.name, messageToString(message),
                     characterImage(data.character), 'attention');

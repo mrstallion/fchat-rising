@@ -120,7 +120,7 @@ export class Logs implements Logging {
         if(character === this.loadedCharacter) return this.loadedIndex!;
         if(character === core.connection.character) {
             this.loadedDb = this.db;
-            this.loadedIndex = this.index !== undefined ? this.index : {};
+            this.loadedIndex = this.index;
         } else
             try {
                 this.loadedDb = await openDatabase(character);
@@ -130,7 +130,7 @@ export class Logs implements Logging {
                 return {};
             }
         this.loadedCharacter = character;
-        return this.loadedIndex;
+        return this.loadedIndex!;
     }
 
     async getConversations(character: string): Promise<ReadonlyArray<{key: string, name: string}>> {
@@ -179,7 +179,7 @@ export class SettingsStore implements Settings.Store {
                         const pinned: Settings.Keys['pinned'] = {channels: [], private: []};
                         pinned.channels = tabs.filter((x) => x.type === 'channel').map((x) => x.id.toLowerCase());
                         pinned.private = tabs.filter((x) => x.type === 'user').map((x) => x.title);
-                        return pinned;
+                        return pinned as Settings.Keys[K];
                     } catch {
                         return undefined;
                     }
@@ -203,7 +203,7 @@ export class SettingsStore implements Settings.Store {
                         settings.playSound = old.html5Audio;
                         settings.joinMessages = old.joinLeaveAlerts;
                         settings.clickOpensMessage = !old.leftClickOpensFlist;
-                        return settings;
+                        return settings as unknown as Settings.Keys[K];
                     } catch {
                         return undefined;
                     }

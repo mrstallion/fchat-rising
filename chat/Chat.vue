@@ -1,3 +1,4 @@
+import {InlineDisplayMode} from '../interfaces';
 <template>
     <div style="display:flex; flex-direction: column; height:100%; justify-content: center">
         <div class="card bg-light" style="width:400px;max-width:100%;margin:0 auto" v-if="!connected">
@@ -11,7 +12,7 @@
             <div class="card-body">
                 <h4 class="card-title">{{l('login.selectCharacter')}}</h4>
                 <select v-model="selectedCharacter" class="form-control custom-select">
-                    <option v-for="character in ownCharacters" :value="character">{{character}}</option>
+                    <option v-for="character in ownCharacters" :value="character">{{character.name}}</option>
                 </select>
                 <div style="text-align:right;margin-top:10px">
                     <button class="btn btn-primary" @click="connect" :disabled="connecting">
@@ -35,15 +36,14 @@
     import {Component, Hook, Prop} from '@f-list/vue-ts';
     import Vue from 'vue';
     import Modal from '../components/Modal.vue';
-    import Channels from '../fchat/channels';
-    import Characters from '../fchat/characters';
+    import {InlineDisplayMode, SimpleCharacter} from '../interfaces';
     import {Keys} from '../keys';
     import ChatView from './ChatView.vue';
     import {errorToString, getKey} from './common';
-    import Conversations from './conversations';
     import core from './core';
     import l from './localize';
     import Logs from './Logs.vue';
+    import {init as profileApiInit} from './profile_api';
 
     type BBCodeNode = Node & {bbcodeTag?: string, bbcodeParam?: string};
 
@@ -53,7 +53,7 @@
             str = `[${node.bbcodeTag}${node.bbcodeParam !== undefined ? `=${node.bbcodeParam}` : ''}]${str}[/${node.bbcodeTag}]`;
         if(node.nextSibling !== null && !flags.endFound) {
             if(node instanceof HTMLElement && getComputedStyle(node).display === 'block') str += '\r\n';
-            str += scanNode(node.nextSibling, end, range, flags);
+            str += scanNode(node.nextSibling!, end, range, flags);
         }
         if(node.parentElement === null) return str;
         return copyNode(str, node.parentNode!, end, range, flags);
@@ -78,11 +78,12 @@
     })
     export default class Chat extends Vue {
         @Prop({required: true})
-        readonly ownCharacters!: string[];
+        readonly ownCharacters!: SimpleCharacter[];
         @Prop({required: true})
-        readonly defaultCharacter!: string | undefined;
-        selectedCharacter = this.defaultCharacter || this.ownCharacters[0]; //tslint:disable-line:strict-boolean-expressions
-        @Prop()
+        readonly defaultCharacter!: number;
+        //tslint:disable-next-line:strict-boolean-expressions
+        selectedCharacter = this.ownCharacters.find((x) => x.id === this.defaultCharacter) || this.ownCharacters[0];
+        @Prop
         readonly version?: string;
         error = '';
         connecting = false;
@@ -110,7 +111,7 @@
                 } else
                     startValue = start.nodeValue!.substring(range.startOffset, start === range.endContainer ? range.endOffset : undefined);
                 if(end instanceof HTMLElement && range.endOffset > 0) end = end.childNodes[range.endOffset - 1];
-                e.clipboardData.setData('text/plain', copyNode(startValue, start, end, range, {}));
+                e.clipboardData!.setData('text/plain', copyNode(startValue, start, end, range, {}));
                 e.preventDefault();
             }) as EventListener);
             window.addEventListener('keydown', (e) => {
@@ -120,10 +121,7 @@
                     e.preventDefault();
                 }
             });
-            core.register('characters', Characters(core.connection));
-            core.register('channels', Channels(core.connection, core.characters));
-            core.register('conversations', Conversations());
-            core.connection.onEvent('closed', async(isReconnect) => {
+            core.connection.onEvent('closed', (isReconnect) => {
                 if(isReconnect) (<Modal>this.$refs['reconnecting']).show(true);
                 if(this.connected) core.notifications.playSound('logout');
                 this.connected = false;
@@ -147,9 +145,13 @@
             });
             core.connection.onEvent('connecting', async() => {
                 this.connecting = true;
+                profileApiInit({
+                    defaultCharacter: this.defaultCharacter, animateEicons: core.state.settings.animatedEicons, fuzzyDates: true,
+                    inlineDisplayMode: InlineDisplayMode.DISPLAY_ALL
+                }, this.ownCharacters);
                 if(core.state.settings.notifications) await core.notifications.requestPermission();
             });
-            core.connection.onEvent('connected', async() => {
+            core.connection.onEvent('connected', () => {
                 (<Modal>this.$refs['reconnecting']).hide();
                 this.error = '';
                 this.connecting = false;
@@ -180,7 +182,7 @@
         async connect(): Promise<void> {
             this.connecting = true;
             await core.notifications.initSounds(['attention', 'login', 'logout', 'modalert', 'newnote']);
-            core.connection.connect(this.selectedCharacter);
+            core.connection.connect(this.selectedCharacter.name);
         }
     }
 </script>

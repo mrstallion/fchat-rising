@@ -1,24 +1,15 @@
 .note-folder {
-    clear: both;
+    display: flex;
     width: 100%;
     .note-folder-total, .note-folder-unread {
         width: 3.5rem;
-        display: inline-block;
-        float: left;
         text-align: center;
     }
     .note-folder-unread {
         font-weight: bold;
-        float: right;
     }
     .note-folder-name {
-        width: auto;
-        display: inline-block;
-        float: left;
-    }
-    .note-folder-icon {
-        display: inline-block;
-        float: right;
+        flex: 1;
     }
 }
 

@@ -60,3 +60,11 @@ select {
   -webkit-appearance: none;
   -moz-appearance: none;
 }
+
+a.btn {
+  color: $link-color;
+
+  &:hover {
+    color: $link-hover-color;
+  }
+}

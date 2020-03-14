@@ -3,25 +3,33 @@
         <div v-html="styling"></div>
         <div v-if="!characters" style="display:flex; align-items:center; justify-content:center; height: 100%;">
             <div class="card bg-light" style="width: 400px;">
-                <h3 class="card-header" style="margin-top:0">{{l('title')}}</h3>
+                <h3 class="card-header" style="margin-top:0;display:flex">
+                    {{l('title')}}
+                    <a href="#" @click.prevent="showLogs()" class="btn" style="flex:1;text-align:right">
+                        <span class="fa fa-file-alt"></span> <span class="btn-text">{{l('logs.title')}}</span>
+                    </a>
+                </h3>
                 <div class="card-body">
                     <div class="alert alert-danger" v-show="error">
                         {{error}}
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="account">{{l('login.account')}}</label>
-                        <input class="form-control" id="account" v-model="settings.account" @keypress.enter="login()" :disabled="loggingIn"/>
+                        <input class="form-control" id="account" v-model="settings.account" @keypress.enter="login()"
+                            :disabled="loggingIn"/>
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="password">{{l('login.password')}}</label>
-                        <input class="form-control" type="password" id="password" v-model="password" @keypress.enter="login()" :disabled="loggingIn"/>
+                        <input class="form-control" type="password" id="password" v-model="password" @keypress.enter="login()"
+                            :disabled="loggingIn"/>
                     </div>
                     <div class="form-group" v-show="showAdvanced">
                         <label class="control-label" for="host">{{l('login.host')}}</label>
                         <div class="input-group">
                             <input class="form-control" id="host" v-model="settings.host" @keypress.enter="login()" :disabled="loggingIn"/>
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" @click="resetHost()"><span class="fas fa-undo-alt"></span></button>
+                                <button class="btn btn-outline-secondary" @click="resetHost()"><span class="fas fa-undo-alt"></span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -65,6 +73,7 @@
                 </select>
             </div>
         </modal>
+        <logs ref="logsDialog"></logs>
     </div>
 </template>
 
@@ -81,20 +90,19 @@
     import Vue from 'vue';
     import Chat from '../chat/Chat.vue';
     import {getKey, Settings} from '../chat/common';
-    import core, {init as initCore} from '../chat/core';
+    import core from '../chat/core';
     import l from '../chat/localize';
-    import {init as profileApiInit} from '../chat/profile_api';
+    import Logs from '../chat/Logs.vue';
     import Socket from '../chat/WebSocket';
     import Modal from '../components/Modal.vue';
-    import Connection from '../fchat/connection';
+    import {SimpleCharacter} from '../interfaces';
     import {Keys} from '../keys';
 //    import { BetterSqliteStore } from '../learn/store/better-sqlite3';
 //     import { Sqlite3Store } from '../learn/store/sqlite3';
     import CharacterPage from '../site/character_page/character_page.vue';
     import {defaultHost, GeneralSettings, nativeRequire} from './common';
-    import {fixLogs, Logs, SettingsStore} from './filesystem';
+    import {fixLogs} from './filesystem';
     import * as SlimcatImporter from './importer';
-    import Notifications from './notifications';
 
     const webContents = electron.remote.getCurrentWebContents();
     const parent = electron.remote.getCurrentWindow().webContents;
@@ -133,17 +141,17 @@
     log.info('Loaded keytar.');
 
     @Component({
-        components: {chat: Chat, modal: Modal, characterPage: CharacterPage}
+        components: {chat: Chat, modal: Modal, characterPage: CharacterPage, logs: Logs}
     })
     export default class Index extends Vue {
         showAdvanced = false;
         saveLogin = false;
         loggingIn = false;
         password = '';
-        character: string | undefined;
-        characters: string[] | undefined;
+        character?: string;
+        characters?: SimpleCharacter[];
         error = '';
-        defaultCharacter: string | undefined;
+        defaultCharacter?: number;
         l = l;
         settings!: GeneralSettings;
         importProgress = 0;
@@ -153,7 +161,7 @@
         fixCharacter = '';
 
         @Hook('created')
-        async created(): Promise<void> {
+        created(): void {
             if(this.settings.account.length > 0) this.saveLogin = true;
             keyStore.getPassword(this.settings.account)
                 .then((value: string) => this.password = value, (err: Error) => this.error = err.message);
@@ -170,7 +178,7 @@
             });
 
             electron.ipcRenderer.on('fix-logs', async() => {
-                this.fixCharacters = await new SettingsStore().getAvailableCharacters();
+                this.fixCharacters = await core.settingsStore.getAvailableCharacters();
                 this.fixCharacter = this.fixCharacters[0];
                 (<Modal>this.$refs['fixLogsModal']).show();
             });
@@ -206,15 +214,14 @@
                     await keyStore.setPassword(this.settings.account, this.password);
                 }
                 Socket.host = this.settings.host;
-                const connection = new Connection(`F-Chat 3.0 (${process.platform})`, electron.remote.app.getVersion(), Socket,
-                    this.settings.account, this.password);
-                connection.onEvent('connecting', async() => {
+
+                core.connection.onEvent('connecting', async() => {
                     if(!electron.ipcRenderer.sendSync('connect', core.connection.character) && process.env.NODE_ENV === 'production') {
                         alert(l('login.alreadyLoggedIn'));
                         return core.connection.close();
                     }
                     parent.send('connect', webContents.id, core.connection.character);
-                    this.character = connection.character;
+                    this.character = core.connection.character;
                     if((await core.settingsStore.get('settings')) === undefined &&
                         SlimcatImporter.canImportCharacter(core.connection.character)) {
                         if(!confirm(l('importer.importGeneral'))) return core.settingsStore.set('settings', new Settings());
@@ -223,22 +230,21 @@
                         (<Modal>this.$refs['importModal']).hide();
                     }
                 });
-                connection.onEvent('connected', () => {
+                core.connection.onEvent('connected', () => {
                     core.watch(() => core.conversations.hasNew, (newValue) => parent.send('has-new', webContents.id, newValue));
                     Raven.setUserContext({username: core.connection.character});
                 });
-                connection.onEvent('closed', () => {
+                core.connection.onEvent('closed', () => {
                     if(this.character === undefined) return;
                     electron.ipcRenderer.send('disconnect', this.character);
                     this.character = undefined;
                     parent.send('disconnect', webContents.id);
                     Raven.setUserContext();
                 });
-                initCore(connection, Logs, SettingsStore, Notifications);
-                const charNames = Object.keys(data.characters);
-                this.characters = charNames.sort();
-                this.defaultCharacter = charNames.find((x) => data.characters[x] === data.default_character)!;
-                profileApiInit(data.characters);
+                core.connection.setCredentials(this.settings.account, this.password);
+                this.characters = Object.keys(data.characters).map((name) => ({name, id: data.characters[name], deleted: false}))
+                    .sort((x, y) => x.name.localeCompare(y.name));
+                this.defaultCharacter = data.default_character;
             } catch(e) {
                 this.error = l('login.error');
                 if(process.env.NODE_ENV !== 'production') throw e;
@@ -281,7 +287,7 @@
             preview.style.display = 'none';
         }
 
-        openProfileInBrowser(): void {
+        async openProfileInBrowser(): Promise<void> {
             electron.remote.shell.openExternal(`https://www.f-list.net/c/${this.profileName}`);
 
             // tslint:disable-next-line: no-any no-unsafe-any
@@ -316,6 +322,10 @@
                 }
                 throw e;
             }
+        }
+
+        showLogs(): void {
+            (<Logs>this.$refs['logsDialog']).show();
         }
     }
 </script>

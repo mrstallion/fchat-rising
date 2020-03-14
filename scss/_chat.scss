@@ -83,6 +83,7 @@
     border-color: theme-color("secondary");
     border-top-right-radius: 0;
     border-top-left-radius: 0;
+    white-space: nowrap;
     @media (min-width: breakpoint-min(sm)) {
       .name {
         display: none;

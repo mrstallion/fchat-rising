@@ -38,10 +38,10 @@
 <script lang="ts">
     import { Component, Hook, Watch } from '@f-list/vue-ts';
     import Axios from 'axios';
+    import {BBCodeView} from '../bbcode/view';
     import CustomDialog from '../components/custom_dialog';
     import FilterableSelect from '../components/FilterableSelect.vue';
     import Modal from '../components/Modal.vue';
-    import {BBCodeView} from './bbcode';
     import {characterImage} from './common';
     import core from './core';
     import {Character, Connection} from './interfaces';
@@ -98,7 +98,7 @@
     }
 
     @Component({
-        components: {modal: Modal, user: UserView, 'filterable-select': FilterableSelect, bbcode: BBCodeView}
+        components: {modal: Modal, user: UserView, 'filterable-select': FilterableSelect, bbcode: BBCodeView(core.bbCodeParser)}
     })
     export default class CharacterSearch extends CustomDialog {
         l = l;

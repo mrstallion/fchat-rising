@@ -1,5 +1,5 @@
 <template>
-    <div class="contact-method" :title="altText">
+    <div class="contact-method" :title="infotag.name">
         <span v-if="contactLink" class="contact-link">
             <a :href="contactLink" target="_blank" rel="nofollow noreferrer noopener">
                 <img :src="iconUrl"><span class="contact-value">{{value}}</span>
@@ -14,39 +14,27 @@
 <script lang="ts">
     import {Component, Prop} from '@f-list/vue-ts';
     import Vue from 'vue';
+    import {CharacterInfotag, Infotag} from '../../interfaces';
     import {formatContactLink, formatContactValue} from './contact_utils';
-    import {methods, Store} from './data_store';
-
-    interface DisplayContactMethod {
-        id: number
-        value: string
-    }
+    import {methods} from './data_store';
 
     @Component
     export default class ContactMethodView extends Vue {
         @Prop({required: true})
-        private readonly method!: DisplayContactMethod;
+        readonly infotag!: Infotag;
+        @Prop({required: true})
+        readonly data!: CharacterInfotag;
 
         get iconUrl(): string {
-            const infotag = Store.kinks.infotags[this.method.id];
-            if(typeof infotag === 'undefined')
-                return 'Unknown Infotag';
-            return methods.contactMethodIconUrl(infotag.name);
+            return methods.contactMethodIconUrl(this.infotag.name);
         }
 
         get value(): string {
-            return formatContactValue(this.method.id, this.method.value);
-        }
-
-        get altText(): string {
-            const infotag = Store.kinks.infotags[this.method.id];
-            if(typeof infotag === 'undefined')
-                return '';
-            return infotag.name;
+            return formatContactValue(this.infotag, this.data.string!);
         }
 
         get contactLink(): string | undefined {
-            return formatContactLink(this.method.id, this.method.value);
+            return formatContactLink(this.infotag, this.data.string!);
         }
     }
 </script>

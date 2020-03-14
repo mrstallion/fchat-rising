@@ -6,7 +6,7 @@
     import {Component, Hook, Prop, Watch} from '@f-list/vue-ts';
     import {distanceInWordsToNow, format} from 'date-fns';
     import Vue from 'vue';
-    import {Settings} from '../site/utils';
+    import {settings} from '../site/utils';
 
     @Component
     export default class DateDisplay extends Vue {
@@ -23,7 +23,7 @@
             const date = isNaN(+this.time) ? new Date(`${this.time}+00:00`) : new Date(+this.time * 1000);
             const absolute = format(date, 'YYYY-MM-DD HH:mm');
             const relative = distanceInWordsToNow(date, {addSuffix: true});
-            if(Settings.fuzzyDates) {
+            if(settings.fuzzyDates) {
                 this.primary = relative;
                 this.secondary = absolute;
             } else {

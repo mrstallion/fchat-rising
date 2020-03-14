@@ -1,5 +1,5 @@
-import Vue, {Component, CreateElement, RenderContext, VNode} from 'vue';
-import { CoreBBCodeParser, analyzeUrlTag } from '../bbcode/core';
+import Vue from 'vue';
+import {BBCodeElement, CoreBBCodeParser, analyzeUrlTag} from '../bbcode/core';
 //tslint:disable-next-line:match-default-export-name
 import BaseEditor from '../bbcode/Editor.vue';
 import {BBCodeTextTag} from '../bbcode/parser';
@@ -10,33 +10,9 @@ import {Character} from './interfaces';
 import {default as UrlView} from '../bbcode/UrlTagView.vue';
 import UserView from './UserView.vue';
 
-export const BBCodeView: Component = {
-    functional: true,
-    render(createElement: CreateElement, context: RenderContext): VNode {
-        /*tslint:disable:no-unsafe-any*///because we're not actually supposed to do any of this
-        context.data.hook = {
-            insert(node: VNode): void {
-                node.elm!.appendChild(core.bbCodeParser.parseEverything(
-                    context.props.text !== undefined ? context.props.text : context.props.unsafeText));
-                if(context.props.afterInsert !== undefined) context.props.afterInsert(node.elm);
-            },
-            destroy(node: VNode): void {
-                const element = (<BBCodeElement>(<Element>node.elm).firstChild);
-                if(element.cleanup !== undefined) element.cleanup();
-            }
-        };
-        const vnode = createElement('span', context.data);
-        vnode.key = context.props.text;
-        return vnode;
-        //tslint:enable
-    }
-};
-
 export class Editor extends BaseEditor {
     parser = core.bbCodeParser;
 }
-
-export type BBCodeElement = HTMLElement & {cleanup?(): void};
 
 export default class BBCodeParser extends CoreBBCodeParser {
     cleanup: Vue[] = [];

@@ -46,10 +46,9 @@ export interface Infotag {
     name: string
     type: InfotagType
     search_field: string
-    validator: string
+    validator?: string
     allow_legacy: boolean
-    infotag_group: string
-    list?: number
+    infotag_group: number
 }
 
 export interface Character extends SimpleCharacter {
@@ -57,7 +56,7 @@ export interface Character extends SimpleCharacter {
     name: string
     title: string
     description: string
-    kinks: {[key: string]: KinkChoice | number | undefined}
+    kinks: {[key: number]: KinkChoice | number | undefined}
     inlines: {[key: string]: InlineImage}
     customs: {[key: string]: CustomKink | undefined}
     infotags: {[key: number]: CharacterInfotag | undefined}
@@ -96,4 +95,42 @@ export interface CustomKink {
     name: string
     choice: KinkChoice
     description: string
+}
+
+export interface KinkGroup {
+    id: number
+    name: string
+    description: string
+    sort_order: number
+}
+
+export interface InfotagGroup {
+    id: number
+    name: string
+    description: string
+    sort_order: number
+}
+
+export interface ListItem {
+    id: number
+    name: string
+    value: string
+    sort_order: number
+}
+
+export const enum InlineDisplayMode {DISPLAY_ALL, DISPLAY_SFW, DISPLAY_NONE}
+
+export interface Settings {
+    animateEicons: boolean
+    inlineDisplayMode: InlineDisplayMode
+    defaultCharacter: number
+    fuzzyDates: boolean
+}
+
+export interface SharedDefinitions {
+    readonly listItems: {readonly [key: string]: Readonly<ListItem>}
+    readonly kinks: {readonly [key: string]: Readonly<Kink>}
+    readonly kinkGroups: {readonly [key: string]: Readonly<KinkGroup>}
+    readonly infotags: {readonly [key: string]: Readonly<Infotag>}
+    readonly infotagGroups: {readonly [key: string]: Readonly<InfotagGroup>}
 }

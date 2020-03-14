@@ -2,12 +2,27 @@
     <modal id="reportDialog" :action="'Report character' + name" :disabled="!dataValid || submitting" @submit.prevent="submitReport()">
         <div class="form-group">
             <label>Type</label>
-            <select v-select="validTypes" v-model="type" class="form-control"></select>
+            <select v-model="type" class="form-control">
+                <option>None</option>
+                <option value="profile">Profile Violation</option>
+                <option value="name_request">Name Request</option>
+                <option value="takedown">Art Takedown</option>
+                <option value="other">Other</option>
+            </select>
         </div>
         <div v-if="type !== 'takedown'">
             <div class="form-group" v-if="type === 'profile'">
                 <label>Violation Type</label>
-                <select v-select="violationTypes" v-model="violation" class="form-control"></select>
+                <select v-model="violation" class="form-control">
+                    <option>Real life images on underage character</option>
+                    <option>Real life animal images on sexual character</option>
+                    <option>Amateur/farmed real life images</option>
+                    <option>Defamation</option>
+                    <option>OOC Kinks</option>
+                    <option>Real life contact information</option>
+                    <option>Solicitation for real life contact</option>
+                    <option>Other</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>Your Character</label>
@@ -30,7 +45,7 @@
     import Modal from '../../components/Modal.vue';
     import * as Utils from '../utils';
     import {methods} from './data_store';
-    import {Character, SelectItem} from './interfaces';
+    import {Character} from './interfaces';
 
     @Component({
         components: {modal: Modal}
@@ -38,33 +53,12 @@
     export default class ReportDialog extends CustomDialog {
         @Prop({required: true})
         readonly character!: Character;
-
-        ourCharacter = Utils.Settings.defaultCharacter;
+        ourCharacter = Utils.settings.defaultCharacter;
         type = '';
         violation = '';
         message = '';
-
         submitting = false;
-
         ticketUrl = `${Utils.siteDomain}tickets/new`;
-
-        validTypes: ReadonlyArray<SelectItem> = [
-            {text: 'None', value: ''},
-            {text: 'Profile Violation', value: 'profile'},
-            {text: 'Name Request', value: 'name_request'},
-            {text: 'Art Takedown', value: 'takedown'},
-            {text: 'Other', value: 'other'}
-        ];
-        violationTypes: ReadonlyArray<string> = [
-            'Real life images on underage character',
-            'Real life animal images on sexual character',
-            'Amateur/farmed real life images',
-            'Defamation',
-            'OOC Kinks',
-            'Real life contact information',
-            'Solicitation for real life contact',
-            'Other'
-        ];
 
         get name(): string {
             return this.character.character.name;

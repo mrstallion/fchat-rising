@@ -1,7 +1,9 @@
 import Vue, {WatchHandler} from 'vue';
 import { CacheManager } from '../learn/cache-manager';
+import {Channels, Characters} from '../fchat';
 import BBCodeParser from './bbcode';
 import {Settings as SettingsImpl} from './common';
+import Conversations from './conversations';
 import {Channel, Character, Connection, Conversation, Logs, Notifications, Settings, State as StateInterface} from './interfaces';
 
 function createBBCodeParser(): BBCodeParser {
@@ -45,8 +47,9 @@ const vue = <Vue & VueState>new Vue({
         state
     },
     watch: {
-        'state.hiddenUsers': async(newValue: string[]) => {
-            if(data.settingsStore !== undefined) await data.settingsStore.set('hiddenUsers', newValue);
+        'state.hiddenUsers': async(newValue: string[], oldValue: string[]) => {
+            if(data.settingsStore !== undefined && newValue !== oldValue)
+                await data.settingsStore.set('hiddenUsers', newValue);
         }
     }
 });
@@ -62,20 +65,15 @@ const data = {
     characters: <Character.State | undefined>undefined,
     notifications: <Notifications | undefined>undefined,
     cache: <CacheManager | undefined>undefined,
-    register(this: void | never, module: 'characters' | 'conversations' | 'channels',
-             subState: Channel.State | Character.State | Conversation.State): void {
+    register<K extends 'characters' | 'conversations' | 'channels'>(module: K, subState: VueState[K]): void {
         Vue.set(vue, module, subState);
-        data[module] = subState;
+        (<VueState[K]>data[module]) = subState;
     },
     watch<T>(getter: (this: VueState) => T, callback: WatchHandler<T>): void {
         vue.$watch(getter, callback);
     },
     async reloadSettings(): Promise<void> {
-        const settings = new SettingsImpl();
-        const loadedSettings = <SettingsImpl | undefined>await core.settingsStore.get('settings');
-        if(loadedSettings !== undefined)
-            for(const key in loadedSettings) settings[<keyof Settings>key] = loadedSettings[<keyof Settings>key];
-        state._settings = settings;
+        state._settings = Object.assign(new SettingsImpl(), await core.settingsStore.get('settings'));
         const hiddenUsers = await core.settingsStore.get('hiddenUsers');
         state.hiddenUsers = hiddenUsers !== undefined ? hiddenUsers : [];
     }
@@ -91,6 +89,10 @@ export function init(this: void, connection: Connection, logsClass: new() => Log
 
     // tslint:disable-next-line no-floating-promises
     data.cache.start();
+
+    data.register('characters', Characters(connection));
+    data.register('channels', Channels(connection, core.characters));
+    data.register('conversations', Conversations());
 
     connection.onEvent('connecting', async() => {
         await data.reloadSettings();
@@ -110,9 +112,6 @@ export interface Core {
     readonly notifications: Notifications
     readonly cache: CacheManager
 
-    register(module: 'conversations', state: Conversation.State): void
-    register(module: 'channels', state: Channel.State): void
-    register(module: 'characters', state: Character.State): void
     watch<T>(getter: (this: VueState) => T, callback: WatchHandler<T>): void
 }
 

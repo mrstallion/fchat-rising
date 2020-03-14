@@ -20,7 +20,11 @@ class ViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
         controller.add(Logs(), name: "Logs")
         config.userContentController = controller
         config.mediaTypesRequiringUserActionForPlayback = [.video]
-        config.setValue(true, forKey: "_alwaysRunsAtForegroundPriority")
+        if #available(iOS 12.2, *) {
+            config.setValue(true, forKey: "alwaysRunsAtForegroundPriority")
+        } else {
+            config.setValue(true, forKey: "_alwaysRunsAtForegroundPriority")
+        }
         webView = WKWebView(frame: UIApplication.shared.windows[0].frame, configuration: config)
         webView.uiDelegate = self
         webView.navigationDelegate = self

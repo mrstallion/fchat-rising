@@ -20,9 +20,9 @@
 
     @Component
     export default class Sidebar extends Vue {
-        @Prop()
+        @Prop
         readonly right?: true;
-        @Prop()
+        @Prop
         readonly label?: string;
         @Prop({required: true})
         readonly icon!: string;

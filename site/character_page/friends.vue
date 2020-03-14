@@ -15,7 +15,8 @@
     import Vue from 'vue';
     import * as Utils from '../utils';
     import {methods} from './data_store';
-    import {Character, CharacterFriend} from './interfaces';
+    import {Character} from './interfaces';
+    import {SimpleCharacter} from '../../interfaces';
     import core from '../../chat/core';
 
     @Component
@@ -23,7 +24,7 @@
         @Prop({required: true})
         private readonly character!: Character;
         private shown = false;
-        friends: CharacterFriend[] = [];
+        friends: SimpleCharacter[] = [];
         loading = true;
         error = '';
 
@@ -46,7 +47,7 @@
             this.loading = false;
         }
 
-        async resolveFriends(): Promise<CharacterFriend[]> {
+        async resolveFriends(): Promise<SimpleCharacter[]> {
             const c = await core.cache.profileCache.get(this.character.character.name);
 
             if ((c) && (c.meta) && (c.meta.friends)) {

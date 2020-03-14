@@ -19,16 +19,15 @@
                         {{ (post.approved) ? 'Unapprove' : 'Approve' }}
                     </button>
                 </div>
-                <button class="btn btn-danger" v-show="!post.deleted && (canEdit || post.canEdit)"
-                    @click="deletePost" :disabled="deleting">Delete
-                </button>
+                <!-- TODO proper permission handling -->
+                <button class="btn btn-danger" v-show="!post.deleted && canEdit" @click="deletePost" :disabled="deleting">Delete</button>
             </div>
             <div class="row">
                 <div class="col-12">
-                    <div class="bbcode guestbook-message" v-bbcode="post.message"></div>
+                    <bbcode class="bbcode guestbook-message" :text="post.message"></bbcode>
                     <div v-if="post.reply && !replyBox" class="guestbook-reply">
                         <date-display v-if="post.repliedAt" :time="post.repliedAt"></date-display>
-                        <div class="reply-message" v-bbcode="post.reply"></div>
+                        <bbcode class="reply-message" :text="post.reply"></bbcode>
                     </div>
                 </div>
             </div>
@@ -54,12 +53,14 @@
     import DateDisplay from '../../components/date_display.vue';
     import * as Utils from '../utils';
     import {methods} from './data_store';
-    import {GuestbookPost} from './interfaces';
+    import {Character, GuestbookPost} from './interfaces';
 
     @Component({
         components: {'date-display': DateDisplay, 'character-link': CharacterLink}
     })
     export default class GuestbookPostView extends Vue {
+        @Prop({required: true})
+        readonly character!: Character;
         @Prop({required: true})
         readonly post!: GuestbookPost;
         @Prop({required: true})
@@ -79,7 +80,7 @@
         async deletePost(): Promise<void> {
             try {
                 this.deleting = true;
-                await methods.guestbookPostDelete(this.post.id);
+                await methods.guestbookPostDelete(this.character.character.id, this.post.id);
                 Vue.set(this.post, 'deleted', true);
                 this.$emit('reload');
             } catch(e) {
@@ -92,7 +93,7 @@
         async approve(): Promise<void> {
             try {
                 this.approving = true;
-                await methods.guestbookPostApprove(this.post.id, !this.post.approved);
+                await methods.guestbookPostApprove(this.character.character.id, this.post.id, !this.post.approved);
                 this.post.approved = !this.post.approved;
             } catch(e) {
                 Utils.ajaxError(e, 'Unable to change post approval.');
@@ -104,9 +105,9 @@
         async postReply(): Promise<void> {
             try {
                 this.replying = true;
-                const replyData = await methods.guestbookPostReply(this.post.id, this.replyMessage);
-                this.post.reply = replyData.reply;
-                this.post.repliedAt = replyData.repliedAt;
+                await methods.guestbookPostReply(this.character.character.id, this.post.id, this.replyMessage);
+                this.post.reply = this.replyMessage;
+                this.post.repliedAt = Date.now() / 1000;
                 this.replyBox = false;
             } catch(e) {
                 Utils.ajaxError(e, 'Unable to post guestbook reply.');

@@ -31,7 +31,7 @@ export const appVersion = (<{version: string}>require('./package.json')).version
 export class GeneralSettings {
     account = '';
     password = '';
-    host = 'wss://chat.f-list.net:9799';
+    host = 'wss://chat.f-list.net/chat2';
     theme = 'default';
     version = appVersion;
 }
@@ -135,7 +135,9 @@ export class Logs implements Logging {
 export async function getGeneralSettings(): Promise<GeneralSettings | undefined> {
     const file = await NativeFile.read('!settings');
     if(file === undefined) return undefined;
-    return <GeneralSettings>JSON.parse(file);
+    const settings = <GeneralSettings>JSON.parse(file);
+    if(settings.host === 'wss://chat.f-list.net:9799') settings.host = 'wss://chat.f-list.net/chat2';
+    return settings;
 }
 
 export async function setGeneralSettings(value: GeneralSettings): Promise<void> {

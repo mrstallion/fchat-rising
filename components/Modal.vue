@@ -1,6 +1,6 @@
 <template>
     <span v-show="isShown">
-        <div class="modal" @click.self="hideWithCheck()" style="display:flex;justify-content:center">
+        <div class="modal" @mousedown.self="hideWithCheck()" style="display:flex;justify-content:center">
             <div class="modal-dialog" :class="dialogClass" style="display:flex;align-items:center;margin-left:0;margin-right:0">
                 <div class="modal-content" style="max-height:100%">
                     <div class="modal-header" style="flex-shrink:0">
@@ -49,17 +49,17 @@
     export default class Modal extends Vue {
         @Prop({default: ''})
         readonly action!: string;
-        @Prop()
+        @Prop
         readonly dialogClass?: {string: boolean};
         @Prop({default: true})
         readonly buttons!: boolean;
         @Prop({default: () => ({'btn-primary': true})})
         readonly buttonClass!: {string: boolean};
-        @Prop()
+        @Prop
         readonly disabled?: boolean;
         @Prop({default: true})
         readonly showCancel!: boolean;
-        @Prop()
+        @Prop
         readonly buttonText?: string;
         isShown = false;
         keepOpen = false;

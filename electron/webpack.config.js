@@ -33,7 +33,6 @@ const mainConfig = {
     },
     plugins: [
         new ForkTsCheckerWebpackPlugin({
-            workers: 2,
             async: false,
             tslint: path.join(__dirname, '../tslint.json'),
             tsconfig: './tsconfig-main.json'
@@ -90,7 +89,6 @@ const mainConfig = {
     },
     plugins: [
         new ForkTsCheckerWebpackPlugin({
-            workers: 2,
             async: false,
             tslint: path.join(__dirname, '../tslint.json'),
             tsconfig: './tsconfig-renderer.json',

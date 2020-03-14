@@ -63,15 +63,13 @@
     import * as Raven from 'raven-js';
     import Vue from 'vue';
     import Chat from '../chat/Chat.vue';
-    import core, {init as initCore} from '../chat/core';
+    import core from '../chat/core';
     import l from '../chat/localize';
-    import {init as profileApiInit} from '../chat/profile_api';
     import Socket from '../chat/WebSocket';
     import Modal from '../components/Modal.vue';
-    import Connection from '../fchat/connection';
+    import {SimpleCharacter} from '../interfaces';
     import CharacterPage from '../site/character_page/character_page.vue';
-    import {appVersion, GeneralSettings, getGeneralSettings, Logs, setGeneralSettings, SettingsStore} from './filesystem';
-    import Notifications from './notifications';
+    import {appVersion, GeneralSettings, getGeneralSettings, setGeneralSettings, SettingsStore} from './filesystem';
 
     declare global {
         interface Window {
@@ -97,9 +95,9 @@
         showAdvanced = false;
         saveLogin = false;
         loggingIn = false;
-        characters?: ReadonlyArray<string>;
+        characters?: ReadonlyArray<SimpleCharacter>;
         error = '';
-        defaultCharacter?: string;
+        defaultCharacter?: number;
         settingsStore = new SettingsStore();
         l = l;
         settings!: GeneralSettings;
@@ -147,27 +145,20 @@
                 }
                 if(this.saveLogin) await setGeneralSettings(this.settings);
                 Socket.host = this.settings.host;
-                const connection = new Connection('F-Chat 3.0 (Mobile)', appVersion, Socket,
-                    this.settings.account, this.settings.password);
-                connection.onEvent('connected', () => {
+                core.connection.setCredentials(this.settings.account, this.settings.password);
+                core.connection.onEvent('connected', () => {
                     Raven.setUserContext({username: core.connection.character});
                     document.addEventListener('backbutton', confirmBack);
                     NativeBackground.start();
                 });
-                connection.onEvent('closed', () => {
+                core.connection.onEvent('closed', () => {
                     Raven.setUserContext();
                     document.removeEventListener('backbutton', confirmBack);
                     NativeBackground.stop();
                 });
-                initCore(connection, Logs, SettingsStore, Notifications);
-                const charNames = Object.keys(data.characters);
-                this.characters = charNames.sort();
-                for(const character of charNames)
-                    if(data.characters[character] === data.default_character) {
-                        this.defaultCharacter = character;
-                        break;
-                    }
-                profileApiInit(data.characters);
+                this.characters = Object.keys(data.characters).map((name) => ({name, id: data.characters[name], deleted: false}))
+                    .sort((x, y) => x.name.localeCompare(y.name));
+                this.defaultCharacter = data.default_character;
             } catch(e) {
                 this.error = l('login.error');
                 if(process.env.NODE_ENV !== 'production') throw e;

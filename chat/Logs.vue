@@ -85,7 +85,7 @@
         components: {modal: Modal, 'message-view': MessageView, 'filterable-select': FilterableSelect}
     })
     export default class Logs extends CustomDialog {
-        @Prop()
+        @Prop
         readonly conversation?: Conversation;
         conversations: LogInterface.Conversation[] = [];
         selectedConversation: LogInterface.Conversation | undefined;

@@ -1,6 +1,6 @@
 <template>
-    <select class="form-control" :value="value" @change="emit">
-        <option v-for="o in characters" :value="o.value" v-once>{{o.text}}</option>
+    <select :value="value" @change="emit">
+        <option v-for="character in characters" :value="character.id">{{character.name}}</option>
         <slot></slot>
     </select>
 </template>
@@ -8,24 +8,16 @@
 <script lang="ts">
     import {Component, Prop} from '@f-list/vue-ts';
     import Vue from 'vue';
-    import {getCharacters} from './character_select/character_list';
-
-    interface SelectItem {
-        value: number
-        text: string
-    }
+    import {SimpleCharacter} from '../interfaces';
+    import * as Utils from '../site/utils';
 
     @Component
     export default class CharacterSelect extends Vue {
         @Prop({required: true})
         readonly value!: number;
 
-        get characters(): SelectItem[] {
-            const characterList = getCharacters();
-            const characters: SelectItem[] = [];
-            for(const character of characterList)
-                characters.push({value: character.id, text: character.name});
-            return characters;
+        get characters(): SimpleCharacter[] {
+            return Utils.characters;
         }
 
         emit(evt: Event): void {

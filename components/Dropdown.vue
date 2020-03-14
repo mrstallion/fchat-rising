@@ -1,13 +1,10 @@
 <template>
-    <div class="dropdown">
-        <a class="form-control custom-select" aria-haspopup="true" :aria-expanded="isOpen" @click="isOpen = true"
-            @blur="isOpen = false" style="width:100%;text-align:left;display:flex;align-items:center" role="button" tabindex="-1">
-            <div style="flex:1">
-                <slot name="title" style="flex:1"></slot>
-            </div>
+    <div class="dropdown" @focusout="blur">
+        <a :class="linkClass" aria-haspopup="true" :aria-expanded="isOpen" @click.prevent="isOpen = !isOpen" href="#"
+            style="width:100%;text-align:left;align-items:center" role="button" tabindex="-1" ref="button">
+            <slot name="title">{{title}}</slot>
         </a>
-        <div class="dropdown-menu" :style="open ? {display: 'block'} : undefined" @mousedown.stop.prevent @click="isOpen = false"
-            ref="menu">
+        <div class="dropdown-menu" ref="menu" @mousedown.prevent.stop @click.prevent.stop="menuClick()">
             <slot></slot>
         </div>
     </div>
@@ -20,33 +17,39 @@
     @Component
     export default class Dropdown extends Vue {
         isOpen = false;
-        @Prop()
+        @Prop({default: 'btn btn-secondary dropdown-toggle'})
+        readonly linkClass!: string;
+        @Prop
         readonly keepOpen?: boolean;
+        @Prop
+        readonly title?: string;
 
-        get open(): boolean {
-            return this.keepOpen || this.isOpen;
-        }
-
-        @Watch('open')
+        @Watch('isOpen')
         onToggle(): void {
             const menu = this.$refs['menu'] as HTMLElement;
             if(!this.isOpen) {
                 menu.style.cssText = '';
                 return;
             }
-            let element = <HTMLElement | null>this.$el;
-            while(element !== null) {
-                if(getComputedStyle(element).position === 'fixed') {
-                    menu.style.display = 'block';
-                    const offset = menu.getBoundingClientRect();
-                    menu.style.position = 'fixed';
-                    menu.style.left = `${offset.left}px`;
-                    menu.style.top = (offset.bottom < window.innerHeight) ? menu.style.top = `${offset.top}px` :
-                        `${this.$el.getBoundingClientRect().top - offset.bottom + offset.top}px`;
-                    break;
-                }
-                element = element.parentElement;
+            menu.style.display = 'block';
+            const offset = menu.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.left = offset.right < window.innerWidth ? `${offset.left}px` : `${window.innerWidth - offset.width}px`;
+            menu.style.top = (offset.bottom < window.innerHeight) ? `${offset.top}px` :
+                `${offset.top - offset.height - (<HTMLElement>this.$el).offsetHeight}px`;
+        }
+
+        blur(event: FocusEvent): void {
+            let elm = <HTMLElement | null>event.relatedTarget;
+            while(elm) {
+                if(elm === this.$refs['menu']) return;
+                elm = elm.parentElement;
             }
+            this.isOpen = false;
+        }
+
+        menuClick(): void {
+            if(!this.keepOpen) this.isOpen = false;
         }
     }
 </script>

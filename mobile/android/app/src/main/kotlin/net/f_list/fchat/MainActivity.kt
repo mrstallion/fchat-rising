@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.view.KeyEvent
+import android.view.View
 import android.view.ViewGroup
 import android.webkit.JsResult
 import android.webkit.WebChromeClient
@@ -96,7 +97,7 @@ class MainActivity : Activity() {
 						"n.getCharacters=function(){return JSON.parse(n.getCharactersN())}})(NativeLogs)", null)
 			}
 		}
-
+		debugHandler.postDelayed(keepAlive, 10000);
 	}
 
 	private fun addFolder(folder: java.io.File, out: ZipOutputStream, path: String) {
@@ -106,6 +107,13 @@ class MainActivity : Activity() {
 				out.putNextEntry(ZipEntry("$path${file.name}"))
 				FileInputStream(file).use { it.copyTo(out) }
 			}
+		}
+	}
+
+	val keepAlive = object : Runnable {
+		override fun run() {
+			webView.dispatchWindowVisibilityChanged(View.VISIBLE);
+			debugHandler.postDelayed(this, 10000)
 		}
 	}
 

@@ -1,23 +1,15 @@
 import Vue from 'vue';
 import { BBCodeElement } from '../chat/bbcode';
-import {InlineImage} from '../interfaces';
-import { analyzeUrlTag, CoreBBCodeParser } from './core';
-import {InlineDisplayMode} from './interfaces';
+import {InlineDisplayMode, InlineImage} from '../interfaces';
+import * as Utils from '../site/utils';
+import {analyzeUrlTag, CoreBBCodeParser} from './core';
 import {BBCodeCustomTag, BBCodeSimpleTag, BBCodeTextTag} from './parser';
 import UrlTagView from './UrlTagView.vue';
 
 
-interface StandardParserSettings {
-    siteDomain: string
-    staticDomain: string
-    animatedIcons: boolean
-    inlineDisplayMode: InlineDisplayMode
-}
-
 const usernameRegex = /^[a-zA-Z0-9_\-\s]+$/;
 
 export class StandardBBCodeParser extends CoreBBCodeParser {
-    allowInlines = true;
     inlines: {[key: string]: InlineImage | undefined} | undefined;
 
     cleanup: Vue[] = [];
@@ -29,12 +21,12 @@ export class StandardBBCodeParser extends CoreBBCodeParser {
         const el = this.createElement('img');
         el.className = 'inline-image';
         el.title = el.alt = inline.name;
-        el.src = `${this.settings.staticDomain}images/charinline/${p1}/${p2}/${inline.hash}.${inline.extension}`;
+        el.src = `${Utils.staticDomain}images/charinline/${p1}/${p2}/${inline.hash}.${inline.extension}`;
         outerEl.appendChild(el);
         return outerEl;
     }
 
-    constructor(public settings: StandardParserSettings) {
+    constructor() {
         super();
         const hrTag = new BBCodeSimpleTag('hr', 'hr', [], []);
         hrTag.noClosingTag = true;
@@ -114,7 +106,7 @@ export class StandardBBCodeParser extends CoreBBCodeParser {
             if(!usernameRegex.test(content))
                 return;
             const a = parser.createElement('a');
-            a.href = `${this.settings.siteDomain}c/${content}`;
+            a.href = `${Utils.siteDomain}c/${content}`;
             a.target = '_blank';
             a.className = 'character-link';
             a.appendChild(document.createTextNode(content));
@@ -127,10 +119,10 @@ export class StandardBBCodeParser extends CoreBBCodeParser {
             if(!usernameRegex.test(content))
                 return;
             const a = parser.createElement('a');
-            a.href = `${this.settings.siteDomain}c/${content}`;
+            a.href = `${Utils.siteDomain}c/${content}`;
             a.target = '_blank';
             const img = parser.createElement('img');
-            img.src = `${this.settings.staticDomain}images/avatar/${content.toLowerCase()}.png`;
+            img.src = `${Utils.staticDomain}images/avatar/${content.toLowerCase()}.png`;
             img.className = 'character-avatar icon';
             img.title = img.alt = content;
             a.appendChild(img);
@@ -144,10 +136,10 @@ export class StandardBBCodeParser extends CoreBBCodeParser {
             if(!usernameRegex.test(content))
                 return;
             let extension = '.gif';
-            if(!this.settings.animatedIcons)
+            if(!Utils.settings.animateEicons)
                 extension = '.png';
             const img = parser.createElement('img');
-            img.src = `${this.settings.staticDomain}images/eicon/${content.toLowerCase()}${extension}`;
+            img.src = `${Utils.staticDomain}images/eicon/${content.toLowerCase()}${extension}`;
             img.className = 'character-avatar icon';
             img.title = img.alt = content;
             parent.appendChild(img);
@@ -155,15 +147,11 @@ export class StandardBBCodeParser extends CoreBBCodeParser {
         }));
         this.addTag(new BBCodeTextTag('img', (p, parent, param, content) => {
             const parser = <StandardBBCodeParser>p;
-            if(!this.allowInlines) {
-                parser.warning('Inline images are not allowed here.');
-                return undefined;
-            }
             if(typeof parser.inlines === 'undefined') {
                 parser.warning('This page does not support inline images.');
                 return undefined;
             }
-            const displayMode = this.settings.inlineDisplayMode;
+            const displayMode = Utils.settings.inlineDisplayMode;
             if(!/^\d+$/.test(param)) {
                 parser.warning('img tag parameters must be numbers.');
                 return undefined;
@@ -227,10 +215,4 @@ export class StandardBBCodeParser extends CoreBBCodeParser {
         this.cleanup = [];
         return elm;
     }
-}
-
-export let standardParser: StandardBBCodeParser;
-
-export function initParser(settings: StandardParserSettings): void {
-    standardParser = new StandardBBCodeParser(settings);
 }

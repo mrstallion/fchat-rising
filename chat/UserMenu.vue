@@ -46,9 +46,9 @@
 <script lang="ts">
     import {Component, Prop} from '@f-list/vue-ts';
     import Vue from 'vue';
+    import {BBCodeView} from '../bbcode/view';
     import Modal from '../components/Modal.vue';
     import AdView from './AdView.vue';
-    import {BBCodeView} from './bbcode';
     import {characterImage, errorToString, getByteLength, profileLink} from './common';
     import core from './core';
     import {Channel, Character} from './interfaces';
@@ -56,7 +56,7 @@
     import ReportDialog from './ReportDialog.vue';
 
     @Component({
-        components: {bbcode: BBCodeView, modal: Modal, 'ad-view': AdView}
+        components: {bbcode: BBCodeView(core.bbCodeParser), modal: Modal, 'ad-view': AdView}
     })
     export default class UserMenu extends Vue {
         @Prop({required: true})
@@ -185,7 +185,7 @@
                 node = node.parentElement!;
             }
             if(node.dataset['touch'] === 'false' && e.type !== 'contextmenu') return;
-            if(node.character === undefined)
+            if(!node.character)
                 if(node.dataset['character'] !== undefined) node.character = core.characters.get(node.dataset['character']!);
                 else {
                     this.showContextMenu = false;
@@ -195,7 +195,7 @@
             switch(e.type) {
                 case 'click':
                     if(node.dataset['character'] === undefined)
-                        if(node === this.touchedElement) this.openMenu(touch, node.character, node.channel);
+                        if(node === this.touchedElement) this.openMenu(touch, node.character, node.channel || undefined);
                         else this.onClick(node.character);
                     e.preventDefault();
                     break;
@@ -203,7 +203,7 @@
                     this.touchedElement = node;
                     break;
                 case 'contextmenu':
-                    this.openMenu(touch, node.character, node.channel);
+                    this.openMenu(touch, node.character, node.channel || undefined);
                     e.preventDefault();
             }
         }

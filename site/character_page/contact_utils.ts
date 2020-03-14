@@ -1,5 +1,5 @@
 import {urlRegex as websitePattern} from '../../bbcode/core';
-import {Store} from './data_store';
+import {Infotag} from '../../interfaces';
 
 const daUsernamePattern = /^([a-z0-9_\-]+)$/i;
 const daSitePattern = /^https?:\/\/([a-z0-9_\-]+)\.deviantart\.com\//i;
@@ -30,10 +30,7 @@ function normalizeSiteUsernamePair(site: RegExp, username: RegExp): (value: stri
     };
 }
 
-export function formatContactValue(id: number, value: string): string {
-    const infotag = Store.kinks.infotags[id];
-    if(typeof infotag === 'undefined')
-        return value;
+export function formatContactValue(infotag: Infotag, value: string): string {
     const methodName = infotag.name.toLowerCase();
     const formatters: {[key: string]: (() => string | undefined) | undefined} = {
         deviantart(): string | undefined {
@@ -56,10 +53,7 @@ export function formatContactValue(id: number, value: string): string {
     return value;
 }
 
-export function formatContactLink(id: number, value: string): string | undefined {
-    const infotag = Store.kinks.infotags[id];
-    if(typeof infotag === 'undefined')
-        return;
+export function formatContactLink(infotag: Infotag, value: string): string | undefined {
     const methodName = infotag.name.toLowerCase();
     const formatters: {[key: string]: (() => string | undefined) | undefined} = {
         deviantart(): string | undefined {

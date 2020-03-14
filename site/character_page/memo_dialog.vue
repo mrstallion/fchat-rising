@@ -33,7 +33,7 @@
     export default class MemoDialog extends CustomDialog {
         @Prop({required: true})
         readonly character!: {id: number, name: string};
-        @Prop()
+        @Prop
         readonly memo?: Memo;
         message = '';
         editing = false;

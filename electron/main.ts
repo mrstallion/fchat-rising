@@ -40,7 +40,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
 import l from '../chat/localize';
-import {GeneralSettings, mkdir} from './common';
+import {defaultHost, GeneralSettings} from './common';
 import {ensureDictionary, getAvailableDictionaries} from './dictionaries';
 import * as windowState from './window_state';
 import BrowserWindow = Electron.BrowserWindow;
@@ -56,11 +56,11 @@ const characters: string[] = [];
 let tabCount = 0;
 
 const baseDir = app.getPath('userData');
-mkdir(baseDir);
+fs.mkdirSync(baseDir, {recursive: true});
 let shouldImportSettings = false;
 
 const settingsDir = path.join(baseDir, 'data');
-mkdir(settingsDir);
+fs.mkdirSync(settingsDir, {recursive: true});
 const settingsFile = path.join(settingsDir, 'settings');
 const settings = new GeneralSettings();
 
@@ -112,7 +112,7 @@ function setUpWebContents(webContents: Electron.WebContents): void {
         e.preventDefault();
         const profileMatch = linkUrl.match(/^https?:\/\/(www\.)?f-list.net\/c\/([^/#]+)\/?#?/);
         if(profileMatch !== null && settings.profileViewer) webContents.send('open-profile', decodeURIComponent(profileMatch[2]));
-        else electron.shell.openExternal(linkUrl);
+        else return electron.shell.openExternal(linkUrl);
     };
 
     webContents.on('will-navigate', openLinkExternally);
@@ -124,14 +124,14 @@ function createWindow(): Electron.BrowserWindow | undefined {
     const lastState = windowState.getSavedWindowState();
     const windowProperties: Electron.BrowserWindowConstructorOptions & {maximized: boolean} = {
         ...lastState, center: lastState.x === undefined, show: false,
-        webPreferences: { webviewTag: true }
+        webPreferences: { webviewTag: true, nodeIntegration: true }
     };
     if(process.platform === 'darwin') windowProperties.titleBarStyle = 'hiddenInset';
     else windowProperties.frame = false;
     const window = new electron.BrowserWindow(windowProperties);
     windows.push(window);
 
-    window.loadURL(url.format({
+    window.loadURL(url.format({ //tslint:disable-line:no-floating-promises
         pathname: path.join(__dirname, 'window.html'),
         protocol: 'file:',
         slashes: true,
@@ -152,7 +152,7 @@ function createWindow(): Electron.BrowserWindow | undefined {
 }
 
 function showPatchNotes(): void {
-    electron.shell.openExternal('https://wiki.f-list.net/F-Chat_3.0#Changelog');
+    electron.shell.openExternal('https://wiki.f-list.net/F-Chat_3.0#Changelog'); //tslint:disable-line:no-floating-promises
 }
 
 function onReady(): void {
@@ -167,6 +167,8 @@ function onReady(): void {
 
     if(settings.version !== app.getVersion()) {
         showPatchNotes();
+        if(settings.host === 'wss://chat.f-list.net:9799')
+            settings.host = defaultHost;
         settings.version = app.getVersion();
         setGeneralSettings(settings);
     }
@@ -242,8 +244,8 @@ function onReady(): void {
                 {
                     label: l('settings.logDir'),
                     click: (_, window: BrowserWindow) => {
-                        const dir = <string[] | undefined>electron.dialog.showOpenDialog(
-                            {defaultPath: new GeneralSettings().logDirectory, properties: ['openDirectory']});
+                        const dir = electron.dialog.showOpenDialog(
+                            {defaultPath: settings.logDirectory, properties: ['openDirectory']});
                         if(dir !== undefined) {
                             if(dir[0].startsWith(path.dirname(app.getPath('exe'))))
                                 return electron.dialog.showErrorBox(l('settings.logDir'), l('settings.logDir.inAppDir'));
@@ -376,7 +378,7 @@ function onReady(): void {
     });
     electron.ipcMain.on('connect', (e: Event & {sender: Electron.WebContents}, character: string) => {
         if(characters.indexOf(character) !== -1) return e.returnValue = false;
-        else characters.push(character);
+        characters.push(character);
         e.returnValue = true;
     });
     electron.ipcMain.on('dictionary-add', (_: Event, word: string) => {

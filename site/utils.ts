@@ -1,18 +1,14 @@
 import Axios, {AxiosError, AxiosResponse} from 'axios';
-import {InlineDisplayMode} from '../bbcode/interfaces';
+import {InlineDisplayMode, Settings, SimpleCharacter} from '../interfaces';
 
-interface Dictionary<T> {
-    [key: string]: T | undefined;
-}
+type FlashMessageType = 'info' | 'success' | 'warning' | 'danger';
+type FlashMessageImpl = (type: FlashMessageType, message: string) => void;
 
-type flashMessageType = 'info' | 'success' | 'warning' | 'danger';
-type flashMessageImpl = (type: flashMessageType, message: string) => void;
-
-let flashImpl: flashMessageImpl = (type: flashMessageType, message: string) => {
+let flashImpl: FlashMessageImpl = (type: FlashMessageType, message: string) => {
     console.log(`${type}: ${message}`);
 };
 
-export function setFlashMessageImplementation(impl: flashMessageImpl): void {
+export function setFlashMessageImplementation(impl: FlashMessageImpl): void {
     flashImpl = impl;
 }
 
@@ -26,32 +22,6 @@ export function characterURL(name: string): string {
     const uregex = /^[a-zA-Z0-9_\-\s]+$/;
     if(!uregex.test(name)) return '#';
     return `${siteDomain}c/${name}`;
-}
-
-export function groupObjectBy<K extends string, T extends {[k in K]: string}>(obj: Dictionary<T>, key: K): Dictionary<T[]> {
-    const newObject: Dictionary<T[]> = {};
-    for(const objkey in obj) {
-        if(!(objkey in obj)) continue;
-        const realItem = <T>obj[objkey];
-        const newKey = realItem[key];
-        if(newObject[<string>newKey] === undefined) newObject[newKey] = [];
-        newObject[<string>newKey]!.push(realItem);
-    }
-    return newObject;
-}
-
-export function groupArrayBy<K extends string, T extends {[k in K]: string}>(arr: T[], key: K): Dictionary<T[]> {
-    const newObject: Dictionary<T[]> = {};
-    arr.map((item) => {
-        const newKey = item[key];
-        if(newObject[<string>newKey] === undefined) newObject[newKey] = [];
-        newObject[<string>newKey]!.push(item);
-    });
-    return newObject;
-}
-
-export function filterOut<K extends string, V, T extends {[key in K]: V}>(arr: ReadonlyArray<T>, field: K, value: V): T[] {
-    return arr.filter((item) => item[field] !== value);
 }
 
 //tslint:disable-next-line:no-any
@@ -75,6 +45,7 @@ export function ajaxError(error: any, prefix: string, showFlashMessage: boolean 
             message = (<Error & {response?: AxiosResponse}>error).response !== undefined ?
                 (<Error & {response: AxiosResponse}>error).response.statusText : error.name;
     } else message = <string>error;
+    console.error(error);
     if(showFlashMessage) flashError(`[ERROR] ${prefix}: ${message}`);
 }
 
@@ -86,35 +57,28 @@ export function flashSuccess(message: string): void {
     flashMessage('success', message);
 }
 
-export function flashMessage(type: flashMessageType, message: string): void {
+export function flashMessage(type: FlashMessageType, message: string): void {
     flashImpl(type, message);
 }
 
 export let siteDomain = '';
 export let staticDomain = '';
 
-interface Settings {
-    animatedIcons: boolean
-    inlineDisplayMode: InlineDisplayMode
-    defaultCharacter: number
-    fuzzyDates: boolean
-}
-
-export let Settings: Settings = {
-    animatedIcons: false,
+export let settings: Settings = {
+    animateEicons: true,
     inlineDisplayMode: InlineDisplayMode.DISPLAY_ALL,
     defaultCharacter: -1,
     fuzzyDates: true
 };
+
+export let characters: SimpleCharacter[] = [];
 
 export function setDomains(site: string, stat: string): void {
     siteDomain = site;
     staticDomain = stat;
 }
 
-export function copySettings(settings: Settings): void {
-    Settings.animatedIcons = settings.animatedIcons;
-    Settings.inlineDisplayMode = settings.inlineDisplayMode;
-    Settings.defaultCharacter = settings.defaultCharacter;
-    Settings.fuzzyDates = settings.fuzzyDates;
+export function init(s: Settings, c: SimpleCharacter[]): void {
+    settings = s;
+    characters = c;
 }

@@ -2,7 +2,7 @@ import { Component, Hook, Prop } from '@f-list/vue-ts';
 import {CreateElement, default as Vue, VNode, VNodeChildrenArrayContents} from 'vue';
 import {Channel} from '../fchat';
 import { Score, Scoring } from '../learn/matcher';
-import {BBCodeView} from './bbcode';
+import {BBCodeView} from './bbcode/view';
 import {formatTime} from './common';
 import core from './core';
 import {Conversation} from './interfaces';
@@ -40,7 +40,8 @@ const userPostfix: {[key: number]: string | undefined} = {
             if(message.isHighlight) classes += ' message-highlight';
         }
         const isAd = message.type === Conversation.Message.Type.Ad && !this.logs;
-        children.push(createElement(BBCodeView, {props: {unsafeText: message.text, afterInsert: isAd ? (elm: HTMLElement) => {
+        children.push(createElement(BBCodeView(core.bbCodeParser),
+            {props: {unsafeText: message.text, afterInsert: isAd ? (elm: HTMLElement) => {
                     setImmediate(() => {
                         elm = elm.parentElement!;
                         if(elm.scrollHeight > elm.offsetHeight) {

@@ -33,7 +33,8 @@
             <div class="list-group conversation-nav" ref="privateConversations">
                 <a v-for="conversation in conversations.privateConversations" href="#" @click.prevent="conversation.show()"
                     :class="getClasses(conversation)" :data-character="conversation.character.name" data-touch="false"
-                    class="list-group-item list-group-item-action item-private" :key="conversation.key" @click.middle="conversation.close()">
+                    class="list-group-item list-group-item-action item-private" :key="conversation.key"
+                    @click.middle.prevent="conversation.close()">
                     <img :src="characterImage(conversation.character.name)" v-if="showAvatars"/>
                     <div class="name">
                         <span>{{conversation.character.name}}</span>
@@ -43,8 +44,8 @@
                                 :class="{'fa-comment-dots': conversation.typingStatus == 'typing', 'fa-comment': conversation.typingStatus == 'paused'}"
                             ></span>
                             <span style="flex:1"></span>
-                            <span class="pin fas fa-thumbtack" :class="{'active': conversation.isPinned}" @mousedown.prevent
-                                @click.stop="conversation.isPinned = !conversation.isPinned" :aria-label="l('chat.pinTab')"></span>
+                            <span class="pin fas fa-thumbtack" :class="{'active': conversation.isPinned}"
+                                @click="conversation.isPinned = !conversation.isPinned" :aria-label="l('chat.pinTab')"></span>
                             <span class="fas fa-times leave" @click.stop="conversation.close()" :aria-label="l('chat.closeTab')"></span>
                         </div>
                     </div>
@@ -55,7 +56,7 @@
             <div class="list-group conversation-nav" ref="channelConversations">
                 <a v-for="conversation in conversations.channelConversations" href="#" @click.prevent="conversation.show()"
                     :class="getClasses(conversation)" class="list-group-item list-group-item-action item-channel" :key="conversation.key"
-                    @click.middle="conversation.close()">
+                    @click.middle.prevent="conversation.close()">
                     <span class="name">{{conversation.name}}</span>
                     <span>
                         <span class="pin fas fa-thumbtack" :class="{'active': conversation.isPinned}" :aria-label="l('chat.pinTab')"
@@ -155,6 +156,7 @@
             this.setFontSize(core.state.settings.fontSize);
             Sortable.create(<HTMLElement>this.$refs['privateConversations'], {
                 animation: 50,
+                fallbackTolerance: 5,
                 onEnd: async(e) => {
                     if(e.oldIndex === e.newIndex) return;
                     return core.conversations.privateConversations[e.oldIndex!].sort(e.newIndex!);
@@ -162,6 +164,7 @@
             });
             Sortable.create(<HTMLElement>this.$refs['channelConversations'], {
                 animation: 50,
+                fallbackTolerance: 5,
                 onEnd: async(e) => {
                     if(e.oldIndex === e.newIndex) return;
                     return core.conversations.channelConversations[e.oldIndex!].sort(e.newIndex!);
@@ -268,13 +271,8 @@
             overrideEl.id = 'overrideFontSize';
             document.body.appendChild(overrideEl);
             const sheet = <CSSStyleSheet>overrideEl.sheet;
-            const selectorList = ['#chatView', '.btn', '.form-control'];
-            for(const selector of selectorList)
-                sheet.insertRule(`${selector} { font-size: ${fontSize}px; }`, sheet.cssRules.length);
-
-            const lineHeight = 1.428571429;
-            sheet.insertRule(`.form-control { line-height: ${lineHeight} }`, sheet.cssRules.length);
-            sheet.insertRule(`select.form-control { line-height: ${lineHeight} }`, sheet.cssRules.length);
+            sheet.insertRule(`#chatView, .btn, .form-control, .custom-select { font-size: ${fontSize}px; }`, sheet.cssRules.length);
+            sheet.insertRule(`.form-control, select.form-control { line-height: 1.428571429 }`, sheet.cssRules.length);
         }
 
         logOut(): void {
@@ -441,6 +439,7 @@
     #sidebar {
         .body a.btn {
             padding: 2px 0;
+            text-align: left;
         }
         @media (min-width: breakpoint-min(md)) {
             .sidebar {

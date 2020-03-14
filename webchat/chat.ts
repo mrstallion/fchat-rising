@@ -36,6 +36,7 @@ import l from '../chat/localize';
 import {setupRaven} from '../chat/vue-raven';
 import Socket from '../chat/WebSocket';
 import Connection from '../fchat/connection';
+import {SimpleCharacter} from '../interfaces';
 import '../scss/fa.scss'; //tslint:disable-line:no-import-side-effect
 import {Logs, SettingsStore} from './logs';
 import Notifications from './notifications';
@@ -49,7 +50,7 @@ Axios.defaults.params = { __fchat: `web/${version}` };
 if(process.env.NODE_ENV === 'production')
     setupRaven('https://a9239b17b0a14f72ba85e8729b9d1612@sentry.f-list.net/2', `web-${version}`);
 
-declare const chatSettings: {account: string, theme: string, characters: ReadonlyArray<string>, defaultCharacter: string | null};
+declare const chatSettings: {account: string, theme: string, characters: ReadonlyArray<SimpleCharacter>, defaultCharacter: number | null};
 
 const ticketProvider = async() => {
     const data = (await Axios.post<{ticket?: string, error: string}>(
@@ -58,7 +59,8 @@ const ticketProvider = async() => {
     throw new Error(data.error);
 };
 
-const connection = new Connection('F-Chat 3.0 (Web)', version, Socket, chatSettings.account, ticketProvider);
+const connection = new Connection('F-Chat 3.0 (Web)', version, Socket);
+connection.setCredentials(chatSettings.account, ticketProvider);
 initCore(connection, Logs, SettingsStore, Notifications);
 
 window.addEventListener('beforeunload', (e) => {

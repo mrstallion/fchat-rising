@@ -46,7 +46,7 @@
         readonly prev!: boolean;
         @Prop({default: false})
         readonly routed!: boolean;
-        @Prop({default: () => ({})})
+        @Prop({default(this: Vue & {$route: RouteParams}): RouteParams { return this.$route; }})
         readonly route!: RouteParams;
         @Prop({default: 'page'})
         readonly paramName!: string;

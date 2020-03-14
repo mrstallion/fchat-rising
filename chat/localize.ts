@@ -330,10 +330,6 @@ Once this process has started, do not interrupt it or your logs will get corrupt
     'commands.roll.param0.help': 'Syntax: [1-9]d[1-100]. Addition and subtraction of rolls and fixed numbers is also possible. Example: /roll 1d6+1d20-5',
     'commands.bottle': 'Spin the bottle',
     'commands.bottle.help': 'Spins a bottle, randomly selecting a member of the current tab and displaying it to all.',
-    'commands.ad': 'Post as ad',
-    'commands.ad.help': 'A quick way to post an ad in the current channel. You may receive an error if ads are not allowed in that channel.',
-    'commands.ad.param0': 'Message',
-    'commands.ad.param0.help': 'The message to post as an ad.',
     'commands.me': 'Post as action',
     'commands.me.help': 'This will cause your message to be formatted differently, as an action your character is performing.',
     'commands.me.param0': 'Message',
@@ -436,9 +432,10 @@ Any existing FChat 3.0 data for this character will be overwritten.`,
 export default function l(key: string, ...args: (string | number)[]): string {
     let i = args.length;
     let str = strings[key];
-    if(str === undefined)
+    if(str === undefined) {
         if(process.env.NODE_ENV !== 'production') throw new Error(`String ${key} does not exist.`);
-        else return '';
+        return '';
+    }
     while(i-- > 0)
         str = str.replace(new RegExp(`\\{${i}\\}`, 'igm'), args[i].toString());
     return str;

@@ -38,7 +38,7 @@
         name = '';
         description = '';
         choice: KinkChoice = 'favorite';
-        target = Utils.Settings.defaultCharacter;
+        target = Utils.settings.defaultCharacter;
         formErrors = {};
         submitting = false;
 

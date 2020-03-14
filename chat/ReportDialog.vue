@@ -16,9 +16,10 @@
 
 <script lang="ts">
     import {Component, Hook} from '@f-list/vue-ts';
+    import {BBCodeElement} from '../bbcode/core';
     import CustomDialog from '../components/custom_dialog';
     import Modal from '../components/Modal.vue';
-    import BBCodeParser, {BBCodeElement} from './bbcode';
+    import BBCodeParser from './bbcode';
     import {errorToString, messageToString} from './common';
     import core from './core';
     import {Character, Conversation} from './interfaces';

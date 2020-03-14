@@ -41,7 +41,7 @@ const config = {
         ]
     },
     plugins: [
-        new ForkTsCheckerWebpackPlugin({workers: 2, async: false, vue: true, tslint: path.join(__dirname, '../tslint.json')}),
+        new ForkTsCheckerWebpackPlugin({async: false, vue: true, tslint: path.join(__dirname, '../tslint.json')}),
         new VueLoaderPlugin()
     ],
     resolve: {

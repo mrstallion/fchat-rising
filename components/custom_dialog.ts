@@ -2,7 +2,9 @@ import {Component} from '@f-list/vue-ts';
 import Vue from 'vue';
 import Modal from './Modal.vue';
 
-@Component
+@Component({
+    components: {Modal}
+})
 export default class CustomDialog extends Vue {
     protected get dialog(): Modal {
         return <Modal>this.$children[0];

@@ -7,8 +7,8 @@
     "allowJs": true,
     "noEmitHelpers": true,
     "importHelpers": true,
-    "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },

@@ -5,9 +5,9 @@
   "description": "F-Chat Themes",
   "license": "MIT",
   "dependencies": {
-    "@fortawesome/fontawesome-free-webfonts": "^1.0.3",
-    "bootstrap": "^4.0.0",
-    "node-sass": "^4.7.2"
+    "@fortawesome/fontawesome-free": "^5.6.3",
+    "bootstrap": "^4.2.1",
+    "node-sass": "^4.11.0"
   },
   "scripts": {
     "build": "node-sass --importer=./importer --output css"

@@ -22,6 +22,6 @@ export default class Notifications extends BaseNotifications {
     }
 
     async requestPermission(): Promise<void> {
-        NativeNotification.requestPermission();
+        return NativeNotification.requestPermission();
     }
 }

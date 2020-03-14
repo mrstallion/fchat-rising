@@ -1,5 +1,5 @@
 <template>
-    <modal id="deleteDialog" :action="'Delete character' + name" :disabled="deleting" @submit.prevent="deleteCharacter()">
+    <modal id="deleteDialog" :action="'Delete character ' + name" :disabled="deleting" @submit.prevent="deleteCharacter()">
         Are you sure you want to permanently delete {{ name }}?<br/>
         Character deletion cannot be undone for any reason.
     </modal>

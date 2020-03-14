@@ -6,7 +6,7 @@ import {Message as MessageImpl} from '../chat/common';
 import core from '../chat/core';
 import {Character, Conversation, Logs as Logging, Settings} from '../chat/interfaces';
 import l from '../chat/localize';
-import {GeneralSettings, mkdir} from './common';
+import {GeneralSettings} from './common';
 
 declare module '../chat/interfaces' {
     interface State {
@@ -16,7 +16,6 @@ declare module '../chat/interfaces' {
 
 const dayMs = 86400000;
 const read = promisify(fs.read);
-const noAssert = process.env.NODE_ENV === 'production';
 
 function writeFile(p: fs.PathLike | number, data: string | object | number,
                    options?: {encoding?: string | null; mode?: number | string; flag?: string} | string | null): void {
@@ -46,7 +45,7 @@ interface Index {
 
 export function getLogDir(this: void, character: string): string {
     const dir = path.join(core.state.generalSettings!.logDirectory, character, 'logs');
-    mkdir(dir);
+    fs.mkdirSync(dir, {recursive: true});
     return dir;
 }
 
@@ -95,10 +94,8 @@ export function serializeMessage(message: Message): {serialized: Buffer, size: n
 }
 
 function deserializeMessage(buffer: Buffer, offset: number = 0,
-                            characterGetter: (name: string) => Character = (name) => core.characters.get(name),
-                            // tslint:disable-next-line ban-ts-ignore
-                            // @ts-ignore
-                            unsafe: boolean = noAssert): {size: number, message: Conversation.Message} {
+                            characterGetter: (name: string) => Character = (name) => core.characters.get(name)
+): {size: number, message: Conversation.Message} {
     const time = buffer.readUInt32LE(offset);
     const type = buffer.readUInt8(offset += 4);
     const senderLength = buffer.readUInt8(offset += 1);
@@ -139,7 +136,7 @@ export function fixLogs(character: string): void {
                 const deserialized = deserializeMessage(buffer, 0, (name) => ({
                     gender: 'None', status: 'online', statusText: '', isFriend: false, isBookmarked: false, isChatOp: false,
                     isIgnored: false, name
-                }), false);
+                }));
                 const time = deserialized.message.time;
                 const day = Math.floor(time.getTime() / dayMs - time.getTimezoneOffset() / 1440);
                 if(day > lastDay) {
@@ -291,14 +288,14 @@ export class Logs implements Logging {
 
     async getAvailableCharacters(): Promise<ReadonlyArray<string>> {
         const baseDir = core.state.generalSettings!.logDirectory;
-        mkdir(baseDir);
+        fs.mkdirSync(baseDir, {recursive: true});
         return (fs.readdirSync(baseDir)).filter((x) => fs.statSync(path.join(baseDir, x)).isDirectory());
     }
 }
 
 function getSettingsDir(character: string = core.connection.character): string {
     const dir = path.join(core.state.generalSettings!.logDirectory, character, 'settings');
-    mkdir(dir);
+    fs.mkdirSync(dir, {recursive: true});
     return dir;
 }
 
@@ -317,6 +314,7 @@ export class SettingsStore implements Settings.Store {
         return (fs.readdirSync(baseDir)).filter((x) => fs.statSync(path.join(baseDir, x)).isDirectory());
     }
 
+    //tslint:disable-next-line:no-async-without-await
     async set<K extends keyof Settings.Keys>(key: K, value: Settings.Keys[K]): Promise<void> {
         writeFile(path.join(getSettingsDir(), key), JSON.stringify(value));
     }

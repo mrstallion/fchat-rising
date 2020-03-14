@@ -2,7 +2,7 @@ import {Component} from 'vue';
 import {SharedStore, StoreMethods} from './interfaces';
 
 export let Store: SharedStore = {
-    kinks: <any>undefined, //tslint:disable-line:no-any
+    shared: undefined!,
     authenticated: false
 };
 

@@ -41,10 +41,14 @@ import * as path from 'path';
 import * as qs from 'querystring';
 import {getKey} from '../chat/common';
 import { EventBus } from '../chat/event-bus';
+import {init as initCore} from '../chat/core';
 import l from '../chat/localize';
 import {setupRaven} from '../chat/vue-raven';
+import Socket from '../chat/WebSocket';
+import Connection from '../fchat/connection';
 import {Keys} from '../keys';
 import {GeneralSettings, nativeRequire} from './common';
+import {Logs, SettingsStore} from './filesystem';
 import * as SlimcatImporter from './importer';
 import Index from './Index.vue';
 
@@ -85,7 +89,7 @@ function openIncognito(url: string): void {
         } catch(e) {
             console.error(e);
         }
-    const commands  = {
+    const commands = {
         chrome: 'chrome.exe -incognito', firefox: 'firefox.exe -private-window', vivaldi: 'vivaldi.exe -incognito',
         opera: 'opera.exe -private'
     };
@@ -105,7 +109,7 @@ webContents.on('context-menu', (_, props) => {
         menuTemplate.push({
             id: 'copy',
             label: l('action.copy'),
-            role: can('Copy') ? 'copy' : '',
+            role: can('Copy') ? 'copy' : undefined,
             accelerator: 'CmdOrCtrl+C',
             enabled: can('Copy')
         });
@@ -113,13 +117,13 @@ webContents.on('context-menu', (_, props) => {
         menuTemplate.push({
             id: 'cut',
             label: l('action.cut'),
-            role: can('Cut') ? 'cut' : '',
+            role: can('Cut') ? 'cut' : undefined,
             accelerator: 'CmdOrCtrl+X',
             enabled: can('Cut')
         }, {
             id: 'paste',
             label: l('action.paste'),
-            role: props.editFlags.canPaste ? 'paste' : '',
+            role: props.editFlags.canPaste ? 'paste' : undefined,
             accelerator: 'CmdOrCtrl+V',
             enabled: props.editFlags.canPaste
         });
@@ -178,7 +182,7 @@ webContents.on('context-menu', (_, props) => {
 let dictDir = path.join(electron.remote.app.getPath('userData'), 'spellchecker');
 if(process.platform === 'win32') //get the path in DOS (8-character) format as special characters cause problems otherwise
     exec(`for /d %I in ("${dictDir}") do @echo %~sI`, (_, stdout) => dictDir = stdout.trim());
-electron.webFrame.setSpellCheckProvider('', false, {spellCheck: (text) => !spellchecker.isMisspelled(text)});
+electron.webFrame.setSpellCheckProvider('', {spellCheck: (words, callback) => callback(words.filter((x) => spellchecker.isMisspelled(x)))});
 
 function onSettings(s: GeneralSettings): void {
     settings = s;
@@ -200,6 +204,10 @@ if(params['import'] !== undefined)
         alert(l('importer.error'));
     }
 onSettings(settings);
+
+const connection = new Connection(`F-Chat 3.0 (${process.platform})`, electron.remote.app.getVersion(), Socket);
+initCore(connection, Logs, SettingsStore, Notifications);
+
 //tslint:disable-next-line:no-unused-expression
 new Index({
     el: '#app',

@@ -1,6 +1,7 @@
 import Axios, {AxiosError, AxiosResponse} from 'axios';
 import * as qs from 'qs';
 import {Connection as Interfaces, WebSocketConnection} from './interfaces';
+import ReadyState = WebSocketConnection.ReadyState;
 
 const fatalErrors = [2, 3, 4, 9, 30, 31, 33, 39, 40, 62, -4];
 const dieErrors = [9, 30, 31, 39, 40];
@@ -11,25 +12,32 @@ async function queryApi(this: void, endpoint: string, data: object): Promise<Axi
 
 export default class Connection implements Interfaces.Connection {
     character = '';
-    vars: Interfaces.Vars & {[key: string]: string} = <any>{}; //tslint:disable-line:no-any
+    vars: Interfaces.Vars = <any>{}; //tslint:disable-line:no-any
     protected socket: WebSocketConnection | undefined = undefined;
-    private messageHandlers: {[key in keyof Interfaces.ServerCommands]?: Interfaces.CommandHandler<key>[]} = {};
-    private connectionHandlers: {[key in Interfaces.EventType]?: Interfaces.EventHandler[]} = {};
+    //tslint:disable-next-line:no-object-literal-type-assertion
+    private messageHandlers = <{ [key in keyof Interfaces.ServerCommands]: Interfaces.CommandHandler<key>[] }>{};
+    private connectionHandlers: { [key in Interfaces.EventType]?: Interfaces.EventHandler[] } = {};
     private errorHandlers: ((error: Error) => void)[] = [];
     private ticket = '';
     private cleanClose = false;
     private reconnectTimer: NodeJS.Timer | undefined;
-    private readonly ticketProvider: Interfaces.TicketProvider;
+    private account = '';
+    private ticketProvider?: Interfaces.TicketProvider;
     private reconnectDelay = 0;
     private isReconnect = false;
+    private pinTimeout?: NodeJS.Timer;
 
     constructor(private readonly clientName: string, private readonly version: string,
-                private readonly socketProvider: new() => WebSocketConnection, private readonly account: string,
-                ticketProvider: Interfaces.TicketProvider | string) {
+                private readonly socketProvider: new() => WebSocketConnection) {
+    }
+
+    setCredentials(account: string, ticketProvider: Interfaces.TicketProvider | string): void {
+        this.account = account;
         this.ticketProvider = typeof ticketProvider === 'string' ? async() => this.getTicket(ticketProvider) : ticketProvider;
     }
 
     async connect(character: string): Promise<void> {
+        if(!this.ticketProvider) throw new Error('No credentials set!');
         this.cleanClose = false;
         if(this.character !== character) this.isReconnect = false;
         this.character = character;
@@ -67,6 +75,7 @@ export default class Connection implements Interfaces.Connection {
                 method: 'ticket',
                 ticket: this.ticket
             });
+            this.resetPinTimeout();
         });
         this.socket.onMessage(async(msg: string) => {
             const type = <keyof Interfaces.ServerCommands>msg.substr(0, 3);
@@ -74,6 +83,7 @@ export default class Connection implements Interfaces.Connection {
             return this.handleMessage(type, data);
         });
         this.socket.onClose(async() => {
+            if(this.pinTimeout) clearTimeout(this.pinTimeout);
             if(!this.cleanClose) this.reconnect();
             this.socket = undefined;
             await this.invokeHandlers('closed', !this.cleanClose);
@@ -95,10 +105,11 @@ export default class Connection implements Interfaces.Connection {
     }
 
     get isOpen(): boolean {
-        return this.socket !== undefined;
+        return this.socket !== undefined && this.socket.readyState === ReadyState.OPEN;
     }
 
     async queryApi<T = object>(endpoint: string, data?: {account?: string, ticket?: string}): Promise<T> {
+        if(!this.ticketProvider) throw new Error('No credentials set!');
         if(data === undefined) data = {};
         data.account = this.account;
         data.ticket = this.ticket;
@@ -156,10 +167,11 @@ export default class Connection implements Interfaces.Connection {
             for(const handler of handlers) await handler(data, time);
         switch(type) {
             case 'VAR':
-                this.vars[data.variable] = data.value;
+                this.vars[<keyof Interfaces.Vars>data.variable] = data.value;
                 break;
             case 'PIN':
                 this.send('PIN');
+                this.resetPinTimeout();
                 break;
             case 'ERR':
                 if(fatalErrors.indexOf(data.number) !== -1) {
@@ -197,5 +209,10 @@ export default class Connection implements Interfaces.Connection {
     private invokeErrorHandlers(error: Error, request: boolean = false): void {
         if(request) (<Error & {request: true}>error).request = true;
         for(const handler of this.errorHandlers) handler(error);
+    }
+
+    private resetPinTimeout(): void {
+        if(this.pinTimeout) clearTimeout(this.pinTimeout);
+        this.pinTimeout = setTimeout(() => this.socket!.close(), 90000);
     }
 }

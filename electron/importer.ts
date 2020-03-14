@@ -231,7 +231,8 @@ export async function importCharacter(ownCharacter: string, progress: (progress:
                         }
                         ++index;
                         continue;
-                    } else if(char === '\r' || char === '\n') {
+                    }
+                    if(char === '\r' || char === '\n') {
                         const nextLine = content.substr(index + (char === '\r' ? 2 : 1), 29);
                         if(logRegex.test(nextLine) || content.length - index <= 2) {
                             const line = content.substring(start, index);

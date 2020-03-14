@@ -4,6 +4,8 @@ const urlFormat = '((?:https?|ftps?|irc)://[^\\s/$.?#"\']+\\.[^\\s"]+)';
 export const findUrlRegex = new RegExp(`(\\[url[=\\]]\\s*)?${urlFormat}`, 'gi');
 export const urlRegex = new RegExp(`^${urlFormat}$`);
 
+export type BBCodeElement = HTMLElement & {cleanup?(): void};
+
 export function domain(url: string): string | undefined {
     const pieces = urlRegex.exec(url);
     if(pieces === null) return;

@@ -35,26 +35,28 @@
                         </div>
                         <div class="card-body">
                             <div class="tab-content">
-                                <div role="tabpanel" class="tab-pane" :class="{active: tab === '0'}" id="overview">
+                                <div role="tabpanel" v-show="tab === '0'" id="overview">
                                     <match-report :characterMatch="characterMatch" :minimized="character.is_self" v-if="shouldShowMatch()"></match-report>
-                                    <div v-bbcode="character.character.description" style="margin-bottom: 10px"></div>
+
+                                    <div style="margin-bottom:10px">
+                                        <bbcode :text="character.character.description"></bbcode>
+                                    </div>
+
                                     <character-kinks :character="character" :oldApi="oldApi" ref="tab0"></character-kinks>
                                 </div>
-                                <div role="tabpanel" class="tab-pane" :class="{active: tab === '1'}" id="infotags">
+                                <div role="tabpanel" v-show="tab === '1'" id="infotags">
                                     <character-infotags :character="character" ref="tab1" :characterMatch="characterMatch"></character-infotags>
                                 </div>
-                                <div role="tabpanel" class="tab-pane" id="groups" :class="{active: tab === '2'}" v-if="!oldApi">
+                                <div role="tabpanel" v-show="tab === '2'" v-if="!oldApi">
                                     <character-groups :character="character" ref="tab2"></character-groups>
                                 </div>
-                                <div role="tabpanel" class="tab-pane" id="images" :class="{active: tab === '3'}">
+                                <div role="tabpanel" v-show="tab === '3'">
                                     <character-images :character="character" ref="tab3" :use-preview="imagePreview"></character-images>
                                 </div>
-                                <div v-if="character.settings.guestbook" role="tabpanel" class="tab-pane" :class="{active: tab === '4'}"
-                                    id="guestbook">
+                                <div v-if="character.settings.guestbook" role="tabpanel" v-show="tab === '4'" id="guestbook">
                                     <character-guestbook :character="character" :oldApi="oldApi" ref="tab4"></character-guestbook>
                                 </div>
-                                <div v-if="character.is_self || character.settings.show_friends" role="tabpanel" class="tab-pane"
-                                    :class="{active: tab === '5'}" id="friends">
+                                <div v-if="character.is_self || character.settings.show_friends" role="tabpanel" v-show="tab === '5'" id="friends">
                                     <character-friends :character="character" ref="tab5"></character-friends>
                                 </div>
                             </div>
@@ -71,7 +73,8 @@
 
     import {Component, Hook, Prop, Watch} from '@f-list/vue-ts';
     import Vue from 'vue';
-    import {standardParser} from '../../bbcode/standard';
+    import {StandardBBCodeParser} from '../../bbcode/standard';
+    import {BBCodeView} from '../../bbcode/view';
     import { CharacterCacheRecord } from '../../learn/profile-cache';
     import * as Utils from '../utils';
     import {methods, Store} from './data_store';
@@ -98,6 +101,8 @@
         show?(): void
     }
 
+    const standardParser = new StandardBBCodeParser();
+
     @Component({
         components: {
             sidebar: Sidebar,
@@ -108,19 +113,20 @@
             'character-infotags': InfotagsView,
             'character-images': ImagesView,
             'character-kinks': CharacterKinksView,
-            'match-report': MatchReportView
+            'match-report': MatchReportView,
+            bbcode: BBCodeView(standardParser)
         }
     })
     export default class CharacterPage extends Vue {
-        @Prop()
+        @Prop
         readonly name?: string;
-        @Prop()
-        readonly characterid?: number;
+        @Prop
+        readonly id?: number;
         @Prop({required: true})
         readonly authenticated!: boolean;
-        @Prop()
+        @Prop
         readonly oldApi?: true;
-        @Prop()
+        @Prop
         readonly imagePreview?: true;
         shared: SharedStore = Store;
         character: Character | undefined;

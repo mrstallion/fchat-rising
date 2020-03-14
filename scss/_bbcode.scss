@@ -113,7 +113,7 @@ div.indentText {
   }
 }
 
-.styledText, .bbcode {
+.bbcode {
   @include force-word-wrapping;
   max-width: 100%;
   a {

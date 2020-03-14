@@ -93,7 +93,7 @@
         @Prop({required: true})
         readonly character!: Character;
 
-        ourCharacter = Utils.Settings.defaultCharacter;
+        ourCharacter = Utils.settings.defaultCharacter;
 
         incoming: FriendRequest[] = [];
         pending: FriendRequest[] = [];
@@ -113,7 +113,12 @@
             try {
                 this.requesting = true;
                 const newRequest = await methods.friendRequest(this.character.character.id, this.ourCharacter);
-                this.pending.push(newRequest);
+                if(typeof newRequest === 'number')
+                    this.pending.push({
+                        id: newRequest, source: Utils.characters.find((x) => x.id === this.ourCharacter)!, target: this.character.character,
+                        createdAt: Date.now() / 1000
+                    });
+                else this.existing.push(newRequest);
             } catch(e) {
                 if(Utils.isJSONError(e))
                     this.error = <string>e.response.data.error;
