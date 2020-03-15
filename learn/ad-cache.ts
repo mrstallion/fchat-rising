@@ -61,6 +61,6 @@ export class AdCache<RecordType extends AdCacheRecord = AdCacheRecord> extends C
             return;
         }
 
-        this.cache[k] = new AdCacheRecord(name, ad) as RecordType;
+        this.cache[k] = new AdCacheRecord(ad.name, ad) as RecordType;
     }
 }

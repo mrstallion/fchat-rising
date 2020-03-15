@@ -27,7 +27,7 @@ export class ChannelConversationCache extends AdCache<ChannelCacheRecord> {
             return;
         }
 
-        this.cache[k] = new ChannelCacheRecord(name, ad);
+        this.cache[k] = new ChannelCacheRecord(ad.name, ad);
     }
 
 }

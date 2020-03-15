@@ -100,7 +100,7 @@
         abstract show(url: string): void;
         abstract hide(): void;
         abstract match(domainName: string): boolean;
-        abstract renderStyle(): any;
+        abstract renderStyle(): Record<string, any>;
 
         constructor(parent: ImagePreview) {
             if (!parent) {
@@ -143,10 +143,10 @@
         }
 
 
-        renderStyle(): any {
+        renderStyle(): Record<string, any> {
             return this.isVisible()
                 ? { backgroundImage: `url(${this.getUrl()})`, display: 'block' }
-                : { display: 'none' }
+                : { display: 'none' };
         }
     }
 
@@ -180,7 +180,7 @@
         }
 
 
-        setRatio(ratio: number) {
+        setRatio(ratio: number): void {
             this.ratio = ratio;
         }
 
@@ -223,6 +223,7 @@
                     this.ratio = null;
 
                     // Broken promise chain on purpose
+                    // tslint:disable-next-line:no-floating-promises
                     this.urlMutator.resolve(url)
                         .then((finalUrl: string) => webview.loadURL(finalUrl));
                 }
@@ -238,7 +239,7 @@
         }
 
 
-        determineScalingRatio(): any {
+        determineScalingRatio(): Record<string, any> {
             // ratio = width / height
             const ratio = this.ratio;
 
@@ -256,23 +257,23 @@
                 const presumedWidth = maxWidth;
                 const presumedHeight = presumedWidth / ratio;
 
+                return {
+                    width: `${presumedWidth}px`,
+                    height: `${presumedHeight}px`
+                };
+            // tslint:disable-next-line:unnecessary-else
+            } else {
+                const presumedHeight = maxHeight;
+                const presumedWidth = presumedHeight * ratio;
 
                 return {
                     width: `${presumedWidth}px`,
                     height: `${presumedHeight}px`
-                }
-            }
-
-            const presumedHeight = maxHeight;
-            const presumedWidth = presumedHeight * ratio;
-
-            return {
-                width: `${presumedWidth}px`,
-                height: `${presumedHeight}px`
+                };
             }
         }
 
-        renderStyle(): any {
+        renderStyle(): Record<string, any> {
             return this.isVisible()
                 ? _.merge({ display: 'flex' }, this.determineScalingRatio())
                 : { display: 'none' };
@@ -298,8 +299,8 @@
 
         jsMutator = new ImagePreviewMutator(this.debug);
 
-        externalPreviewStyle = {};
-        localPreviewStyle = {};
+        externalPreviewStyle: Record<string, any> = {};
+        localPreviewStyle: Record<string, any> = {};
 
 
         private interval: Timer | null = null;
@@ -429,7 +430,8 @@
                         console.log('ImagePreview ipc-message', event);
 
                     if (event.channel === 'webview.img') {
-                        this.updatePreviewSize(event.args[0], event.args[1]);
+                        // tslint:disable-next-line:no-unsafe-any
+                        this.updatePreviewSize(parseInt(event.args[0], 10), parseInt(event.args[1], 10));
                     }
                 }
             );
@@ -470,17 +472,23 @@
                         this.hide();
                     }
                 },
-                10
+                50
             );
         }
 
 
         reRenderStyles(): void {
+            // tslint:disable-next-line:no-unsafe-any
             this.externalPreviewStyle = this.externalPreviewHelper.renderStyle();
+            // tslint:disable-next-line:no-unsafe-any
             this.localPreviewStyle = this.localPreviewHelper.renderStyle();
 
             if (this.debug) {
-                console.log('ImagePreview: reRenderStyles', 'external', JSON.parse(JSON.stringify(this.externalPreviewStyle)), 'local', JSON.parse(JSON.stringify(this.localPreviewStyle)));
+                console.log(
+                    'ImagePreview: reRenderStyles', 'external',
+                    JSON.parse(JSON.stringify(this.externalPreviewStyle)),
+                    'local', JSON.parse(JSON.stringify(this.localPreviewStyle))
+                );
             }
         }
 
@@ -616,7 +624,7 @@
             // -- you actually have to pause on it
             // tslint:disable-next-line no-unnecessary-type-assertion
             this.interval = setTimeout(
-                async () => {
+                () => {
                     if (this.debug)
                         console.log('ImagePreview: show.timeout', this.url);
 
@@ -628,10 +636,12 @@
                         ? this.externalPreviewHelper.show(this.url as string)
                         : this.externalPreviewHelper.hide();
 
+                    this.interval = null;
                     this.visible = true;
                     this.visibleSince = Date.now();
 
                     this.initialCursorPosition = screen.getCursorScreenPoint();
+
 
                     this.reRenderStyles();
                 },
@@ -721,7 +731,7 @@
             return this.$refs.imagePreviewExt as WebviewTag;
         }
 
-        reset() {
+        reset(): void {
             this.externalPreviewHelper = new ExternalImagePreviewHelper(this);
             this.localPreviewHelper = new LocalImagePreviewHelper(this);
 

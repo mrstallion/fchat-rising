@@ -209,7 +209,7 @@ export class ImagePreviewMutator {
                 selected = selected.concat(selectedElements);
             }
 
-            ${this.debug ? `console.log('Selector', '${elSelector}'); console.log('Selected', selected);` : ''}
+            ${this.debug ? `console.log('Selector', '${elSelector.toString()}'); console.log('Selected', selected);` : ''}
 
             const img = selected.shift();
 

@@ -664,7 +664,9 @@ export class Matcher {
                 return new Score(Scoring.MISMATCH, 'No <span>dominants</span>');
 
             return new Score(Scoring.WEAK_MISMATCH, 'Hesitant on <span>dominants</span>');
-        } else if ((yourSubDomRole === SubDomRole.AlwaysSubmissive) || (yourSubDomRole === SubDomRole.UsuallySubmissive)) {
+        }
+
+        if ((yourSubDomRole === SubDomRole.AlwaysSubmissive) || (yourSubDomRole === SubDomRole.UsuallySubmissive)) {
             if (theirSubDomRole === SubDomRole.Switch)
                 return new Score(Scoring.WEAK_MATCH, `Likes <span>switches</span>`);
 
@@ -708,7 +710,7 @@ export class Matcher {
     }
 
     static getTagValueList(tagId: number, c: Character): number | null {
-        const t = this.getTagValue(tagId, c);
+        const t = Matcher.getTagValue(tagId, c);
 
         if ((!t) || (!t.list))
             return null;
@@ -747,11 +749,11 @@ export class Matcher {
         if (!(gender in genderKinkMapping))
             return null;
 
-        return this.getKinkPreference(c, genderKinkMapping[gender]);
+        return Matcher.getKinkPreference(c, genderKinkMapping[gender]);
     }
 
     static getKinkSpeciesPreference(c: Character, species: Species): KinkPreference | null {
-        return this.getKinkPreference(c, species);
+        return Matcher.getKinkPreference(c, species);
     }
 
     static has(c: Character, kinkId: Kink): boolean {
@@ -770,12 +772,12 @@ export class Matcher {
     }
 
     static isAnthro(c: Character): boolean | null {
-        const bodyTypeId = this.getTagValueList(TagId.BodyType, c);
+        const bodyTypeId = Matcher.getTagValueList(TagId.BodyType, c);
 
         if (bodyTypeId === BodyType.Anthro)
             return true;
 
-        const speciesId = this.species(c);
+        const speciesId = Matcher.species(c);
 
         if (!speciesId)
             return null;
@@ -784,12 +786,12 @@ export class Matcher {
     }
 
     static isHuman(c: Character): boolean | null {
-        const bodyTypeId = this.getTagValueList(TagId.BodyType, c);
+        const bodyTypeId = Matcher.getTagValueList(TagId.BodyType, c);
 
         if (bodyTypeId === BodyType.Human)
             return true;
 
-        const speciesId = this.species(c);
+        const speciesId = Matcher.species(c);
 
         return (speciesId === Species.Human);
     }
@@ -798,7 +800,7 @@ export class Matcher {
         let foundSpeciesId: Species | null = null;
         let match = '';
 
-        const mySpecies = this.getTagValue(TagId.Species, c);
+        const mySpecies = Matcher.getTagValue(TagId.Species, c);
 
         if ((!mySpecies) || (!mySpecies.string))
             return Species.Human; // best guess

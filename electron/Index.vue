@@ -289,7 +289,7 @@
         }
 
         async openProfileInBrowser(): Promise<void> {
-            electron.remote.shell.openExternal(`https://www.f-list.net/c/${this.profileName}`);
+            await electron.remote.shell.openExternal(`https://www.f-list.net/c/${this.profileName}`);
 
             // tslint:disable-next-line: no-any no-unsafe-any
             (this.$refs.profileViewer as any).hide();
@@ -315,7 +315,7 @@
 
         get styling(): string {
             try {
-                return `<style>${fs.readFileSync(path.join(__dirname, `themes/${this.settings.theme}.css`))}</style>`;
+                return `<style>${fs.readFileSync(path.join(__dirname, `themes/${this.settings.theme}.css`), 'utf8').toString()}</style>`;
             } catch(e) {
                 if((<Error & {code: string}>e).code === 'ENOENT' && this.settings.theme !== 'default') {
                     this.settings.theme = 'default';

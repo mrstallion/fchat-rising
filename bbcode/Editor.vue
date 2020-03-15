@@ -58,8 +58,8 @@
             this.parser = new CoreBBCodeParser();
             this.resizeListener = () => {
                 const styles = getComputedStyle(this.element);
-                this.maxHeight = parseInt(styles.maxHeight!, 10) || 250;
-                this.minHeight = parseInt(styles.minHeight!, 10) || 60;
+                this.maxHeight = parseInt(styles.maxHeight, 10) || 250;
+                this.minHeight = parseInt(styles.minHeight, 10) || 60;
             };
         }
 
@@ -67,8 +67,8 @@
         mounted(): void {
             this.element = <HTMLTextAreaElement>this.$refs['input'];
             const styles = getComputedStyle(this.element);
-            this.maxHeight = parseInt(styles.maxHeight!, 10) || 250;
-            this.minHeight = parseInt(styles.minHeight!, 10) || 60;
+            this.maxHeight = parseInt(styles.maxHeight, 10) || 250;
+            this.minHeight = parseInt(styles.minHeight, 10) || 60;
             setInterval(() => {
                 if(Date.now() - this.lastInput >= 500 && this.text !== this.undoStack[0] && this.undoIndex === 0) {
                     if(this.undoStack.length >= 30) this.undoStack.pop();
@@ -164,8 +164,10 @@
             // Allow emitted variations for custom buttons.
             this.$once('insert', (startText: string, endText: string) => this.applyText(startText, endText));
             // noinspection TypeScriptValidateTypes
-            if(button.handler !== undefined)
+            if(button.handler !== undefined) {
+                // tslint:ignore-next-line:no-any
                 return button.handler.call(this as any, this);
+            }
             if(button.startText === undefined)
                 button.startText = `[${button.tag}]`;
             if(button.endText === undefined)

@@ -87,5 +87,4 @@
             this.isMinimized = !this.isMinimized;
         }
     }
-
 </script>

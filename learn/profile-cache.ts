@@ -58,10 +58,10 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
 
         if (key in this.cache) {
             return this.cache[key];
-        } else {
-            if ((!this.store) || (skipStore)) {
-                return null;
-            }
+        }
+
+        if ((!this.store) || (skipStore)) {
+            return null;
         }
 
         const pd = await this.store.getProfile(name);

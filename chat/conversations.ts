@@ -10,7 +10,7 @@ import {CommandContext, isAction, isCommand, isWarn, parse as parseCommand} from
 import MessageType = Interfaces.Message.Type;
 import {EventBus} from '../chat/event-bus';
 
-function createMessage(this: void, type: MessageType, sender: Character, text: string, time?: Date): Message {
+function createMessage(this: any, type: MessageType, sender: Character, text: string, time?: Date): Message {
     if(type === MessageType.Message && isAction(text)) {
         type = MessageType.Action;
         text = text.substr(text.charAt(4) === ' ' ? 4 : 3);
@@ -18,7 +18,7 @@ function createMessage(this: void, type: MessageType, sender: Character, text: s
     return new Message(type, sender, text, time);
 }
 
-function safeAddMessage(this: void, messages: Interfaces.Message[], message: Interfaces.Message, max: number): void {
+function safeAddMessage(this: any, messages: Interfaces.Message[], message: Interfaces.Message, max: number): void {
     if(messages.length >= max) messages.shift();
     messages.push(message);
 }
@@ -123,7 +123,7 @@ abstract class Conversation implements Interfaces.Conversation {
         safeAddMessage(this.messages, message, this.maxMessages);
     }
 
-    protected abstract doSend(): Promise<void> | void;
+    protected abstract doSend(): void | Promise<void>;
 }
 
 class PrivateConversation extends Conversation implements Interfaces.PrivateConversation {
@@ -470,17 +470,17 @@ class State implements Interfaces.State {
 
 let state: State;
 
-async function addEventMessage(this: void, message: Interfaces.Message): Promise<void> {
+async function addEventMessage(this: any, message: Interfaces.Message): Promise<void> {
     await state.consoleTab.addMessage(message);
     if(core.state.settings.eventMessages && state.selectedConversation !== state.consoleTab)
         await state.selectedConversation.addMessage(message);
 }
 
-function isOfInterest(this: void, character: Character): boolean {
+function isOfInterest(this: any, character: Character): boolean {
     return character.isFriend || character.isBookmarked || state.privateMap[character.name.toLowerCase()] !== undefined;
 }
 
-export default function(this: void): Interfaces.State {
+export default function(this: any): Interfaces.State {
     state = new State();
     window.addEventListener('focus', () => {
         state.windowFocused = true;

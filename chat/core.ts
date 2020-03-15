@@ -79,7 +79,7 @@ const data = {
     }
 };
 
-export function init(this: void, connection: Connection, logsClass: new() => Logs, settingsClass: new() => Settings.Store,
+export function init(this: any, connection: Connection, logsClass: new() => Logs, settingsClass: new() => Settings.Store,
                      notificationsClass: new() => Notifications): void {
     data.connection = connection;
     data.logs = new logsClass();

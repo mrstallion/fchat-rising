@@ -192,7 +192,7 @@ export class BBCodeParser {
                     }
                     if(!selfAllowed) return mark - 1;
                     if(isAllowed(tagKey))
-                         this.warning(`Unexpected closing ${tagKey} tag. Needed ${self} tag instead.`);
+                         this.warning(`Unexpected closing ${tagKey} tag. Needed ${self.tag} tag instead.`);
                 } else if(isAllowed(tagKey)) this.warning(`Found closing ${tagKey} tag that was never opened.`);
             }
         }

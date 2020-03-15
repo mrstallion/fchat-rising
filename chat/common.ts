@@ -2,15 +2,15 @@ import {isToday} from 'date-fns';
 import {Keys} from '../keys';
 import {Character, Conversation, Settings as ISettings} from './interfaces';
 
-export function profileLink(this: void | never, character: string): string {
+export function profileLink(this: any | never, character: string): string {
     return `https://www.f-list.net/c/${character}`;
 }
 
-export function characterImage(this: void | never, character: string): string {
+export function characterImage(this: any | never, character: string): string {
     return `https://static.f-list.net/images/avatar/${character.toLowerCase()}.png`;
 }
 
-export function getByteLength(this: void | never, str: string): number {
+export function getByteLength(this: any | never, str: string): number {
     let byteLen = 0;
     for(let i = 0; i < str.length; i++) {
         let c = str.charCodeAt(i);
@@ -67,12 +67,12 @@ function pad(num: number): string | number {
     return num < 10 ? `0${num}` : num;
 }
 
-export function formatTime(this: void | never, date: Date, noDate: boolean = false): string {
+export function formatTime(this: any | never, date: Date, noDate: boolean = false): string {
     if(!noDate && isToday(date)) return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-export function messageToString(this: void | never, msg: Conversation.Message, timeFormatter: (date: Date) => string = formatTime): string {
+export function messageToString(this: any | never, msg: Conversation.Message, timeFormatter: (date: Date) => string = formatTime): string {
     let text = `[${timeFormatter(msg.time)}] `;
     if(msg.type !== Conversation.Message.Type.Event)
         text += (msg.type === Conversation.Message.Type.Action ? '*' : '') + msg.sender.name +

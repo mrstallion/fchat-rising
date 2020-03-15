@@ -63,11 +63,13 @@ export default class AdView extends CustomDialog {
 
     async onOpen(): Promise<void> {
         // empty
+        return;
     }
 
 
     async onClose(): Promise<void> {
         // empty
+        return;
     }
 }
 </script>
