@@ -122,7 +122,7 @@
     import {getStatusIcon} from './UserView.vue';
     import UserList from './UserList.vue';
     import UserMenu from './UserMenu.vue';
-    import ImagePreview from './ImagePreview.vue';
+    import ImagePreview from './preview/ImagePreview.vue';
 
     const unreadClasses = {
         [Conversation.UnreadState.None]: '',

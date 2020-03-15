@@ -19,13 +19,13 @@
 
 import * as _ from 'lodash';
 import { Component, Hook, Prop, Watch } from '@f-list/vue-ts';
-import CustomDialog from '../components/custom_dialog';
-import Modal from '../components/Modal.vue';
-import { Character } from '../fchat/interfaces';
-import { AdCachedPosting } from '../learn/ad-cache';
-import core from './core';
-import {formatTime} from './common';
-import UserView from './UserView.vue';
+import CustomDialog from '../../components/custom_dialog';
+import Modal from '../../components/Modal.vue';
+import { Character } from '../../fchat/interfaces';
+import { AdCachedPosting } from '../../learn/ad-cache';
+import core from '../core';
+import {formatTime} from '../common';
+import UserView from '../UserView.vue';
 
 @Component({
     components: {modal: Modal, user: UserView}

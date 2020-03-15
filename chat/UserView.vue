@@ -8,7 +8,7 @@ import Vue from 'vue';
 import {Channel, Character} from '../fchat';
 import { Score, Scoring } from '../learn/matcher';
 import core from './core';
-import { EventBus } from './event-bus';
+import { EventBus } from './preview/event-bus';
 
 
 export function getStatusIcon(status: Character.Status): string {

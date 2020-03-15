@@ -2,7 +2,7 @@
 import {Connection} from '../fchat';
 
 import {Channel, Character} from '../fchat/interfaces';
-import { AdManager } from './ad-manager';
+import { AdManager } from './ads/ad-manager';
 export {Connection, Channel, Character} from '../fchat/interfaces';
 export const userStatuses: ReadonlyArray<Character.Status> = ['online', 'looking', 'away', 'busy', 'dnd'];
 export const channelModes: ReadonlyArray<Channel.Mode> = ['chat', 'ads', 'both'];

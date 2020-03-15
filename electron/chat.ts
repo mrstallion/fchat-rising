@@ -40,7 +40,7 @@ import * as electron from 'electron';
 import * as path from 'path';
 import * as qs from 'querystring';
 import {getKey} from '../chat/common';
-import { EventBus } from '../chat/event-bus';
+import { EventBus } from '../chat/preview/event-bus';
 import {init as initCore} from '../chat/core';
 import l from '../chat/localize';
 import {setupRaven} from '../chat/vue-raven';

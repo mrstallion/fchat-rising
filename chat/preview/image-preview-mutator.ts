@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import * as urlHelper from 'url';
 
 
-import { domain as extractDomain } from '../bbcode/core';
+import { domain as extractDomain } from '../../bbcode/core';
 
 export interface PreviewMutator {
     match: string | RegExp;

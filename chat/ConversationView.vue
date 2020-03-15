@@ -161,7 +161,7 @@
     import {BBCodeView} from '../bbcode/view';
     import {isShowing as anyDialogsShown} from '../components/Modal.vue';
     import {Keys} from '../keys';
-    import AdView from './AdView.vue';
+    import AdView from './ads/AdView.vue';
     import {Editor} from './bbcode';
     import CommandHelp from './CommandHelp.vue';
     import { characterImage, getByteLength, getKey } from './common';

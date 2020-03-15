@@ -38,10 +38,10 @@ import * as electron from 'electron';
 import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 import * as fs from 'fs';
 import * as path from 'path';
-import * as url from 'url';
+// import * as url from 'url';
 import l from '../chat/localize';
 import {defaultHost, GeneralSettings} from './common';
-import {ensureDictionary, getAvailableDictionaries} from './dgit ictionaries';
+import {ensureDictionary, getAvailableDictionaries} from './dictionaries';
 import * as windowState from './window_state';
 import BrowserWindow = Electron.BrowserWindow;
 import MenuItem = Electron.MenuItem;
@@ -128,8 +128,8 @@ function createWindow(): Electron.BrowserWindow | undefined {
     };
 
     if(process.platform === 'darwin') {
-        // windowProperties.titleBarStyle = 'hiddenInset';
-        windowProperties.frame = true;
+        windowProperties.titleBarStyle = 'hiddenInset';
+        // windowProperties.frame = true;
     } else {
        windowProperties.frame = false;
     }

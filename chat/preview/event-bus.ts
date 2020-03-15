@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import { Character } from '../site/character_page/interfaces';
-import { Message } from './common';
-import { Conversation } from './interfaces';
+import { Character } from '../../site/character_page/interfaces';
+import { Message } from '../common';
+import { Conversation } from '../interfaces';
 import ChannelConversation = Conversation.ChannelConversation;
 
 /**

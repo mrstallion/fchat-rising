@@ -20,59 +20,16 @@
 </template>
 
 <script lang="ts">
-    /*
-    [url=https://giphy.com/gifs/arianagrande-ariana-grande-thank-u-next-you-uldtLAK6tSOKP5PWw3]Test[/url]
-
-    [url=https://media1.tenor.com/images/097ee180965dd336f470b77d064f198f/tenor.gif?itemid=13664909]Test[/url]
-
-    [url=https://tenor.com/view/thank-unext-ariana-grande-thank-you-next-wink-winking-gif-13664909]Test[/url]
-
-    [url=https://www.sex.com/pin/58497794/]Test[/url]
-
-    [url=https://images.sex.com/images/pinporn/2019/09/10/620/21790701.gif]Test[/url]
-
-    [url=http://gfycatporn.com/deepthroat.php]Test[/url]
-
-    [url=https://imgur.com/LmEyXEM]Test[/url]
-
-    [url=https://static1.e621.net/data/6d/bf/6dbf0c369793dbb5a53d9814c17861eb.webm]Test[/url]
-
-    [url=https://www.youtube.com/watch?v=_52zdiltkRM]Test[/url]
-
-    [url=https://e621.net/post/show/1672753/2018-anthro-antlers-balls-bed-big_penis-black_hair]Test[/url]
-
-    [url=https://rule34.xxx/index.php?page=post&s=view&id=3213191]Test[/url]
-
-    [url=https://chan.sankakucomplex.com/post/show/6163997]Test[/url]
-
-    [url=https://chan.sankakucomplex.com/post/show/5774884]Test[/url]
-
-    [url=https://www.sex.com/pin/38152484-she-likes-it-rough/]Test[/url]
-
-    [url=https://www.sex.com/pin/57537179-cock-slapping-hungry-tongue/]Test[/url]
-
-    [url=https://imgur.com/gallery/ILsb94I]Imgur gallery[/url]
-
-    [url=https://imgur.com/CIKv6sA]Imgur image[/url]
-
-    [url=https://imgur.com/a/nMafj]Imgur album[/url]
-
-    [url=http://i.imgur.com/txEREOg.gifv]Imgur video[/url]
-
-    [url=https://www.punishbang.com/videos/1898/tied-redhead-is-on-her-knees-and-can/]Test[/url]
-
-    [url=https://www.pornhub.com/view_video.php?viewkey=ph5b2c03dc1e23b]Test[/url]
-
-    */
-
     import * as _ from 'lodash';
     import {Component, Hook} from '@f-list/vue-ts';
     import Vue from 'vue';
-    import core from './core';
+    import core from '../core';
     import { EventBus, EventBusEvent } from './event-bus';
-    import {domain} from '../bbcode/core';
+    import {domain} from '../../bbcode/core';
     import {ImagePreviewMutator} from './image-preview-mutator';
-    import {ImageUrlMutator} from './image-url-mutator';
+
+    import { ExternalImagePreviewHelper, LocalImagePreviewHelper } from './helper';
+
     import {Point, WebviewTag, remote} from 'electron';
     import Timer = NodeJS.Timer;
     import IpcMessageEvent = Electron.IpcMessageEvent;
@@ -88,196 +45,6 @@
     interface DidNavigateEvent extends Event {
         httpResponseCode: number;
         httpStatusText: string;
-    }
-
-
-    abstract class ImagePreviewHelper {
-        protected visible = false;
-        protected url: string | null = 'about:blank';
-        protected parent: ImagePreview;
-        protected debug: boolean;
-
-        abstract show(url: string): void;
-        abstract hide(): void;
-        abstract match(domainName: string): boolean;
-        abstract renderStyle(): Record<string, any>;
-
-        constructor(parent: ImagePreview) {
-            if (!parent) {
-                throw new Error('Empty parent!');
-            }
-
-            this.parent = parent;
-            this.debug = parent.debug;
-        }
-
-        isVisible(): boolean {
-            return this.visible;
-        }
-
-        getUrl(): string | null {
-            return this.url;
-        }
-
-        setDebug(debug: boolean): void {
-            this.debug = debug;
-        }
-    }
-
-
-    class LocalImagePreviewHelper extends ImagePreviewHelper {
-        hide(): void {
-            this.visible = false;
-            this.url = null;
-        }
-
-
-        show(url: string): void {
-            this.visible = true;
-            this.url = url;
-        }
-
-
-        match(domainName: string): boolean {
-            return ((domainName === 'f-list.net') || (domainName === 'static.f-list.net'));
-        }
-
-
-        renderStyle(): Record<string, any> {
-            return this.isVisible()
-                ? { backgroundImage: `url(${this.getUrl()})`, display: 'block' }
-                : { display: 'none' };
-        }
-    }
-
-
-    class ExternalImagePreviewHelper extends ImagePreviewHelper {
-        protected lastExternalUrl: string | null = null;
-
-        protected allowCachedUrl = true;
-
-        protected urlMutator = new ImageUrlMutator(this.parent.debug);
-
-        protected ratio: number | null = null;
-
-        hide(): void {
-            const wasVisible = this.visible;
-
-            if (this.parent.debug)
-                console.log('ImagePreview: exec hide mutator');
-
-            if (wasVisible) {
-                const webview = this.parent.getWebview();
-
-                if (this.allowCachedUrl) {
-                    webview.executeJavaScript(this.parent.jsMutator.getHideMutator());
-                } else {
-                    webview.loadURL('about:blank');
-                }
-
-                this.visible = false;
-            }
-        }
-
-
-        setRatio(ratio: number): void {
-            this.ratio = ratio;
-        }
-
-
-        setDebug(debug: boolean): void {
-            this.debug = debug;
-
-            this.urlMutator.setDebug(debug);
-        }
-
-
-        show(url: string): void {
-            const webview = this.parent.getWebview();
-
-            if (!this.parent) {
-                throw new Error('Empty parent v2');
-            }
-
-            if (!webview) {
-                throw new Error('Empty webview!');
-            }
-
-            // const oldUrl = this.url;
-            const oldLastExternalUrl = this.lastExternalUrl;
-
-            this.url = url;
-            this.lastExternalUrl = url;
-            this.visible = true;
-
-            try {
-                if ((this.allowCachedUrl) && ((webview.getURL() === url) || (url === oldLastExternalUrl))) {
-                    if (this.debug)
-                        console.log('ImagePreview: exec re-show mutator');
-
-                    webview.executeJavaScript(this.parent.jsMutator.getReShowMutator());
-                } else {
-                    if (this.debug)
-                        console.log('ImagePreview: must load; skip re-show because urls don\'t match', this.url, webview.getURL());
-
-                    this.ratio = null;
-
-                    // Broken promise chain on purpose
-                    // tslint:disable-next-line:no-floating-promises
-                    this.urlMutator.resolve(url)
-                        .then((finalUrl: string) => webview.loadURL(finalUrl));
-                }
-
-            } catch (err) {
-                console.error('ImagePreview: Webview reuse error', err);
-            }
-        }
-
-
-        match(domainName: string): boolean {
-            return !((domainName === 'f-list.net') || (domainName === 'static.f-list.net'));
-        }
-
-
-        determineScalingRatio(): Record<string, any> {
-            // ratio = width / height
-            const ratio = this.ratio;
-
-            if (!ratio) {
-                return {};
-            }
-
-            const ww = window.innerWidth;
-            const wh = window.innerHeight;
-
-            const maxWidth = Math.round(ww * 0.5);
-            const maxHeight = Math.round(wh * 0.7);
-
-            if (ratio >= 1) {
-                const presumedWidth = maxWidth;
-                const presumedHeight = presumedWidth / ratio;
-
-                return {
-                    width: `${presumedWidth}px`,
-                    height: `${presumedHeight}px`
-                };
-            // tslint:disable-next-line:unnecessary-else
-            } else {
-                const presumedHeight = maxHeight;
-                const presumedWidth = presumedHeight * ratio;
-
-                return {
-                    width: `${presumedWidth}px`,
-                    height: `${presumedHeight}px`
-                };
-            }
-        }
-
-        renderStyle(): Record<string, any> {
-            return this.isVisible()
-                ? _.merge({ display: 'flex' }, this.determineScalingRatio())
-                : { display: 'none' };
-        }
     }
 
 
@@ -760,9 +527,9 @@
 
 
 <style lang="scss">
-    @import "~bootstrap/scss/functions";
-    @import "~bootstrap/scss/variables";
-    @import "~bootstrap/scss/mixins/breakpoints";
+    @import "../../node_modules/bootstrap/scss/functions";
+    @import "../../node_modules/bootstrap/scss/variables";
+    @import "../../node_modules/bootstrap/scss/mixins/breakpoints";
 
     .image-preview-wrapper {
         z-index: 10000;

@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import core from '../chat/core';
-import { ChannelAdEvent, ChannelMessageEvent, CharacterDataEvent, EventBus } from '../chat/event-bus';
+import { ChannelAdEvent, ChannelMessageEvent, CharacterDataEvent, EventBus } from '../chat/preview/event-bus';
 import { Conversation } from '../chat/interfaces';
 import { methods } from '../site/character_page/data_store';
 import { Character as ComplexCharacter } from '../site/character_page/interfaces';

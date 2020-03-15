@@ -1,5 +1,5 @@
-import core from './core';
-import { Conversation } from './interfaces';
+import core from '../core';
+import { Conversation } from '../interfaces';
 import Timer = NodeJS.Timer;
 
 import throat from 'throat';

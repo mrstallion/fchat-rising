@@ -48,7 +48,7 @@
     import Vue from 'vue';
     import {BBCodeView} from '../bbcode/view';
     import Modal from '../components/Modal.vue';
-    import AdView from './AdView.vue';
+    import AdView from './ads/AdView.vue';
     import {characterImage, errorToString, getByteLength, profileLink} from './common';
     import core from './core';
     import {Channel, Character} from './interfaces';

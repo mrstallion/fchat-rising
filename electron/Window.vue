@@ -85,7 +85,7 @@
         @Hook('mounted')
         async mounted(): Promise<void> {
             // top bar devtools
-            browserWindow.webContents.openDevTools();
+            // browserWindow.webContents.openDevTools( { mode: 'detach' } );
 
             await this.addTab();
 
@@ -168,7 +168,7 @@
 
         get styling(): string {
             try {
-                return `<style>${fs.readFileSync(path.join(__dirname, `themes/${this.settings.theme}.css`, 'utf8')).toString()}</style>`;
+                return `<style>${fs.readFileSync(path.join(__dirname, `themes/${this.settings.theme}.css`), 'utf8').toString()}</style>`;
             } catch(e) {
                 if((<Error & {code: string}>e).code === 'ENOENT' && this.settings.theme !== 'default') {
                     this.settings.theme = 'default';

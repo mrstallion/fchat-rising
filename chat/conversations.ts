@@ -1,14 +1,14 @@
 import {queuedJoin} from '../fchat/channels';
 import {decodeHTML} from '../fchat/common';
 import { CharacterCacheRecord } from '../learn/profile-cache';
-import { AdManager } from './ad-manager';
+import { AdManager } from './ads/ad-manager';
 import { characterImage, ConversationSettings, EventMessage, Message, messageToString } from './common';
 import core from './core';
 import {Channel, Character, Conversation as Interfaces} from './interfaces';
 import l from './localize';
 import {CommandContext, isAction, isCommand, isWarn, parse as parseCommand} from './slash_commands';
 import MessageType = Interfaces.Message.Type;
-import {EventBus} from '../chat/event-bus';
+import {EventBus} from './preview/event-bus';
 
 function createMessage(this: any, type: MessageType, sender: Character, text: string, time?: Date): Message {
     if(type === MessageType.Message && isAction(text)) {

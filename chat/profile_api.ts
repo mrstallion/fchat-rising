@@ -19,7 +19,7 @@ import {
 } from '../site/character_page/interfaces';
 import * as Utils from '../site/utils';
 import core from './core';
-import { EventBus } from './event-bus';
+import { EventBus } from './preview/event-bus';
 
 const parserSettings = {
     siteDomain: 'https://www.f-list.net/',

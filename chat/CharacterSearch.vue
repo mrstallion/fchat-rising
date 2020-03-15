@@ -48,7 +48,7 @@
     import l from './localize';
     import UserView from './UserView.vue';
     import * as _ from 'lodash';
-    import {EventBus} from './event-bus';
+    import {EventBus} from './preview/event-bus';
 
     type Options = {
         kinks: Kink[],
