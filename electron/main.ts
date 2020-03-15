@@ -41,7 +41,7 @@ import * as path from 'path';
 import * as url from 'url';
 import l from '../chat/localize';
 import {defaultHost, GeneralSettings} from './common';
-import {ensureDictionary, getAvailableDictionaries} from './dictionaries';
+import {ensureDictionary, getAvailableDictionaries} from './dgit ictionaries';
 import * as windowState from './window_state';
 import BrowserWindow = Electron.BrowserWindow;
 import MenuItem = Electron.MenuItem;
@@ -126,17 +126,30 @@ function createWindow(): Electron.BrowserWindow | undefined {
         ...lastState, center: lastState.x === undefined, show: false,
         webPreferences: { webviewTag: true, nodeIntegration: true }
     };
-    if(process.platform === 'darwin') windowProperties.titleBarStyle = 'hiddenInset';
-    else windowProperties.frame = false;
+
+    if(process.platform === 'darwin') {
+        // windowProperties.titleBarStyle = 'hiddenInset';
+        windowProperties.frame = true;
+    } else {
+       windowProperties.frame = false;
+    }
+
     const window = new electron.BrowserWindow(windowProperties);
     windows.push(window);
 
-    window.loadURL(url.format({ //tslint:disable-line:no-floating-promises
-        pathname: path.join(__dirname, 'window.html'),
-        protocol: 'file:',
-        slashes: true,
-        query: {settings: JSON.stringify(settings), import: shouldImportSettings ? 'true' : []}
-    }));
+    window.loadFile(
+        path.join(__dirname, 'window.html'),
+        {
+            query: {settings: JSON.stringify(settings), import: shouldImportSettings ? 'true' : []}
+        }
+    );
+
+    // window.loadURL(url.format({ //tslint:disable-line:no-floating-promises
+    //     pathname: path.join(__dirname, 'window.html'),
+    //     protocol: 'file:',
+    //     slashes: true,
+    //     query: {settings: JSON.stringify(settings), import: shouldImportSettings ? 'true' : []}
+    // }));
 
     setUpWebContents(window.webContents);
 

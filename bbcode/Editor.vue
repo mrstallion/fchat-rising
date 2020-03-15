@@ -1,7 +1,7 @@
 <template>
     <div class="bbcode-editor" style="display:flex;flex-wrap:wrap;justify-content:flex-end">
         <slot></slot>
-        <a v-show="hasToolbar" tabindex="0" class="btn btn-light bbcode-btn btn-sm" role="button" @click="showToolbar = true" @blur="showToolbar = false" style="border-bottom-left-radius:0;border-bottom-right-radius:0">
+        <a v-show="hasToolbar" tabindex="0" class="btn btn-light bbcode-btn btn-sm" role="button" @click="showToolbar = true" @blur="showToolbar = false" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0">
             <i class="fa fa-code"></i>
         </a>
     </div>
@@ -20,20 +20,28 @@
     export default class Editor extends Vue {
         @Prop
         readonly extras?: EditorButton[];
+
         @Prop({default: 1000})
         readonly maxlength!: number;
+
         @Prop
         readonly classes?: string;
+
         @Prop
         readonly value?: string | undefined;
+
         @Prop
         readonly disabled?: boolean;
+
         @Prop
         readonly placeholder?: string;
+
         @Prop({default: true})
         readonly hasToolbar!: boolean;
+
         @Prop({default: false, type: Boolean})
         readonly invalid!: boolean;
+
         preview = false;
         previewWarnings: ReadonlyArray<string> = [];
         previewResult = '';
@@ -44,8 +52,10 @@
         maxHeight!: number;
         minHeight!: number;
         showToolbar = false;
+
         protected parser!: BBCodeParser;
         protected defaultButtons = defaultButtons;
+
         private isShiftPressed = false;
         private undoStack: string[] = [];
         private undoIndex = 0;
@@ -55,6 +65,7 @@
 
         @Hook('created')
         created(): void {
+            console.log('EDITOR', 'created');
             this.parser = new CoreBBCodeParser();
             this.resizeListener = () => {
                 const styles = getComputedStyle(this.element);
@@ -65,6 +76,7 @@
 
         @Hook('mounted')
         mounted(): void {
+            console.log('EDITOR', 'mounted');
             this.element = <HTMLTextAreaElement>this.$refs['input'];
             const styles = getComputedStyle(this.element);
             this.maxHeight = parseInt(styles.maxHeight, 10) || 250;
@@ -91,6 +103,7 @@
 
         @Hook('destroyed')
         destroyed(): void {
+            console.log('EDITOR', 'destroyed');
             window.removeEventListener('resize', this.resizeListener);
         }
 
