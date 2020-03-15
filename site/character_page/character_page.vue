@@ -868,7 +868,7 @@
 
     .character-card-header {
         position: sticky;
-        top: 0;
+        top: -1rem;
         z-index: 10000;
         background: #2a2a54 !important;
     }
