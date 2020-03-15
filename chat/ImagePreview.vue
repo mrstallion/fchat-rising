@@ -5,14 +5,15 @@
             <a @click="toggleDevMode()" :class="{toggled: debug}" title="Debug Mode"><i class="fa fa-terminal"></i></a>
             <a @click="toggleJsMode()" :class="{toggled: runJs}" title="Expand Images"><i class="fa fa-magic"></i></a>
             <a @click="reloadUrl()" title="Reload Image"><i class="fa fa-redo-alt"></i></a>
+            <a @click="reset()" title="Reset Image Viewer"><i class="fa fa-recycle"></i></a>
             <a @click="toggleStickyMode()" :class="{toggled: sticky}" title="Toggle Stickyness"><i class="fa fa-thumbtack"></i></a>
         </div>
 
-        <webview src="about:blank" webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required" id="image-preview-ext" ref="imagePreviewExt" class="image-preview-external" :style="{display: externalPreviewHelper.isVisible() ? 'flex' : 'none'}"></webview>
+        <webview src="about:blank" nodeintegration webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required" id="image-preview-ext" ref="imagePreviewExt" class="image-preview-external" :style="externalPreviewStyle"></webview>
 
         <div
             class="image-preview-local"
-            :style="{backgroundImage: `url(${localPreviewHelper.getUrl()})`, display: localPreviewHelper.isVisible() ? 'block' : 'none'}"
+            :style="localPreviewStyle"
         >
         </div>
     </div>
@@ -72,8 +73,11 @@
     import {domain} from '../bbcode/core';
     import {ImagePreviewMutator} from './image-preview-mutator';
     import {ImageUrlMutator} from './image-url-mutator';
-    import {Point, screen, WebviewTag} from 'electron';
+    import {Point, WebviewTag, remote} from 'electron';
     import Timer = NodeJS.Timer;
+    import IpcMessageEvent = Electron.IpcMessageEvent;
+
+    const screen = remote.screen;
 
 
     interface DidFailLoadEvent extends Event {
@@ -93,11 +97,16 @@
         protected parent: ImagePreview;
         protected debug: boolean;
 
-        abstract show(url: string): Promise<void>;
+        abstract show(url: string): void;
         abstract hide(): void;
         abstract match(domainName: string): boolean;
+        abstract renderStyle(): any;
 
         constructor(parent: ImagePreview) {
+            if (!parent) {
+                throw new Error('Empty parent!');
+            }
+
             this.parent = parent;
             this.debug = parent.debug;
         }
@@ -123,7 +132,7 @@
         }
 
 
-        async show(url: string): Promise<void> {
+        show(url: string): void {
             this.visible = true;
             this.url = url;
         }
@@ -131,6 +140,13 @@
 
         match(domainName: string): boolean {
             return ((domainName === 'f-list.net') || (domainName === 'static.f-list.net'));
+        }
+
+
+        renderStyle(): any {
+            return this.isVisible()
+                ? { backgroundImage: `url(${this.getUrl()})`, display: 'block' }
+                : { display: 'none' }
         }
     }
 
@@ -142,6 +158,7 @@
 
         protected urlMutator = new ImageUrlMutator(this.parent.debug);
 
+        protected ratio: number | null = null;
 
         hide(): void {
             const wasVisible = this.visible;
@@ -163,6 +180,11 @@
         }
 
 
+        setRatio(ratio: number) {
+            this.ratio = ratio;
+        }
+
+
         setDebug(debug: boolean): void {
             this.debug = debug;
 
@@ -170,11 +192,26 @@
         }
 
 
-        async show(url: string): Promise<void> {
+        show(url: string): void {
             const webview = this.parent.getWebview();
 
+            if (!this.parent) {
+                throw new Error('Empty parent v2');
+            }
+
+            if (!webview) {
+                throw new Error('Empty webview!');
+            }
+
+            // const oldUrl = this.url;
+            const oldLastExternalUrl = this.lastExternalUrl;
+
+            this.url = url;
+            this.lastExternalUrl = url;
+            this.visible = true;
+
             try {
-                if ((this.allowCachedUrl) && ((webview.getURL() === url) || (url === this.lastExternalUrl))) {
+                if ((this.allowCachedUrl) && ((webview.getURL() === url) || (url === oldLastExternalUrl))) {
                     if (this.debug)
                         console.log('ImagePreview: exec re-show mutator');
 
@@ -183,20 +220,62 @@
                     if (this.debug)
                         console.log('ImagePreview: must load; skip re-show because urls don\'t match', this.url, webview.getURL());
 
-                    webview.loadURL(await this.urlMutator.resolve(url));
+                    this.ratio = null;
+
+                    // Broken promise chain on purpose
+                    this.urlMutator.resolve(url)
+                        .then((finalUrl: string) => webview.loadURL(finalUrl));
                 }
 
             } catch (err) {
                 console.error('ImagePreview: Webview reuse error', err);
             }
-
-            this.url = url;
-            this.lastExternalUrl = url;
-            this.visible = true;
         }
+
 
         match(domainName: string): boolean {
             return !((domainName === 'f-list.net') || (domainName === 'static.f-list.net'));
+        }
+
+
+        determineScalingRatio(): any {
+            // ratio = width / height
+            const ratio = this.ratio;
+
+            if (!ratio) {
+                return {};
+            }
+
+            const ww = window.innerWidth;
+            const wh = window.innerHeight;
+
+            const maxWidth = Math.round(ww * 0.5);
+            const maxHeight = Math.round(wh * 0.7);
+
+            if (ratio >= 1) {
+                const presumedWidth = maxWidth;
+                const presumedHeight = presumedWidth / ratio;
+
+
+                return {
+                    width: `${presumedWidth}px`,
+                    height: `${presumedHeight}px`
+                }
+            }
+
+            const presumedHeight = maxHeight;
+            const presumedWidth = presumedHeight * ratio;
+
+            return {
+                width: `${presumedWidth}px`,
+                height: `${presumedHeight}px`
+            }
+        }
+
+        renderStyle(): any {
+            return this.isVisible()
+                ? _.merge({ display: 'flex' }, this.determineScalingRatio())
+                : { display: 'none' };
         }
     }
 
@@ -218,6 +297,10 @@
         debug = false;
 
         jsMutator = new ImagePreviewMutator(this.debug);
+
+        externalPreviewStyle = {};
+        localPreviewStyle = {};
+
 
         private interval: Timer | null = null;
 
@@ -339,6 +422,19 @@
             );
 
 
+            webview.addEventListener(
+                'ipc-message',
+                (event: IpcMessageEvent) => {
+                    if (this.debug)
+                        console.log('ImagePreview ipc-message', event);
+
+                    if (event.channel === 'webview.img') {
+                        this.updatePreviewSize(event.args[0], event.args[1]);
+                    }
+                }
+            );
+
+
             /* webview.getWebContents().session.on(
                 'will-download',
                 (e: Event) => {
@@ -348,7 +444,7 @@
 
 
             _.each(
-                ['did-start-loading', 'load-commit', 'dom-ready', 'will-navigate', 'did-navigate', 'did-navigate-in-page', 'update-target-url'],
+                ['did-start-loading', 'load-commit', 'dom-ready', 'will-navigate', 'did-navigate', 'did-navigate-in-page', 'update-target-url', 'ipc-message'],
                 (en: string) => {
                     webview.addEventListener(
                         en,
@@ -378,6 +474,33 @@
             );
         }
 
+
+        reRenderStyles(): void {
+            this.externalPreviewStyle = this.externalPreviewHelper.renderStyle();
+            this.localPreviewStyle = this.localPreviewHelper.renderStyle();
+
+            if (this.debug) {
+                console.log('ImagePreview: reRenderStyles', 'external', JSON.parse(JSON.stringify(this.externalPreviewStyle)), 'local', JSON.parse(JSON.stringify(this.localPreviewStyle)));
+            }
+        }
+
+
+        updatePreviewSize(width: number, height: number): void {
+            if (!this.externalPreviewHelper.isVisible()) {
+                return;
+            }
+
+            if ((width) && (height)) {
+                if (this.debug) {
+                    console.log('ImagePreview: updatePreviewSize', width, height, width / height);
+                }
+
+                this.externalPreviewHelper.setRatio(width / height);
+                this.reRenderStyles();
+            }
+        }
+
+
         hide(): void {
             if (this.debug)
                 console.log('ImagePreview: hide', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible());
@@ -396,6 +519,8 @@
             this.shouldDismiss = false;
 
             this.sticky = false;
+
+            this.reRenderStyles();
         }
 
         dismiss(initialUrl: string, force: boolean = false): void {
@@ -452,15 +577,17 @@
             // console.log('SHOW');
 
             if ((this.visible) && (!this.exitInterval) && (!this.hasMouseMovedSince())) {
-                if (this.debug) {
-                    console.log('ImagePreview: show cancel: visible & not moved');
+                if (!this.sticky) {
+                    if (this.debug) {
+                        console.log('ImagePreview: show cancel: visible & not moved');
+                    }
+                    return;
                 }
-                return;
             }
 
             if ((this.url === url) && ((this.visible) || (this.interval))) {
                 if (this.debug) {
-                    console.log('ImagePreview: same url');
+                    console.log('ImagePreview: same url', url, this.url);
                 }
 
                 return;
@@ -489,7 +616,7 @@
             // -- you actually have to pause on it
             // tslint:disable-next-line no-unnecessary-type-assertion
             this.interval = setTimeout(
-                () => {
+                async () => {
                     if (this.debug)
                         console.log('ImagePreview: show.timeout', this.url);
 
@@ -505,6 +632,8 @@
                     this.visibleSince = Date.now();
 
                     this.initialCursorPosition = screen.getCursorScreenPoint();
+
+                    this.reRenderStyles();
                 },
                 due
             ) as Timer;
@@ -591,6 +720,31 @@
         getWebview(): WebviewTag {
             return this.$refs.imagePreviewExt as WebviewTag;
         }
+
+        reset() {
+            this.externalPreviewHelper = new ExternalImagePreviewHelper(this);
+            this.localPreviewHelper = new LocalImagePreviewHelper(this);
+
+            this.url = null;
+            this.domain = undefined;
+
+            this.sticky = false;
+            this.runJs = true;
+            this.debug = false;
+
+            this.jsMutator = new ImagePreviewMutator(this.debug);
+
+            this.cancelExitTimer();
+            this.cancelTimer();
+
+            this.exitUrl = null;
+
+            this.initialCursorPosition = null;
+            this.shouldDismiss = false;
+            this.visibleSince = 0;
+
+            this.reRenderStyles();
+        }
     }
 </script>
 
@@ -609,6 +763,7 @@
         width: 50%;
         height: 70%;
         pointer-events: none;
+        overflow: hidden;
 
         &.visible {
             display: block;

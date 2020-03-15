@@ -582,6 +582,7 @@
 
         .guestbook-message {
             margin-top: 10px;
+            display: block;
         }
 
         .guestbook-reply {

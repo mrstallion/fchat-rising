@@ -540,8 +540,8 @@ export class Matcher {
             return new Score(
                 score,
                 theyAreAnthro
-                    ? 'Would prefer <span>humans</span>, ok with anthros'
-                    : 'Would prefer <span>anthros</span>, ok with humans'
+                    ? 'Prefers <span>humans</span>, ok with anthros'
+                    : 'Prefers <span>anthros</span>, ok with humans'
             );
 
         return this.formatScoring(score, theyAreAnthro ? 'furry pairings' : theyAreHuman ? 'human pairings' : '');

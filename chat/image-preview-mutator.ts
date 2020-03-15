@@ -143,7 +143,7 @@ export class ImagePreviewMutator {
                     ${this.injectHtmlJs('<div id="imageCount" style="z-index: 1000000; position: absolute; bottom: 0; right: 0; background: green; border: 2px solid lightgreen; width: 5rem; height: 5rem; font-size: 2rem; font-weight: bold; color: white; border-radius: 5rem; margin: 0.75rem;"><div id="imageCountInner" style="position: absolute; top: 50%; left: 50%; transform: translateY(-50%) translateX(-50%);"></div></div>')}
 
                     const imageCountEl = document.getElementById('imageCountInner');
-                    
+
                     if (imageCountEl) {
                         imageCountEl.innerHTML = '+' + (imageCount - 1);
                     }
@@ -196,7 +196,8 @@ export class ImagePreviewMutator {
     }
 
     getBaseJsMutatorScript(elSelector: string[], skipElementRemove: boolean = false): string {
-        return `const body = document.querySelector('body');
+        return `const { ipcRenderer } = require('electron');
+            const body = document.querySelector('body');
             const html = document.querySelector('html');
             const selectors = ${JSON.stringify(elSelector)};
 
@@ -215,6 +216,8 @@ export class ImagePreviewMutator {
             ${this.debug ? `console.log('Img', img);` : ''}
 
             if (!img) { return; }
+
+            ipcRenderer.sendToHost('webview.img', img.width || img.naturalWidth || img.videoWidth, img.height || img.naturalHeight || img.videoHeight);
 
             const el = document.createElement('div');
             el.id = 'flistWrapper';
@@ -254,7 +257,6 @@ export class ImagePreviewMutator {
 
             img.class = '';
             el.class = '';
-
             html.class = '';
 
             html.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
@@ -285,26 +287,30 @@ export class ImagePreviewMutator {
             document.addEventListener('DOMContentLoaded', (event) => {
                 ${this.debug ? "console.log('on DOMContentLoaded');" : ''}
 
+                ipcRenderer.sendToHost('webview.img', img.width || img.naturalWidth, img.height || img.naturalHeight);
+
                 if (
                     (img.play)
                     && ((!img.paused) && (!img.ended) && (!(img.currentTime > 0)))
                 )
-                { img.muted = true; img.play(); }
+                { img.muted = true; img.loop = true; img.play(); }
             });
 
             document.addEventListener('load', (event) => {
                 ${this.debug ? "console.log('on load');" : ''}
 
+                ipcRenderer.sendToHost('webview.img', img.width || img.naturalWidth, img.height || img.naturalHeight);
+
                 if (
                     (img.play)
                     && ((!img.paused) && (!img.ended) && (!(img.currentTime > 0)))
                 )
-                { img.muted = true; img.play(); }
+                { img.muted = true; img.loop = true; img.play(); }
             });
 
 
             try {
-                if (img.play) { img.muted = true; img.play(); }
+                if (img.play) { img.muted = true; img.loop = true; img.play(); }
             } catch (err) {
                 console.error('Failed img.play()', err);
             }

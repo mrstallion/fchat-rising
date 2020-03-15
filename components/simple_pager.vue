@@ -66,7 +66,7 @@
         get prevRoute(): RouteParams {
             if(this.route.params !== undefined && this.route.params[this.paramName] !== undefined) {
                 const newPage = this.route.params[this.paramName]! - 1;
-                const clone = cloneDeep(this.route);
+                const clone = cloneDeep(this.route) as RouteParams;
                 clone.params![this.paramName] = newPage;
                 return clone;
             }
@@ -76,7 +76,7 @@
         get nextRoute(): RouteParams {
             if(this.route.params !== undefined && this.route.params[this.paramName] !== undefined) {
                 const newPage = this.route.params[this.paramName]! + 1;
-                const clone = cloneDeep(this.route);
+                const clone = cloneDeep(this.route) as RouteParams;
                 clone.params![this.paramName] = newPage;
                 return clone;
             }

@@ -1,37 +1,9 @@
 <template>
     <div class="bbcode-editor" style="display:flex;flex-wrap:wrap;justify-content:flex-end">
         <slot></slot>
-        <a tabindex="0" class="btn btn-light bbcode-btn btn-sm" role="button" @click="showToolbar = true" @blur="showToolbar = false"
-            style="border-bottom-left-radius:0;border-bottom-right-radius:0" v-if="hasToolbar">
+        <a v-show="hasToolbar" tabindex="0" class="btn btn-light bbcode-btn btn-sm" role="button" @click="showToolbar = true" @blur="showToolbar = false" style="border-bottom-left-radius:0;border-bottom-right-radius:0">
             <i class="fa fa-code"></i>
         </a>
-        <div class="bbcode-toolbar btn-toolbar" role="toolbar" :style="showToolbar ? {display: 'flex'} : undefined" @mousedown.stop.prevent
-            v-if="hasToolbar" style="flex:1 51%">
-            <div class="btn-group" style="flex-wrap:wrap">
-                <div class="btn btn-light btn-sm" v-for="button in buttons" :title="button.title" @click.prevent.stop="apply(button)">
-                    <i :class="(button.class ? button.class : 'fa ') + button.icon"></i>
-                </div>
-                <div @click="previewBBCode" class="btn btn-light btn-sm" :class="preview ? 'active' : ''"
-                    :title="preview ? 'Close Preview' : 'Preview'">
-                    <i class="fa fa-eye"></i>
-                </div>
-            </div>
-            <button type="button" class="close" aria-label="Close" style="margin-left:10px" @click="showToolbar = false">&times;</button>
-        </div>
-        <div class="bbcode-editor-text-area" style="order:100;width:100%;">
-            <textarea ref="input" v-model="text" @input="onInput" v-show="!preview" :maxlength="maxlength" :placeholder="placeholder"
-                :class="finalClasses" @keyup="onKeyUp" :disabled="disabled" @paste="onPaste" @keypress="$emit('keypress', $event)"
-                :style="hasToolbar ? {'border-top-left-radius': 0} : undefined" @keydown="onKeyDown"></textarea>
-            <textarea ref="sizer"></textarea>
-            <div class="bbcode-preview" v-show="preview">
-                <div class="bbcode-preview-warnings">
-                    <div class="alert alert-danger" v-show="previewWarnings.length">
-                        <li v-for="warning in previewWarnings">{{warning}}</li>
-                    </div>
-                </div>
-                <div class="bbcode" ref="preview-element"></div>
-            </div>
-        </div>
     </div>
 </template>
 
@@ -193,7 +165,7 @@
             this.$once('insert', (startText: string, endText: string) => this.applyText(startText, endText));
             // noinspection TypeScriptValidateTypes
             if(button.handler !== undefined)
-                return button.handler.call(this, this);
+                return button.handler.call(this as any, this);
             if(button.startText === undefined)
                 button.startText = `[${button.tag}]`;
             if(button.endText === undefined)

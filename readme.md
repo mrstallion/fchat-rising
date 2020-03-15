@@ -76,6 +76,10 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Save character's status messages
 *   Conversation bot API
 *   Filter unmatching ads is not channel specific -- it's either on everywhere or nowhere
+*   Fix e621 URLs
+*   AD UI Cleanup / hide to popovers
+*   Reset preview mode
+*   Better image fitting & loading animation
 
 
 # F-List Exported

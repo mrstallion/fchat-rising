@@ -34,13 +34,17 @@
                 infotag: true
             };
 
-            // console.log(`Infotag ${this.infotag.id}: ${this.label}`);
-            const id = this.infotag.id;
+            // console.log(`Infotag ${this.infotag.id}: ${this.infotag.name}`, core.state.settings.risingAdScore, this.characterMatch);
+            const id = parseInt(this.infotag.id as any, 10);
 
             if ((core.state.settings.risingAdScore) && (this.characterMatch)) {
+                console.log('MATCH');
+
                 const scores = this.theirInterestIsRelevant(id)
                     ? this.characterMatch.them.scores
                     : (this.yourInterestIsRelevant(id) ? this.characterMatch.you.scores : null);
+
+                console.log('SCORES', scores);
 
                 if (scores) {
                     const score = scores[id];
