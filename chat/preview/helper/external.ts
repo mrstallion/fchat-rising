@@ -1,5 +1,5 @@
 import { ImageUrlMutator } from '../image-url-mutator';
-import { ImagePreviewHelper } from './index';
+import { ImagePreviewHelper } from './helper';
 import * as _ from 'lodash';
 
 export class ExternalImagePreviewHelper extends ImagePreviewHelper {

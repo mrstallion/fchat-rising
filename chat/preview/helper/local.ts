@@ -1,4 +1,4 @@
-import { ImagePreviewHelper } from './index';
+import { ImagePreviewHelper } from './helper';
 
 export class LocalImagePreviewHelper extends ImagePreviewHelper {
     hide(): void {

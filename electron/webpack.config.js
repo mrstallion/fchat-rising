@@ -4,6 +4,7 @@ const ForkTsCheckerWebpackPlugin = require('@f-list/fork-ts-checker-webpack-plug
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const vueTransformer = require('@f-list/vue-ts/transform').default;
+const CopyPlugin = require('copy-webpack-plugin');
 
 const mainConfig = {
     entry: [path.join(__dirname, 'main.ts'), path.join(__dirname, 'package.json')],
@@ -94,7 +95,12 @@ const mainConfig = {
             tsconfig: './tsconfig-renderer.json',
             vue: true
         }),
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
+        new CopyPlugin(
+            [
+                { from: path.resolve(__dirname, '..', 'chat', 'preview', 'assets', '**/*'), to: path.join('preview', 'assets'), context: path.resolve(__dirname, '..', 'chat', 'preview', 'assets') }
+            ]
+        )
     ],
     resolve: {
         extensions: ['.ts', '.js', '.vue', '.css'],

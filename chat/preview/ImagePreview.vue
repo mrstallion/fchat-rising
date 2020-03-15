@@ -9,7 +9,8 @@
             <a @click="toggleStickyMode()" :class="{toggled: sticky}" title="Toggle Stickyness"><i class="fa fa-thumbtack"></i></a>
         </div>
 
-        <webview src="about:blank" nodeintegration webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required" id="image-preview-ext" ref="imagePreviewExt" class="image-preview-external" :style="externalPreviewStyle"></webview>
+        <!-- note: preload requires a webpack config CopyPlugin configuration -->
+        <webview preload="./preview/assets/browser.pre.js" src="about:blank" nodeintegration webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required" id="image-preview-ext" ref="imagePreviewExt" class="image-preview-external" :style="externalPreviewStyle"></webview>
 
         <div
             class="image-preview-local"
@@ -540,7 +541,7 @@
         width: 50%;
         height: 70%;
         pointer-events: none;
-        overflow: hidden;
+        overflow: visible;
 
         &.visible {
             display: block;

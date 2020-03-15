@@ -19,6 +19,12 @@ export interface ImagePreviewMutatorCollection {
 }
 
 
+// tslint:disable-next-line:max-line-length
+const imgurOuterStyle = 'z-index: 1000000; position: absolute; bottom: 0.75rem; right: 0.75rem; background: rgba(0, 128, 0, 0.8); border: 2px solid rgba(144, 238, 144, 0.5); width: 3rem; height: 3rem; font-size: 15pt; font-weight: normal; color: white; border-radius: 3rem; margin: 0; font-family: Helvetica,Arial,sans-serif; box-shadow: 2px 2px 2px rgba(0,0,0,0.5)';
+// tslint:disable-next-line:max-line-length
+const imgurInnerStyle = 'position: absolute; top: 50%; left: 50%; transform: translateY(-50%) translateX(-50%); text-shadow: 1px 1px 2px rgba(0,0,0,0.4);';
+
+
 export class ImagePreviewMutator {
     // tslint:disable: prefer-function-over-method
     private hostMutators: ImagePreviewMutatorCollection = {};
@@ -120,7 +126,7 @@ export class ImagePreviewMutator {
         this.add('youtube.com', this.getBaseJsMutatorScript(['video']), undefined, 'dom-ready');
         this.add('instantfap.com', this.getBaseJsMutatorScript(['#post video', '#post img']));
         this.add('webmshare.com', this.getBaseJsMutatorScript(['video']));
-        this.add('pornhub.com', this.getBaseJsMutatorScript(['.mainPlayerDiv video', '.photoImageSection img']));
+        this.add('pornhub.com', this.getBaseJsMutatorScript(['.mainPlayerDiv video[preload="auto"]', '.mainPlayerDiv video[preload="none"]', '.mainPlayerDiv video', '.photoImageSection img']));
         this.add('sex.com', this.getBaseJsMutatorScript(['.image_frame video', '.image_frame img']));
         this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript(['picture video', 'picture img']));
         this.add('postimg.cc', this.getBaseJsMutatorScript(['video', '#main-image']));
@@ -131,7 +137,6 @@ export class ImagePreviewMutator {
         this.add(/^media[0-9]\.tenor\.com$/, this.getBaseJsMutatorScript(['#view .file video', '#view .file img']));
         this.add('tenor.com', this.getBaseJsMutatorScript(['#view video', '#view img']));
 
-        // tslint:disable max-line-length
         this.add(
             'i.imgur.com',
             `
@@ -140,18 +145,17 @@ export class ImagePreviewMutator {
                 ${this.getBaseJsMutatorScript(['video', 'img'])}
 
                 if(imageCount > 1) {
-                    ${this.injectHtmlJs('<div id="imageCount" style="z-index: 1000000; position: absolute; bottom: 0; right: 0; background: green; border: 2px solid lightgreen; width: 5rem; height: 5rem; font-size: 2rem; font-weight: bold; color: white; border-radius: 5rem; margin: 0.75rem;"><div id="imageCountInner" style="position: absolute; top: 50%; left: 50%; transform: translateY(-50%) translateX(-50%);"></div></div>')}
+                    ${this.injectHtmlJs(`<div id="imageCount" style="${imgurOuterStyle}"><div id="imageCountInner" style="${imgurInnerStyle}"></div></div>`)}
 
                     const imageCountEl = document.getElementById('imageCountInner');
 
                     if (imageCountEl) {
-                        imageCountEl.innerHTML = '+' + (imageCount - 1);
+                        imageCountEl.innerHTML = '' + (imageCount);
                     }
                 }
             `
         );
 
-        // tslint:disable max-line-length
         this.add(
             'imgur.com',
             `
@@ -160,7 +164,7 @@ export class ImagePreviewMutator {
                 ${this.getBaseJsMutatorScript(['.post-container video', '.post-container img'], true)}
 
                 if(imageCount > 1)
-                    $('#flistWrapper').append('<div id="imageCount" style="position: absolute; bottom: 0; right: 0; background: green; border: 2px solid lightgreen; width: 5rem; height: 5rem; font-size: 2rem; font-weight: bold; color: white; border-radius: 5rem; margin: 0.75rem;"><div style="position: absolute; top: 50%; left: 50%; transform: translateY(-50%) translateX(-50%);">+' + (imageCount - 1) + '</div></div>');
+                    $('#flistWrapper').append('<div id="imageCount" style="${imgurOuterStyle}"><div style="${imgurInnerStyle}">+' + (imageCount - 1) + '</div></div>');
             `
         );
 
