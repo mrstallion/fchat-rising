@@ -213,6 +213,8 @@ export class CacheManager {
                 const message = data.message;
                 const channel = data.channel;
 
+                console.log('CHANNEL AD', data);
+
                 this.adCache.register(
                     {
                         name: message.sender.name,

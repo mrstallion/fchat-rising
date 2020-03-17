@@ -7,7 +7,9 @@
        <div class="row ad-viewer" ref="pageBody">
             <template v-for="message in messages">
                 <h3>#{{message.channelName}} <span class="message-time">{{formatTime(message.datePosted)}}</span></h3>
-                <div v-bbcode="message.message" class="border-bottom"></div>
+                <div class="border-bottom">
+                    <bbcode :text="message.message"></bbcode>
+                </div>
             </template>
         </div>
 
@@ -26,9 +28,10 @@ import { AdCachedPosting } from '../../learn/ad-cache';
 import core from '../core';
 import {formatTime} from '../common';
 import UserView from '../UserView.vue';
+import { BBCodeView } from '../../bbcode/view';
 
 @Component({
-    components: {modal: Modal, user: UserView}
+    components: {modal: Modal, user: UserView, bbcode: BBCodeView(core.bbCodeParser)}
 })
 export default class AdView extends CustomDialog {
     @Prop({required: true})
