@@ -125,6 +125,7 @@
     import UserMenu from './UserMenu.vue';
     import ImagePreview from './preview/ImagePreview.vue';
     import PrivateConversation = Conversation.PrivateConversation;
+    import _ from 'lodash';
 
     const unreadClasses = {
         [Conversation.UnreadState.None]: '',
@@ -293,7 +294,7 @@
 
             const cls = { [styling[status].color]: true };
 
-            _.each(
+            _.forEach(
                 styling[status].icon,
                 (name) => cls[name] = true
             );
