@@ -43,9 +43,10 @@
                 <infotag-item v-for="id in quickInfoIds" v-if="character.character.infotags[id]" :infotag="getInfotag(id)"
                     :data="character.character.infotags[id]" :key="id" :characterMatch="characterMatch"></infotag-item>
 
-                <div class="contact-block">
-                    <contact-method v-for="method in contactMethods" :method="method" :key="method.id"></contact-method>
-                </div>
+            <div class="contact-block">
+                <contact-method v-for="method in contactMethods" :infotag="method" :key="method.id"
+                    :data="character.character.infotags[method.id]"></contact-method>
+            </div>
 
                 <div class="quick-info">
                     <span class="quick-info-label">Created</span>

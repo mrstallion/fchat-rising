@@ -79,6 +79,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   AD UI Cleanup / hide to popovers
 *   image loading animation
 *   Ad cache is broken
+*   Show online / offline status on PM list
 
 
 # F-List Exported

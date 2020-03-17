@@ -131,7 +131,7 @@
 
         @Hook('destroyed')
         destroyed(): void {
-            console.log('EDITOR', 'destroyed');
+            // console.log('EDITOR', 'destroyed');
             window.removeEventListener('resize', this.resizeListener);
         }
 

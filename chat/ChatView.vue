@@ -44,6 +44,7 @@
                                 :class="{'fa-comment-dots': conversation.typingStatus == 'typing', 'fa-comment': conversation.typingStatus == 'paused'}"
                             ></span>
                             <span style="flex:1"></span>
+                            <span :class="getOnlineStatusIconClasses(conversation)"></span>
                             <span class="pin fas fa-thumbtack" :class="{'active': conversation.isPinned}"
                                 @click="conversation.isPinned = !conversation.isPinned" :aria-label="l('chat.pinTab')"></span>
                             <span class="fas fa-times leave" @click.stop="conversation.close()" :aria-label="l('chat.closeTab')"></span>
@@ -123,6 +124,7 @@
     import UserList from './UserList.vue';
     import UserMenu from './UserMenu.vue';
     import ImagePreview from './preview/ImagePreview.vue';
+    import PrivateConversation = Conversation.PrivateConversation;
 
     const unreadClasses = {
         [Conversation.UnreadState.None]: '',
@@ -275,6 +277,30 @@
             sheet.insertRule(`.form-control, select.form-control { line-height: 1.428571429 }`, sheet.cssRules.length);
         }
 
+        getOnlineStatusIconClasses(conversation: PrivateConversation) {
+            const status = conversation.character.status;
+
+            const styling = {
+              crown: { color: 'online', icon: ['fas', 'fa-crown'] },
+              online: { color: 'online', icon: ['fas', 'fa-circle'] },
+              looking: { color: 'online', icon: ['fa', 'fa-eye'] },
+              offline: { color: 'offline', icon: ['fas', 'fa-circle'] },
+              busy: { color: 'away', icon: ['fas', 'fa-circle'] },
+              idle: { color: 'away', icon: ['fas', 'fa-circle'] },
+              dnd: { color: 'away', icon: ['fas', 'fa-circle'] },
+              away: { color: 'away', icon: ['fas', 'fa-circle'] },
+            };
+
+            const cls = { [styling[status].color]: true };
+
+            _.each(
+                styling[status].icon,
+                (name) => cls[name] = true
+            );
+
+            return cls;
+        }
+
         logOut(): void {
             if(confirm(l('chat.confirmLeave'))) core.connection.close();
         }
@@ -345,6 +371,10 @@
     }
 
     .list-group.conversation-nav {
+        .fas.active {
+          color: #02a002;
+        }
+
         margin-bottom: 10px;
         .list-group-item {
             padding: 5px;
@@ -370,6 +400,28 @@
                 padding-left: 0;
                 padding-top: 0;
                 padding-bottom: 0;
+
+                .offline,
+                .online,
+                .away {
+                    font-size: 80%;
+                }
+
+                .offline {
+                    color: #5c5c84;
+                }
+
+                .online {
+                    color: #02a002;
+                }
+
+                .away {
+                    color: #c7894f;
+                }
+
+                .fa-eye {
+                    margin-right: 3px;
+                }
             }
             img {
                 height: 40px;
