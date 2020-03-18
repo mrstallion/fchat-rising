@@ -222,6 +222,4 @@ export default class UserView extends Vue {
 
 export default UserView;
 */
-
 </script>
-

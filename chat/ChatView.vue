@@ -278,7 +278,7 @@
             sheet.insertRule(`.form-control, select.form-control { line-height: 1.428571429 }`, sheet.cssRules.length);
         }
 
-        getOnlineStatusIconClasses(conversation: PrivateConversation) {
+        getOnlineStatusIconClasses(conversation: PrivateConversation): Record<string, any> {
             const status = conversation.character.status;
 
             const styling = {
@@ -289,7 +289,7 @@
               busy: { color: 'away', icon: ['fas', 'fa-circle'] },
               idle: { color: 'away', icon: ['fas', 'fa-circle'] },
               dnd: { color: 'away', icon: ['fas', 'fa-circle'] },
-              away: { color: 'away', icon: ['fas', 'fa-circle'] },
+              away: { color: 'away', icon: ['fas', 'fa-circle'] }
             };
 
             const cls = { [styling[status].color]: true };
