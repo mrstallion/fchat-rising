@@ -40,11 +40,8 @@
                         <span>{{conversation.character.name}}</span>
                         <div style="line-height:0;display:flex">
                             <span class="fas fa-reply" v-show="needsReply(conversation)"></span>
-                            <span class="fas"
-                                :class="{'fa-comment-dots': conversation.typingStatus == 'typing', 'fa-comment': conversation.typingStatus == 'paused'}"
-                            ></span>
+                            <span class='online-status' :class="getOnlineStatusIconClasses(conversation)"></span>
                             <span style="flex:1"></span>
-                            <span :class="getOnlineStatusIconClasses(conversation)"></span>
                             <span class="pin fas fa-thumbtack" :class="{'active': conversation.isPinned}"
                                 @click="conversation.isPinned = !conversation.isPinned" :aria-label="l('chat.pinTab')"></span>
                             <span class="fas fa-times leave" @click.stop="conversation.close()" :aria-label="l('chat.closeTab')"></span>
@@ -281,6 +278,14 @@
         getOnlineStatusIconClasses(conversation: PrivateConversation): Record<string, any> {
             const status = conversation.character.status;
 
+            if ((conversation.typingStatus === 'typing') || (conversation.typingStatus === 'paused')) {
+                return {
+                    fas: true,
+                    'fa-comment-dots': (conversation.typingStatus === 'typing'),
+                    'fa-comment': (conversation.typingStatus === 'paused')
+                };
+            }
+
             const styling = {
               crown: { color: 'online', icon: ['fas', 'fa-crown'] },
               online: { color: 'online', icon: ['fas', 'fa-circle'] },
@@ -402,11 +407,16 @@
                 padding-top: 0;
                 padding-bottom: 0;
 
-                .offline,
-                .online,
-                .away {
-                    font-size: 80%;
+                .online-status {
+                    padding-left: 1px;
+                    font-size: 85%;
                 }
+
+                /*.offline,*/
+                /*.online,*/
+                /*.away {*/
+                /*    font-size: 80%;*/
+                /*}*/
 
                 .offline {
                     color: #5c5c84;
@@ -420,9 +430,14 @@
                     color: #c7894f;
                 }
 
-                .fa-eye {
-                    margin-right: 3px;
+                .fa-comment,
+                .fa-comment-dots {
+                    color: #cbcbe5;
                 }
+
+                /*.fa-eye {*/
+                /*    // margin-right: 3px;*/
+                /*}*/
             }
             img {
                 height: 40px;
