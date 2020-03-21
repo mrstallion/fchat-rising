@@ -7,10 +7,11 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 
 1. **Profile matching** automatically compares your profile with others to determine with whom you are compatible.
 1. **Automatic ad posting** repeatedly posts and rotates ads on selected channels.
-1. **Link previews** pop up shows a preview of an image when you hover your mouse over a link.
+1. **Link previews** popup shows a preview of an image / video when you hover your mouse over a link.
+1. **Caching** speeds up profile loads and other actions.
 
 
-### More Details
+### More Detailed Differences
 
 *   Ads view
     *    Highlight ads from characters most interesting to you
@@ -42,10 +43,13 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Display match score in search results
     *    Current search filters are listed in the search dialog
     *    Search filters can be reset
+*   Character status
+    *    Last 10 status messages are stored and can be accessed from the 'Set status' dialog
 *   General
-    *    Character profiles, guestbooks, friend lists, and image lists are cached for faster access.
+    *    Character profiles, guestbooks, friend lists, and image lists are cached for faster access
     *    Conversation dialog can be opened by typing in a character name
-    *    Message search also checks character names
+    *    Message search matches character names
+    *    PM list shows characters' online status as a colored icon
 
 
 ## How to Set Up Ads
@@ -76,10 +80,9 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Save character's status messages
 *   Conversation bot API
 *   'Filter unmatching ads' is not channel specific -- it's either on everywhere or nowhere
-*   AD UI Cleanup / hide to popovers
+*   AD UI Cleanup / hide to popovers?
 *   image loading animation
-*   Ad cache is broken
-*   Show online / offline status on PM list
+*   Usually submissive vs usually submissive shows up as 'maybe'?
 
 
 # F-List Exported

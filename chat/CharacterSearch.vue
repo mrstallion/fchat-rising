@@ -286,7 +286,7 @@
 
         .search-spinner {
             float: right;
-            animation: search-spin 4s linear infinite;
+            animation: search-spin 0.75s linear infinite;
         }
     }
 

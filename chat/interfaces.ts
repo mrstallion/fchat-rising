@@ -145,13 +145,14 @@ export interface Logs {
 
 export namespace Settings {
     export type Keys = {
-        settings: Settings,
-        pinned: {channels: string[], private: string[]},
+        settings: Settings
+        pinned: {channels: string[], private: string[]}
         conversationSettings: {[key: string]: Conversation.Settings | undefined}
         modes: {[key: string]: Channel.Mode | undefined}
         recent: Conversation.RecentPrivateConversation[]
         recentChannels: Conversation.RecentChannelConversation[]
         hiddenUsers: string[]
+        statusHistory: string[]
     };
 
     export interface Store {

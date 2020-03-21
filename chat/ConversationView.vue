@@ -56,7 +56,7 @@
                             class="nav-link" href="#" @click.prevent="setMode(mode)">{{l('channel.mode.' + mode)}}</a>
                     </li>
                     <li>
-                        <a @click.prevent="toggleNonMatchingAds()" :class="{active: showNonMatchingAds, disabled: !showNonMatchingAds}" v-show="(conversation.mode == 'both' || conversation.mode == 'ads')"
+                        <a @click.prevent="toggleNonMatchingAds()" :class="{active: showNonMatchingAds}" v-show="(conversation.mode == 'both' || conversation.mode == 'ads')"
                             class="nav-link" href="#">Non-Matching</a>
                     </li>
                 </ul>
