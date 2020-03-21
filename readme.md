@@ -43,6 +43,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Display match score in search results
     *    Current search filters are listed in the search dialog
     *    Search filters can be reset
+    *    Last 15 searches are stored and can be accessed from the 'Search' dialog
 *   Character status
     *    Last 10 status messages are stored and can be accessed from the 'Set status' dialog
 *   General

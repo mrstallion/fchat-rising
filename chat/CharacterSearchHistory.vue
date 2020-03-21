@@ -1,19 +1,19 @@
 <template>
-    <modal ref="dialog" action="Status message history" buttonText="Select" @open="onMounted()" @submit="selectStatus" dialogClass="w-100 modal-lg">
-        <form class="status-picker" v-if="history.length > 0">
-            <div class="form-row" v-for="(historicStatus, index) in history" :class="{ 'selected-row': (index === selectedStatus)}">
+    <modal ref="dialog" action="Search history" buttonText="Select" @open="onMounted()" @submit="selectStatus" dialogClass="w-100 modal-lg">
+        <form class="search-history" v-if="history.length > 0">
+            <div class="form-row" v-for="(search, index) in history" :class="{ 'selected-row': (index === selectedSearch)}">
                 <div class="form-col radio-col">
-                    <input type="radio" :id="'history_status_' + index" :name="'history_status_' + index" v-model="selectedStatus" v-bind:value="index" />
+                    <input type="radio" :id="'search_history_' + index" :name="'search_history_' + index" v-model="selectedSearch" v-bind:value="index" />
                 </div>
                 <div class="form-col content-col">
-                    <label class="custom-control-label" :for="'history_status_' + index" @dblclick="submit">
-                        <bbcode :text="historicStatus"></bbcode>
+                    <label class="custom-control-label" :for="'search_history_' + index" @dblclick="submit">
+                        {{describeSearch(search)}}
                     </label>
                 </div>
             </div>
         </form>
         <div v-else>
-            <i>This character has no status message history.</i>
+            <i>This character has no search history.</i>
         </div>
     </modal>
 </template>
@@ -26,37 +26,45 @@
     import core from './core';
     import { BBCodeView } from '../bbcode/view';
     import * as _ from 'lodash';
+    import { SearchData } from './interfaces';
 
     @Component({
         components: {modal: Modal, dropdown: Dropdown, bbcode: BBCodeView(core.bbCodeParser)}
     })
-    export default class StatusPicker extends CustomDialog {
+    export default class CharacterSearchHistory extends CustomDialog {
         @Prop({required: true})
-        readonly callback!: (statusMessage: string) => void;
+        readonly callback!: (searchData: SearchData) => void;
 
         @Prop({required: true})
-        readonly curStatus!: string | undefined;
+        readonly curSearch!: SearchData | undefined;
 
-        history: string[] = [];
+        history: SearchData[] = [];
 
-        selectedStatus: number | null = null;
+        selectedSearch: number | null = null;
 
         @Hook('mounted')
         async onMounted(): Promise<void> {
-            this.history = (await core.settingsStore.get('statusHistory')) || [];
-            this.selectedStatus = null;
+            this.history = (await core.settingsStore.get('searchHistory')) || [];
+            this.selectedSearch = null;
 
-            if ((this.curStatus) && (this.curStatus.trim() !== '')) {
-                const cleanedStatus = this.curStatus.toLowerCase().trim();
+            if (this.curSearch) {
+                const cleanedSearch = JSON.stringify(this.curSearch, null, 0);
 
                 const index = _.findIndex(
                     this.history,
-                  (c: string) => (c.toString().toLowerCase().trim() === cleanedStatus)
+                  (c) => (JSON.stringify(c, null, 0) === cleanedSearch)
                 );
 
                 if (index >= 0) {
-                    this.selectedStatus = index;
+                    this.selectedSearch = index;
                 }
+            }
+        }
+
+
+        selectStatus(): void {
+            if (this.selectedSearch !== null) {
+                this.callback(this.history[this.selectedSearch]);
             }
         }
 
@@ -66,16 +74,22 @@
         }
 
 
-        selectStatus(): void {
-            if (this.selectedStatus !== null) {
-                this.callback(this.history[this.selectedStatus]);
-            }
+        describeSearch(searchData: SearchData): string {
+            return _.join(
+                _.map(
+                    // tslint:disable-next-line no-unsafe-any no-any
+                    _.flatten(_.map(searchData as any)),
+                    // tslint:disable-next-line no-unsafe-any no-any
+                    (v) => _.get(v, 'name', v)
+                ),
+                ', '
+            );
         }
     }
 </script>
 
 <style lang="scss">
-    .status-picker {
+    .search-history {
         .radio-col {
             display: none;
         }

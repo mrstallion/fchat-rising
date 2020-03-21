@@ -186,3 +186,9 @@ import {InlineDisplayMode} from '../interfaces';
         }
     }
 </script>
+
+<style lang="scss">
+    .modal-footer {
+        min-height: initial;
+    }
+</style>

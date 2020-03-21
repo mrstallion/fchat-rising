@@ -143,6 +143,19 @@ export interface Logs {
     canZip: boolean;
 }
 
+export type SearchKink = {id: number, name: string, description: string};
+
+export interface SearchData {
+    kinks: SearchKink[]
+    genders: string[]
+    orientations: string[]
+    languages: string[]
+    furryprefs: string[]
+    roles: string[]
+    positions: string[]
+}
+
+
 export namespace Settings {
     export type Keys = {
         settings: Settings
@@ -153,6 +166,7 @@ export namespace Settings {
         recentChannels: Conversation.RecentChannelConversation[]
         hiddenUsers: string[]
         statusHistory: string[]
+        searchHistory: SearchData[]
     };
 
     export interface Store {

@@ -15,7 +15,12 @@
                 Searching for <span>{{searchString}}</span>
             </div>
 
-            <button class="btn btn-outline-secondary" @click.prevent="reset()">Reset</button>
+            <div class="btn-group">
+                <button class="btn btn-outline-secondary" @click.prevent="showHistory()">History</button>
+                <button class="btn btn-outline-secondary" @click.prevent="reset()">Reset</button>
+            </div>
+
+            <search-history ref="searchHistory" :callback="updateSearch" :curSearch="data"></search-history>
         </div>
         <div v-else-if="results" class="results">
             <h4>
@@ -44,20 +49,19 @@
     import Modal from '../components/Modal.vue';
     import {characterImage} from './common';
     import core from './core';
-    import {Character, Connection} from './interfaces';
+    import { Character, Connection, SearchData, SearchKink } from './interfaces';
     import l from './localize';
     import UserView from './UserView.vue';
     import * as _ from 'lodash';
     import {EventBus} from './preview/event-bus';
+    import CharacterSearchHistory from './CharacterSearchHistory.vue';
 
     type Options = {
-        kinks: Kink[],
+        kinks: SearchKink[],
         listitems: {id: string, name: string, value: string}[]
     };
 
     let options: Options | undefined;
-
-    type Kink = {id: number, name: string, description: string};
 
     function sort(x: Character, y: Character): number {
         if(x.status === 'looking' && y.status !== 'looking') return -1;
@@ -87,18 +91,9 @@
         return 0;
     }
 
-    interface Data {
-        kinks: Kink[]
-        genders: string[]
-        orientations: string[]
-        languages: string[]
-        furryprefs: string[]
-        roles: string[]
-        positions: string[]
-    }
 
     @Component({
-        components: {modal: Modal, user: UserView, 'filterable-select': FilterableSelect, bbcode: BBCodeView(core.bbCodeParser)}
+        components: {modal: Modal, user: UserView, 'filterable-select': FilterableSelect, bbcode: BBCodeView(core.bbCodeParser), 'search-history': CharacterSearchHistory}
     })
     export default class CharacterSearch extends CustomDialog {
         l = l;
@@ -107,9 +102,9 @@
         results: Character[] | undefined;
         resultsComplete = false;
         characterImage = characterImage;
-        options!: Data;
-        data: Data = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: []};
-        listItems: ReadonlyArray<keyof Data> = ['genders', 'orientations', 'languages', 'furryprefs', 'roles', 'positions'];
+        options!: SearchData;
+        data: SearchData = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: []};
+        listItems: ReadonlyArray<keyof SearchData> = ['genders', 'orientations', 'languages', 'furryprefs', 'roles', 'positions'];
 
         searchString = '';
 
@@ -216,7 +211,7 @@
         }
 
 
-        filterKink(filter: RegExp, kink: Kink): boolean {
+        filterKink(filter: RegExp, kink: SearchKink): boolean {
             if(this.data.kinks.length >= 5)
                 return this.data.kinks.indexOf(kink) !== -1;
             return filter.test(kink.name);
@@ -232,6 +227,13 @@
         }
 
 
+        updateSearch(data?: SearchData): void {
+          if (data) {
+            this.data = data;
+          }
+        }
+
+
         submit(): void {
             if(this.results !== undefined) {
                 this.results = undefined;
@@ -240,11 +242,29 @@
             this.error = '';
             const data: Connection.ClientCommands['FKS'] & {[key: string]: (string | number)[]} = {kinks: []};
             for(const key in this.data) {
-                const item = this.data[<keyof Data>key];
+                const item = this.data[<keyof SearchData>key];
                 if(item.length > 0)
-                    data[key] = key === 'kinks' ? (<Kink[]>item).map((x) => x.id) : (<string[]>item);
+                    data[key] = key === 'kinks' ? (<SearchKink[]>item).map((x) => x.id) : (<string[]>item);
             }
             core.connection.send('FKS', data);
+
+            // tslint:disable-next-line
+            this.updateSearchHistory(this.data);
+        }
+
+
+        showHistory(): void {
+          (<CharacterSearchHistory>this.$refs.searchHistory).show();
+        }
+
+
+        async updateSearchHistory(data: SearchData): Promise<void> {
+            const history = (await core.settingsStore.get('searchHistory')) || [];
+            const dataStr = JSON.stringify(data, null, 0);
+            const filteredHistory = _.reject(history, (h: SearchData) => (JSON.stringify(h, null, 0) === dataStr));
+            const newHistory: SearchData[] = _.take(_.concat([data], filteredHistory), 15);
+
+            await core.settingsStore.set('searchHistory', newHistory);
         }
     }
 </script>

@@ -126,7 +126,8 @@ export class ImagePreviewMutator {
         this.add('youtube.com', this.getBaseJsMutatorScript(['video']), undefined, 'dom-ready');
         this.add('instantfap.com', this.getBaseJsMutatorScript(['#post video', '#post img']));
         this.add('webmshare.com', this.getBaseJsMutatorScript(['video']));
-        this.add('pornhub.com', this.getBaseJsMutatorScript(['.mainPlayerDiv video[preload="auto"]', '.mainPlayerDiv video[preload="none"]', '.mainPlayerDiv video', '.photoImageSection img']));
+        this.add('pornhub.com', this.getBaseJsMutatorScript(['#video, video', '.mainPlayerDiv video', '.photoImageSection img']));
+        this.add('vimeo.com', this.getBaseJsMutatorScript(['#video, video', '#image, img']));
         this.add('sex.com', this.getBaseJsMutatorScript(['.image_frame video', '.image_frame img']));
         this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript(['picture video', 'picture img']));
         this.add('postimg.cc', this.getBaseJsMutatorScript(['video', '#main-image']));
@@ -199,7 +200,7 @@ export class ImagePreviewMutator {
         );
     }
 
-    getBaseJsMutatorScript(elSelector: string[], skipElementRemove: boolean = false): string {
+    getBaseJsMutatorScript(elSelector: string[], skipElementRemove: boolean = false, safeTags: string[] = []): string {
         return `const { ipcRenderer } = require('electron');
             const body = document.querySelector('body');
             const html = document.querySelector('html');
@@ -252,12 +253,14 @@ export class ImagePreviewMutator {
             body.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
                 + 'top: 0 !important; left: 0 !important; position: absolute !important;'
-                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;';
+                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;'
+                + 'display: block !important; visibility: visible !important';
 
             img.style = 'object-position: top left !important; object-fit: contain !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
                 + 'margin: 0 !imporant; border: 0 !important; padding: 0 !important;'
-                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;';
+                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;'
+                + 'display: block !important; visibility: visible !important';
 
             img.class = '';
             el.class = '';
@@ -266,7 +269,8 @@ export class ImagePreviewMutator {
             html.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
                 + 'top: 0 !important; left: 0 !important; position: absolute !important;'
-                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;';
+                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;'
+                + 'display: block !important; visibility: visible !important';
 
             ${this.debug ? "console.log('Wrapper', el);" : ''}
 
@@ -322,8 +326,14 @@ export class ImagePreviewMutator {
 
             let removeList = [];
             const safeIds = ['flistWrapper', 'flistError', 'flistHider'];
+            const safeTags = [${_.map(safeTags, (t) => `'${t.toLowerCase()}'`).join(',')}];
 
-            body.childNodes.forEach((el) => ((safeIds.indexOf(el.id) < 0) ? removeList.push(el) : true));
+            body.childNodes.forEach((el) => (
+                (
+                    (safeIds.indexOf(el.id) < 0)
+                    && ((!el.tagName) || (safeTags.indexOf(el.tagName.toLowerCase())) < 0)
+                ) ? removeList.push(el) : true)
+            );
 
             ${skipElementRemove ? '' : 'removeList.forEach((el) => el.remove());'}
             removeList = [];
