@@ -31,7 +31,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Custom kink explanations can be expanded inline
     *    Custom kinks are highlighted
     *    Gender, anthro/human preference, age, sexual preference, and sub/dom preference are highlighted if compatible or incompatible
-    *    Guestbook, friend, and group counts are visible on tabs
+    *    Guestbook, friend, and group counts are visible on tab titles
     *    Character images are expanded inline
     *    Cleaner presentation for the side bar details (age, etc.), sorted in most relevant order
     *    Less informative side bar details (views, contact) are separated and shown in a less prominent way
@@ -55,17 +55,26 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 
 ## How to Set Up Ads
 
-1. Open a conversation channel of your preference, such as `#LFRP`
-1. Click `Tab Settings`
-1. Enter one or more `Channel Auto-Posting Ads`
+1. Open a conversation channel of your preference, such as `#Sex Driven LFRP`
+1. Locate `Ads` dropdown at the top right corner of the channel view
+1. Click `Ads > Edit Channel Ads`
+1. Enter one or more ads
 1. Click `Save settings`
-1. Click `Auto-Post Ads`
+1. Click `Ads > Start Posting Ads`
+1. To stop, click `Ads > Stop Posting Ads`
 
 
 ## FAQ
 
-1. The more information you have in your profile (**non-custom** kinks in particular), the better the matching quality will be.
-1. Non-binary gender preference matching relies on kinks. For example, if your non-binary character has a preference for females, make sure 'females' are listed as a favorite kink.
+1. The more information you have in your profile (**non-custom** kinks in particular), the better the matching quality will be. The algorithm considers the following data points:
+   *   Age
+   *   Gender
+   *   Sexual preference
+   *   Dominance preference
+   *   Human/anthro preference
+   *   Non-custom kinks
+   *   Species
+1. Maching for non-binary genders relies on kinks. For example, if your non-binary character has a preference for females, make sure 'females' are listed as a favorite kink.
 1. 'Underage' kink is considered to apply to characters aged 16 or above; 'ageplay' kink is considered to apply to characters aged 16 or below.
 1. 'Older characters' and 'younger characters' kink preferences are interpreted as age difference of 5+ years.
 1. Comparison results will get faster over time, as more and more character data is cached.
@@ -75,15 +84,10 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 
 *   Collect data on ads / responses to determine which ads work best
 *   Preview mode should allow detaching from the main window
-*   Split chat view / separate window for specific chats?
 *   Improve log browsing
-*   Reposition ad settings and toggle
-*   Save character's status messages
 *   Conversation bot API
 *   'Filter unmatching ads' is not channel specific -- it's either on everywhere or nowhere
-*   AD UI Cleanup / hide to popovers?
-*   image loading animation
-*   Usually submissive vs usually submissive shows up as 'maybe'?
+*   Bug? Usually submissive vs usually submissive shows up as 'maybe'
 
 
 # F-List Exported

@@ -21,14 +21,13 @@
 <script lang="ts">
     import { Component, Hook, Prop } from '@f-list/vue-ts';
     import Modal from '../components/Modal.vue';
-    import Dropdown from '../components/Dropdown.vue';
     import CustomDialog from '../components/custom_dialog';
     import core from './core';
     import { BBCodeView } from '../bbcode/view';
     import * as _ from 'lodash';
 
     @Component({
-        components: {modal: Modal, dropdown: Dropdown, bbcode: BBCodeView(core.bbCodeParser)}
+        components: {modal: Modal, bbcode: BBCodeView(core.bbCodeParser)}
     })
     export default class StatusPicker extends CustomDialog {
         @Prop({required: true})

@@ -50,16 +50,31 @@
                     <a href="#" @click.prevent="reportDialog.report()" class="btn">
                         <span class="fa fa-exclamation-triangle"></span><span class="btn-text">{{l('chat.report')}}</span></a>
                 </div>
-                <ul class="nav nav-pills mode-switcher">
-                    <li v-for="mode in modes" class="nav-item">
-                        <a :class="isChannel(conversation) ? {active: conversation.mode == mode, disabled: conversation.channel.mode != 'both'} : undefined"
-                            class="nav-link" href="#" @click.prevent="setMode(mode)">{{l('channel.mode.' + mode)}}</a>
-                    </li>
-                    <li>
-                        <a @click.prevent="toggleNonMatchingAds()" :class="{active: showNonMatchingAds}" v-show="(conversation.mode == 'both' || conversation.mode == 'ads')"
-                            class="nav-link" href="#">Non-Matching</a>
-                    </li>
-                </ul>
+
+<!--                <ul class="nav nav-pills mode-switcher">-->
+<!--                    <li v-for="mode in modes" class="nav-item">-->
+<!--                        <a :class="isChannel(conversation) ? {active: conversation.mode == mode, disabled: conversation.channel.mode != 'both'} : undefined"-->
+<!--                            class="nav-link" href="#" @click.prevent="setMode(mode)">{{l('channel.mode.' + mode)}}</a>-->
+<!--                    </li>-->
+<!--                    <li>-->
+<!--                        <a @click.prevent="toggleNonMatchingAds()" :class="{active: showNonMatchingAds}" v-show="(conversation.mode == 'both' || conversation.mode == 'ads')"-->
+<!--                            class="nav-link" href="#">Non-Matching</a>-->
+<!--                    </li>-->
+<!--                </ul>-->
+
+                <div class="btn-toolbar">
+                    <dropdown :keep-open="false" title="View" :icon-class="{fas: true, 'fa-comments': conversation.mode === 'chat', 'fa-ad': conversation.mode === 'ads', 'fa-asterisk': conversation.mode === 'both'}" wrap-class="btn-group views" link-class="btn btn-secondary dropdown-toggle" v-show="(conversation.channel.mode == 'both')">
+                        <button v-for="mode in modes" class="dropdown-item" :class="{ selected: conversation.mode == mode }" type="button" @click="setMode(mode)">{{l('channel.mode.' + mode)}}</button>
+                    </dropdown>
+
+                    <dropdown :keep-open="false" title="Ads" :icon-class="{fas: true, 'fa-pause': !conversation.adManager.isActive(), 'fa-play': conversation.adManager.isActive()}" wrap-class="btn-group ads" link-class="btn btn-secondary dropdown-toggle" v-show="(conversation.channel.mode == 'both' || conversation.channel.mode == 'ads')">
+                        <button class="dropdown-item" type="button" @click="toggleAutoPostAds()">{{conversation.adManager.isActive() ? 'Stop' : 'Start'}} Posting Ads</button>
+                        <button class="dropdown-item" type="button" @click="showAdSettings()">Edit Channel Ads</button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" :class="{ selected: showNonMatchingAds }" type="button" @click="toggleNonMatchingAds()">Show Incompatible Ads</button>
+                    </dropdown>
+                </div>
+
             </div>
             <div style="z-index:5;position:absolute;left:0;right:0;max-height:60%;overflow:auto"
                 :style="{display: descriptionExpanded ? 'block' : 'none'}" class="bg-solid-text border-bottom">
@@ -91,7 +106,7 @@
             </div>
 
             <a class="btn btn-sm btn-outline-primary renew-autoposts" @click="renewAutoPosting()" v-if="!adsRequireSetup">{{l('admgr.renew')}}</a>
-            <a class="btn btn-sm btn-outline-primary renew-autoposts" @click="showSettings()" v-if="adsRequireSetup">{{l('admgr.setup')}}</a>
+            <a class="btn btn-sm btn-outline-primary renew-autoposts" @click="showAdSettings()" v-if="adsRequireSetup">{{l('admgr.setup')}}</a>
         </div>
         <div class="border-top messages" :class="getMessageWrapperClasses()" ref="messages"
              @scroll="onMessagesScroll" style="flex:1;overflow:auto;margin-top:2px">
@@ -130,23 +145,24 @@
                 </div>
                 <ul class="nav nav-pills send-ads-switcher" v-if="isChannel(conversation)"
                     style="position:relative;z-index:10;margin-right:5px">
-                    <li class="nav-item">
+                    <li class="nav-item" v-show="((conversation.channel.mode === 'both') || (conversation.channel.mode === 'chat'))">
                         <a href="#" :class="{active: !conversation.isSendingAds, disabled: (conversation.channel.mode != 'both') || (conversation.adManager.isActive())}"
                             class="nav-link" @click.prevent="setSendingAds(false)">{{l('channel.mode.chat')}}</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" v-show="((conversation.channel.mode === 'both') || (conversation.channel.mode === 'ads'))">
                         <a href="#" :class="{active: conversation.isSendingAds, disabled: (conversation.channel.mode != 'both') || (conversation.adManager.isActive())}"
                             class="nav-link" @click.prevent="setSendingAds(true)">{{adsMode}}</a>
                     </li>
-                    <li class="nav-item">
-                        <a href="#" :class="{active: conversation.adManager.isActive()}" class="nav-link toggle-autopost" @click="toggleAutoPostAds()">{{l('admgr.toggleAutoPost')}}</a>
-                    </li>
+<!--                    <li class="nav-item">-->
+<!--                        <a href="#" :class="{active: conversation.adManager.isActive()}" class="nav-link toggle-autopost" @click="toggleAutoPostAds()">{{l('admgr.toggleAutoPost')}}</a>-->
+<!--                    </li>-->
                 </ul>
                 <div class="btn btn-sm btn-primary" v-show="!settings.enterSend" @click="sendButton">{{l('chat.send')}}</div>
             </div>
         </bbcode-editor>
         <command-help ref="helpDialog"></command-help>
         <settings ref="settingsDialog" :conversation="conversation"></settings>
+        <adSettings ref="adSettingsDialog" :conversation="conversation"></adSettings>
         <logs ref="logsDialog" :conversation="conversation"></logs>
         <manage-channel ref="manageDialog" v-if="isChannel(conversation)" :channel="conversation.channel"></manage-channel>
         <ad-view ref="adViewer" v-if="isPrivate(conversation) && conversation.character" :character="conversation.character"></ad-view>
@@ -166,6 +182,7 @@
     import CommandHelp from './CommandHelp.vue';
     import { characterImage, getByteLength, getKey } from './common';
     import ConversationSettings from './ConversationSettings.vue';
+    import ConversationAdSettings from './ConversationAdSettings.vue';
     import core from './core';
     import {Channel, channelModes, Character, Conversation, Settings} from './interfaces';
     import l from './localize';
@@ -177,13 +194,14 @@
     import UserView from './UserView.vue';
     import UserChannelList from './UserChannelList.vue';
     import * as _ from 'lodash';
+    import Dropdown from '../components/Dropdown.vue';
 
 
     @Component({
         components: {
             user: UserView, 'bbcode-editor': Editor, 'manage-channel': ManageChannel, settings: ConversationSettings,
             logs: Logs, 'message-view': MessageView, bbcode: BBCodeView(core.bbCodeParser), 'command-help': CommandHelp,
-            'ad-view': AdView, 'channel-list': UserChannelList
+            'ad-view': AdView, 'channel-list': UserChannelList, dropdown: Dropdown, adSettings: ConversationAdSettings
         }
     })
     export default class ConversationView extends Vue {
@@ -447,6 +465,10 @@
             (<ConversationSettings>this.$refs['settingsDialog']).show();
         }
 
+        showAdSettings(): void {
+            (<ConversationAdSettings>this.$refs['adSettingsDialog']).show();
+        }
+
         showManage(): void {
             (<ManageChannel>this.$refs['manageDialog']).show();
         }
@@ -573,6 +595,47 @@
             }
         }
 
+        .btn-toolbar {
+            .btn-group {
+                margin-right: 0.3rem;
+
+                &:last-child {
+                    margin-right: 0;
+                }
+
+                a.btn {
+                    padding-left: 0.5rem;
+                    padding-right: 0.5rem;
+
+                    i {
+                        margin-right: 0.4rem;
+                        font-size: 90%;
+                    }
+                }
+
+                button::before {
+                    display: inline-block;
+                    width: 1.3rem;
+                    height: 1rem;
+                    content: '';
+                    margin-left: -1.3rem;
+                    margin-right: 0.1rem;
+                    padding-left: 0.3rem;
+                    font-weight: bold;
+                }
+
+                button.selected::before {
+                    content: '✓';
+                }
+
+                &.views {
+                    button.selected::before {
+                        content: '•';
+                    }
+                }
+            }
+        }
+
         .send-ads-switcher a {
             padding: 3px 10px;
         }
@@ -584,13 +647,14 @@
 
 
         .auto-ads {
-            background-color: rgba(255, 128, 32, 0.8);
+            background-color: rgb(220, 113, 31);
             padding-left: 10px;
             padding-right: 10px;
             padding-top: 5px;
             padding-bottom: 5px;
             margin: 0;
             position: relative;
+            margin-top: 5px;
 
             .renew-autoposts {
                 display: block;

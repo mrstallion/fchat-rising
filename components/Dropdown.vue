@@ -1,7 +1,8 @@
 <template>
-    <div class="dropdown" @focusout="blur">
+    <div :class="wrapClass" @focusout="blur">
         <a :class="linkClass" aria-haspopup="true" :aria-expanded="isOpen" @click.prevent="isOpen = !isOpen" href="#"
             style="width:100%;text-align:left;align-items:center" role="button" tabindex="-1" ref="button">
+            <i :class="iconClass" v-if="!!iconClass"></i>
             <slot name="title">{{title}}</slot>
         </a>
         <div class="dropdown-menu" ref="menu" @mousedown.prevent.stop @click.prevent.stop="menuClick()">
@@ -19,6 +20,10 @@
         isOpen = false;
         @Prop({default: 'btn btn-secondary dropdown-toggle'})
         readonly linkClass!: string;
+        @Prop({default: 'dropdown'})
+        readonly wrapClass!: string;
+        @Prop
+        readonly iconClass?: string;
         @Prop
         readonly keepOpen?: boolean;
         @Prop
