@@ -26,6 +26,18 @@ export class ImageUrlMutator {
 
     protected init(): void {
         this.add(
+          /^https?:\/\/(www.)?pornhub.com\/view_video.php\?viewkey=([a-z0-9A-Z]+)/,
+          async(_url: string, match: RegExpMatchArray): Promise<string> => {
+            // https://www.pornhub.com/view_video.php?viewkey=ph5e11b975327f2
+            // https://www.pornhub.com/embed/ph5e11b975327f2
+
+            const videoId = match[2];
+
+            return `https://pornhub.com/embed/${videoId}`;
+          }
+        );
+
+        this.add(
             /^https?:\/\/imgur.com\/gallery\/([a-zA-Z0-9]+)/,
             async(url: string, match: RegExpMatchArray): Promise<string> => {
                 // Imgur Gallery

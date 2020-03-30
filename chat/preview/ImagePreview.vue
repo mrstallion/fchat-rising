@@ -125,11 +125,8 @@
                     const url = webview.getURL();
                     const js = this.jsMutator.getMutatorJsForSite(url, 'update-target-url');
 
-                    if (this.debug)
-                        console.log('ImagePreview update-target', event, js);
-
-                    if ((js) && (this.runJs))
-                        webview.executeJavaScript(js);
+                    // tslint:disable-next-line
+                    this.executeJavaScript(js, 'update-target-url', event);
                 }
             );
 
@@ -140,11 +137,8 @@
                     const url = webview.getURL();
                     const js = this.jsMutator.getMutatorJsForSite(url, 'dom-ready');
 
-                    if (this.debug)
-                        console.log('ImagePreview dom-ready', event, js);
-
-                    if ((js) && (this.runJs))
-                        webview.executeJavaScript(js, true);
+                    // tslint:disable-next-line
+                    this.executeJavaScript(js, 'dom-ready', event);
                 }
             );
 
@@ -154,13 +148,28 @@
                 (event: Event) => {
                     const e = event as DidFailLoadEvent;
 
+                    if (e.errorCode < 0) {
+                      const url = webview.getURL();
+                      const qjs = this.jsMutator.getMutatorJsForSite(url, 'update-target-url');
+
+                      // tslint:disable-next-line
+                      this.executeJavaScript(qjs, 'did-fail-load-but-still-loading', event);
+                      return;
+                    }
+
+                    // if (e.errorCode < 100) {
+                    //   const url = webview.getURL();
+                    //   const js = this.jsMutator.getMutatorJsForSite(url, 'update-target-url');
+                    //
+                    //   this.executeJavaScript(js, 'did-fail-load-but-still-loading', event);
+                    //
+                    //   return;
+                    // }
+
                     const js = this.jsMutator.getErrorMutator(e.errorCode, e.errorDescription);
 
-                    if (this.debug)
-                        console.log('ImagePreview did-fail-load', event, js);
-
-                    if ((js) && (this.runJs) && (e.errorCode >= 400))
-                        webview.executeJavaScript(js);
+                    // tslint:disable-next-line
+                    this.executeJavaScript(js, 'did-fail-load', event);
                 }
             );
 
@@ -172,11 +181,8 @@
                     if (e.httpResponseCode >= 400) {
                         const js = this.jsMutator.getErrorMutator(e.httpResponseCode, e.httpStatusText);
 
-                        if (this.debug)
-                            console.log('ImagePreview did-navigate', event, js);
-
-                        if ((js) && (this.runJs))
-                            webview.executeJavaScript(js);
+                        // tslint:disable-next-line
+                        this.executeJavaScript(js, 'did-navigate', event);
                     }
                 }
             );
@@ -185,8 +191,7 @@
             webview.addEventListener(
                 'did-finish-load',
                 (event: Event) => {
-                    if (this.debug)
-                        console.log('ImagePreview did-finish-load', event);
+                    this.debugLog('ImagePreview did-finish-load', event);
                 }
             );
 
@@ -194,8 +199,7 @@
             webview.addEventListener(
                 'ipc-message',
                 (event: IpcMessageEvent) => {
-                    if (this.debug)
-                        console.log('ImagePreview ipc-message', event);
+                    this.debugLog('ImagePreview ipc-message', event);
 
                     if (event.channel === 'webview.img') {
                         // tslint:disable-next-line:no-unsafe-any
@@ -219,8 +223,7 @@
                     webview.addEventListener(
                         en,
                         (event: Event) => {
-                            if (this.debug)
-                                console.log(`ImagePreview ${en} ${Date.now()}`, event);
+                            this.debugLog(`ImagePreview ${en} ${Date.now()}`, event);
                         }
                     );
                 }
@@ -233,9 +236,7 @@
                         this.initialCursorPosition = screen.getCursorScreenPoint();
 
                     if ((this.visible) && (this.shouldDismiss) && (this.hasMouseMovedSince()) && (!this.exitInterval) && (!this.interval)) {
-                        if (this.debug) {
-                            console.log('ImagePreview: call hide from interval');
-                        }
+                        this.debugLog('ImagePreview: call hide from interval');
 
                         this.hide();
                     }
@@ -251,13 +252,11 @@
             // tslint:disable-next-line:no-unsafe-any
             this.localPreviewStyle = this.localPreviewHelper.renderStyle();
 
-            if (this.debug) {
-                console.log(
-                    'ImagePreview: reRenderStyles', 'external',
-                    JSON.parse(JSON.stringify(this.externalPreviewStyle)),
-                    'local', JSON.parse(JSON.stringify(this.localPreviewStyle))
-                );
-            }
+            this.debugLog(
+                'ImagePreview: reRenderStyles', 'external',
+                JSON.parse(JSON.stringify(this.externalPreviewStyle)),
+                'local', JSON.parse(JSON.stringify(this.localPreviewStyle))
+            );
         }
 
 
@@ -267,9 +266,7 @@
             }
 
             if ((width) && (height)) {
-                if (this.debug) {
-                    console.log('ImagePreview: updatePreviewSize', width, height, width / height);
-                }
+                this.debugLog('ImagePreview: updatePreviewSize', width, height, width / height);
 
                 this.externalPreviewHelper.setRatio(width / height);
                 this.reRenderStyles();
@@ -278,8 +275,7 @@
 
 
         hide(): void {
-            if (this.debug)
-                console.log('ImagePreview: hide', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible());
+            this.debugLog('ImagePreview: hide', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible());
 
             this.cancelExitTimer();
 
@@ -302,9 +298,7 @@
         dismiss(initialUrl: string, force: boolean = false): void {
             const url = this.jsMutator.mutateUrl(initialUrl);
 
-            if (this.debug) {
-                console.log('ImagePreview: dismiss', url);
-            }
+            this.debugLog('ImagePreview: dismiss', url);
 
             if (this.url !== url)
                 return; // simply ignore
@@ -330,8 +324,7 @@
             if ((!this.hasMouseMovedSince()) && (!force))
                 return;
 
-            if (this.debug)
-                console.log('ImagePreview: dismiss.exec', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible(), url);
+            this.debugLog('ImagePreview: dismiss.exec', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible(), url);
 
             // This timeout makes the preview window disappear with a slight delay, which helps UX
             // when dealing with situations such as quickly scrolling text that moves the cursor away
@@ -346,39 +339,27 @@
         show(initialUrl: string): void {
             const url = this.jsMutator.mutateUrl(initialUrl);
 
-            if (this.debug)
-                console.log('ImagePreview: show', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible(),
+            this.debugLog('ImagePreview: show', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible(),
                 this.visible, this.hasMouseMovedSince(), !!this.interval, this.sticky, url);
 
             // console.log('SHOW');
 
             if ((this.visible) && (!this.exitInterval) && (!this.hasMouseMovedSince())) {
-                if (!this.sticky) {
-                    if (this.debug) {
-                        console.log('ImagePreview: show cancel: visible & not moved');
-                    }
-                    return;
-                }
+                this.debugLog('ImagePreview: show cancel: visible & not moved');
+                return;
             }
 
             if ((this.url === url) && ((this.visible) || (this.interval))) {
-                if (this.debug) {
-                    console.log('ImagePreview: same url', url, this.url);
-                }
-
+                this.debugLog('ImagePreview: same url', url, this.url);
                 return;
             }
 
             if ((this.url) && (this.sticky) && (this.visible)) {
-                if (this.debug) {
-                    console.log('ImagePreview: sticky visible');
-                }
-
+                this.debugLog('ImagePreview: sticky visible');
                 return;
             }
 
-            if (this.debug)
-                console.log('ImagePreview: show.exec', url);
+            this.debugLog('ImagePreview: show.exec', url);
 
             const due = ((url === this.exitUrl) && (this.exitInterval)) ? 0 : 100;
 
@@ -393,8 +374,7 @@
             // tslint:disable-next-line no-unnecessary-type-assertion
             this.interval = setTimeout(
                 () => {
-                    if (this.debug)
-                        console.log('ImagePreview: show.timeout', this.url);
+                    this.debugLog('ImagePreview: show.timeout', this.url);
 
                     this.localPreviewHelper.match(this.domain as string)
                         ? this.localPreviewHelper.show(this.url as string)
@@ -475,6 +455,31 @@
                 webview.openDevTools();
             }
         }
+
+
+        async executeJavaScript(js: string | undefined, context: string = 'unknown', logDetails?: any): Promise<any> {
+            const webview = this.getWebview();
+
+            if (!js) {
+                this.debugLog(`ImagePreview ${context}: No JavaScript to execute`, logDetails);
+                return;
+            }
+
+            this.debugLog(`ImagePreview ${context}`, js, logDetails);
+
+            const result = await (webview.executeJavaScript(js) as unknown as Promise<any>);
+
+            this.debugLog(`ImagePreview result-${context}`, result);
+
+            return result;
+        }
+
+        debugLog(...args: any[]): void {
+            if (this.debug) {
+                console.log(...args);
+            }
+        }
+
 
         toggleStickyMode(): void {
             this.sticky = !this.sticky;

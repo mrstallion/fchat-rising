@@ -5,6 +5,7 @@ import * as urlHelper from 'url';
 
 
 import { domain as extractDomain } from '../../bbcode/core';
+import { PornhubIntegration } from './integration/pornhub';
 
 export interface PreviewMutator {
     match: string | RegExp;
@@ -34,7 +35,8 @@ export class ImagePreviewMutator {
     constructor(debug: boolean) {
         this.init();
 
-        this.debug = debug;
+        // this.debug = debug;
+        this.debug = debug || true;
     }
 
     setDebug(debug: boolean): void {
@@ -126,7 +128,6 @@ export class ImagePreviewMutator {
         this.add('youtube.com', this.getBaseJsMutatorScript(['video']), undefined, 'dom-ready');
         this.add('instantfap.com', this.getBaseJsMutatorScript(['#post video', '#post img']));
         this.add('webmshare.com', this.getBaseJsMutatorScript(['video']));
-        this.add('pornhub.com', this.getBaseJsMutatorScript(['#video, video', '.mainPlayerDiv video', '.photoImageSection img']));
         this.add('vimeo.com', this.getBaseJsMutatorScript(['#video, video', '#image, img']));
         this.add('sex.com', this.getBaseJsMutatorScript(['.image_frame video', '.image_frame img']));
         this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript(['picture video', 'picture img']));
@@ -137,6 +138,13 @@ export class ImagePreviewMutator {
         this.add('giphy.com', this.getBaseJsMutatorScript(['video', 'a > div > img']));
         this.add(/^media[0-9]\.tenor\.com$/, this.getBaseJsMutatorScript(['#view .file video', '#view .file img']));
         this.add('tenor.com', this.getBaseJsMutatorScript(['#view video', '#view img']));
+
+        this.add(
+            'pornhub.com',
+            PornhubIntegration.preprocess()
+                + this.getBaseJsMutatorScript(['#__flistCore', '#player'], true)
+                + PornhubIntegration.postprocess()
+        );
 
         this.add(
             'i.imgur.com',
@@ -222,7 +230,31 @@ export class ImagePreviewMutator {
 
             if (!img) { return; }
 
-            ipcRenderer.sendToHost('webview.img', img.width || img.naturalWidth || img.videoWidth, img.height || img.naturalHeight || img.videoHeight);
+            const sizePairs = [
+                ['naturalWidth', 'naturalHeight'],
+                ['videoWidth', 'videoHeight'],
+                ['width', 'height'],
+            ];
+
+            const imSize = sizePairs.reduce(
+                (acc, val) => {
+                    if ((acc.width) && (acc.height)) {
+                        return acc;
+                    }
+
+                    if ((img[val[0]]) && (img[val[1]])) {
+                        return {
+                            width: img[val[0]],
+                            height: img[val[1]]
+                        }
+                    }
+
+                    return acc;
+                },
+                {}
+            );
+
+            ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height);
 
             const el = document.createElement('div');
             el.id = 'flistWrapper';
@@ -337,6 +369,8 @@ export class ImagePreviewMutator {
 
             ${skipElementRemove ? '' : 'removeList.forEach((el) => el.remove());'}
             removeList = [];
+
+            window.stop();
         `;
     }
 
