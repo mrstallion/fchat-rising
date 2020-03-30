@@ -67,11 +67,18 @@
                         <button v-for="mode in modes" class="dropdown-item" :class="{ selected: conversation.mode == mode }" type="button" @click="setMode(mode)">{{l('channel.mode.' + mode)}}</button>
                     </dropdown>
 
-                    <dropdown :keep-open="false" title="Ads" :icon-class="{fas: true, 'fa-pause': !conversation.adManager.isActive(), 'fa-play': conversation.adManager.isActive()}" wrap-class="btn-group ads" link-class="btn btn-secondary dropdown-toggle" v-show="(conversation.channel.mode == 'both' || conversation.channel.mode == 'ads')">
-                        <button class="dropdown-item" type="button" @click="toggleAutoPostAds()">{{conversation.adManager.isActive() ? 'Stop' : 'Start'}} Posting Ads</button>
+                    <dropdown :keep-open="false" wrap-class="btn-group ads" link-style="" link-class="btn btn-secondary dropdown-toggle dropdown-toggle-split" v-show="(conversation.channel.mode == 'both' || conversation.channel.mode == 'ads')">
+                        <button class="dropdown-item" type="button" @click="toggleAutoPostAds()">{{conversation.adManager.isActive() ? 'Pause' : 'Start'}} Posting Ads</button>
                         <button class="dropdown-item" type="button" @click="showAdSettings()">Edit Channel Ads</button>
                         <div class="dropdown-divider"></div>
                         <button class="dropdown-item" :class="{ selected: showNonMatchingAds }" type="button" @click="toggleNonMatchingAds()">Show Incompatible Ads</button>
+
+                        <template v-slot:split>
+                            <a class="btn btn-secondary" @click="toggleAutoPostAds()">
+                                <i :class="{fas: true, 'fa-pause': conversation.adManager.isActive(), 'fa-play': !conversation.adManager.isActive()}"></i>
+                                {{conversation.adManager.isActive() ? 'Pause' : 'Start'}} Ads
+                            </a>
+                        </template>
                     </dropdown>
                 </div>
 
@@ -606,6 +613,7 @@
                 a.btn {
                     padding-left: 0.5rem;
                     padding-right: 0.5rem;
+                    color: #cbcbe5;
 
                     i {
                         margin-right: 0.4rem;
@@ -687,6 +695,7 @@
             .update {
                 color: rgba(255, 255, 255, 0.6);
                 font-size: 13px;
+                width: 75%;
             }
 
             .next {

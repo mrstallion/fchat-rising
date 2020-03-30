@@ -1,7 +1,8 @@
 <template>
     <div :class="wrapClass" @focusout="blur">
+        <slot name="split"></slot>
         <a :class="linkClass" aria-haspopup="true" :aria-expanded="isOpen" @click.prevent="isOpen = !isOpen" href="#"
-            style="width:100%;text-align:left;align-items:center" role="button" tabindex="-1" ref="button">
+            :style="linkStyle" role="button" tabindex="-1" ref="button">
             <i :class="iconClass" v-if="!!iconClass"></i>
             <slot name="title">{{title}}</slot>
         </a>
@@ -28,6 +29,8 @@
         readonly keepOpen?: boolean;
         @Prop
         readonly title?: string;
+        @Prop({default: 'width:100%;text-align:left;align-items:center'})
+        readonly linkStyle!: string;
 
         @Watch('isOpen')
         onToggle(): void {
