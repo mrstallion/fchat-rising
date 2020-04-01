@@ -1,6 +1,6 @@
 <template>
     <!-- hiding elements instead of using 'v-if' is used here as an optimization -->
-    <div class="image-preview-wrapper" :class="{interactive: sticky}" v-show="visible">
+    <div class="image-preview-wrapper" :class="{interactive: sticky, visible: visible}">
         <div class="image-preview-toolbar" v-show="sticky || debug">
             <a @click="toggleDevMode()" :class="{toggled: debug}" title="Debug Mode"><i class="fa fa-terminal"></i></a>
             <a @click="toggleJsMode()" :class="{toggled: runJs}" title="Expand Images"><i class="fa fa-magic"></i></a>
@@ -44,8 +44,12 @@
     import Timer = NodeJS.Timer;
     import IpcMessageEvent = Electron.IpcMessageEvent;
 
-    const screen = remote.screen;
+    import { ElectronBlocker } from '@cliqz/adblocker-electron';
+    import fetch from 'node-fetch';
 
+    // import { promises as fs } from 'fs';
+
+    const screen = remote.screen;
 
     interface DidFailLoadEvent extends Event {
         errorCode: number;
@@ -160,8 +164,11 @@
                     const e = event as DidFailLoadEvent;
 
                     if (e.errorCode < 0) {
-                      const url = webview.getURL();
-                      const qjs = this.jsMutator.getMutatorJsForSite(url, 'update-target-url');
+                      console.error('DID FAIL LOAD', event);
+                      const url = this.getUrl() || '';
+
+                      const qjs = this.jsMutator.getMutatorJsForSite(url, 'update-target-url')
+                        || this.jsMutator.getMutatorJsForSite(url, 'dom-ready');
 
                       // tslint:disable-next-line
                       this.executeJavaScript(qjs, 'did-fail-load-but-still-loading', event);
@@ -254,8 +261,44 @@
                 },
                 50
             );
+
+            // this.initAdBlocker();
         }
 
+
+        async initAdBlocker() {
+            const webview = this.getWebview();
+            const contents = remote.webContents.fromId(webview.getWebContentsId());
+
+            console.log('INITADBLOCKER');
+
+            const blocker = await ElectronBlocker.fromLists(
+                fetch,
+                [
+                    'https://easylist.to/easylist/easylist.txt',
+                    'https://easylist.to/easylist/easyprivacy.txt', // EasyPrivacy
+                    'https://easylist.to/easylist/fanboy-social.txt', // Fanboy Social
+                    'https://easylist.to/easylist/fanboy-annoyance.txt', // Fanboy Annoyances
+                    'https://filters.adtidy.org/extension/chromium/filters/2.txt', // AdGuard Base
+                    'https://filters.adtidy.org/extension/chromium/filters/11.txt', // AdGuard Mobile Ads
+                    'https://filters.adtidy.org/extension/chromium/filters/4.txt', // AdGuard Social Media
+                    'https://filters.adtidy.org/extension/chromium/filters/14.txt', // AdGuard Annoyances
+                    'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt', // uBlock Origin Filters
+                    'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt', // uBlock Origin Privacy
+                    'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt', // uBlock Origin Resource Abuse
+                ],
+              {
+                enableCompression: true,
+              },
+              // {
+              //   path: 'engine.bin',
+              //   read: fs.readFile,
+              //   write: fs.writeFile
+              // }
+            );
+
+            blocker.enableBlockingInSession(contents.session);
+        }
 
         reRenderStyles(): void {
             // tslint:disable-next-line:no-unsafe-any
@@ -476,13 +519,17 @@
                 return;
             }
 
-            this.debugLog(`ImagePreview ${context}`, js, logDetails);
+            this.debugLog(`ImagePreview execute-${context}`, js, logDetails);
 
-            const result = await (webview.executeJavaScript(js) as unknown as Promise<any>);
+            try {
+                const result = await (webview.executeJavaScript(js) as unknown as Promise<any>);
 
-            this.debugLog(`ImagePreview result-${context}`, result);
+                this.debugLog(`ImagePreview result-${context}`, result);
 
-            return result;
+                return result;
+            } catch (err) {
+                this.debugLog(`ImagePreview error-${context}`, err);
+            }
         }
 
         debugLog(...args: any[]): void {
@@ -514,6 +561,7 @@
         getWebview(): WebviewTag {
             return this.$refs.imagePreviewExt as WebviewTag;
         }
+
 
         reset(): void {
             this.externalPreviewHelper = new ExternalImagePreviewHelper(this);

@@ -85,7 +85,7 @@
         @Hook('mounted')
         async mounted(): Promise<void> {
             // top bar devtools
-            // browserWindow.webContents.openDevTools( { mode: 'detach' } );
+            browserWindow.webContents.openDevTools( { mode: 'detach' } );
 
             await this.addTab();
 
@@ -196,10 +196,10 @@
             const tray = new electron.remote.Tray(trayIcon);
             tray.setToolTip(l('title'));
             tray.on('click', (_) => this.trayClicked(tab));
-            const view = new electron.remote.BrowserView({webPreferences: {webviewTag: true, nodeIntegration: true}});
+            const view = new electron.remote.BrowserView({webPreferences: {webviewTag: true, nodeIntegration: true, spellcheck: true}});
 
             // tab devtools
-            // view.webContents.openDevTools();
+            view.webContents.openDevTools();
 
             view.setAutoResize({width: true, height: true});
             electron.ipcRenderer.send('tab-added', view.webContents.id);

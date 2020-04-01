@@ -38,6 +38,15 @@ export class ImageUrlMutator {
         );
 
         this.add(
+          /^https?:\/\/(www.)?gfycat.com\/([a-z0-9A-Z\-]+)\/?$/,
+          async(_url: string, match: RegExpMatchArray): Promise<string> => {
+            const gfyId = match[2];
+
+            return `https://gfycat.com/ifr/${gfyId}?controls=0&hd=1`;
+          }
+        );
+
+        this.add(
             /^https?:\/\/imgur.com\/gallery\/([a-zA-Z0-9]+)/,
             async(url: string, match: RegExpMatchArray): Promise<string> => {
                 // Imgur Gallery

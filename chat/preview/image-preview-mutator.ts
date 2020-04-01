@@ -123,8 +123,8 @@ export class ImagePreviewMutator {
         this.add('gelbooru.com', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('chan.sankakucomplex.com', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('danbooru.donmai.us', this.getBaseJsMutatorScript(['video', '#image']));
-        this.add('gfycat.com', this.getBaseJsMutatorScript(['video']), undefined, 'dom-ready');
-        this.add('gfycatporn.com', this.getBaseJsMutatorScript(['video']), undefined, 'dom-ready');
+        this.add('gfycat.com', this.getBaseJsMutatorScript(['video']) /*, undefined, 'dom-ready' */);
+        this.add('gfycatporn.com', this.getBaseJsMutatorScript(['video']) /*, undefined, 'dom-ready'*/);
         this.add('youtube.com', this.getBaseJsMutatorScript(['video']), undefined, 'dom-ready');
         this.add('instantfap.com', this.getBaseJsMutatorScript(['#post video', '#post img']));
         this.add('webmshare.com', this.getBaseJsMutatorScript(['video']));
@@ -236,24 +236,27 @@ export class ImagePreviewMutator {
                 ['width', 'height'],
             ];
 
-            const imSize = sizePairs.reduce(
-                (acc, val) => {
-                    if ((acc.width) && (acc.height)) {
-                        return acc;
-                    }
-
-                    if ((img[val[0]]) && (img[val[1]])) {
-                        return {
-                            width: img[val[0]],
-                            height: img[val[1]]
+            const resolveImgSize = function() {
+                return sizePairs.reduce(
+                    (acc, val) => {
+                        if ((acc.width) && (acc.height)) {
+                            return acc;
                         }
-                    }
 
-                    return acc;
-                },
-                {}
-            );
+                        if ((img[val[0]]) && (img[val[1]])) {
+                            return {
+                                width: img[val[0]],
+                                height: img[val[1]]
+                            }
+                        }
 
+                        return acc;
+                    },
+                    {}
+                );
+            }
+
+            const imSize = resolveImgSize();
             ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height);
 
             const el = document.createElement('div');
@@ -285,14 +288,14 @@ export class ImagePreviewMutator {
             body.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
                 + 'top: 0 !important; left: 0 !important; position: absolute !important;'
-                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;'
+                + 'min-width: initial !important; min-height: initial !important; max-width: initial !important; max-height: initial !important;'
                 + 'display: block !important; visibility: visible !important';
 
             img.style = 'object-position: top left !important; object-fit: contain !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
                 + 'margin: 0 !imporant; border: 0 !important; padding: 0 !important;'
-                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;'
-                + 'display: block !important; visibility: visible !important';
+                + 'min-width: initial !important; min-height: initial !important; max-width: initial !important; max-height: initial !important;'
+                + 'display: block !important; visibility: visible !important;';
 
             img.class = '';
             el.class = '';
@@ -301,7 +304,7 @@ export class ImagePreviewMutator {
             html.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
                 + 'top: 0 !important; left: 0 !important; position: absolute !important;'
-                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;'
+                + 'min-width: initial !important; min-height: initial !important; max-width: initial !important; max-height: initial !important;'
                 + 'display: block !important; visibility: visible !important';
 
             ${this.debug ? "console.log('Wrapper', el);" : ''}
@@ -327,7 +330,8 @@ export class ImagePreviewMutator {
             document.addEventListener('DOMContentLoaded', (event) => {
                 ${this.debug ? "console.log('on DOMContentLoaded');" : ''}
 
-                ipcRenderer.sendToHost('webview.img', img.width || img.naturalWidth, img.height || img.naturalHeight);
+                const imSize = resolveImgSize();
+                ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height);
 
                 if (
                     (img.play)
@@ -339,7 +343,8 @@ export class ImagePreviewMutator {
             document.addEventListener('load', (event) => {
                 ${this.debug ? "console.log('on load');" : ''}
 
-                ipcRenderer.sendToHost('webview.img', img.width || img.naturalWidth, img.height || img.naturalHeight);
+                const imSize = resolveImgSize();
+                ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height);
 
                 if (
                     (img.play)
@@ -369,8 +374,6 @@ export class ImagePreviewMutator {
 
             ${skipElementRemove ? '' : 'removeList.forEach((el) => el.remove());'}
             removeList = [];
-
-            window.stop();
         `;
     }
 

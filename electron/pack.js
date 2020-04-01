@@ -20,7 +20,7 @@ const modules = path.join(__dirname, 'app', 'node_modules');
 // fs.copyFileSync(require.resolve(keytarPath), path.join(modules, keytarPath));
 
 const includedPaths = [
-    'spellchecker/build/Release/spellchecker.node',
+    // 'spellchecker/build/Release/spellchecker.node',
     'keytar/build/Release/keytar.node',
     'throat'
 ];

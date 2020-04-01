@@ -45,6 +45,8 @@ import {ensureDictionary, getAvailableDictionaries} from './dictionaries';
 import * as windowState from './window_state';
 import BrowserWindow = Electron.BrowserWindow;
 import MenuItem = Electron.MenuItem;
+import { ElectronBlocker } from '@cliqz/adblocker-electron';
+import fetch from 'node-fetch';
 
 // Module to control application life.
 const app = electron.app;
@@ -124,7 +126,7 @@ function createWindow(): Electron.BrowserWindow | undefined {
     const lastState = windowState.getSavedWindowState();
     const windowProperties: Electron.BrowserWindowConstructorOptions & {maximized: boolean} = {
         ...lastState, center: lastState.x === undefined, show: false,
-        webPreferences: { webviewTag: true, nodeIntegration: true }
+        webPreferences: { webviewTag: true, nodeIntegration: true, spellcheck: true }
     };
 
     if(process.platform === 'darwin') {
@@ -137,12 +139,46 @@ function createWindow(): Electron.BrowserWindow | undefined {
     const window = new electron.BrowserWindow(windowProperties);
     windows.push(window);
 
+    ElectronBlocker.fromPrebuiltAdsAndTracking(fetch)
+      .then(
+        (blocker) => {
+            blocker.enableBlockingInSession(electron.session.defaultSession);
+
+            console.log('Got this far!!!!');
+
+            blocker.on('request-blocked', (request: Request) => {
+                console.log('blocked', request.url);
+              });
+
+              blocker.on('request-redirected', (request: Request) => {
+                console.log('redirected', request.url);
+              });
+
+              blocker.on('request-whitelisted', (request: Request) => {
+                console.log('whitelisted', request.url);
+              });
+
+              blocker.on('csp-injected', (request: Request) => {
+                console.log('csp', request.url);
+              });
+
+              blocker.on('script-injected', (script: string, url: string) => {
+                console.log('script', script.length, url);
+              });
+
+              blocker.on('style-injected', (style: string, url: string) => {
+                console.log('style', style.length, url);
+              });
+        }
+      );
+
     window.loadFile(
         path.join(__dirname, 'window.html'),
         {
             query: {settings: JSON.stringify(settings), import: shouldImportSettings ? 'true' : []}
         }
     );
+
 
     // window.loadURL(url.format({ //tslint:disable-line:no-floating-promises
     //     pathname: path.join(__dirname, 'window.html'),
