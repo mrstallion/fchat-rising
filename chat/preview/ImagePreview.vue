@@ -1,7 +1,7 @@
 <template>
     <!-- hiding elements instead of using 'v-if' is used here as an optimization -->
-    <div class="image-preview-wrapper" :class="{visible: visible, interactive: sticky}">
-        <div class="image-preview-toolbar" v-if="sticky || debug">
+    <div class="image-preview-wrapper" :class="{interactive: sticky}" v-show="visible">
+        <div class="image-preview-toolbar" v-show="sticky || debug">
             <a @click="toggleDevMode()" :class="{toggled: debug}" title="Debug Mode"><i class="fa fa-terminal"></i></a>
             <a @click="toggleJsMode()" :class="{toggled: runJs}" title="Expand Images"><i class="fa fa-magic"></i></a>
             <a @click="reloadUrl()" title="Reload Image"><i class="fa fa-redo-alt"></i></a>
@@ -10,7 +10,16 @@
         </div>
 
         <!-- note: preload requires a webpack config CopyPlugin configuration -->
-        <webview preload="./preview/assets/browser.pre.js" src="about:blank" nodeintegration webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required" id="image-preview-ext" ref="imagePreviewExt" class="image-preview-external" :style="externalPreviewStyle"></webview>
+        <webview
+            preload="./preview/assets/browser.pre.js"
+            src="about:blank"
+            nodeintegration
+            webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required"
+            id="image-preview-ext"
+            ref="imagePreviewExt"
+            class="image-preview-external"
+            :style="externalPreviewStyle">
+        </webview>
 
         <div
             class="image-preview-local"
@@ -82,6 +91,8 @@
 
         @Hook('mounted')
         onMounted(): void {
+            console.warn('Mounted ImagePreview');
+
             EventBus.$on(
                 'imagepreview-dismiss',
                 (eventData: EventBusEvent) => {
