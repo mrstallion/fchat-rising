@@ -237,27 +237,24 @@ export class ImagePreviewMutator {
             ];
 
             const resolveImgSize = function() {
-                return sizePairs.reduce(
-                    (acc, val) => {
-                        if ((acc.width) && (acc.height)) {
-                            return acc;
-                        }
+                const solved = {};
 
-                        if ((img[val[0]]) && (img[val[1]])) {
-                            return {
-                                width: img[val[0]],
-                                height: img[val[1]]
-                            }
-                        }
+                for (let ri = 0; ri < sizePairs.length; ri++) {
+                    const val = sizePairs[ri];
 
-                        return acc;
-                    },
-                    {}
-                );
+                    if ((img[val[0]]) && (img[val[1]])) {
+                        solved.width = img[val[0]];
+                        solved.height = img[val[1]];
+                        break;
+                    }
+                }
+
+                return solved;
             }
 
-            const imSize = resolveImgSize();
-            ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height);
+
+            const preImSize = resolveImgSize();
+            ipcRenderer.sendToHost('webview.img', preImSize.width, preImSize.height, 'preImSize');
 
             const el = document.createElement('div');
             el.id = 'flistWrapper';
@@ -297,6 +294,9 @@ export class ImagePreviewMutator {
                 + 'min-width: initial !important; min-height: initial !important; max-width: initial !important; max-height: initial !important;'
                 + 'display: block !important; visibility: visible !important;';
 
+            img.removeAttribute('width');
+            img.removeAttribute('height');
+
             img.class = '';
             el.class = '';
             html.class = '';
@@ -331,7 +331,7 @@ export class ImagePreviewMutator {
                 ${this.debug ? "console.log('on DOMContentLoaded');" : ''}
 
                 const imSize = resolveImgSize();
-                ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height);
+                ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height, 'dom-content-loaded');
 
                 if (
                     (img.play)
@@ -344,7 +344,7 @@ export class ImagePreviewMutator {
                 ${this.debug ? "console.log('on load');" : ''}
 
                 const imSize = resolveImgSize();
-                ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height);
+                ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height, 'load');
 
                 if (
                     (img.play)
@@ -359,6 +359,19 @@ export class ImagePreviewMutator {
             } catch (err) {
                 console.error('Failed img.play()', err);
             }
+
+
+            const updateSize = () => {
+                const imSize = resolveImgSize();
+
+                if ((imSize.width) && (imSize.height)) {
+                    ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height, 'updateSize');
+                } else {
+                    setTimeout(() => updateSize(), 200);
+                }
+            }
+
+            updateSize();
 
 
             let removeList = [];

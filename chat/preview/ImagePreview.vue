@@ -44,10 +44,6 @@
     import Timer = NodeJS.Timer;
     import IpcMessageEvent = Electron.IpcMessageEvent;
 
-    import { ElectronBlocker } from '@cliqz/adblocker-electron';
-    import fetch from 'node-fetch';
-
-    // import { promises as fs } from 'fs';
 
     const screen = remote.screen;
 
@@ -164,14 +160,14 @@
                     const e = event as DidFailLoadEvent;
 
                     if (e.errorCode < 0) {
-                      console.error('DID FAIL LOAD', event);
-                      const url = this.getUrl() || '';
-
-                      const qjs = this.jsMutator.getMutatorJsForSite(url, 'update-target-url')
-                        || this.jsMutator.getMutatorJsForSite(url, 'dom-ready');
-
-                      // tslint:disable-next-line
-                      this.executeJavaScript(qjs, 'did-fail-load-but-still-loading', event);
+                      // console.error('DID FAIL LOAD', event);
+                      // const url = this.getUrl() || '';
+                      //
+                      // const qjs = this.jsMutator.getMutatorJsForSite(url, 'update-target-url')
+                      //   || this.jsMutator.getMutatorJsForSite(url, 'dom-ready');
+                      //
+                      // // tslint:disable-next-line
+                      // this.executeJavaScript(qjs, 'did-fail-load-but-still-loading', event);
                       return;
                     }
 
@@ -261,44 +257,8 @@
                 },
                 50
             );
-
-            // this.initAdBlocker();
         }
 
-
-        async initAdBlocker() {
-            const webview = this.getWebview();
-            const contents = remote.webContents.fromId(webview.getWebContentsId());
-
-            console.log('INITADBLOCKER');
-
-            const blocker = await ElectronBlocker.fromLists(
-                fetch,
-                [
-                    'https://easylist.to/easylist/easylist.txt',
-                    'https://easylist.to/easylist/easyprivacy.txt', // EasyPrivacy
-                    'https://easylist.to/easylist/fanboy-social.txt', // Fanboy Social
-                    'https://easylist.to/easylist/fanboy-annoyance.txt', // Fanboy Annoyances
-                    'https://filters.adtidy.org/extension/chromium/filters/2.txt', // AdGuard Base
-                    'https://filters.adtidy.org/extension/chromium/filters/11.txt', // AdGuard Mobile Ads
-                    'https://filters.adtidy.org/extension/chromium/filters/4.txt', // AdGuard Social Media
-                    'https://filters.adtidy.org/extension/chromium/filters/14.txt', // AdGuard Annoyances
-                    'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt', // uBlock Origin Filters
-                    'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt', // uBlock Origin Privacy
-                    'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt', // uBlock Origin Resource Abuse
-                ],
-              {
-                enableCompression: true,
-              },
-              // {
-              //   path: 'engine.bin',
-              //   read: fs.readFile,
-              //   write: fs.writeFile
-              // }
-            );
-
-            blocker.enableBlockingInSession(contents.session);
-        }
 
         reRenderStyles(): void {
             // tslint:disable-next-line:no-unsafe-any

@@ -186,7 +186,8 @@ let dictDir = path.join(electron.remote.app.getPath('userData'), 'spellchecker')
 if(process.platform === 'win32') //get the path in DOS (8-character) format as special characters cause problems otherwise
     exec(`for /d %I in ("${dictDir}") do @echo %~sI`, (_, stdout) => dictDir = stdout.trim());
 
-// electron.webFrame.setSpellCheckProvider('', {spellCheck: (words, callback) => callback(words.filter((x) => spellchecker.isMisspelled(x)))});
+// electron.webFrame.setSpellCheckProvider(
+// '', {spellCheck: (words, callback) => callback(words.filter((x) => spellchecker.isMisspelled(x)))});
 
 function onSettings(s: GeneralSettings): void {
     settings = s;

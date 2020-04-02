@@ -85,7 +85,7 @@
         @Hook('mounted')
         async mounted(): Promise<void> {
             // top bar devtools
-            browserWindow.webContents.openDevTools( { mode: 'detach' } );
+            // browserWindow.webContents.openDevTools({ mode: 'detach' });
 
             await this.addTab();
 

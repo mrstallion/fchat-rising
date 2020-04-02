@@ -47,6 +47,7 @@ import BrowserWindow = Electron.BrowserWindow;
 import MenuItem = Electron.MenuItem;
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'node-fetch';
+import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
 
 // Module to control application life.
 const app = electron.app;
@@ -139,43 +140,59 @@ function createWindow(): Electron.BrowserWindow | undefined {
     const window = new electron.BrowserWindow(windowProperties);
     windows.push(window);
 
-    ElectronBlocker.fromPrebuiltAdsAndTracking(fetch)
-      .then(
+    // tslint:disable-next-line:no-floating-promises
+    ElectronBlocker.fromLists(
+        fetch,
+   [
+            'https://easylist.to/easylist/easylist.txt',
+            'https://easylist.to/easylist/easyprivacy.txt', // EasyPrivacy
+            'https://easylist.to/easylist/fanboy-social.txt', // Fanboy Social
+            'https://easylist.to/easylist/fanboy-annoyance.txt', // Fanboy Annoyances
+            'https://filters.adtidy.org/extension/chromium/filters/2.txt', // AdGuard Base
+            'https://filters.adtidy.org/extension/chromium/filters/11.txt', // AdGuard Mobile Ads
+            'https://filters.adtidy.org/extension/chromium/filters/4.txt', // AdGuard Social Media
+            'https://filters.adtidy.org/extension/chromium/filters/14.txt', // AdGuard Annoyances
+            'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt', // uBlock Origin Filters
+            'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt', // uBlock Origin Privacy
+            'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt' // uBlock Origin Resource Abuse
+        ]
+    ).then(
         (blocker) => {
             blocker.enableBlockingInSession(electron.session.defaultSession);
 
-            console.log('Got this far!!!!');
+            // console.log('Got this far!!!!');
 
             blocker.on('request-blocked', (request: Request) => {
                 console.log('blocked', request.url);
-              });
+            });
 
-              blocker.on('request-redirected', (request: Request) => {
+            blocker.on('request-redirected', (request: Request) => {
                 console.log('redirected', request.url);
-              });
+            });
 
-              blocker.on('request-whitelisted', (request: Request) => {
+            blocker.on('request-whitelisted', (request: Request) => {
                 console.log('whitelisted', request.url);
-              });
+            });
 
-              blocker.on('csp-injected', (request: Request) => {
+            blocker.on('csp-injected', (request: Request) => {
                 console.log('csp', request.url);
-              });
+            });
 
-              blocker.on('script-injected', (script: string, url: string) => {
+            blocker.on('script-injected', (script: string, url: string) => {
                 console.log('script', script.length, url);
-              });
+            });
 
-              blocker.on('style-injected', (style: string, url: string) => {
+            blocker.on('style-injected', (style: string, url: string) => {
                 console.log('style', style.length, url);
-              });
+            });
         }
       );
 
+    // tslint:disable-next-line:no-floating-promises
     window.loadFile(
         path.join(__dirname, 'window.html'),
         {
-            query: {settings: JSON.stringify(settings), import: shouldImportSettings ? 'true' : []}
+            query: {settings: JSON.stringify(settings), import: shouldImportSettings ? 'true' : ''}
         }
     );
 
@@ -269,7 +286,7 @@ function onReady(): void {
         ]
     };
     if(process.env.NODE_ENV !== 'production')
-        viewItem.submenu.unshift({role: 'reload'}, {role: 'forcereload'}, {role: 'toggledevtools'}, {type: 'separator'});
+        viewItem.submenu.unshift({role: 'reload'}, {role: 'forceReload'}, {role: 'toggleDevTools'}, {type: 'separator'});
     const spellcheckerMenu = new electron.Menu();
     //tslint:disable-next-line:no-floating-promises
     addSpellcheckerItems(spellcheckerMenu);
@@ -293,12 +310,12 @@ function onReady(): void {
                 {
                     label: l('settings.logDir'),
                     click: (_, window: BrowserWindow) => {
-                        const dir = electron.dialog.showOpenDialog(
+                        const dir = electron.dialog.showOpenDialogSync(
                             {defaultPath: settings.logDirectory, properties: ['openDirectory']});
                         if(dir !== undefined) {
                             if(dir[0].startsWith(path.dirname(app.getPath('exe'))))
                                 return electron.dialog.showErrorBox(l('settings.logDir'), l('settings.logDir.inAppDir'));
-                            const button = electron.dialog.showMessageBox(window, {
+                            const button = electron.dialog.showMessageBoxSync(window, {
                                 message: l('settings.logDir.confirm', dir[0], settings.logDirectory),
                                 buttons: [l('confirmYes'), l('confirmNo')],
                                 cancelId: 1
@@ -359,7 +376,7 @@ function onReady(): void {
                     label: l('action.quit'),
                     click(_: Electron.MenuItem, window: Electron.BrowserWindow): void {
                         if(characters.length === 0) return app.quit();
-                        const button = electron.dialog.showMessageBox(window, {
+                        const button = electron.dialog.showMessageBoxSync(window, {
                             message: l('chat.confirmLeave'),
                             buttons: [l('confirmYes'), l('confirmNo')],
                             cancelId: 1
@@ -370,7 +387,7 @@ function onReady(): void {
                         }
                     }
                 }
-            ]
+            ] as MenuItemConstructorOptions[]
         }, {
             label: `&${l('action.edit')}`,
             submenu: [
@@ -381,7 +398,7 @@ function onReady(): void {
                 {role: 'copy'},
                 {role: 'paste'},
                 {role: 'selectall'}
-            ]
+            ] as MenuItemConstructorOptions[]
         }, viewItem, {
             label: `&${l('help')}`,
             submenu: [

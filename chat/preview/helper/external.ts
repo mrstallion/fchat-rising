@@ -21,8 +21,10 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
             const webview = this.parent.getWebview();
 
             if (this.allowCachedUrl) {
+                // tslint:disable-next-line:no-floating-promises
                 webview.executeJavaScript(this.parent.jsMutator.getHideMutator());
             } else {
+                // tslint:disable-next-line:no-floating-promises
                 webview.loadURL('about:blank');
             }
 
@@ -55,30 +57,42 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
         }
 
         // const oldUrl = this.url;
-        const oldLastExternalUrl = this.lastExternalUrl;
+        // const oldLastExternalUrl = this.lastExternalUrl;
 
         this.url = url;
         this.lastExternalUrl = url;
         this.visible = true;
 
         try {
-            if ((this.allowCachedUrl) && ((webview.getURL() === url) || (url === oldLastExternalUrl))) {
-                if (this.debug)
-                    console.log('ImagePreview: exec re-show mutator');
+            // if ((this.allowCachedUrl) && ((webview.getURL() === url) || (url === oldLastExternalUrl))) {
+            //     if (this.debug)
+            //         console.log('ImagePreview: exec re-show mutator');
+            //
+            //     // tslint:disable-next-line:no-floating-promises
+            //     webview.executeJavaScript(this.parent.jsMutator.getReShowMutator());
+            // } else {
+            //     if (this.debug)
+            //         console.log('ImagePreview: must load; skip re-show because urls don\'t match', this.url, webview.getURL());
 
-                webview.executeJavaScript(this.parent.jsMutator.getReShowMutator());
-            } else {
-                if (this.debug)
-                    console.log('ImagePreview: must load; skip re-show because urls don\'t match', this.url, webview.getURL());
+            this.ratio = null;
 
-                this.ratio = null;
+            webview.stop();
 
-                // Broken promise chain on purpose
-                // tslint:disable-next-line:no-floating-promises
-                this.urlMutator.resolve(url)
-                    .then((finalUrl: string) => webview.loadURL(finalUrl));
-            }
+            // Broken promise chain on purpose
+            // tslint:disable-next-line:no-floating-promises
+            this.urlMutator.resolve(url)
+                .then(
+                    async(finalUrl: string) => {
+                        if (this.debug)
+                            console.log('ImagePreview: must load', finalUrl, this.url, webview.getURL());
 
+                        webview.stop();
+
+                        return webview.loadURL(finalUrl);
+                    }
+                );
+
+            // }
         } catch (err) {
             console.error('ImagePreview: Webview reuse error', err);
         }
