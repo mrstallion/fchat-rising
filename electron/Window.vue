@@ -199,7 +199,7 @@
             const view = new electron.remote.BrowserView({webPreferences: {webviewTag: true, nodeIntegration: true, spellcheck: true}});
 
             // tab devtools
-            view.webContents.openDevTools();
+            // view.webContents.openDevTools();
 
             view.setAutoResize({width: true, height: true});
             electron.ipcRenderer.send('tab-added', view.webContents.id);
