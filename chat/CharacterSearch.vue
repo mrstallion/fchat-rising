@@ -229,7 +229,23 @@
 
         updateSearch(data?: SearchData): void {
           if (data) {
-            this.data = data;
+            // this.data = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: []};
+            // this.data = data;
+
+            this.data = _.mapValues(
+                data,
+                (category, categoryName) => (
+                  _.map(
+                    category,
+                    (selection) => {
+                        const jsonSelection = JSON.stringify(selection);
+                        const v = _.find((this.options as any)[categoryName], (op) => (JSON.stringify(op) === jsonSelection));
+
+                        return v || selection;
+                    }
+                  )
+                )
+            ) as SearchData;
           }
         }
 

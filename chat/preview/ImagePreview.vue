@@ -401,6 +401,7 @@
                     this.interval = null;
                     this.visible = true;
                     this.visibleSince = Date.now();
+                    this.shouldDismiss = false;
 
                     this.initialCursorPosition = screen.getCursorScreenPoint();
 

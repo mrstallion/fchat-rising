@@ -14,7 +14,7 @@
         </div>
 
         <div class="row ad-viewer" ref="pageBody" v-else>
-            <i>Character has not posted any ads.</i>
+            <i><user :character="character">{{character.name}}</user> has not posted any ads on the channels you are on.</i>
         </div>
 
    </modal>
@@ -37,7 +37,7 @@ import { BBCodeView } from '../../bbcode/view';
 @Component({
     components: {modal: Modal, user: UserView, bbcode: BBCodeView(core.bbCodeParser)}
 })
-export default class AdView extends CustomDialog {
+export default class CharacterAdView extends CustomDialog {
     @Prop({required: true})
     readonly character!: Character;
 

@@ -41,7 +41,7 @@ import * as path from 'path';
 // import * as url from 'url';
 import l from '../chat/localize';
 import {defaultHost, GeneralSettings} from './common';
-import { getSafeLanguages, knownLanguageNames } from './language';
+import { getSafeLanguages, knownLanguageNames, updateSupportedLanguages } from './language';
 import * as windowState from './window_state';
 import BrowserWindow = Electron.BrowserWindow;
 import MenuItem = Electron.MenuItem;
@@ -270,6 +270,8 @@ function onReady(): void {
     log.transports.file.maxSize = 5 * 1024 * 1024;
     log.transports.file.file = path.join(baseDir, 'log.txt');
     log.info('Starting application.');
+
+    updateSupportedLanguages(electron.session.defaultSession.availableSpellCheckerLanguages);
 
     app.setAppUserModelId('com.squirrel.fchat.F-Chat');
     app.on('open-file', createWindow);

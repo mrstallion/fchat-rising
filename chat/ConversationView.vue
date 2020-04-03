@@ -184,7 +184,7 @@
     import {BBCodeView} from '../bbcode/view';
     import {isShowing as anyDialogsShown} from '../components/Modal.vue';
     import {Keys} from '../keys';
-    import AdView from './ads/AdView.vue';
+    import CharacterAdView from './character/CharacterAdView.vue';
     import {Editor} from './bbcode';
     import CommandHelp from './CommandHelp.vue';
     import { characterImage, getByteLength, getKey } from './common';
@@ -199,7 +199,7 @@
     import ReportDialog from './ReportDialog.vue';
     import {isCommand} from './slash_commands';
     import UserView from './UserView.vue';
-    import UserChannelList from './UserChannelList.vue';
+    import CharacterChannelList from './character/CharacterChannelList.vue';
     import * as _ from 'lodash';
     import Dropdown from '../components/Dropdown.vue';
 
@@ -208,7 +208,7 @@
         components: {
             user: UserView, 'bbcode-editor': Editor, 'manage-channel': ManageChannel, settings: ConversationSettings,
             logs: Logs, 'message-view': MessageView, bbcode: BBCodeView(core.bbCodeParser), 'command-help': CommandHelp,
-            'ad-view': AdView, 'channel-list': UserChannelList, dropdown: Dropdown, adSettings: ConversationAdSettings
+            'ad-view': CharacterAdView, 'channel-list': CharacterChannelList, dropdown: Dropdown, adSettings: ConversationAdSettings
         }
     })
     export default class ConversationView extends Vue {
@@ -481,11 +481,11 @@
         }
 
         showAds(): void {
-            (<AdView>this.$refs['adViewer']).show();
+            (<CharacterAdView>this.$refs['adViewer']).show();
         }
 
         showChannels(): void {
-            (<UserChannelList>this.$refs['channelList']).show();
+            (<CharacterChannelList>this.$refs['channelList']).show();
         }
 
 

@@ -48,7 +48,7 @@
     import Vue from 'vue';
     import {BBCodeView} from '../bbcode/view';
     import Modal from '../components/Modal.vue';
-    import AdView from './ads/AdView.vue';
+    import CharacterAdView from './character/CharacterAdView.vue';
     import {characterImage, errorToString, getByteLength, profileLink} from './common';
     import core from './core';
     import {Channel, Character} from './interfaces';
@@ -56,7 +56,7 @@
     import ReportDialog from './ReportDialog.vue';
 
     @Component({
-        components: {bbcode: BBCodeView(core.bbCodeParser), modal: Modal, 'ad-view': AdView}
+        components: {bbcode: BBCodeView(core.bbCodeParser), modal: Modal, 'ad-view': CharacterAdView}
     })
     export default class UserMenu extends Vue {
         @Prop({required: true})
@@ -131,7 +131,7 @@
                 return;
             }
 
-            (<AdView>this.$refs['adViewDialog']).show();
+            (<CharacterAdView>this.$refs['adViewDialog']).show();
         }
 
 

@@ -4,10 +4,14 @@
             Channels for <user :character="character">{{character.name}}</user>
         </template>
 
-       <div class="user-channel-list" ref="pageBody">
+       <div class="user-channel-list" ref="pageBody" v-if="channels.length > 0">
             <template v-for="channel in channels">
                 <h3><a href="#" @click.prevent="jumpToChannel(channel)">#{{channel.name}}</a></h3>
             </template>
+        </div>
+
+        <div class="user-channel-list" ref="pageBody" v-else>
+            <i><user :character="character">{{character.name}}</user> is not on any of the channels you are on.</i>
         </div>
 
    </modal>
@@ -18,18 +22,18 @@
 
 import * as _ from 'lodash';
 import { Component, Hook, Prop, Watch } from '@f-list/vue-ts';
-import CustomDialog from '../components/custom_dialog';
-import Modal from '../components/Modal.vue';
-import { Character } from '../fchat/interfaces';
-import core from './core';
-import { Conversation } from './interfaces';
-import UserView from './UserView.vue';
+import CustomDialog from '../../components/custom_dialog';
+import Modal from '../../components/Modal.vue';
+import { Character } from '../../fchat/interfaces';
+import core from '../core';
+import { Conversation } from '../interfaces';
+import UserView from '../UserView.vue';
 import ChannelConversation = Conversation.ChannelConversation;
 
 @Component({
     components: {modal: Modal, user: UserView}
 })
-export default class UserChannelList extends CustomDialog {
+export default class CharacterChannelList extends CustomDialog {
     @Prop({required: true})
     readonly character!: Character;
 

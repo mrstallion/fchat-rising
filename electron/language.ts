@@ -2,7 +2,26 @@ import * as _ from 'lodash';
 
 
 export function getSafeLanguages(langs: string | string[] | undefined): string[] {
-    return langs ? _.castArray(langs) : [];
+    const initialLanguages = _.isString(langs)
+        ? ([langs.replace('_', '-')])
+        : (langs || []);
+
+    const initialCount = initialLanguages.length;
+    const safeLanguages = _.filter(initialLanguages, (il) => (_.indexOf(supportedLanguages, il) >= 0));
+
+    if ((initialCount > 0) && (safeLanguages.length)) {
+        safeLanguages.push('en-GB');
+    }
+
+    return safeLanguages;
+}
+
+
+let supportedLanguages: string[] = [];
+
+
+export function updateSupportedLanguages(langs: string[]): void {
+    supportedLanguages = langs;
 }
 
 
@@ -30,7 +49,6 @@ export const knownLanguageNames = {
 
     et: 'Estonian',
     fa: 'Persian',
-    fi: 'Finnish',
     fo: 'Faroese',
     fr: 'French',
     he: 'Hebrew',

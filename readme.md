@@ -52,10 +52,10 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Conversation dialog can be opened by typing in a character name
     *    Message search matches character names
     *    PM list shows characters' online status as a colored icon
-*   Details for Nerds
+*   Technical Details for Nerds
     *    Upgraded to Electron 8.x
-    *    Replaced node-spellchecker with the built-in spellchecker of Electron 8
-    *    Multi-language support for spell checking (Windows only – language support is fully automatic on MacOS) 
+    *    Replaced `node-spellchecker` with the built-in spellchecker that ships with Electron 8
+    *    Multi-language support for spell checking (Windows only – language is autodetected on MacOS) 
 
 
 ## How to Set Up Ads
