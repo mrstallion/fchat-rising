@@ -9,7 +9,7 @@ export class GeneralSettings {
     profileViewer = true;
     host = defaultHost;
     logDirectory = path.join(electron.app.getPath('userData'), 'data');
-    spellcheckLang: string | undefined = 'en_GB';
+    spellcheckLang: string[] | string | undefined = 'en_GB';
     theme = 'default';
     version = electron.app.getVersion();
     beta = false;

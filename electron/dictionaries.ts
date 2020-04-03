@@ -4,6 +4,7 @@ import log from 'electron-log';  //tslint:disable-line:match-default-export-name
 import * as fs from 'fs';
 import * as path from 'path';
 import {promisify} from 'util';
+import * as _ from 'lodash';
 
 const dictDir = path.join(electron.app.getPath('userData'), 'spellchecker');
 fs.mkdirSync(dictDir, {recursive: true});

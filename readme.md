@@ -20,12 +20,13 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Ad auto-posting
     *    Manage channel ad settings via "Tab Settings"
     *    Automatically re-post ads every 11-18 minutes (randomized) for up to 180 minutes
-    *    Rotate multiple ads on a single channel by entering multiple ads in "Tab Settings"
+    *    Rotate multiple ads on a single channel by entering multiple ads in "Ad Settings"
 *   Ad ratings
-    *    LFP ads are automatically rated and matched against your profile
+    *    LFP ads are automatically rated (great/good/maybe/no) and matched against your profile
 *   Link previews
     *    Hover cursor over any `[url]` to see a preview of it
     *    Middle click any `[url]` to turn the preview into a sticky / interactive mode
+    *    Link preview has an ad-blocker to minimize page load times and protect against unfriendly scripts 
 *   Profile
     *    Kinks are auto-compared when viewing character profile
     *    Custom kink explanations can be expanded inline
@@ -51,6 +52,10 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Conversation dialog can be opened by typing in a character name
     *    Message search matches character names
     *    PM list shows characters' online status as a colored icon
+*   Details for Nerds
+    *    Upgraded to Electron 8.x
+    *    Replaced node-spellchecker with the built-in spellchecker of Electron 8
+    *    Multi-language support for spell checking (Windows only – language support is fully automatic on MacOS) 
 
 
 ## How to Set Up Ads

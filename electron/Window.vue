@@ -35,6 +35,7 @@
 
 <script lang="ts">
     import Sortable = require('sortablejs'); //tslint:disable-line:no-require-imports
+    import * as _ from 'lodash';
 
     import {Component, Hook} from '@f-list/vue-ts';
     import * as electron from 'electron';
@@ -44,6 +45,7 @@
     import Vue from 'vue';
     import l from '../chat/localize';
     import {GeneralSettings} from './common';
+    import { getSafeLanguages } from './language';
 
     const browserWindow = electron.remote.getCurrentWindow();
 
@@ -87,15 +89,26 @@
             // top bar devtools
             // browserWindow.webContents.openDevTools({ mode: 'detach' });
 
+            browserWindow.webContents.session.setSpellCheckerLanguages(getSafeLanguages(this.settings.spellcheckLang));
+
             await this.addTab();
 
-            electron.ipcRenderer.on('settings', (_: Event, settings: GeneralSettings) => this.settings = settings);
-            electron.ipcRenderer.on('allow-new-tabs', (_: Event, allow: boolean) => this.canOpenTab = allow);
+            electron.ipcRenderer.on('settings', (_e: Event, settings: GeneralSettings) => this.settings = settings);
+            electron.ipcRenderer.on('allow-new-tabs', (_e: Event, allow: boolean) => this.canOpenTab = allow);
             electron.ipcRenderer.on('open-tab', () => this.addTab());
-            electron.ipcRenderer.on('update-available', (_: Event, available: boolean) => this.hasUpdate = available);
+            electron.ipcRenderer.on('update-available', (_e: Event, available: boolean) => this.hasUpdate = available);
             electron.ipcRenderer.on('fix-logs', () => this.activeTab!.view.webContents.send('fix-logs'));
             electron.ipcRenderer.on('quit', () => this.destroyAllTabs());
-            electron.ipcRenderer.on('connect', (_: Event, id: number, name: string) => {
+
+            electron.ipcRenderer.on('update-dictionaries', (_e: Event, langs: string[]) => {
+                browserWindow.webContents.session.setSpellCheckerLanguages(langs);
+
+                for (const t of this.tabs) {
+                    t.view.webContents.session.setSpellCheckerLanguages(langs);
+                }
+            });
+
+            electron.ipcRenderer.on('connect', (_e: Event, id: number, name: string) => {
                 const tab = this.tabMap[id];
                 tab.user = name;
                 tab.tray.setToolTip(`${l('title')} - ${tab.user}`);
@@ -103,7 +116,7 @@
                 menu.unshift({label: tab.user, enabled: false}, {type: 'separator'});
                 tab.tray.setContextMenu(electron.remote.Menu.buildFromTemplate(menu));
             });
-            electron.ipcRenderer.on('disconnect', (_: Event, id: number) => {
+            electron.ipcRenderer.on('disconnect', (_e: Event, id: number) => {
                 const tab = this.tabMap[id];
                 if(tab.hasNew) {
                     tab.hasNew = false;
@@ -113,18 +126,18 @@
                 tab.tray.setToolTip(l('title'));
                 tab.tray.setContextMenu(electron.remote.Menu.buildFromTemplate(this.createTrayMenu(tab)));
             });
-            electron.ipcRenderer.on('has-new', (_: Event, id: number, hasNew: boolean) => {
+            electron.ipcRenderer.on('has-new', (_e: Event, id: number, hasNew: boolean) => {
                 const tab = this.tabMap[id];
                 tab.hasNew = hasNew;
                 electron.ipcRenderer.send('has-new', this.tabs.reduce((cur, t) => cur || t.hasNew, false));
             });
             browserWindow.on('maximize', () => this.isMaximized = true);
             browserWindow.on('unmaximize', () => this.isMaximized = false);
-            electron.ipcRenderer.on('switch-tab', (_: Event) => {
+            electron.ipcRenderer.on('switch-tab', (_e: Event) => {
                 const index = this.tabs.indexOf(this.activeTab!);
                 this.show(this.tabs[index + 1 === this.tabs.length ? 0 : index + 1]);
             });
-            electron.ipcRenderer.on('show-tab', (_: Event, id: number) => {
+            electron.ipcRenderer.on('show-tab', (_e: Event, id: number) => {
                 this.show(this.tabMap[id]);
             });
             document.addEventListener('click', () => this.activeTab!.view.webContents.focus());
@@ -195,11 +208,13 @@
             if(this.lockTab) return;
             const tray = new electron.remote.Tray(trayIcon);
             tray.setToolTip(l('title'));
-            tray.on('click', (_) => this.trayClicked(tab));
+            tray.on('click', (_e) => this.trayClicked(tab));
             const view = new electron.remote.BrowserView({webPreferences: {webviewTag: true, nodeIntegration: true, spellcheck: true}});
 
             // tab devtools
             // view.webContents.openDevTools();
+
+            view.webContents.session.setSpellCheckerLanguages(getSafeLanguages(this.settings.spellcheckLang));
 
             view.setAutoResize({width: true, height: true});
             electron.ipcRenderer.send('tab-added', view.webContents.id);

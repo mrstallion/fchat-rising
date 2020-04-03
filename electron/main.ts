@@ -41,13 +41,14 @@ import * as path from 'path';
 // import * as url from 'url';
 import l from '../chat/localize';
 import {defaultHost, GeneralSettings} from './common';
-import {ensureDictionary, getAvailableDictionaries} from './dictionaries';
+import { getSafeLanguages, knownLanguageNames } from './language';
 import * as windowState from './window_state';
 import BrowserWindow = Electron.BrowserWindow;
 import MenuItem = Electron.MenuItem;
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'node-fetch';
 import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
+import * as _ from 'lodash';
 
 // Module to control application life.
 const app = electron.app;
@@ -80,10 +81,46 @@ if(!settings.hwAcceleration) {
     app.disableHardwareAcceleration();
 }
 
-async function setDictionary(lang: string | undefined): Promise<void> {
-    if(lang !== undefined) await ensureDictionary(lang);
-    settings.spellcheckLang = lang;
+// async function setDictionary(lang: string | undefined): Promise<void> {
+//     if(lang !== undefined) await ensureDictionary(lang);
+//     settings.spellcheckLang = lang;
+//     setGeneralSettings(settings);
+// }
+
+
+export function updateSpellCheckerLanguages(langs: string[]): void {
+    // console.log('Language support:', langs);
+
+    for (const w of windows) {
+        // console.log('LANG SEND');
+        w.webContents.send('update-dictionaries', langs);
+    }
+
+    electron.session.defaultSession.setSpellCheckerLanguages(langs);
+}
+
+
+async function toggleDictionary(lang: string): Promise<void> {
+    const activeLangs = getSafeLanguages(settings.spellcheckLang);
+
+    // console.log('INITIAL LANG', activeLangs, lang);
+
+    let newLangs: string[] = [];
+
+    if (_.indexOf(activeLangs, lang) >= 0) {
+        newLangs = _.reject(activeLangs, (al) => (al === lang));
+    } else {
+        activeLangs.push(lang);
+        newLangs = activeLangs;
+    }
+
+    settings.spellcheckLang = newLangs;
+
     setGeneralSettings(settings);
+
+    // console.log('NEW LANG', newLangs);
+
+    updateSpellCheckerLanguages(newLangs);
 }
 
 function setGeneralSettings(value: GeneralSettings): void {
@@ -93,20 +130,23 @@ function setGeneralSettings(value: GeneralSettings): void {
 }
 
 async function addSpellcheckerItems(menu: Electron.Menu): Promise<void> {
-    if(settings.spellcheckLang !== undefined) await ensureDictionary(settings.spellcheckLang);
-    const dictionaries = await getAvailableDictionaries();
-    const selected = settings.spellcheckLang;
-    menu.append(new electron.MenuItem({
-        type: 'radio',
-        label: l('settings.spellcheck.disabled'),
-        click: async() => setDictionary(undefined)
-    }));
-    for(const lang of dictionaries)
+    const selected = getSafeLanguages(settings.spellcheckLang);
+    const langs = electron.session.defaultSession.availableSpellCheckerLanguages;
+
+    const sortedLangs = _.sortBy(
+        _.map(
+            langs,
+            (lang) => ({lang, name: (lang in knownLanguageNames) ? `${(knownLanguageNames as any)[lang]} (${lang})` : lang})
+        ),
+        'name'
+    );
+
+    for (const lang of sortedLangs)
         menu.append(new electron.MenuItem({
-            type: 'radio',
-            label: lang,
-            checked: lang === selected,
-            click: async() => setDictionary(lang)
+            type: 'checkbox',
+            label: lang.name,
+            checked: (_.indexOf(selected, lang.lang) >= 0),
+            click: async() => toggleDictionary(lang.lang)
         }));
 }
 
@@ -140,6 +180,9 @@ function createWindow(): Electron.BrowserWindow | undefined {
     const window = new electron.BrowserWindow(windowProperties);
     windows.push(window);
 
+    const safeLanguages = settings.spellcheckLang ? _.castArray(settings.spellcheckLang) : [];
+    electron.session.defaultSession.setSpellCheckerLanguages(safeLanguages);
+
     // tslint:disable-next-line:no-floating-promises
     ElectronBlocker.fromLists(
         fetch,
@@ -160,31 +203,31 @@ function createWindow(): Electron.BrowserWindow | undefined {
         (blocker) => {
             blocker.enableBlockingInSession(electron.session.defaultSession);
 
-            // console.log('Got this far!!!!');
-
-            blocker.on('request-blocked', (request: Request) => {
-                console.log('blocked', request.url);
-            });
-
-            blocker.on('request-redirected', (request: Request) => {
-                console.log('redirected', request.url);
-            });
-
-            blocker.on('request-whitelisted', (request: Request) => {
-                console.log('whitelisted', request.url);
-            });
-
-            blocker.on('csp-injected', (request: Request) => {
-                console.log('csp', request.url);
-            });
-
-            blocker.on('script-injected', (script: string, url: string) => {
-                console.log('script', script.length, url);
-            });
-
-            blocker.on('style-injected', (style: string, url: string) => {
-                console.log('style', style.length, url);
-            });
+            // // console.log('Got this far!!!!');
+            //
+            // blocker.on('request-blocked', (request: Request) => {
+            //     console.log('blocked', request.url);
+            // });
+            //
+            // blocker.on('request-redirected', (request: Request) => {
+            //     console.log('redirected', request.url);
+            // });
+            //
+            // blocker.on('request-whitelisted', (request: Request) => {
+            //     console.log('whitelisted', request.url);
+            // });
+            //
+            // blocker.on('csp-injected', (request: Request) => {
+            //     console.log('csp', request.url);
+            // });
+            //
+            // blocker.on('script-injected', (script: string, url: string) => {
+            //     console.log('script', script.length, url);
+            // });
+            //
+            // blocker.on('style-injected', (style: string, url: string) => {
+            //     console.log('style', style.length, url);
+            // });
         }
       );
 
@@ -302,14 +345,14 @@ function onReady(): void {
                 {label: l('action.newWindow'), click: createWindow, accelerator: 'CmdOrCtrl+n'},
                 {
                     label: l('action.newTab'),
-                    click: (_: Electron.MenuItem, w: Electron.BrowserWindow) => {
+                    click: (_m: Electron.MenuItem, w: Electron.BrowserWindow) => {
                         if(tabCount < 3) w.webContents.send('open-tab');
                     },
                     accelerator: 'CmdOrCtrl+t'
                 },
                 {
                     label: l('settings.logDir'),
-                    click: (_, window: BrowserWindow) => {
+                    click: (_m, window: BrowserWindow) => {
                         const dir = electron.dialog.showOpenDialogSync(
                             {defaultPath: settings.logDirectory, properties: ['openDirectory']});
                         if(dir !== undefined) {
@@ -367,14 +410,14 @@ function onReady(): void {
                     }
                 }, {
                     label: l('fixLogs.action'),
-                    click: (_, window: BrowserWindow) => window.webContents.send('fix-logs')
+                    click: (_m, window: BrowserWindow) => window.webContents.send('fix-logs')
                 },
                 {type: 'separator'},
                 {role: 'minimize'},
                 {
                     accelerator: process.platform === 'darwin' ? 'Cmd+Q' : undefined,
                     label: l('action.quit'),
-                    click(_: Electron.MenuItem, window: Electron.BrowserWindow): void {
+                    click(_m: Electron.MenuItem, window: Electron.BrowserWindow): void {
                         if(characters.length === 0) return app.quit();
                         const button = electron.dialog.showMessageBoxSync(window, {
                             message: l('chat.confirmLeave'),
@@ -426,7 +469,7 @@ function onReady(): void {
             ]
         }
     ]));
-    electron.ipcMain.on('tab-added', (_: Event, id: number) => {
+    electron.ipcMain.on('tab-added', (_event: Event, id: number) => {
         const webContents = electron.webContents.fromId(id);
         setUpWebContents(webContents);
         ++tabCount;
@@ -437,7 +480,7 @@ function onReady(): void {
         --tabCount;
         for(const w of windows) w.webContents.send('allow-new-tabs', true);
     });
-    electron.ipcMain.on('save-login', (_: Event, account: string, host: string) => {
+    electron.ipcMain.on('save-login', (_event: Event, account: string, host: string) => {
         settings.account = account;
         settings.host = host;
         setGeneralSettings(settings);
@@ -447,16 +490,17 @@ function onReady(): void {
         characters.push(character);
         e.returnValue = true;
     });
-    electron.ipcMain.on('dictionary-add', (_: Event, word: string) => {
-        if(settings.customDictionary.indexOf(word) !== -1) return;
-        settings.customDictionary.push(word);
-        setGeneralSettings(settings);
+    electron.ipcMain.on('dictionary-add', (_event: Event, word: string) => {
+        // if(settings.customDictionary.indexOf(word) !== -1) return;
+        // settings.customDictionary.push(word);
+        // setGeneralSettings(settings);
+        for(const w of windows) w.webContents.session.addWordToSpellCheckerDictionary(word);
     });
-    electron.ipcMain.on('dictionary-remove', (_: Event, word: string) => {
-        settings.customDictionary.splice(settings.customDictionary.indexOf(word), 1);
-        setGeneralSettings(settings);
+    electron.ipcMain.on('dictionary-remove', (_event: Event /*, word: string*/) => {
+        // settings.customDictionary.splice(settings.customDictionary.indexOf(word), 1);
+        // setGeneralSettings(settings);
     });
-    electron.ipcMain.on('disconnect', (_: Event, character: string) => {
+    electron.ipcMain.on('disconnect', (_event: Event, character: string) => {
         const index = characters.indexOf(character);
         if(index !== -1) characters.splice(index, 1);
     });

@@ -161,17 +161,17 @@ webContents.on('context-menu', (_, props) => {
             click: () => electron.clipboard.writeText(props.selectionText)
         });
     if(props.misspelledWord !== '') {
-        // const corrections = spellchecker.getCorrectionsForMisspelling(props.misspelledWord);
-        // menuTemplate.unshift({
-        //     label: l('spellchecker.add'),
-        //     click: () => electron.ipcRenderer.send('dictionary-add', props.misspelledWord)
-        // }, {type: 'separator'});
-        // if(corrections.length > 0)
-        //     menuTemplate.unshift(...corrections.map((correction: string) => ({
-        //         label: correction,
-        //         click: () => webContents.replaceMisspelling(correction)
-        //     })));
-        // else menuTemplate.unshift({enabled: false, label: l('spellchecker.noCorrections')});
+        const corrections = props.dictionarySuggestions; //spellchecker.getCorrectionsForMisspelling(props.misspelledWord);
+        menuTemplate.unshift({
+            label: l('spellchecker.add'),
+            click: () => electron.ipcRenderer.send('dictionary-add', props.misspelledWord)
+        }, {type: 'separator'});
+        if(corrections.length > 0)
+            menuTemplate.unshift(...corrections.map((correction: string) => ({
+                label: correction,
+                click: () => webContents.replaceMisspelling(correction)
+            })));
+        else menuTemplate.unshift({enabled: false, label: l('spellchecker.noCorrections')});
     } else if(settings.customDictionary.indexOf(props.selectionText) !== -1)
         menuTemplate.unshift({
             label: l('spellchecker.remove'),
