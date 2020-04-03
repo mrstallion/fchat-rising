@@ -4,13 +4,17 @@
             Channel Ads for <user :character="character">{{character.name}}</user>
         </template>
 
-       <div class="row ad-viewer" ref="pageBody">
+       <div class="row ad-viewer" ref="pageBody" v-if="messages.length > 0">
             <template v-for="message in messages">
                 <h3>#{{message.channelName}} <span class="message-time">{{formatTime(message.datePosted)}}</span></h3>
                 <div class="border-bottom">
                     <bbcode :text="message.message"></bbcode>
                 </div>
             </template>
+        </div>
+
+        <div class="row ad-viewer" ref="pageBody" v-else>
+            <i>Character has not posted any ads.</i>
         </div>
 
    </modal>
