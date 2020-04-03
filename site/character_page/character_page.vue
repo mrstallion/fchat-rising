@@ -468,18 +468,18 @@
 
         .kink-name {
             font-weight: bold;
-            color: #f2cd00;
+            color: var(--characterKinkCustomColor);
         }
 
         i {
-            color: #f2cd00;
+            color: var(--characterKinkCustomColor);
         }
 
         margin-top: 7px;
         margin-bottom: 7px;
         margin-left: -6px;
         margin-right: -6px;
-        border: 1px rgba(255, 255, 255, 0.1) solid;
+        border: 1px var(--characterKinkCustomBorderColor) solid;
         border-radius: 2px;
         /* border-collapse: collapse; */
         padding: 5px;
@@ -488,14 +488,14 @@
 
     .stock-kink {
         .kink-name, i {
-            color: #ededf6;
+            color: var(--characterKinkStockColor);
             font-weight: normal;
         }
 
         &.highlighted {
             .kink-name, i {
                 font-weight: bold;
-                color: #ffffff;
+                color: var(--characterKinkStockHighlightedColor);
             }
         }
     }
@@ -521,7 +521,7 @@
         display: block;
         font-weight: normal;
         font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.7);
+        color: var(--characterInfotagColor);
         line-height: 125%;
     }
 
@@ -532,7 +532,7 @@
         font-weight: normal !important;
         line-height: 120%;
         font-size: 85%;
-        color: rgba(255, 255, 255, 0.7);
+        color: var(--characterInfotagColor);
     }
 
 
@@ -554,29 +554,29 @@
         font-weight: normal !important;
         line-height: 120%;
         font-size: 85%;
-        color: rgba(255, 255, 255, 0.7);
+        color: var(--characterInfotagColor);
     }
 
     .quick-info {
         margin-bottom: 1rem;
         font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.7);
+        color: var(--characterInfotagColor);
     }
 
     .guestbook-post {
         margin-bottom: 15px;
         margin-top: 15px;
-        background-color: rgba(0,0,0,0.15);
+        background-color: var(--characterGuestbookPostBg);
         border-radius: 5px;
         padding: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--characterGuestbookPostBorderColor);
 
         .characterLink {
             font-size: 20pt;
         }
 
         .guestbook-timestamp {
-            color: rgba(255, 255, 255, 0.3);
+            color: var(--characterGuestbookTimestampFg);
             font-size: 85%
         }
 
@@ -587,7 +587,7 @@
 
         .guestbook-reply {
             margin-top: 20px;
-            background-color: rgba(0,0,0, 0.1);
+            background-color: var(--characterGuestbookReplyBg);
             padding: 15px;
             border-radius: 4px;
         }
@@ -630,7 +630,7 @@
 
         .character-image-wrapper {
             display: inline-block;
-            background-color: rgba(0,0,0, 0.2);
+            background-color: var(--characterImageWrapperBg);
             border-radius: 5px;
             box-sizing: border-box;
             margin: 5px;
@@ -682,7 +682,7 @@
     .match-report {
         display: flex;
         flex-direction: row;
-        background-color: rgba(0,0,0,0.2);
+        background-color: var(--scoreReportBg);
         /* width: 100%; */
         margin-top: -1.2rem;
         margin-left: -1.2rem;
@@ -719,12 +719,12 @@
             position: absolute;
             display: block;
             right: 0.5rem;
-            background-color: rgba(0,0,0,0.2);
+            background-color: var(--scoreMinimizeButtonBg);
             padding: 0.4rem;
             padding-top: 0.2rem;
             padding-bottom: 0.2rem;
             font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--scoreMinimizeButtonFg);
             border-radius: 4px;
             z-index: 1000;
         }
@@ -757,7 +757,7 @@
                 padding-right: 4px;
 
                 span {
-                    color: white;
+                    color: var(--scoreTitleColor);
                     font-weight: bold;
                 }
             }
@@ -777,84 +777,74 @@
         }
     }
 
-
-    $scoreMatchBg: rgb(0, 142, 0);
-    $scoreMatchFg: rgb(0, 113, 0);
-    $scoreWeakMatchBg: rgb(0, 80, 0);
-    $scoreWeakMatchFg: rgb(0, 64, 0);
-    $scoreWeakMismatchBg: rgb(152, 134, 0);
-    $scoreWeakMismatchFg: rgb(142, 126, 0);
-    $scoreMismatchBg: rgb(171, 0, 0);
-    $scoreMismatchFg: rgb(128, 0, 0);
-
     .character-kinks-block .character-kink.comparison-favorite,
     .match-report .scores .match-score.match,
     .infotag.match {
-        background-color: $scoreMatchBg;
-        border: solid 1px $scoreMatchFg;
+        background-color: var(--scoreMatchBg);
+        border: solid 1px var(--scoreMatchFg);
     }
 
     .character-kinks-block .character-kink.comparison-yes,
     .match-report .scores .match-score.weak-match,
     .infotag.weak-match {
-        background-color: $scoreWeakMatchBg;
-        border: 1px solid $scoreWeakMatchFg;
+        background-color: var(--scoreWeakMatchBg);
+        border: 1px solid var(--scoreWeakMatchFg);
     }
 
     .character-kinks-block .character-kink.comparison-maybe,
     .match-report .scores .match-score.weak-mismatch,
     .infotag.weak-mismatch {
-        background-color: $scoreWeakMismatchBg;
-        border: 1px solid $scoreWeakMismatchFg;
+        background-color: var(--scoreWeakMismatchBg);
+        border: 1px solid var(--scoreWeakMismatchFg);
     }
 
     .character-kinks-block .character-kink.comparison-no,
     .match-report .scores .match-score.mismatch,
     .infotag.mismatch {
-        background-color: $scoreMismatchBg;
-        border: 1px solid $scoreMismatchFg;
+        background-color: var(--scoreMismatchBg);
+        border: 1px solid var(--scoreMismatchFg);
     }
 
 
     .character-kinks-block .highlighting {
         .character-kink {
             &.comparison-favorite {
-                background-color: adjust-color($scoreMatchBg, $alpha: -0.6);
-                border-color: adjust-color($scoreMatchFg, $alpha: -0.6);
+                background-color: var(--scoreFadedMatchBg);
+                border-color: var(--scoreFadedMatchFg);
 
                 &.highlighted {
-                    background-color: $scoreMatchBg;
-                    border-color: $scoreMatchFg;
+                    background-color: var(--scoreMatchBg);
+                    border-color: var(--scoreMatchFg);
                 }
             }
 
             &.comparison-yes {
-                background-color: adjust-color($scoreWeakMatchBg, $alpha: -0.6);
-                border-color: adjust-color($scoreWeakMatchFg, $alpha: -0.6);
+                background-color: var(--scoreWeakMatchBg);
+                border-color: var(--scoreWeakMatchFg);
 
                 &.highlighted {
-                    background-color: $scoreWeakMatchBg;
-                    border-color: $scoreWeakMatchFg;
+                    background-color: var(--scoreWeakMatchBg);
+                    border-color: var(--scoreWeakMatchFg);
                 }
             }
 
             &.comparison-maybe {
-                background-color: adjust-color($scoreWeakMismatchBg, $alpha: -0.6);
-                border-color: adjust-color($scoreWeakMismatchFg, $alpha: -0.6);
+                background-color: var(--scoreWeakMismatchBg);
+                border-color: var(--scoreWeakMismatchFg);
 
                 &.highlighted {
-                    background-color: $scoreWeakMismatchBg;
-                    border-color: $scoreWeakMismatchFg;
+                    background-color: var(--scoreWeakMismatchBg);
+                    border-color: var(--scoreWeakMismatchFg);
                 }
             }
 
             &.comparison-no {
-                background-color: adjust-color($scoreMismatchBg, $alpha: -0.6);
-                border-color: adjust-color($scoreMismatchFg, $alpha: -0.6);
+                background-color: var(--scoreMismatchBg);
+                border-color: var(--scoreMismatchFg);
 
                 &.highlighted {
-                    background-color: $scoreMismatchBg;
-                    border-color: $scoreMismatchFg;
+                    background-color: var(--scoreMismatchBg);
+                    border-color: var(--scoreMismatchFg);
                 }
             }
         }
@@ -862,7 +852,7 @@
 
 
     .tab-count {
-        color: rgba(255, 255, 255, 0.5);
+        color: var(--tabSecondaryFgColor);
     }
 
 
@@ -870,7 +860,7 @@
         position: sticky;
         top: -1rem;
         z-index: 10000;
-        background: #2a2a54 !important;
+        background: var(--headerBackgroundMaskColor) !important;
     }
 
 </style>

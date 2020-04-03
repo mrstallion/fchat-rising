@@ -136,12 +136,12 @@ div.indentText {
 
 .bbcode {
   .fa-link {
-      color: white;
+      color: var(--linkForcedColor);
       margin-right: 2px;
   }
 
   a.user-link {
-      color: white;
+      color: var(--linkForcedColor);
   }
 }
 

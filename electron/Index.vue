@@ -1,5 +1,5 @@
 <template>
-    <div @mouseover="onMouseOver" id="page" style="position:relative;padding:5px 10px 10px" @auxclick.prevent>
+    <div @mouseover="onMouseOver" id="page" style="position:relative;padding:5px 10px 10px" :class="getThemeClass()" @auxclick.prevent>
         <div v-html="styling"></div>
         <div v-if="!characters" style="display:flex; align-items:center; justify-content:center; height: 100%;">
             <div class="card bg-light" style="width: 400px;">
@@ -312,6 +312,12 @@
             // tslint:disable-next-line: no-any no-unsafe-any
             (this.$refs.characterPage as any).reload();
         }
+
+
+        getThemeClass(): string {
+            return `theme-${this.settings.theme}`;
+        }
+
 
         get styling(): string {
             try {

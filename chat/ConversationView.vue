@@ -613,7 +613,7 @@
                 a.btn {
                     padding-left: 0.5rem;
                     padding-right: 0.5rem;
-                    color: #cbcbe5;
+                    // color: #cbcbe5;
 
                     i {
                         margin-right: 0.4rem;
@@ -731,8 +731,8 @@
     .message-time,
     .message .message-time,
     .ad-viewer .message-time {
-        background-color: #4f4f61;
-        color: #dadada;
+        background-color: var(--messageTimeBgColor);
+        color: var(--messageTimeFgColor);
         border-radius: 3px;
         padding-left: 3px;
         padding-right: 3px;
@@ -775,23 +775,23 @@
             text-transform: uppercase;
 
             &.match {
-                background-color: rgb(0, 142, 0);
-                border: solid 1px rgb(0, 113, 0);
+                background-color: var(--scoreMatchBg);
+                border: solid 1px var(--scoreMatchFg);
             }
 
             &.weak-match {
-                background-color: rgb(0, 80, 0);
-                border: 1px solid rgb(0, 64, 0);
+                background-color: var(--scoreWeakMatchBg);
+                border: 1px solid var(--scoreWeakMatchFg);
             }
 
             &.weak-mismatch {
-                background-color: rgb(152, 134, 0);
-                border: 1px solid rgb(142, 126, 0);
+                background-color: var(--scoreWeakMismatchBg);
+                border: 1px solid var(--scoreWeakMismatchFg);
             }
 
             &.mismatch {
-                background-color: rgb(171, 0, 0);
-                border: 1px solid rgb(128, 0, 0);
+                background-color: var(--scoreMismatchBg);
+                border: 1px solid var(--scoreMismatchFg);
             }
         }
     }
@@ -814,15 +814,15 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
             &.match {
-                border-left: 12px solid #048a04;
-                background-color: rgba(0, 110, 0, 0.47);
+                border-left: 12px solid var(--scoreStandoutMatchBorderColor);
+                background-color: var(--scoreStandoutMatchBgColor);
                 // border-left: 12px solid #027b02;
                 // background-color: rgba(1, 115, 1, 0.45);
             }
 
             &.weak-match {
-                border-left: 12px solid #014a01;
-                background-color: rgba(0, 79, 0, 0.4);
+                border-left: 12px solid var(--scoreStandoutWeakMatchBorderColor);
+                background-color: var(--scoreStandoutWeakMatchBgColor);
 
                 .bbcode {
                     filter: grayscale(0.25);
@@ -831,7 +831,7 @@
             }
 
             &.neutral {
-                border-left: 12px solid #555;
+                border-left: 12px solid var(--scoreStandoutNeutralBorderColor);
 
                 .bbcode {
                     filter: grayscale(0.5);
@@ -845,8 +845,8 @@
             };
 
             &.weak-mismatch {
-                background-color: rgba(208, 188, 0, 0.0);
-                border-left: 12px solid rgb(138, 123, 0);
+                border-left: 12px solid var(--scoreStandoutWeakMismatchBorderColor);
+                background-color: var(--scoreStandoutWeakMismatchBgColor);
 
                 .bbcode {
                     filter: grayscale(0.7);
@@ -860,7 +860,7 @@
             }
 
             &.mismatch {
-                border-left: 12px solid #841a1a;
+                border-left: 12px solid var(--scoreStandoutMismatchBorderColor);
 
                 .bbcode {
                     filter: grayscale(0.8);

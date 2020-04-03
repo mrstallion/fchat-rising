@@ -12,3 +12,56 @@ $secondary: $gray-400;
 
 $body-bg: $gray-100;
 $text-muted: $gray-500;
+
+
+// F-List Rising
+$scoreMatchBg: rgba(0, 180, 0, 0.65);
+$scoreMatchFg: rgba(0, 133, 0, 0.4);
+$scoreWeakMatchBg: rgba(0, 180, 0, 0.22);
+$scoreWeakMatchFg: rgba(0, 133, 0, 0.20);
+$scoreWeakMismatchBg: rgba(227, 189, 0, 0.5);
+$scoreWeakMismatchFg: rgba(192, 160, 0, 0.5);
+$scoreMismatchBg: rgba(192, 0, 0, 0.35);
+$scoreMismatchFg: rgba(148, 0, 0, 0.3);
+$scoreTitleColor: black;
+$scoreMinimizeButtonFg: rgba(255, 255, 255, 0.6);
+$scoreMinimizeButtonBg: rgba(0,0,0,0.1);
+$scoreReportBg: rgba(0,0,0,0.08);
+
+$scoreFadedMatchBg: adjust-color($scoreMatchBg, $alpha: -0.6);
+$scoreFadedMatchFg: adjust-color($scoreMatchFg, $alpha: -0.6);
+$scoreFadedWeakMatchBg: adjust-color($scoreWeakMatchBg, $alpha: -0.6);
+$scoreFadedWeakMatchFg: adjust-color($scoreWeakMatchFg, $alpha: -0.6);
+$scoreFadedWeakMismatchBg: adjust-color($scoreWeakMismatchBg, $alpha: -0.6);
+$scoreFadedWeakMismatchFg: adjust-color($scoreWeakMismatchFg, $alpha: -0.6);
+$scoreFadedMismatchBg: adjust-color($scoreMismatchBg, $alpha: -0.6);
+$scoreFadedMismatchFg: adjust-color($scoreMismatchFg, $alpha: -0.6);
+
+$scoreStandoutMatchBorderColor: #059e05;
+$scoreStandoutMatchBgColor: rgba(53, 225, 53, 0.4);
+$scoreStandoutWeakMatchBorderColor: #016c01;
+$scoreStandoutWeakMatchBgColor: rgba(85, 191, 85, 0.2);
+$scoreStandoutNeutralBorderColor: #888;
+$scoreStandoutWeakMismatchBorderColor: #c18f02;
+$scoreStandoutWeakMismatchBgColor: rgba(208, 188, 0, 0.0);
+$scoreStandoutMismatchBorderColor: #a01a1a;
+
+$characterImageWrapperBg: rgba(0,0,0, 0.2);
+$characterGuestbookPostBg: rgba(0,0,0,0.08);
+$characterGuestbookPostBorderColor: rgba(0, 0, 0, 0.06);
+$characterGuestbookReplyBg: rgba(0,0,0, 0.05);
+$characterGuestbookTimestampFg: rgba(0, 0, 0, 0.4);
+$characterKinkCustomColor: #0072ec;
+$characterKinkCustomBorderColor: rgba(0, 0, 0, 0.1);
+$characterKinkStockColor: #444444;
+$characterKinkStockHighlightedColor: #333333;
+$characterInfotagColor: rgba(0, 0, 0, 0.7);
+
+$messageTimeBgColor: #dadada;
+$messageTimeFgColor: #4f4f61;
+
+$headerBackgroundMaskColor: #e5e5e5;
+
+$linkForcedColor: #007bff;
+$tabSecondaryFgColor: rgba(0, 0, 0, 0.4);
+

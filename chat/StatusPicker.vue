@@ -100,15 +100,17 @@
         }
 
         .form-row:hover {
-            background-color: #20203e;
-            border: 1px solid #2d2d6b;
+            /*background-color: #20203e;*/
+            /*border: 1px solid #2d2d6b;*/
+            backdrop-filter: invert(30%) !important;
             border-radius: 2px;
         }
 
         .selected-row,
         .form-row.selected-row:hover {
-            background-color: #343461;
-            border: 1px solid #6565b2;
+            /*background-color: #343461;*/
+            /*border: 1px solid #6565b2;*/
+            backdrop-filter: invert(20%);
             border-radius: 2px;
         }
     }

@@ -58,4 +58,56 @@ $pagination-active-color: $link-color;
 $text-background-color: $gray-200;
 $text-background-color-disabled: $gray-100;
 
+// F-List Rising
+$scoreMatchBg: rgb(0, 142, 0);
+$scoreMatchFg: rgb(0, 113, 0);
+$scoreWeakMatchBg: rgb(0, 80, 0);
+$scoreWeakMatchFg: rgb(0, 64, 0);
+$scoreWeakMismatchBg: rgb(152, 134, 0);
+$scoreWeakMismatchFg: rgb(142, 126, 0);
+$scoreMismatchBg: rgb(171, 0, 0);
+$scoreMismatchFg: rgb(128, 0, 0);
+$scoreTitleColor: white;
+$scoreMinimizeButtonFg: rgba(255, 255, 255, 0.7);
+$scoreMinimizeButtonBg: rgba(0,0,0,0.2);
+$scoreReportBg: rgba(0,0,0,0.2);
+
+$scoreFadedMatchBg: adjust-color($scoreMatchBg, $alpha: -0.6);
+$scoreFadedMatchFg: adjust-color($scoreMatchFg, $alpha: -0.6);
+$scoreFadedWeakMatchBg: adjust-color($scoreWeakMatchBg, $alpha: -0.6);
+$scoreFadedWeakMatchFg: adjust-color($scoreWeakMatchFg, $alpha: -0.6);
+$scoreFadedWeakMismatchBg: adjust-color($scoreWeakMismatchBg, $alpha: -0.6);
+$scoreFadedWeakMismatchFg: adjust-color($scoreWeakMismatchFg, $alpha: -0.6);
+$scoreFadedMismatchBg: adjust-color($scoreMismatchBg, $alpha: -0.6);
+$scoreFadedMismatchFg: adjust-color($scoreMismatchFg, $alpha: -0.6);
+
+$scoreStandoutMatchBorderColor: #048a04;
+$scoreStandoutMatchBgColor: rgba(0, 110, 0, 0.47);
+$scoreStandoutWeakMatchBorderColor: #014a01;
+$scoreStandoutWeakMatchBgColor: rgba(0, 79, 0, 0.4);
+$scoreStandoutNeutralBorderColor: #555;
+$scoreStandoutWeakMismatchBorderColor: rgb(138, 123, 0);
+$scoreStandoutWeakMismatchBgColor: rgba(208, 188, 0, 0.0);
+$scoreStandoutMismatchBorderColor: #841a1a;
+
+$characterImageWrapperBg: rgba(0,0,0, 0.2);
+$characterGuestbookPostBg: rgba(0,0,0,0.15);
+$characterGuestbookPostBorderColor: rgba(255, 255, 255, 0.1);
+$characterGuestbookReplyBg: rgba(0,0,0, 0.1);
+$characterGuestbookTimestampFg: rgba(255, 255, 255, 0.3);
+$characterKinkCustomColor: #f2cd00;
+$characterKinkCustomBorderColor: rgba(255, 255, 255, 0.1);
+$characterKinkStockColor: #ededf6;
+$characterKinkStockHighlightedColor: #ffffff;
+$characterInfotagColor: rgba(255, 255, 255, 0.7);
+
+$messageTimeBgColor: #4f4f61;
+$messageTimeFgColor: #dadada;
+
+$headerBackgroundMaskColor: #2a2a54;
+
+$linkForcedColor: white;
+$tabSecondaryFgColor: rgba(255, 255, 255, 0.5);
+
+
 @import "invert";
