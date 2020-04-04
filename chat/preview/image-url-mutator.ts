@@ -38,6 +38,15 @@ export class ImageUrlMutator {
         );
 
         this.add(
+          /^https?:\/\/(www.)?pornhub.com\/gif\/([a-z0-9A-Z]+)/,
+          async(_url: string, match: RegExpMatchArray): Promise<string> => {
+            const gifId = match[2];
+
+            return `https://pornhub.com/embedgif/${gifId}`;
+          }
+        );
+
+        this.add(
           /^https?:\/\/(www.)?gfycat.com\/([a-z0-9A-Z\-]+)\/?$/,
           async(_url: string, match: RegExpMatchArray): Promise<string> => {
             const gfyId = match[2];
@@ -45,6 +54,32 @@ export class ImageUrlMutator {
             return `https://gfycat.com/ifr/${gfyId}?controls=0&hd=1`;
           }
         );
+
+        this.add(
+          /^https?:\/\/e621.net\/(posts|post\/show)\/([0-9]+)/,
+          async(url: string, match: RegExpMatchArray): Promise<string> => {
+            const galleryId = match[2];
+
+            try {
+              const result = await Axios.get(
+                  `https://e621.net/posts/${galleryId}.json`,
+                  {
+                      // headers: {
+                      //     'User-Agent': 'F-List-Rising-Client/1.0'
+                      // }
+                  }
+              );
+
+              const imageUrl = _.get(result, 'data.post.file.url') as string;
+
+              return imageUrl || url;
+            } catch(err) {
+              console.error('E621 API Failure', url, err);
+              return url;
+            }
+          }
+        );
+
 
         this.add(
             /^https?:\/\/imgur.com\/gallery\/([a-zA-Z0-9]+)/,

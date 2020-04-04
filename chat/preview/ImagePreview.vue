@@ -160,15 +160,26 @@
                     const e = event as DidFailLoadEvent;
 
                     if (e.errorCode < 0) {
-                      // console.error('DID FAIL LOAD', event);
-                      // const url = this.getUrl() || '';
-                      //
-                      // const qjs = this.jsMutator.getMutatorJsForSite(url, 'update-target-url')
-                      //   || this.jsMutator.getMutatorJsForSite(url, 'dom-ready');
-                      //
-                      // // tslint:disable-next-line
-                      // this.executeJavaScript(qjs, 'did-fail-load-but-still-loading', event);
-                      return;
+                        const url = webview.getURL();
+
+                        if (url.match(/^https?:\/\/(www.)?pornhub.com/)) {
+                            const qjs = this.jsMutator.getMutatorJsForSite(url, 'update-target-url')
+                                || this.jsMutator.getMutatorJsForSite(url, 'dom-ready');
+
+                            // tslint:disable-next-line
+                            this.executeJavaScript(qjs, 'did-fail-load-but-still-loading', event);
+                            return;
+                        }
+
+                        // console.error('DID FAIL LOAD', event);
+                        // const url = this.getUrl() || '';
+                        //
+                        // const qjs = this.jsMutator.getMutatorJsForSite(url, 'update-target-url')
+                        //   || this.jsMutator.getMutatorJsForSite(url, 'dom-ready');
+                        //
+                        // // tslint:disable-next-line
+                        // this.executeJavaScript(qjs, 'did-fail-load-but-still-loading', event);
+                        return;
                     }
 
                     // if (e.errorCode < 100) {

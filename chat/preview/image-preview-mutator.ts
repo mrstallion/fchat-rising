@@ -5,7 +5,6 @@ import * as urlHelper from 'url';
 
 
 import { domain as extractDomain } from '../../bbcode/core';
-import { PornhubIntegration } from './integration/pornhub';
 
 export interface PreviewMutator {
     match: string | RegExp;
@@ -138,12 +137,12 @@ export class ImagePreviewMutator {
         this.add('giphy.com', this.getBaseJsMutatorScript(['video', 'a > div > img']));
         this.add(/^media[0-9]\.tenor\.com$/, this.getBaseJsMutatorScript(['#view .file video', '#view .file img']));
         this.add('tenor.com', this.getBaseJsMutatorScript(['#view video', '#view img']));
+        this.add('hypnohub.net', this.getBaseJsMutatorScript(['video', '#image', 'img']));
+        this.add('derpibooru.org', this.getBaseJsMutatorScript(['video', '#image-display', 'img']));
 
         this.add(
             'pornhub.com',
-            PornhubIntegration.preprocess()
-                + this.getBaseJsMutatorScript(['#__flistCore', '#player'], true)
-                + PornhubIntegration.postprocess()
+            this.getBaseJsMutatorScript([/*'#__flistCore', '#player', */ '#photoImageSection img', 'video', 'img', '#player'], false)
         );
 
         this.add(
@@ -164,6 +163,7 @@ export class ImagePreviewMutator {
                 }
             `
         );
+
 
         this.add(
             'imgur.com',
@@ -209,10 +209,22 @@ export class ImagePreviewMutator {
     }
 
     getBaseJsMutatorScript(elSelector: string[], skipElementRemove: boolean = false, safeTags: string[] = []): string {
-        return `const { ipcRenderer } = require('electron');
+        return `
+            const ipcRenderer = (typeof require !== 'undefined')
+                ? require('electron').ipcRenderer
+                : { sendToHost: (...args) => (console.log('ipc.sendToHost', ...args)) };
+
             const body = document.querySelector('body');
             const html = document.querySelector('html');
             const selectors = ${JSON.stringify(elSelector)};
+
+            for (const el of document.querySelectorAll('header, .header')) {
+                try {
+                    el.remove();
+                } catch (err) {
+                    console.error('Header removal error', err);
+                }
+            }
 
             // writing this out because sometimes .map and .reduce are overridden
             let selected = [];
@@ -224,7 +236,7 @@ export class ImagePreviewMutator {
 
             ${this.debug ? `console.log('Selector', '${elSelector.toString()}'); console.log('Selected', selected);` : ''}
 
-            const img = selected.shift();
+            const img = selected.filter(el => (el !== body)).shift();
 
             ${this.debug ? `console.log('Img', img);` : ''}
 
@@ -290,7 +302,7 @@ export class ImagePreviewMutator {
 
             img.style = 'object-position: top left !important; object-fit: contain !important;'
                 + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
-                + 'margin: 0 !imporant; border: 0 !important; padding: 0 !important;'
+                + 'margin: 0 !important; border: 0 !important; padding: 0 !important;'
                 + 'min-width: initial !important; min-height: initial !important; max-width: initial !important; max-height: initial !important;'
                 + 'display: block !important; visibility: visible !important;';
 
@@ -306,6 +318,29 @@ export class ImagePreviewMutator {
                 + 'top: 0 !important; left: 0 !important; position: absolute !important;'
                 + 'min-width: initial !important; min-height: initial !important; max-width: initial !important; max-height: initial !important;'
                 + 'display: block !important; visibility: visible !important';
+
+            const extraStyle = document.createElement('style');
+
+            extraStyle.textContent = \`
+                #flistWrapper img, #flistWrapper video {
+                    object-position: top left !important;
+                    object-fit: contain !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    opacity: 1 !important;
+                    margin: 0 !important;
+                    border: 0 !important;
+                    padding: 0 !important;
+                    min-width: initial !important;
+                    min-height: initial !important;
+                    max-width: initial !important;
+                    max-height: initial !important;
+                    display: block !important;
+                    visibility: visible !important;
+                }
+            \`;
+
+            el.append(extraStyle);
 
             ${this.debug ? "console.log('Wrapper', el);" : ''}
 

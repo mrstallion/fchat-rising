@@ -205,29 +205,29 @@ function createWindow(): Electron.BrowserWindow | undefined {
 
             // // console.log('Got this far!!!!');
             //
-            // blocker.on('request-blocked', (request: Request) => {
-            //     console.log('blocked', request.url);
-            // });
-            //
-            // blocker.on('request-redirected', (request: Request) => {
-            //     console.log('redirected', request.url);
-            // });
-            //
-            // blocker.on('request-whitelisted', (request: Request) => {
-            //     console.log('whitelisted', request.url);
-            // });
-            //
-            // blocker.on('csp-injected', (request: Request) => {
-            //     console.log('csp', request.url);
-            // });
-            //
-            // blocker.on('script-injected', (script: string, url: string) => {
-            //     console.log('script', script.length, url);
-            // });
-            //
-            // blocker.on('style-injected', (style: string, url: string) => {
-            //     console.log('style', style.length, url);
-            // });
+            blocker.on('request-blocked', (request: Request) => {
+                console.log('blocked', request.url);
+            });
+
+            blocker.on('request-redirected', (request: Request) => {
+                console.log('redirected', request.url);
+            });
+
+            blocker.on('request-whitelisted', (request: Request) => {
+                console.log('whitelisted', request.url);
+            });
+
+            blocker.on('csp-injected', (request: Request) => {
+                console.log('csp', request.url);
+            });
+
+            blocker.on('script-injected', (script: string, url: string) => {
+                console.log('script', script.length, url);
+            });
+
+            blocker.on('style-injected', (style: string, url: string) => {
+                console.log('style', style.length, url);
+            });
         }
       );
 

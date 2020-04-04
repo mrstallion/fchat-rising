@@ -1,14 +1,29 @@
+// window.onload = () => console.log('window.onload');
+// window.onloadstart = () => console.log('window.onloadstart');
+// window.onloadend = () => console.log('window.onloadend');
+// window.addEventListener('DOMContentLoaded', () => (console.log('window.DOMContentLoaded')));
+// setTimeout(() => (console.log('Timeout')), 0); ---- Note that clear() below will break this
+
+(() => {
+    try {
+        if (window.location.href.match(/^https?:\/\/(www.)?pornhub.com/)) {
+            const el = document.createElement('script');
+            el.type='text/javascript';
+            el.text="console.log('JQuery Injection'); window.$ = window.jQuery = require('jquery');";
+            document.appendChild(el);
+
+            if (!window.zest) {
+                window.zest = (q) => (document.querySelectorAll(q));
+            }
+        }
+    } catch (err) {
+        console.error('PornHub integration', err);
+    }
+})();
+
 (() => {
     try {
         const clear = () => {
-            if (window.location.href.match(/^https?:\/\/(www.)?pornhub.com/)) {
-                if (!window.zest) {
-                    window.zest = (q) => (document.querySelectorAll(q));
-                }
-
-                return;
-            }
-
             try {
                 const frameCount = window.frames.length;
 
@@ -36,27 +51,26 @@
                 console.error('Element remove', e);
             }
 
+            const intervalCount = setInterval(() => {}, 10000);
 
-            // const intervalCount = setInterval(() => {}, 10000);
-            //
-            // for (let i = 0; i <= intervalCount; i++) {
-            //     try {
-            //         clearInterval(i);
-            //     } catch (e) {
-            //         console.error('Clear interval', i, e);
-            //     }
-            // }
-            //
-            //
-            // const timeoutCount = setTimeout(() => {}, 10000);
-            //
-            // for (let i = 0; i <= timeoutCount; i++) {
-            //     try {
-            //         clearTimeout(i);
-            //     } catch (e) {
-            //         console.error('Clear timeout', i, e);
-            //     }
-            // }
+            for (let i = 0; i <= intervalCount; i++) {
+                try {
+                    clearInterval(i);
+                } catch (e) {
+                    console.error('Clear interval', i, e);
+                }
+            }
+
+
+            const timeoutCount = setTimeout(() => {}, 10000);
+
+            for (let i = 0; i <= timeoutCount; i++) {
+                try {
+                    clearTimeout(i);
+                } catch (e) {
+                    console.error('Clear timeout', i, e);
+                }
+            }
         };
 
         console.log('Document loading', Date.now());
