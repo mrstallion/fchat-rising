@@ -22,7 +22,8 @@ const modules = path.join(__dirname, 'app', 'node_modules');
 const includedPaths = [
     // 'spellchecker/build/Release/spellchecker.node',
     'keytar/build/Release/keytar.node',
-    'throat'
+    'throat',
+    'jquery'
 ];
 
 _.each(
