@@ -23,6 +23,8 @@ const includedPaths = [
     // 'spellchecker/build/Release/spellchecker.node',
     'keytar/build/Release/keytar.node',
     'throat',
+    '@cliqz/adblocker-electron',
+    'node-fetch',
     'jquery'
 ];
 
