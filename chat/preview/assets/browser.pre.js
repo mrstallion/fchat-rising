@@ -79,6 +79,9 @@
         window.addEventListener('DOMContentLoaded', (event) => {
             console.log('DOM fully loaded and parsed', Date.now());
             clear();
+
+            // const ipcRenderer = require('electron').ipcRenderer;
+            // ipcRenderer.sendToHost('state.dom-loaded');
         });
     } catch(e) {
         console.error('browser.pre', e);

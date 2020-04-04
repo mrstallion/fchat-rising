@@ -49,6 +49,7 @@ import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'node-fetch';
 import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
 import * as _ from 'lodash';
+import DownloadItem = Electron.DownloadItem;
 
 // Module to control application life.
 const app = electron.app;
@@ -230,6 +231,19 @@ function createWindow(): Electron.BrowserWindow | undefined {
             });
         }
       );
+
+
+    // This prevents automatic download prompts on certain webview URLs without
+    // stopping conversation logs from being downloaded
+    electron.session.defaultSession.on(
+        'will-download',
+        (e: Event, item: DownloadItem) => {
+            if (!item.getURL().match(/^blob:file:/)) {
+                e.preventDefault();
+            }
+        }
+    );
+
 
     // tslint:disable-next-line:no-floating-promises
     window.loadFile(

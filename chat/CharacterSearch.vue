@@ -25,7 +25,7 @@
         <div v-else-if="results" class="results">
             <h4>
                 {{l('characterSearch.results')}}
-                <i class="fa fa-spinner search-spinner" v-if="!resultsComplete"></i>
+                <i class="fas fa-circle-notch fa-spin search-spinner" v-if="!resultsComplete"></i>
             </h4>
 
             <div v-for="character in results" :key="character.name" class="search-result" :class="'status-' + character.status">
@@ -322,19 +322,6 @@
 
         .search-spinner {
             float: right;
-            animation: search-spin 0.75s linear infinite;
         }
     }
-
-
-    @keyframes search-spin {
-        from {
-            transform: rotate(0deg);
-        }
-        to {
-            transform: rotate(360deg);
-        }
-
-    }
-
 </style>

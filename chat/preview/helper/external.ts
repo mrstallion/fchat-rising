@@ -20,13 +20,15 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
         if (wasVisible) {
             const webview = this.parent.getWebview();
 
-            if (this.allowCachedUrl) {
-                // tslint:disable-next-line:no-floating-promises
-                webview.executeJavaScript(this.parent.jsMutator.getHideMutator());
-            } else {
-                // tslint:disable-next-line:no-floating-promises
-                webview.loadURL('about:blank');
-            }
+            // if (this.allowCachedUrl) {
+            //     // tslint:disable-next-line:no-floating-promises
+            //     webview.executeJavaScript(this.parent.jsMutator.getHideMutator());
+            // } else {
+
+            // tslint:disable-next-line:no-floating-promises
+            webview.loadURL('about:blank');
+
+            //}
 
             this.visible = false;
         }

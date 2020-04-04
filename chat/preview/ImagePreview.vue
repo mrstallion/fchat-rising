@@ -26,6 +26,9 @@
             :style="localPreviewStyle"
         >
         </div>
+
+        <i id="preview-spinner" class="fas fa-circle-notch fa-spin" v-show="shouldShowSpinner"></i>
+        <i id="preview-error" class="fas fa-times" v-show="shouldShowError"></i>
     </div>
 </template>
 
@@ -78,6 +81,11 @@
 
         externalPreviewStyle: Record<string, any> = {};
         localPreviewStyle: Record<string, any> = {};
+
+        state = 'hidden';
+
+        shouldShowSpinner = false;
+        shouldShowError = true;
 
 
         private interval: Timer | null = null;
@@ -150,6 +158,8 @@
 
                     // tslint:disable-next-line
                     this.executeJavaScript(js, 'dom-ready', event);
+
+                    this.setState('loaded');
                 }
             );
 
@@ -157,7 +167,13 @@
             webview.addEventListener(
                 'did-fail-load',
                 (event: Event) => {
+
                     const e = event as DidFailLoadEvent;
+
+                    if (e.errorCode !== -3) {
+                        this.setState('error'); // -3 is a weird error code, not sure why it occurs
+                    }
+
 
                     if (e.errorCode < 0) {
                         const url = webview.getURL();
@@ -234,12 +250,14 @@
             );
 
 
-            /* webview.getWebContents().session.on(
-                'will-download',
-                (e: Event) => {
-                    e.preventDefault();
-                }
-            );*/
+            // const webContentsId = webview.getWebContentsId();
+            //
+            // remote.webContents.fromId(webContentsId).session.on(
+            //     'will-download',
+            //     (e: Event) => {
+            //         e.preventDefault();
+            //     }
+            // );
 
 
             _.each(
@@ -265,6 +283,9 @@
 
                         this.hide();
                     }
+
+                    this.shouldShowSpinner = this.testSpinner();
+                    this.shouldShowError = this.testError();
                 },
                 50
             );
@@ -316,6 +337,8 @@
             this.shouldDismiss = false;
 
             this.sticky = false;
+
+            this.setState('hidden');
 
             this.reRenderStyles();
         }
@@ -401,7 +424,9 @@
                 () => {
                     this.debugLog('ImagePreview: show.timeout', this.url);
 
-                    this.localPreviewHelper.match(this.domain as string)
+                    const isLocal = this.localPreviewHelper.match(this.domain as string);
+
+                    isLocal
                         ? this.localPreviewHelper.show(this.url as string)
                         : this.localPreviewHelper.hide();
 
@@ -416,8 +441,9 @@
 
                     this.initialCursorPosition = screen.getCursorScreenPoint();
 
-
                     this.reRenderStyles();
+
+                    this.setState(isLocal ? 'loaded' : 'loading');
                 },
                 due
             ) as Timer;
@@ -556,8 +582,32 @@
             this.initialCursorPosition = null;
             this.shouldDismiss = false;
             this.visibleSince = 0;
+            this.shouldShowSpinner = false;
+            this.shouldShowError = false;
+
+            this.setState('hidden');
 
             this.reRenderStyles();
+        }
+
+
+        setState(state: string): void {
+            this.debugLog('ImagePreview set-state', state, (this.visibleSince > 0) ? `${(Date.now() - this.visibleSince) / 1000}s` : '');
+
+            this.state = state;
+            this.shouldShowSpinner = this.testSpinner();
+            this.shouldShowError = this.testError();
+        }
+
+
+        testSpinner(): boolean {
+            return (this.visibleSince > 0)
+                ? ((this.state === 'loading') && (Date.now() - this.visibleSince > 1000))
+                : false;
+        }
+
+        testError(): boolean {
+            return ((this.state === 'error') && (this.externalPreviewHelper.isVisible()));
         }
     }
 </script>
@@ -662,6 +712,28 @@
                 background-color: rgba(255, 255, 255, 0.2);
                 box-shadow: 0 0 1px 0px rgba(255, 255, 255, 0.6);
             }
+        }
+
+        #preview-spinner {
+            color: white;
+            opacity: 0.5;
+            transition: visibility 0.25s, opacity 0.25s;
+            font-size: 30pt;
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            transform: translateX(-50%), translateY(-50%);
+            text-shadow: 0 0 2px #b3b3b3;
+        }
+
+        #preview-error {
+            color: red;
+            transition: all 0.25s;
+            font-size: 180pt;
+            position: absolute;
+            left: 2rem;
+            top: 0;
+            opacity: 0.8;
         }
     }
 </style>
