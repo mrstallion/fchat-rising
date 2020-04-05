@@ -43,7 +43,7 @@ export class ImageDomMutator {
     }
 
     setDebug(debug: boolean): void {
-        this.debug = debug || true;
+        this.debug = debug;
     }
 
 
@@ -154,6 +154,7 @@ export class ImageDomMutator {
         this.add('hypnohub.net', this.getBaseJsMutatorScript(['video', '#image', 'img']));
         this.add('derpibooru.org', this.getBaseJsMutatorScript(['video', '#image-display', 'img']));
         this.add('sexbot.gallery', this.getBaseJsMutatorScript(['video.hero', 'video']));
+        this.add('imagefap.com', this.getBaseJsMutatorScript(['.image-wrapper img', 'video', 'img']));
 
         this.add(
             'pornhub.com',

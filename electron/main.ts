@@ -190,45 +190,47 @@ function createWindow(): Electron.BrowserWindow | undefined {
    [
             'https://easylist.to/easylist/easylist.txt',
             'https://easylist.to/easylist/easyprivacy.txt', // EasyPrivacy
+            'https://easylist-downloads.adblockplus.org/easylist-cookie.txt', // Easy Cookies
             'https://easylist.to/easylist/fanboy-social.txt', // Fanboy Social
             'https://easylist.to/easylist/fanboy-annoyance.txt', // Fanboy Annoyances
             'https://filters.adtidy.org/extension/chromium/filters/2.txt', // AdGuard Base
             'https://filters.adtidy.org/extension/chromium/filters/11.txt', // AdGuard Mobile Ads
             'https://filters.adtidy.org/extension/chromium/filters/4.txt', // AdGuard Social Media
             'https://filters.adtidy.org/extension/chromium/filters/14.txt', // AdGuard Annoyances
+            'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/annoyances.txt', // uBlock Origin Annoyances
             'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt', // uBlock Origin Filters
             'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt', // uBlock Origin Privacy
-            'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt' // uBlock Origin Resource Abuse
+            'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt', // uBlock Origin Badware
+            'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt', // uBlock Origin Resource Abuse
+            'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt' // uBlock Origin Unbreak
         ]
     ).then(
         (blocker) => {
             blocker.enableBlockingInSession(electron.session.defaultSession);
 
-            // // console.log('Got this far!!!!');
+            // blocker.on('request-blocked', (request: Request) => {
+            //     console.log('blocked', request.url);
+            // });
             //
-            blocker.on('request-blocked', (request: Request) => {
-                console.log('blocked', request.url);
-            });
-
-            blocker.on('request-redirected', (request: Request) => {
-                console.log('redirected', request.url);
-            });
-
-            blocker.on('request-whitelisted', (request: Request) => {
-                console.log('whitelisted', request.url);
-            });
-
-            blocker.on('csp-injected', (request: Request) => {
-                console.log('csp', request.url);
-            });
-
-            blocker.on('script-injected', (script: string, url: string) => {
-                console.log('script', script.length, url);
-            });
-
-            blocker.on('style-injected', (style: string, url: string) => {
-                console.log('style', style.length, url);
-            });
+            // blocker.on('request-redirected', (request: Request) => {
+            //     console.log('redirected', request.url);
+            // });
+            //
+            // blocker.on('request-whitelisted', (request: Request) => {
+            //     console.log('whitelisted', request.url);
+            // });
+            //
+            // blocker.on('csp-injected', (request: Request) => {
+            //     console.log('csp', request.url);
+            // });
+            //
+            // blocker.on('script-injected', (script: string, url: string) => {
+            //     console.log('script', script.length, url);
+            // });
+            //
+            // blocker.on('style-injected', (style: string, url: string) => {
+            //     console.log('style', style.length, url);
+            // });
         }
       );
 
