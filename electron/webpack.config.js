@@ -25,7 +25,8 @@ const mainConfig = {
                 }
             },
             {test: path.join(__dirname, 'package.json'), loader: 'file-loader?name=package.json', type: 'javascript/auto'},
-            {test: /\.(png|html)$/, loader: 'file-loader?name=[name].[ext]'}
+            {test: /\.(png|html)$/, loader: 'file-loader?name=[name].[ext]'},
+            {test: /\.raw\.js$/, loader: 'raw-loader'}
         ]
     },
     node: {
@@ -82,6 +83,7 @@ const mainConfig = {
             {test: /\.(png|html)$/, loader: 'file-loader?name=[name].[ext]'},
             {test: /\.vue\.scss/, loader: ['vue-style-loader','css-loader','sass-loader']},
             {test: /\.vue\.css/, loader: ['vue-style-loader','css-loader']},
+            {test: /\.raw\.js$/, loader: 'raw-loader'}
         ]
     },
     node: {

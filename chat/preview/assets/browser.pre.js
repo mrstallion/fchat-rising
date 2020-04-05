@@ -1,12 +1,20 @@
-// window.onload = () => console.log('window.onload');
-// window.onloadstart = () => console.log('window.onloadstart');
-// window.onloadend = () => console.log('window.onloadend');
-// window.addEventListener('DOMContentLoaded', () => (console.log('window.DOMContentLoaded')));
-// setTimeout(() => (console.log('Timeout')), 0); ---- Note that clear() below will break this
+/***
+ * This script is injected on every web page ImagePreview loads
+ */
+
+const previewInitiationTime = Date.now();
+
+window.onload = () => console.log('window.onload', `${(Date.now() - previewInitiationTime)/1000}s`);
+window.onloadstart = () => console.log('window.onloadstart', `${(Date.now() - previewInitiationTime)/1000}s`);
+window.onloadend = () => console.log('window.onloadend', `${(Date.now() - previewInitiationTime)/1000}s`);
+window.addEventListener('DOMContentLoaded', () => (console.log('window.DOMContentLoaded', `${(Date.now() - previewInitiationTime)/1000}s`)));
+setTimeout(() => (console.log('Timeout', `${(Date.now() - previewInitiationTime)/1000}s`)), 0); // ---- Note that clear() below could break this
+
 
 (() => {
     try {
         if (window.location.href.match(/^https?:\/\/(www.)?pornhub.com/)) {
+            // Inject JQuery
             const el = document.createElement('script');
             el.type='text/javascript';
             el.text="console.log('JQuery Injection'); window.$ = window.jQuery = require('jquery');";

@@ -29,6 +29,7 @@
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "qs": "^6.9.1",
     "raven-js": "^3.27.2",
+    "raw-loader": "^4.0.0",
     "sass-loader": "^7.1.0",
     "sortablejs": "~1.9.0",
     "style-loader": "^0.23.1",

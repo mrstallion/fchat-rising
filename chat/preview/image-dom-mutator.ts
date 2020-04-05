@@ -3,19 +3,20 @@
 import * as _ from 'lodash';
 import * as urlHelper from 'url';
 
-
 import { domain as extractDomain } from '../../bbcode/core';
 
-export interface PreviewMutator {
+// tslint:disable-next-line:ban-ts-ignore
+// @ts-ignore
+// tslint:disable-next-line:no-submodule-imports ban-ts-ignore match-default-export-name
+import processorScript from '!!raw-loader!./assets/browser.processor.raw.js';
+
+
+export interface DomMutator {
     match: string | RegExp;
     injectJs: string;
     eventName: string;
 
     urlMutator?(url: string): string;
-}
-
-export interface ImagePreviewMutatorCollection {
-    [key: string]: PreviewMutator;
 }
 
 
@@ -24,22 +25,25 @@ const imgurOuterStyle = 'z-index: 1000000; position: absolute; bottom: 0.75rem; 
 // tslint:disable-next-line:max-line-length
 const imgurInnerStyle = 'position: absolute; top: 50%; left: 50%; transform: translateY(-50%) translateX(-50%); text-shadow: 1px 1px 2px rgba(0,0,0,0.4);';
 
+export interface DomMutatorScripts {
+    processor: string;
+}
 
-export class ImagePreviewMutator {
+
+export class ImageDomMutator {
     // tslint:disable: prefer-function-over-method
-    private hostMutators: ImagePreviewMutatorCollection = {};
-    private regexMutators: PreviewMutator[] = [];
+    private hostMutators: Record<string, DomMutator> = {};
+    private regexMutators: DomMutator[] = [];
     private debug: boolean;
+    private scripts: DomMutatorScripts = { processor: '' };
 
     constructor(debug: boolean) {
-        this.init();
-
         // this.debug = debug;
         this.debug = debug || true;
     }
 
     setDebug(debug: boolean): void {
-        this.debug = debug;
+        this.debug = debug || true;
     }
 
 
@@ -65,7 +69,7 @@ export class ImagePreviewMutator {
         return this.wrapJs(mutator.injectJs) + this.getReShowMutator();
     }
 
-    matchMutator(url: string): PreviewMutator | undefined {
+    matchMutator(url: string): DomMutator | undefined {
         const urlDomain = extractDomain(url);
 
         if (!urlDomain)
@@ -76,7 +80,7 @@ export class ImagePreviewMutator {
 
         return _.find(
             this.regexMutators,
-            (m: PreviewMutator) => {
+            (m: DomMutator) => {
                 const match = m.match;
 
                 return (match instanceof RegExp) ? (urlDomain.match(match) !== null) : (match === urlDomain);
@@ -115,7 +119,17 @@ export class ImagePreviewMutator {
         };
     }
 
-    protected init(): void {
+
+    protected async loadScripts(): Promise<void> {
+        this.scripts = {
+            processor: processorScript
+        };
+    }
+
+
+    async init(): Promise<void> {
+        await this.loadScripts();
+
         this.add('default', this.getBaseJsMutatorScript(['#video, video', '#image, img']));
         this.add('e621.net', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('e-hentai.org', this.getBaseJsMutatorScript(['video', '#img']));
@@ -139,6 +153,7 @@ export class ImagePreviewMutator {
         this.add('tenor.com', this.getBaseJsMutatorScript(['#view video', '#view img']));
         this.add('hypnohub.net', this.getBaseJsMutatorScript(['video', '#image', 'img']));
         this.add('derpibooru.org', this.getBaseJsMutatorScript(['video', '#image-display', 'img']));
+        this.add('sexbot.gallery', this.getBaseJsMutatorScript(['video.hero', 'video']));
 
         this.add(
             'pornhub.com',
@@ -208,222 +223,22 @@ export class ImagePreviewMutator {
         );
     }
 
+
     getBaseJsMutatorScript(elSelector: string[], skipElementRemove: boolean = false, safeTags: string[] = []): string {
-        return `
-            const ipcRenderer = (typeof require !== 'undefined')
-                ? require('electron').ipcRenderer
-                : { sendToHost: (...args) => (console.log('ipc.sendToHost', ...args)) };
+        const js = this.scripts.processor; // ./assets/browser.processor.raw.js
 
-            const body = document.querySelector('body');
-            const html = document.querySelector('html');
-            const selectors = ${JSON.stringify(elSelector)};
+        const settings = {
+            skipElementRemove,
+            safeTags,
+            selectors: elSelector,
+            debug: this.debug
+        };
 
-            for (const el of document.querySelectorAll('header, .header')) {
-                try {
-                    el.remove();
-                } catch (err) {
-                    console.error('Header removal error', err);
-                }
-            }
+        const settingsJson = JSON.stringify(settings, null, 0);
 
-            // writing this out because sometimes .map and .reduce are overridden
-            let selected = [];
-
-            for (selector of selectors) {
-                const selectedElements = (Array.from(document.querySelectorAll(selector)).filter((i) => ((i.width !== 1) && (i.height !== 1))));
-                selected = selected.concat(selectedElements);
-            }
-
-            ${this.debug ? `console.log('Selector', '${elSelector.toString()}'); console.log('Selected', selected);` : ''}
-
-            const img = selected.filter(el => (el !== body)).shift();
-
-            ${this.debug ? `console.log('Img', img);` : ''}
-
-            if (!img) { return; }
-
-            const sizePairs = [
-                ['naturalWidth', 'naturalHeight'],
-                ['videoWidth', 'videoHeight'],
-                ['width', 'height'],
-            ];
-
-            const resolveImgSize = function() {
-                const solved = {};
-
-                for (let ri = 0; ri < sizePairs.length; ri++) {
-                    const val = sizePairs[ri];
-
-                    if ((img[val[0]]) && (img[val[1]])) {
-                        solved.width = img[val[0]];
-                        solved.height = img[val[1]];
-                        break;
-                    }
-                }
-
-                return solved;
-            }
-
-
-            const preImSize = resolveImgSize();
-            ipcRenderer.sendToHost('webview.img', preImSize.width, preImSize.height, 'preImSize');
-
-            const el = document.createElement('div');
-            el.id = 'flistWrapper';
-
-            el.style = 'width: 100% !important; height: 100% !important; position: absolute !important;'
-                + 'top: 0 !important; left: 0 !important; z-index: 100000 !important;'
-                + 'background-color: black !important; background-size: contain !important;'
-                + 'background-repeat: no-repeat !important; background-position: top left !important;'
-                + 'opacity: 1 !important; padding: 0 !important; border: 0 !important; margin: 0 !important;'
-                + 'min-width: unset !important; min-height: unset !important; max-width: unset !important; max-height: unset !important;';
-
-            try {
-                img.remove();
-            } catch(err) {
-                console.error('Failed remove()', err);
-
-                try {
-                    img.parentNode.removeChild(img);
-                } catch(err2) {
-                    console.error('Failed removeChild()', err2);
-                }
-            }
-
-            el.append(img);
-            body.append(el);
-            body.class = '';
-
-            body.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
-                + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
-                + 'top: 0 !important; left: 0 !important; position: absolute !important;'
-                + 'min-width: initial !important; min-height: initial !important; max-width: initial !important; max-height: initial !important;'
-                + 'display: block !important; visibility: visible !important';
-
-            img.style = 'object-position: top left !important; object-fit: contain !important;'
-                + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
-                + 'margin: 0 !important; border: 0 !important; padding: 0 !important;'
-                + 'min-width: initial !important; min-height: initial !important; max-width: initial !important; max-height: initial !important;'
-                + 'display: block !important; visibility: visible !important;';
-
-            img.removeAttribute('width');
-            img.removeAttribute('height');
-
-            img.class = '';
-            el.class = '';
-            html.class = '';
-
-            html.style = 'border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important;'
-                + 'width: 100% !important; height: 100% !important; opacity: 1 !important;'
-                + 'top: 0 !important; left: 0 !important; position: absolute !important;'
-                + 'min-width: initial !important; min-height: initial !important; max-width: initial !important; max-height: initial !important;'
-                + 'display: block !important; visibility: visible !important';
-
-            const extraStyle = document.createElement('style');
-
-            extraStyle.textContent = \`
-                #flistWrapper img, #flistWrapper video {
-                    object-position: top left !important;
-                    object-fit: contain !important;
-                    width: 100% !important;
-                    height: 100% !important;
-                    opacity: 1 !important;
-                    margin: 0 !important;
-                    border: 0 !important;
-                    padding: 0 !important;
-                    min-width: initial !important;
-                    min-height: initial !important;
-                    max-width: initial !important;
-                    max-height: initial !important;
-                    display: block !important;
-                    visibility: visible !important;
-                }
-            \`;
-
-            el.append(extraStyle);
-
-            ${this.debug ? "console.log('Wrapper', el);" : ''}
-
-            if ((!img.src) && (img.tagName) && (img.tagName.toUpperCase() === 'VIDEO')) {
-                ${this.debug ? "console.log('Nedds a content URL', img);" : ''}
-
-                const contentUrls = document.querySelectorAll('meta[itemprop="contentURL"]');
-
-                if ((contentUrls) && (contentUrls.length > 0)) {
-                    ${this.debug ? "console.log('Found content URLs', contentUrls);" : ''}
-
-                    const cu = contentUrls[0];
-
-                    if ((cu.attributes) && (cu.attributes.content) && (cu.attributes.content.value)) {
-                        ${this.debug ? "console.log('Content URL', cu.attributes.content.value);" : ''}
-
-                        img.src = cu.attributes.content.value;
-                    }
-                }
-            }
-
-            document.addEventListener('DOMContentLoaded', (event) => {
-                ${this.debug ? "console.log('on DOMContentLoaded');" : ''}
-
-                const imSize = resolveImgSize();
-                ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height, 'dom-content-loaded');
-
-                if (
-                    (img.play)
-                    && ((!img.paused) && (!img.ended) && (!(img.currentTime > 0)))
-                )
-                { img.muted = true; img.loop = true; img.play(); }
-            });
-
-            document.addEventListener('load', (event) => {
-                ${this.debug ? "console.log('on load');" : ''}
-
-                const imSize = resolveImgSize();
-                ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height, 'load');
-
-                if (
-                    (img.play)
-                    && ((!img.paused) && (!img.ended) && (!(img.currentTime > 0)))
-                )
-                { img.muted = true; img.loop = true; img.play(); }
-            });
-
-
-            try {
-                if (img.play) { img.muted = true; img.loop = true; img.play(); }
-            } catch (err) {
-                console.error('Failed img.play()', err);
-            }
-
-
-            const updateSize = () => {
-                const imSize = resolveImgSize();
-
-                if ((imSize.width) && (imSize.height)) {
-                    ipcRenderer.sendToHost('webview.img', imSize.width, imSize.height, 'updateSize');
-                } else {
-                    setTimeout(() => updateSize(), 200);
-                }
-            }
-
-            updateSize();
-
-
-            let removeList = [];
-            const safeIds = ['flistWrapper', 'flistError', 'flistHider'];
-            const safeTags = [${_.map(safeTags, (t) => `'${t.toLowerCase()}'`).join(',')}];
-
-            body.childNodes.forEach((el) => (
-                (
-                    (safeIds.indexOf(el.id) < 0)
-                    && ((!el.tagName) || (safeTags.indexOf(el.tagName.toLowerCase())) < 0)
-                ) ? removeList.push(el) : true)
-            );
-
-            ${skipElementRemove ? '' : 'removeList.forEach((el) => el.remove());'}
-            removeList = [];
-        `;
+        return js.replace(/\/\* ## SETTINGS_START[^]*SETTINGS_END ## \*\//m, `this.settings = ${settingsJson}`);
     }
+
 
     getErrorMutator(code: number, description: string): string {
         const errorHtml = `

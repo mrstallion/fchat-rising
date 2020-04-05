@@ -39,7 +39,7 @@
     import core from '../core';
     import { EventBus, EventBusEvent } from './event-bus';
     import {domain} from '../../bbcode/core';
-    import {ImagePreviewMutator} from './image-preview-mutator';
+    import {ImageDomMutator} from './image-dom-mutator';
 
     import { ExternalImagePreviewHelper, LocalImagePreviewHelper } from './helper';
 
@@ -77,7 +77,7 @@
         runJs = true;
         debug = false;
 
-        jsMutator = new ImagePreviewMutator(this.debug);
+        jsMutator = new ImageDomMutator(this.debug);
 
         externalPreviewStyle: Record<string, any> = {};
         localPreviewStyle: Record<string, any> = {};
@@ -100,6 +100,9 @@
         @Hook('mounted')
         onMounted(): void {
             console.warn('Mounted ImagePreview');
+
+            // tslint:disable-next-line:no-floating-promises
+            this.jsMutator.init();
 
             EventBus.$on(
                 'imagepreview-dismiss',
@@ -572,7 +575,7 @@
             this.runJs = true;
             this.debug = false;
 
-            this.jsMutator = new ImagePreviewMutator(this.debug);
+            this.jsMutator = new ImageDomMutator(this.debug);
 
             this.cancelExitTimer();
             this.cancelTimer();
