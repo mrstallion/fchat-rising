@@ -26,7 +26,14 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
             // } else {
 
             // tslint:disable-next-line:no-floating-promises
-            webview.loadURL('about:blank');
+            webview.stop();
+
+            webview.loadURL('about:blank')
+                .catch(
+                  (err: any) => {
+                      console.warn('webview.loadURL() in hide()', err);
+                  }
+                );
 
             //}
 
@@ -91,6 +98,11 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
                         webview.stop();
 
                         return webview.loadURL(finalUrl);
+                    }
+                )
+                .catch(
+                    (err: any) => {
+                        console.warn('webview.loadURL() in show()', err);
                     }
                 );
 

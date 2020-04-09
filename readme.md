@@ -98,7 +98,6 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Bug? Reconnection doesn't restore status message
 *   Bug? Reconnection doesn't cancel advertisement timers, although they look like they're cancelled
 *   Bug? [color] acts weird
-*   Feature? Update to Electonr 9 and fix IPCs
 
 
 # F-List Exported

@@ -100,8 +100,10 @@
 
 <script lang="ts">
     import {Component, Hook} from '@f-list/vue-ts';
-    //tslint:disable-next-line:no-require-imports
-    import Sortable = require('sortablejs');
+
+    import * as SortableBase from 'sortablejs';
+    const Sortable = (SortableBase as any).Sortable;
+
     import Vue from 'vue';
     import {Keys} from '../keys';
     import ChannelList from './ChannelList.vue';
@@ -157,7 +159,7 @@
             Sortable.create(<HTMLElement>this.$refs['privateConversations'], {
                 animation: 50,
                 fallbackTolerance: 5,
-                onEnd: async(e) => {
+                onEnd: async(e: any) => {
                     if(e.oldIndex === e.newIndex) return;
                     return core.conversations.privateConversations[e.oldIndex!].sort(e.newIndex!);
                 }
@@ -165,7 +167,7 @@
             Sortable.create(<HTMLElement>this.$refs['channelConversations'], {
                 animation: 50,
                 fallbackTolerance: 5,
-                onEnd: async(e) => {
+                onEnd: async(e: any) => {
                     if(e.oldIndex === e.newIndex) return;
                     return core.conversations.channelConversations[e.oldIndex!].sort(e.newIndex!);
                 }

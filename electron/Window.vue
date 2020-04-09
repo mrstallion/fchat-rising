@@ -34,7 +34,9 @@
 </template>
 
 <script lang="ts">
-    import Sortable = require('sortablejs'); //tslint:disable-line:no-require-imports
+    import * as SortableBase from 'sortablejs';
+    const Sortable = (SortableBase as any).Sortable;
+
     import * as _ from 'lodash';
 
     import {Component, Hook} from '@f-list/vue-ts';
@@ -143,9 +145,11 @@
             document.addEventListener('click', () => this.activeTab!.view.webContents.focus());
             window.addEventListener('focus', () => this.activeTab!.view.webContents.focus());
 
+            console.log('SORTABLE', Sortable);
+
             Sortable.create(<HTMLElement>this.$refs['tabs'], {
                 animation: 50,
-                onEnd: (e) => {
+                onEnd: (e: any) => {
                     if(e.oldIndex === e.newIndex) return;
                     const tab = this.tabs.splice(e.oldIndex!, 1)[0];
                     this.tabs.splice(e.newIndex!, 0, tab);

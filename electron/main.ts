@@ -247,6 +247,8 @@ function createWindow(): Electron.BrowserWindow | undefined {
     );
 
 
+    console.log('GOT HERE');
+
     // tslint:disable-next-line:no-floating-promises
     window.loadFile(
         path.join(__dirname, 'window.html'),
