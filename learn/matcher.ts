@@ -162,7 +162,7 @@ const speciesNames: SpeciesStrMap = {
 
 const speciesMapping: SpeciesMap = {
     [Species.Human]: ['human', 'humanoid', 'angel', 'android'],
-    [Species.Equine]: ['horse', 'stallion', 'mare', 'filly', 'equine', 'shire', 'donkey', 'mule', 'zebra', 'centaur', 'pony' ],
+    [Species.Equine]: ['horse', 'stallion', 'mare', 'filly', 'equine', 'shire', 'donkey', 'mule', 'zebra', 'centaur', 'pony', 'unicorn', 'clydesdale', 'shire', 'appaloosa', 'friesian', 'draft', 'draught' ],
     [Species.Feline]: ['cat', 'kitten', 'catgirl', 'neko', 'tiger', 'puma', 'lion', 'lioness',
         'tigress', 'feline', 'jaguar', 'cheetah', 'lynx', 'leopard'],
     [Species.Canine]: ['dog', 'wolf', 'dingo', 'coyote', 'jackal', 'canine', 'doberman', 'husky'],
