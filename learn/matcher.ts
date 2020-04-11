@@ -180,7 +180,7 @@ interface SpeciesStrMap {
     [key: number]: string;
 }
 
-const speciesNames: SpeciesStrMap = {
+export const speciesNames: SpeciesStrMap = {
     [Species.MarineMammal]: 'marine mammals',
     [Species.Elf]: 'elves',
     [Species.Fish]: 'fishes',
@@ -195,7 +195,7 @@ const speciesMapping: SpeciesMap = {
         'appaloosa', 'friesian', 'draft', 'draught', 'alicorn', 'amazon', 'amazonian', 'horsie', 'hoss', 'pegasus', 'colt', 'filly'],
     [Species.Feline]: ['cat', 'kitten', 'catgirl', 'neko', 'tiger', 'puma', 'lion', 'lioness',
         'tigress', 'feline', 'jaguar', 'cheetah', 'lynx', 'leopard', 'cougar', 'kitty', 'migote', 'miqo\'te', 'miqote', 'ocelot',
-        'sabertooth', 'saber tooth', 'tabby'],
+        'sabertooth', 'saber tooth', 'tabby', 'liger'],
     [Species.Canine]: ['dog', 'wolf', 'dingo', 'coyote', 'jackal', 'canine', 'doberman', 'husky', 'hound', 'akita', 'pitbull', 'pit bull', 'terrier',
         'bull terrier', 'australian shepherd', 'australian shepard', 'german shepherd', 'german shepard', 'malinois', 'woof', 'labrador', 'collie',
         'canis', 'canid', 'chihuahua', 'poodle', 'chinchilla', 'chowchow', 'corgi', 'anubis', 'anubian', 'dalmatian', 'inumimi', 'lupine', 'malamute', 'mastiff',

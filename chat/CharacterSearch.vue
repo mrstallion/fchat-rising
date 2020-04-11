@@ -11,6 +11,11 @@
                 v-model="data[item]" :placeholder="l('filter')" :title="l('characterSearch.' + item)" :options="options[item]" :key="item">
             </filterable-select>
 
+            <filterable-select v-model="data.species" :multiple="true" :placeholder="l('filter')"
+                :title="l('characterSearch.species')" :options="options.species">
+                <template slot-scope="s">{{s.option.name}}</template>
+            </filterable-select>
+
             <div v-if="searchString" class="search-string">
                 Searching for <span>{{searchString}}</span>
             </div>
@@ -49,12 +54,13 @@
     import Modal from '../components/Modal.vue';
     import {characterImage} from './common';
     import core from './core';
-    import { Character, Connection, SearchData, SearchKink } from './interfaces';
+    import { Character, Connection, ExtendedSearchData, SearchData, SearchKink, SearchSpecies } from './interfaces';
     import l from './localize';
     import UserView from './UserView.vue';
     import * as _ from 'lodash';
     import {EventBus} from './preview/event-bus';
     import CharacterSearchHistory from './CharacterSearchHistory.vue';
+    import { Matcher, Species, speciesNames } from '../learn/matcher';
 
     type Options = {
         kinks: SearchKink[],
@@ -102,9 +108,9 @@
         results: Character[] | undefined;
         resultsComplete = false;
         characterImage = characterImage;
-        options!: SearchData;
-        data: SearchData = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: []};
-        listItems: ReadonlyArray<keyof SearchData> = ['genders', 'orientations', 'languages', 'furryprefs', 'roles', 'positions'];
+        options!: ExtendedSearchData;
+        data: ExtendedSearchData = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: [], species: []};
+        listItems: ReadonlyArray<keyof SearchData> = ['genders', 'orientations', 'languages', 'furryprefs', 'roles', 'positions']; // SearchData is correct
 
         searchString = '';
 
@@ -124,7 +130,8 @@
                 languages: options.listitems.filter((x) => x.name === 'languagepreference').map((x) => x.value),
                 furryprefs: options.listitems.filter((x) => x.name === 'furrypref').map((x) => x.value),
                 roles: options.listitems.filter((x) => x.name === 'subdom').map((x) => x.value),
-                positions: options.listitems.filter((x) => x.name === 'position').map((x) => x.value)
+                positions: options.listitems.filter((x) => x.name === 'position').map((x) => x.value),
+                species: this.getSpeciesOptions()
             });
         }
 
@@ -144,7 +151,9 @@
             });
             core.connection.onMessage('FKS', (data) => {
                 this.results = data.characters.map((x) => core.characters.get(x))
-                    .filter((x) => core.state.hiddenUsers.indexOf(x.name) === -1 && !x.isIgnored).sort(sort);
+                    .filter((x) => core.state.hiddenUsers.indexOf(x.name) === -1 && !x.isIgnored)
+                    .filter((x) => this.isSpeciesMatch(x))
+                    .sort(sort);
 
                 this.resultsComplete = this.checkResultCompletion();
             });
@@ -164,7 +173,11 @@
                     // tslint:disable-next-line no-unsafe-any no-any
                     && (_.find(this.results, (c: Character) => c.name === event.character.character.name))
                 ) {
-                    this.results = this.results.sort(sort);
+                    this.results = (_.filter(
+                        this.results,
+                        (x) => this.isSpeciesMatch(x)
+                    ) as Character[]).sort(sort);
+
                     this.resultsComplete = this.checkResultCompletion();
                 }
             };
@@ -203,6 +216,51 @@
         }
 
 
+        isSpeciesMatch(c: Character): boolean {
+          if (this.data.species.length === 0) {
+            return true;
+          }
+
+          const knownCharacter = core.cache.profileCache.getSync(c.name);
+
+          if (!knownCharacter) {
+            return true;
+          }
+
+          const species = Matcher.species(knownCharacter.character.character);
+
+          if (!species) {
+            return false;
+          }
+
+          return !!_.find(this.data.species, (s) => (s.id === species));
+        }
+
+
+        getSpeciesOptions(): SearchSpecies[] {
+            const species = _.map(
+                _.filter(Species, (s) => (_.isString(s))) as unknown[] as string[],
+                (speciesName: string) => {
+                    const speciesId = (Species as any)[speciesName];
+
+                    if (speciesId in speciesNames) {
+                        return {
+                            name: `${speciesNames[speciesId].substr(0, 1).toUpperCase()}${speciesNames[speciesId].substr(1)} (species)`,
+                            id: speciesId
+                        };
+                    }
+
+                    return {
+                        name: `${speciesName}s (species)`,
+                        id: speciesId
+                    };
+                }
+            );
+
+            return _.sortBy(species, 'name');
+        }
+
+
         checkResultCompletion(): boolean {
             return _.every(
                 this.results,
@@ -223,11 +281,11 @@
 
 
         reset(): void {
-            this.data = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: []};
+            this.data = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: [], species: []};
         }
 
 
-        updateSearch(data?: SearchData): void {
+        updateSearch(data?: ExtendedSearchData): void {
           if (data) {
             // this.data = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: []};
             // this.data = data;
@@ -245,7 +303,7 @@
                     }
                   )
                 )
-            ) as SearchData;
+            ) as ExtendedSearchData;
           }
         }
 
@@ -258,7 +316,7 @@
             this.error = '';
             const data: Connection.ClientCommands['FKS'] & {[key: string]: (string | number)[]} = {kinks: []};
             for(const key in this.data) {
-                const item = this.data[<keyof SearchData>key];
+                const item = this.data[<keyof SearchData>key]; // SearchData is correct
                 if(item.length > 0)
                     data[key] = key === 'kinks' ? (<SearchKink[]>item).map((x) => x.id) : (<string[]>item);
             }
@@ -274,11 +332,16 @@
         }
 
 
-        async updateSearchHistory(data: SearchData): Promise<void> {
+        async updateSearchHistory(data: ExtendedSearchData): Promise<void> {
             const history = (await core.settingsStore.get('searchHistory')) || [];
             const dataStr = JSON.stringify(data, null, 0);
-            const filteredHistory = _.reject(history, (h: SearchData) => (JSON.stringify(h, null, 0) === dataStr));
-            const newHistory: SearchData[] = _.take(_.concat([data], filteredHistory), 15);
+
+            const filteredHistory = _.map(
+                _.reject(history, (h: SearchData) => (JSON.stringify(h, null, 0) === dataStr)),
+              (h) => _.merge({ species: [] }, h)
+            ) as ExtendedSearchData[];
+
+            const newHistory: ExtendedSearchData[] = _.take(_.concat([data], filteredHistory), 15);
 
             await core.settingsStore.set('searchHistory', newHistory);
         }

@@ -144,6 +144,7 @@ export interface Logs {
 }
 
 export type SearchKink = {id: number, name: string, description: string};
+export type SearchSpecies = {id: number, name: string};
 
 export interface SearchData {
     kinks: SearchKink[]
@@ -155,6 +156,9 @@ export interface SearchData {
     positions: string[]
 }
 
+export interface ExtendedSearchData extends SearchData {
+    species: SearchSpecies[];
+}
 
 export namespace Settings {
     export type Keys = {
@@ -166,7 +170,7 @@ export namespace Settings {
         recentChannels: Conversation.RecentChannelConversation[]
         hiddenUsers: string[]
         statusHistory: string[]
-        searchHistory: SearchData[]
+        searchHistory: (ExtendedSearchData | SearchData)[]
     };
 
     export interface Store {

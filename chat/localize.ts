@@ -229,6 +229,7 @@ Once this process has started, do not interrupt it or your logs will get corrupt
     'characterSearch.furryprefs': 'Furry preferences',
     'characterSearch.roles': 'Dom/sub roles',
     'characterSearch.positions': 'Positions',
+    'characterSearch.species': 'Species (beta)',
     'characterSearch.error.noResults': 'There were no search results.',
     'characterSearch.error.throttle': 'You must wait five seconds between searches.',
     'characterSearch.error.tooManyResults': 'There are too many search results, please narrow your search.',

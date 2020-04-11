@@ -26,19 +26,19 @@
     import core from './core';
     import { BBCodeView } from '../bbcode/view';
     import * as _ from 'lodash';
-    import { SearchData } from './interfaces';
+    import { ExtendedSearchData, SearchData } from './interfaces';
 
     @Component({
         components: {modal: Modal, dropdown: Dropdown, bbcode: BBCodeView(core.bbCodeParser)}
     })
     export default class CharacterSearchHistory extends CustomDialog {
         @Prop({required: true})
-        readonly callback!: (searchData: SearchData) => void;
+        readonly callback!: (searchData: ExtendedSearchData) => void;
 
         @Prop({required: true})
-        readonly curSearch!: SearchData | undefined;
+        readonly curSearch!: ExtendedSearchData | undefined;
 
-        history: SearchData[] = [];
+        history: (ExtendedSearchData|SearchData)[] = [];
 
         selectedSearch: number | null = null;
 
@@ -64,7 +64,7 @@
 
         selectStatus(): void {
             if (this.selectedSearch !== null) {
-                this.callback(this.history[this.selectedSearch]);
+                this.callback(_.merge({species: []}, this.history[this.selectedSearch]) as ExtendedSearchData);
             }
         }
 
@@ -74,7 +74,7 @@
         }
 
 
-        describeSearch(searchData: SearchData): string {
+        describeSearch(searchData: SearchData | ExtendedSearchData): string {
             return _.join(
                 _.map(
                     // tslint:disable-next-line no-unsafe-any no-any
