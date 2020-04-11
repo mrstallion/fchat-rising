@@ -130,7 +130,7 @@ export class ImageDomMutator {
     async init(): Promise<void> {
         await this.loadScripts();
 
-        this.add('default', this.getBaseJsMutatorScript(['#video, video', '#image, img']));
+        this.add('default', this.getBaseJsMutatorScript(['.content video', '.content img', '#video, video', '#image, img']));
         this.add('e621.net', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('e-hentai.org', this.getBaseJsMutatorScript(['video', '#img']));
         this.add('gelbooru.com', this.getBaseJsMutatorScript(['video', '#image']));
@@ -146,7 +146,7 @@ export class ImageDomMutator {
         this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript(['picture video', 'picture img']));
         this.add('postimg.cc', this.getBaseJsMutatorScript(['video', '#main-image']));
         this.add('gifsauce.com', this.getBaseJsMutatorScript(['video']));
-        this.add('motherless.com', this.getBaseJsMutatorScript(['.content video', '.content img']));
+        // this.add('motherless.com', this.getBaseJsMutatorScript(['.content video', '.content img']));
         this.add(/^media[0-9]\.giphy\.com$/, this.getBaseJsMutatorScript(['video', 'img[alt]']));
         this.add('giphy.com', this.getBaseJsMutatorScript(['video', 'a > div > img']));
         this.add(/^media[0-9]\.tenor\.com$/, this.getBaseJsMutatorScript(['#view .file video', '#view .file img']));
@@ -155,6 +155,7 @@ export class ImageDomMutator {
         this.add('derpibooru.org', this.getBaseJsMutatorScript(['video', '#image-display', 'img']));
         this.add('sexbot.gallery', this.getBaseJsMutatorScript(['video.hero', 'video']));
         this.add('imagefap.com', this.getBaseJsMutatorScript(['.image-wrapper img', 'video', 'img']));
+        this.add('myhentaicomics.com', this.getBaseJsMutatorScript(['#entire_image img', 'video', 'img']));
 
         this.add(
             'pornhub.com',

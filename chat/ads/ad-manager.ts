@@ -1,10 +1,22 @@
+import throat from 'throat';
+import * as _ from 'lodash';
+
 import core from '../core';
 import { Conversation } from '../interfaces';
 import Timer = NodeJS.Timer;
+import ChannelConversation = Conversation.ChannelConversation;
 
-import throat from 'throat';
 
 const adManagerThroat = throat(1);
+
+
+export interface RecoverableAd {
+    channel: string;
+    index: number;
+    nextPostDue: Date | undefined,
+    firstPost: Date | undefined,
+    expireDue: Date | undefined;
+}
 
 
 export class AdManager {
@@ -129,6 +141,22 @@ export class AdManager {
         ) as Timer;
     }
 
+
+    protected forceTimeout(waitTime: number): void {
+        if (this.interval) {
+            clearTimeout(this.interval);
+        }
+
+        // tslint:disable-next-line: no-unnecessary-type-assertion
+        this.interval = setTimeout(
+            async() => {
+                await this.sendNextPost();
+            },
+            waitTime
+        ) as Timer;
+    }
+
+
     stop(): void {
         if (this.interval)
             clearTimeout(this.interval);
@@ -151,4 +179,66 @@ export class AdManager {
 
         this.expireDue = new Date(Date.now() + 3 * 60 * 60 * 1000);
     }
+
+
+    protected static recoverableCharacter: string = '';
+    protected static recoverableAds: RecoverableAd[] = [];
+
+
+    static onConnectionClosed() {
+        AdManager.recoverableCharacter = core.characters.ownCharacter.name;
+
+        AdManager.recoverableAds = _.map(
+            _.filter(core.conversations.channelConversations, (c) => ((c.adManager) && (c.adManager.isActive()))),
+            (chanConv): RecoverableAd => {
+                const adManager = chanConv.adManager;
+
+                return {
+                    channel     : chanConv.name,
+                    index       : adManager.adIndex,
+                    nextPostDue : adManager.nextPostDue,
+                    firstPost   : adManager.firstPost,
+                    expireDue   : adManager.expireDue
+                };
+            }
+        );
+
+        _.each(
+            _.filter(core.conversations.channelConversations, (c) => ((c.adManager) && (c.adManager.isActive()))),
+          (c) => c.adManager.stop()
+        );
+    }
+
+
+    static onNewChannelAvailable(channel: ChannelConversation) {
+        if (AdManager.recoverableCharacter !== core.characters.ownCharacter.name) {
+            AdManager.recoverableAds = [];
+            AdManager.recoverableCharacter = '';
+
+            return;
+        }
+
+        const ra = _.find(AdManager.recoverableAds, (r) => (r.channel === channel.name));
+
+        if (!ra) {
+            return;
+        }
+
+        const adManager = channel.adManager;
+
+        adManager.stop();
+        adManager.start();
+
+        adManager.adIndex = ra.index;
+        adManager.firstPost = ra.firstPost;
+        adManager.nextPostDue = ra.nextPostDue || new Date();
+        adManager.expireDue = ra.expireDue;
+
+        adManager.forceTimeout(
+            Date.now() - adManager.nextPostDue.getTime()
+        );
+
+        AdManager.recoverableAds = _.filter(AdManager.recoverableAds, (r) => (r.channel !== ra.channel));
+    }
 }
+

@@ -519,6 +519,8 @@ export default function(this: any): Interfaces.State {
                 if(state.recentChannels.length >= 50) state.recentChannels.pop();
                 state.recentChannels.unshift({channel: channel.id, name: conv.channel.name});
                 core.settingsStore.set('recentChannels', state.recentChannels); //tslint:disable-line:no-floating-promises
+
+                AdManager.onNewChannelAvailable(conv);
             } else {
                 const conv = state.channelMap[channel.id];
                 if(conv === undefined) return;

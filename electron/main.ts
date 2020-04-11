@@ -91,13 +91,13 @@ if(!settings.hwAcceleration) {
 
 export function updateSpellCheckerLanguages(langs: string[]): void {
     // console.log('Language support:', langs);
+    electron.session.defaultSession.setSpellCheckerLanguages(langs);
 
     for (const w of windows) {
         // console.log('LANG SEND');
+        w.webContents.session.setSpellCheckerLanguages(langs);
         w.webContents.send('update-dictionaries', langs);
     }
-
-    electron.session.defaultSession.setSpellCheckerLanguages(langs);
 }
 
 
@@ -183,6 +183,7 @@ function createWindow(): Electron.BrowserWindow | undefined {
 
     const safeLanguages = settings.spellcheckLang ? _.castArray(settings.spellcheckLang) : [];
     electron.session.defaultSession.setSpellCheckerLanguages(safeLanguages);
+    window.webContents.session.setSpellCheckerLanguages(safeLanguages);
 
     // tslint:disable-next-line:no-floating-promises
     ElectronBlocker.fromLists(

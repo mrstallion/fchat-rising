@@ -44,6 +44,7 @@ import {InlineDisplayMode} from '../interfaces';
     import l from './localize';
     import Logs from './Logs.vue';
     import {init as profileApiInit} from './profile_api';
+    import { AdManager } from './ads/ad-manager';
 
     type BBCodeNode = Node & {bbcodeTag?: string, bbcodeParam?: string};
 
@@ -127,19 +128,7 @@ import {InlineDisplayMode} from '../interfaces';
                 this.connected = false;
                 this.connecting = false;
 
-                if (!isReconnect) {
-                    core.conversations.channelConversations.forEach(
-                        (chanConv) => {
-                            try {
-                                if (chanConv.adManager) {
-                                    chanConv.adManager.stop();
-                                }
-                            } catch (e) {
-                                console.error(e);
-                            }
-                        }
-                    );
-                }
+                AdManager.onConnectionClosed();
 
                 document.title = l('title');
             });
