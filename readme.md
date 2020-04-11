@@ -95,8 +95,6 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   'Filter unmatching ads' is not channel specific -- it's either on everywhere or nowhere
 *   Bug? Usually submissive vs usually submissive shows up as 'maybe'
 *   Bug? YOU have 'loves humans'; THEY have 'no furry characters, just humans' -- THEIR ad shows green, not red -- your side of comparison is fully green, they just have 'no furry pairings' in red
-*   Bug? Reconnection doesn't restore status message
-*   Bug? Reconnection doesn't cancel advertisement timers, although they look like they're cancelled
 *   Bug? [color] acts weird
 
 

@@ -111,14 +111,19 @@ const genderKinkMapping: GenderKinkIdMap = {
     [Gender.Transgender]: Kink.Transgenders
 };
 
- // if no species and 'no furry chareacters', === human
- // if no species and dislike 'antho characters' === human
+ // if no species and 'no furry characters', === human
+ // if no species and dislike 'anthro characters' === human
 
 export enum Species {
     Human = 609,
+    Humanoid = 131,
+    Bovine = 318,
     Equine = 236,
     Feline = 212,
     Canine = 226,
+    Caprinae = 558,
+    Demon = 7,
+    Divinity = 530,
     Vulpine = 213,
     Avian = 215,
     Amphibian = 223,
@@ -136,15 +141,36 @@ export enum Species {
     Orc = 615,
     Fish = 608,
     Reptile = 225,
+    Marsupial = 322,
     Anthro = 587,
-    Minotaur = 12121212
+    Robot = 161,
+    Hyaenidae = 321,
+    Mephitidae = 323,
+    Bat = 451,
+    Alien = 281,
+    Dinosaur = 610,
+    Pokemon = 504,
+    Fae = 612,
+    Taur = 68,
+    Vampire = 182,
+    Naga = 619,
+    Monster = 483,
+
+    Minotaur = 12121212,
+    Giraffe = 13131313,
+    Rhinoceros = 14141414
  }
 
-const nonAnthroSpecies = [Species.Human, Species.Elf, Species.Orc];
+const nonAnthroSpecies = [
+    Species.Human, Species.Elf, Species.Orc, Species.Humanoid,
+    Species.Demon, Species.Divinity, Species.Alien, Species.Robot,
+    Species.Fae, Species.Vampire
+];
 
 const mammalSpecies = [Species.Equine, Species.Feline, Species.Canine, Species.Vulpine, Species.Cervine, Species.Lapine,
-    Species.Musteline, Species.Rodent, Species.Ursine, Species.MarineMammal, Species.Primate, Species.Elf, Species.Orc,
-    Species.Anthro, Species.Minotaur];
+    Species.Musteline, Species.Procyon, Species.Rodent, Species.Ursine, Species.MarineMammal, Species.Primate,
+    Species.Anthro, Species.Bovine, Species.Caprinae, Species.Marsupial, Species.Hyaenidae, Species.Minotaur,
+    Species.Bat, Species.Mephitidae, Species.Taur, Species.Giraffe, Species.Rhinoceros];
 
 interface SpeciesMap {
     [key: number]: string[];
@@ -157,34 +183,61 @@ interface SpeciesStrMap {
 const speciesNames: SpeciesStrMap = {
     [Species.MarineMammal]: 'marine mammals',
     [Species.Elf]: 'elves',
-    [Species.Fish]: 'fishes'
+    [Species.Fish]: 'fishes',
+    [Species.Mephitidae]: 'mephitis',
+    [Species.Rhinoceros]: 'rhinoceros'
 };
 
 const speciesMapping: SpeciesMap = {
-    [Species.Human]: ['human', 'humanoid', 'angel', 'android'],
-    [Species.Equine]: ['horse', 'stallion', 'mare', 'filly', 'equine', 'shire', 'donkey', 'mule', 'zebra', 'centaur', 'pony', 'unicorn', 'clydesdale', 'shire', 'appaloosa', 'friesian', 'draft', 'draught' ],
+    [Species.Human]: ['human', 'humanoid', 'angel', 'android', 'african american', 'africanamerican', 'woman', 'dothraki', 'homo sapien', 'homosapien', 'homosapian', 'hooman', 'hoomin', 'hooomin'],
+    [Species.Humanoid]: ['satyr', 'gnome', 'dwarf', 'halfling', 'tiefling', 'humanoid'],
+    [Species.Equine]: ['horse', 'stallion', 'mare', 'filly', 'equine', 'shire', 'donkey', 'mule', 'zebra', 'pony', 'unicorn', 'clydesdale', 'shire',
+        'appaloosa', 'friesian', 'draft', 'draught', 'alicorn', 'amazon', 'amazonian', 'horsie', 'hoss', 'pegasus', 'colt', 'filly'],
     [Species.Feline]: ['cat', 'kitten', 'catgirl', 'neko', 'tiger', 'puma', 'lion', 'lioness',
-        'tigress', 'feline', 'jaguar', 'cheetah', 'lynx', 'leopard'],
-    [Species.Canine]: ['dog', 'wolf', 'dingo', 'coyote', 'jackal', 'canine', 'doberman', 'husky'],
+        'tigress', 'feline', 'jaguar', 'cheetah', 'lynx', 'leopard', 'cougar', 'kitty', 'migote', 'miqo\'te', 'miqote', 'ocelot',
+        'sabertooth', 'saber tooth', 'tabby'],
+    [Species.Canine]: ['dog', 'wolf', 'dingo', 'coyote', 'jackal', 'canine', 'doberman', 'husky', 'hound', 'akita', 'pitbull', 'pit bull', 'terrier',
+        'bull terrier', 'australian shepherd', 'australian shepard', 'german shepherd', 'german shepard', 'malinois', 'woof', 'labrador', 'collie',
+        'canis', 'canid', 'chihuahua', 'poodle', 'chinchilla', 'chowchow', 'corgi', 'anubis', 'anubian', 'dalmatian', 'inumimi', 'lupine', 'malamute', 'mastiff',
+        'mutt', 'rottweiler', 'shih tzu', 'worgen'],
     [Species.Vulpine]: ['fox', 'fennec', 'kitsune', 'vulpine', 'vixen'],
-    [Species.Avian]: ['bird', 'gryphon', 'phoenix', 'roc', 'chimera', 'avian'],
-    [Species.Amphibian]: ['salamander', 'frog', 'toad', 'newt'],
-    [Species.Cervine]: ['deer', 'elk', 'moose'],
+    [Species.Avian]: ['bird', 'gryphon', 'phoenix', 'roc', 'chimera', 'avian', 'albatross', 'cockatiel', 'dove', 'eagle', 'owl', 'penguin', 'raven'],
+    [Species.Amphibian]: ['salamander', 'frog', 'toad', 'newt', 'amphibian'],
+    [Species.Cervine]: ['deer', 'elk', 'moose', 'cervid', 'cervine', 'caribou', 'reindeer', 'doe', 'stag'],
     [Species.Insect]: ['bee', 'wasp', 'spider', 'scorpion', 'ant', 'insect'],
     [Species.Lapine]: ['bunny', 'rabbit', 'hare', 'lapine'],
-    [Species.Dragon]: ['dragon', 'drake', 'wyvern'],
-    [Species.Musteline]: ['mink', 'ferret', 'weasel', 'stoat', 'otter', 'wolverine', 'marten'],
-    [Species.Procyon]: ['raccoon', 'coatimund', 'longtail'],
-    [Species.Rodent]: ['rat', 'mouse', 'chipmunk', 'squirrel', 'rodent'],
-    [Species.Ursine]: ['bear', 'panda', 'black bear', 'brown bear', 'polar bear'],
+    [Species.Dragon]: ['dragon', 'drake', 'wyvern', 'draconian'],
+    [Species.Demon]: ['demon', 'daemon', 'deamon', 'demoness', 'demonkin', 'devil', 'succubus', 'incubus', 'baphomet'],
+    [Species.Musteline]: ['mink', 'ferret', 'weasel', 'stoat', 'otter', 'wolverine', 'marten', 'musteline'],
+    [Species.Procyon]: ['raccoon', 'racoon', 'coatimund', 'longtail', 'procyon'],
+    [Species.Rodent]: ['rat', 'mouse', 'chipmunk', 'squirrel', 'rodent', 'maus'],
+    [Species.Ursine]: ['bear', 'panda', 'black bear', 'brown bear', 'polar bear', 'ursine'],
     [Species.MarineMammal]: ['whale', 'killer whale', 'dolphin'],
-    [Species.Primate]: ['monkey', 'ape', 'chimp', 'chimpanzee', 'gorilla'],
-    [Species.Elf]: ['elf'],
-    [Species.Fish]: ['fish', 'shark', 'great white'],
+    [Species.Primate]: ['monkey', 'ape', 'chimp', 'chimpanzee', 'gorilla', 'lemur', 'silverback'],
+    [Species.Divinity]: ['god', 'goddess', 'demigod', 'demigoddess', 'demi-god', 'demi-goddess'],
+    [Species.Elf]: ['elf', 'e l f', 'drow', 'draenei', 'draenai', 'kaldorei', 'sindorei'],
+    [Species.Fish]: ['fish', 'shark', 'great white', 'sergal', 'elven'],
     [Species.Orc]: ['orc'],
-    [Species.Reptile]: ['chameleon', 'anole', 'alligator', 'snake', 'crocodile', 'lizard'],
+    [Species.Reptile]: ['chameleon', 'anole', 'alligator', 'aligator', 'snake', 'crocodile', 'lizard', 'gator', 'gecko', 'reptile', 'reptilian'],
     [Species.Anthro]: ['anthro', 'anthropomorphic'],
-    [Species.Minotaur]: ['minotaur']
+    [Species.Bovine]: ['cow', 'bovine', 'bison', 'antelope', 'gazelle', 'oryx', 'black angus', 'bull', 'ox'],
+    [Species.Caprinae]: ['sheep', 'goat', 'ibex', 'takin', 'bharal', 'goral', 'serow', 'lamb'],
+    [Species.Marsupial]: ['opossum', 'possum', 'kangaroo', 'roo', 'koala', 'wombat'],
+    [Species.Hyaenidae]: ['hyena'],
+    [Species.Minotaur]: ['minotaur', 'tauren'],
+    [Species.Bat]: ['bat'],
+    [Species.Alien]: ['alien', 'krogan', 'xenomorph'],
+    [Species.Mephitidae]: ['skunk'],
+    [Species.Robot]: ['android', 'robot', 'cyborg'],
+    [Species.Dinosaur]: ['saurus', 'deathclaw', 'dinosaur', 'raptor', 'trex', 't-rex'],
+    [Species.Pokemon]: ['charizard', 'charmander', 'pikachu', 'digimon', 'renamon', 'eevee', 'gardevoir', 'absol', 'aggron', 'jolteon', 'lopunny'],
+    [Species.Fae]: ['fairy', 'fae', 'imp', 'elemental'],
+    [Species.Taur]: ['chakat', 'centaur', 'equitaur'],
+    [Species.Vampire]: ['vampyre', 'vampire', 'dhampir', 'daywalker'],
+    [Species.Naga]: ['naga', 'lamia'],
+    [Species.Monster]: ['gnoll', 'goblin', 'kobold', 'monster', 'troll', 'illithid', 'golem', 'basilisk'],
+    [Species.Giraffe]: ['giraffe'],
+    [Species.Rhinoceros]: ['rhino', 'rhinoceros']
 };
 
 
@@ -802,8 +855,9 @@ export class Matcher {
 
         const mySpecies = Matcher.getTagValue(TagId.Species, c);
 
-        if ((!mySpecies) || (!mySpecies.string))
+        if ((!mySpecies) || (!mySpecies.string)) {
             return Species.Human; // best guess
+        }
 
         const finalSpecies = mySpecies.string.toLowerCase();
 
