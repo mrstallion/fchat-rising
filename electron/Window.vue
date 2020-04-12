@@ -89,7 +89,7 @@
         @Hook('mounted')
         async mounted(): Promise<void> {
             // top bar devtools
-            browserWindow.webContents.openDevTools({ mode: 'detach' });
+            // browserWindow.webContents.openDevTools({ mode: 'detach' });
 
             updateSupportedLanguages(browserWindow.webContents.session.availableSpellCheckerLanguages);
 
@@ -222,7 +222,7 @@
             const view = new electron.remote.BrowserView({webPreferences: {webviewTag: true, nodeIntegration: true, spellcheck: true}});
 
             // tab devtools
-            view.webContents.openDevTools();
+            // view.webContents.openDevTools();
 
             // console.log('ADD TAB LANGUAGES', getSafeLanguages(this.settings.spellcheckLang), this.settings.spellcheckLang);
             view.webContents.session.setSpellCheckerLanguages(getSafeLanguages(this.settings.spellcheckLang));
