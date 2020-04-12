@@ -38,6 +38,9 @@
         private readonly character!: Character;
         @Prop
         private readonly usePreview?: boolean;
+        @Prop
+        private readonly injectedImages?: CharacterImage[] | null;
+
         private shown = false;
         previewImage = '';
         images: CharacterImage[] = [];
@@ -64,6 +67,10 @@
         }
 
         async resolveImages(): Promise<CharacterImage[]> {
+            if ((this.injectedImages) && (this.injectedImages.length)) {
+                return this.injectedImages;
+            }
+
             const c = await core.cache.profileCache.get(this.character.character.name);
 
             if ((c) && (c.meta) && (c.meta.images)) {

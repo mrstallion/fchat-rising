@@ -51,7 +51,7 @@
                                     <character-groups :character="character" ref="tab2"></character-groups>
                                 </div>
                                 <div role="tabpanel" v-show="tab === '3'">
-                                    <character-images :character="character" ref="tab3" :use-preview="imagePreview"></character-images>
+                                    <character-images :character="character" ref="tab3" :use-preview="imagePreview" :injected-images="images"></character-images>
                                 </div>
                                 <div v-if="character.settings.guestbook" role="tabpanel" v-show="tab === '4'" id="guestbook">
                                     <character-guestbook :character="character" :oldApi="oldApi" ref="tab4"></character-guestbook>
