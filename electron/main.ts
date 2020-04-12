@@ -90,6 +90,8 @@ if(!settings.hwAcceleration) {
 
 
 export function updateSpellCheckerLanguages(langs: string[]): void {
+    // console.log('UPDATESPELLCHECKERLANGUAGES', langs);
+
     // console.log('Language support:', langs);
     electron.session.defaultSession.setSpellCheckerLanguages(langs);
 
@@ -181,7 +183,11 @@ function createWindow(): Electron.BrowserWindow | undefined {
     const window = new electron.BrowserWindow(windowProperties);
     windows.push(window);
 
-    const safeLanguages = settings.spellcheckLang ? _.castArray(settings.spellcheckLang) : [];
+    updateSupportedLanguages(electron.session.defaultSession.availableSpellCheckerLanguages);
+
+    const safeLanguages = getSafeLanguages(settings.spellcheckLang);
+
+    // console.log('CREATEWINDOW', safeLanguages);
     electron.session.defaultSession.setSpellCheckerLanguages(safeLanguages);
     window.webContents.session.setSpellCheckerLanguages(safeLanguages);
 
@@ -247,8 +253,7 @@ function createWindow(): Electron.BrowserWindow | undefined {
         }
     );
 
-
-    console.log('GOT HERE');
+    // console.log('GOT HERE');
 
     // tslint:disable-next-line:no-floating-promises
     window.loadFile(
@@ -289,8 +294,6 @@ function onReady(): void {
     log.transports.file.maxSize = 5 * 1024 * 1024;
     log.transports.file.file = path.join(baseDir, 'log.txt');
     log.info('Starting application.');
-
-    updateSupportedLanguages(electron.session.defaultSession.availableSpellCheckerLanguages);
 
     app.setAppUserModelId('com.squirrel.fchat.F-Chat');
     app.on('open-file', createWindow);

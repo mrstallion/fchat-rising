@@ -9,7 +9,7 @@ export function getSafeLanguages(langs: string | string[] | undefined): string[]
     const initialCount = initialLanguages.length;
     const safeLanguages = _.filter(initialLanguages, (il) => (_.indexOf(supportedLanguages, il) >= 0));
 
-    if ((initialCount > 0) && (safeLanguages.length)) {
+    if ((initialCount > 0) && (!safeLanguages.length)) {
         safeLanguages.push('en-GB');
     }
 

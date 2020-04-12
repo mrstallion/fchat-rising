@@ -47,7 +47,7 @@
     import Vue from 'vue';
     import l from '../chat/localize';
     import {GeneralSettings} from './common';
-    import { getSafeLanguages } from './language';
+    import { getSafeLanguages, updateSupportedLanguages } from './language';
 
     const browserWindow = electron.remote.getCurrentWindow();
 
@@ -89,7 +89,11 @@
         @Hook('mounted')
         async mounted(): Promise<void> {
             // top bar devtools
-            // browserWindow.webContents.openDevTools({ mode: 'detach' });
+            browserWindow.webContents.openDevTools({ mode: 'detach' });
+
+            updateSupportedLanguages(browserWindow.webContents.session.availableSpellCheckerLanguages);
+
+            // console.log('MOUNT DICTIONARIES', getSafeLanguages(this.settings.spellcheckLang), this.settings.spellcheckLang);
 
             browserWindow.webContents.session.setSpellCheckerLanguages(getSafeLanguages(this.settings.spellcheckLang));
 
@@ -103,6 +107,8 @@
             electron.ipcRenderer.on('quit', () => this.destroyAllTabs());
 
             electron.ipcRenderer.on('update-dictionaries', (_e: Event, langs: string[]) => {
+                // console.log('UPDATE DICTIONARIES', langs);
+
                 browserWindow.webContents.session.setSpellCheckerLanguages(langs);
 
                 for (const t of this.tabs) {
@@ -145,7 +151,7 @@
             document.addEventListener('click', () => this.activeTab!.view.webContents.focus());
             window.addEventListener('focus', () => this.activeTab!.view.webContents.focus());
 
-            console.log('SORTABLE', Sortable);
+            // console.log('SORTABLE', Sortable);
 
             Sortable.create(<HTMLElement>this.$refs['tabs'], {
                 animation: 50,
@@ -216,8 +222,9 @@
             const view = new electron.remote.BrowserView({webPreferences: {webviewTag: true, nodeIntegration: true, spellcheck: true}});
 
             // tab devtools
-            // view.webContents.openDevTools();
+            view.webContents.openDevTools();
 
+            // console.log('ADD TAB LANGUAGES', getSafeLanguages(this.settings.spellcheckLang), this.settings.spellcheckLang);
             view.webContents.session.setSpellCheckerLanguages(getSafeLanguages(this.settings.spellcheckLang));
 
             view.setAutoResize({width: true, height: true});
