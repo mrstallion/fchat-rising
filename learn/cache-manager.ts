@@ -40,7 +40,7 @@ export class CacheManager {
     protected lastPost: Date = new Date();
 
 
-    timeLastPost(): void {
+    markLastPostTime(): void {
         this.lastPost = new Date();
     }
 

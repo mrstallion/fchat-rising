@@ -8,6 +8,7 @@
     "@f-list/fork-ts-checker-webpack-plugin": "^3.1.1",
     "@f-list/vue-ts": "^1.0.3",
     "@fortawesome/fontawesome-free": "^5.9.0",
+    "@types/bluebird": "^3.5.30",
     "@types/lodash": "^4.14.134",
     "@types/node-fetch": "^2.5.5",
     "@types/qs": "^6.9.1",
@@ -45,6 +46,7 @@
   },
   "dependencies": {
     "@cliqz/adblocker-electron": "^1.13.0",
+    "bluebird": "^3.7.2",
     "jquery": "^3.4.1",
     "keytar": "^5.4.0",
     "node-fetch": "^2.6.0"

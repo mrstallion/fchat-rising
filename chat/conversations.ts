@@ -9,6 +9,8 @@ import l from './localize';
 import {CommandContext, isAction, isCommand, isWarn, parse as parseCommand} from './slash_commands';
 import MessageType = Interfaces.Message.Type;
 import {EventBus} from './preview/event-bus';
+import throat from 'throat';
+import Bluebird from 'bluebird';
 
 function createMessage(this: any, type: MessageType, sender: Character, text: string, time?: Date): Message {
     if(type === MessageType.Message && isAction(text)) {
@@ -39,6 +41,8 @@ abstract class Conversation implements Interfaces.Conversation {
     readonly reportMessages: Interfaces.Message[] = [];
     private lastSent = '';
     adManager: AdManager;
+
+    protected static readonly conversationThroat = throat(1); // make sure user posting and ad posting won't get in each others' way
 
     constructor(readonly key: string, public _isPinned: boolean) {
         this.adManager = new AdManager(this);
@@ -124,6 +128,19 @@ abstract class Conversation implements Interfaces.Conversation {
     }
 
     protected abstract doSend(): void | Promise<void>;
+
+
+    protected static readonly POST_DELAY = 1250;
+
+    protected static async testPostDelay(): Promise<void> {
+        const lastPostDelta = Date.now() - core.cache.getLastPost().getTime();
+
+        // console.log('Last Post Delta', lastPostDelta, ((lastPostDelta < Conversation.POST_DELAY) && (lastPostDelta > 0)));
+
+        if ((lastPostDelta < Conversation.POST_DELAY) && (lastPostDelta > 0)) {
+            await Bluebird.delay(Conversation.POST_DELAY - lastPostDelta);
+        }
+    }
 }
 
 class PrivateConversation extends Conversation implements Interfaces.PrivateConversation {
@@ -200,11 +217,23 @@ class PrivateConversation extends Conversation implements Interfaces.PrivateConv
             return;
         }
 
-        core.connection.send('PRI', {recipient: this.name, message: this.enteredText});
-        const message = createMessage(MessageType.Message, core.characters.ownCharacter, this.enteredText);
-        this.safeAddMessage(message);
-        if(core.state.settings.logMessages) await core.logs.logMessage(this, message);
+        const messageText = this.enteredText;
+
         this.clearText();
+
+        await Conversation.conversationThroat(
+            async() => {
+                await Conversation.testPostDelay();
+
+                core.connection.send('PRI', {recipient: this.name, message: messageText});
+                core.cache.markLastPostTime();
+
+                const message = createMessage(MessageType.Message, core.characters.ownCharacter, messageText);
+                this.safeAddMessage(message);
+
+                if(core.state.settings.logMessages) await core.logs.logMessage(this, message);
+            }
+        );
     }
 
     private setOwnTyping(status: Interfaces.TypingStatus): void {
@@ -335,29 +364,51 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
             return;
         }
 
-        core.connection.send(isAd ? 'LRP' : 'MSG', {channel: this.channel.id, message: this.enteredText});
-        await this.addMessage(
-            createMessage(isAd ? MessageType.Ad : MessageType.Message, core.characters.ownCharacter, this.enteredText, new Date()));
-        if(isAd)
-            this.nextAd = Date.now() + core.connection.vars.lfrp_flood * 1000;
-        else this.clearText();
+        const message = this.enteredText;
 
-        core.cache.timeLastPost();
+        if (!isAd) {
+            this.clearText();
+        }
+
+        await Conversation.conversationThroat(
+          async() => {
+                await Conversation.testPostDelay();
+
+                core.connection.send(isAd ? 'LRP' : 'MSG', {channel: this.channel.id, message});
+                core.cache.markLastPostTime();
+
+                await this.addMessage(
+                    createMessage(isAd ? MessageType.Ad : MessageType.Message, core.characters.ownCharacter, message, new Date())
+                );
+
+                if(isAd)
+                    this.nextAd = Date.now() + core.connection.vars.lfrp_flood * 1000;
+          }
+        );
     }
+
 
     async sendAd(text: string): Promise<void> {
         if (text.length < 1)
             return;
 
-        core.connection.send('LRP', {channel: this.channel.id, message: text});
+        await Conversation.conversationThroat(
+            async() => {
+                await Conversation.testPostDelay();
 
-        await this.addMessage(
-            createMessage(MessageType.Ad, core.characters.ownCharacter, text, new Date())
+                core.connection.send('LRP', {channel: this.channel.id, message: text});
+                core.cache.markLastPostTime();
+
+                await this.addMessage(
+                    createMessage(MessageType.Ad, core.characters.ownCharacter, text, new Date())
+                );
+
+                this.nextAd = Date.now() + core.connection.vars.lfrp_flood * 1000;
+            }
         );
-
-        this.nextAd = Date.now() + core.connection.vars.lfrp_flood * 1000;
     }
 }
+
 
 class ConsoleConversation extends Conversation {
     readonly context = CommandContext.Console;

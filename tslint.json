@@ -51,7 +51,7 @@
       true,
       "array"
     ],
-    "await-promise": [true, "AxiosPromise"],
+    "await-promise": [true, "AxiosPromise", "Bluebird"],
     "comment-format": false,
     "completed-docs": false,
     "curly": false,

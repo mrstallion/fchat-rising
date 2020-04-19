@@ -13,17 +13,18 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 
 ### More Detailed Differences
 
-*   Ads view
+*   Channel Conversations
     *    Highlight ads from characters most interesting to you
     *    Hide clearly unmatched ads
-    *    View characters' recent ads
-*   Ad auto-posting
+*   Ad Auto-Posting
     *    Manage channel ad settings via "Tab Settings"
     *    Automatically re-post ads every 11-18 minutes (randomized) for up to 180 minutes
     *    Rotate multiple ads on a single channel by entering multiple ads in "Ad Settings"
-*   Ad ratings
+*   Ad Ratings
     *    LFP ads are automatically rated (great/good/maybe/no) and matched against your profile
-*   Link previews
+*   Private Conversations
+    *    View a characters' recent ads
+*   Link Previews
     *    Hover cursor over any `[url]` to see a preview of it
     *    Middle click any `[url]` to turn the preview into a sticky / interactive mode
     *    Link preview has an ad-blocker to minimize page load times and protect against unfriendly scripts 
@@ -45,8 +46,8 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Current search filters are listed in the search dialog
     *    Search filters can be reset
     *    Search results can be filtered by species
-    *    Last 15 searches are stored and can be accessed from the 'Search' dialog
-*   Character status
+    *    Last 15 searches are stored and can be accessed from the 'Character search' dialog
+*   Character Status Message
     *    Last 10 status messages are stored and can be accessed from the 'Set status' dialog
 *   General
     *    Character profiles, guestbooks, friend lists, and image lists are cached for faster access
@@ -55,7 +56,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    PM list shows characters' online status as a colored icon
 *   Technical Details for Nerds
     *    Upgraded to Electron 9.x
-    *    Replaced `node-spellchecker` with the built-in spellchecker that ships with Electron 8
+    *    Replaced `node-spellchecker` with the built-in spellchecker that ships with Electron 8+
     *    Multi-language support for spell checking (Windows only – language is autodetected on MacOS) 
 
 
