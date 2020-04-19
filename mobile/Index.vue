@@ -60,7 +60,7 @@
     import {Component, Hook} from '@f-list/vue-ts';
     import Axios from 'axios';
     import * as qs from 'qs';
-    import * as Raven from 'raven-js';
+    import Raven from 'raven-js';
     import Vue from 'vue';
     import Chat from '../chat/Chat.vue';
     import core from '../chat/core';

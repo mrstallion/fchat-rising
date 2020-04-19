@@ -34,10 +34,7 @@
 </template>
 
 <script lang="ts">
-    import * as SortableBase from 'sortablejs';
-    const Sortable = (SortableBase as any).Sortable;
-
-    import * as _ from 'lodash';
+    import Sortable from 'sortablejs';
 
     import {Component, Hook} from '@f-list/vue-ts';
     import * as electron from 'electron';
@@ -155,7 +152,7 @@
 
             Sortable.create(<HTMLElement>this.$refs['tabs'], {
                 animation: 50,
-                onEnd: (e: any) => {
+                onEnd: (e) => {
                     if(e.oldIndex === e.newIndex) return;
                     const tab = this.tabs.splice(e.oldIndex!, 1)[0];
                     this.tabs.splice(e.newIndex!, 0, tab);

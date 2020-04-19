@@ -1,4 +1,4 @@
-import * as Raven from 'raven-js';
+import Raven from 'raven-js';
 import Vue from 'vue';
 
 /*tslint:disable:no-unsafe-any no-any*///hack

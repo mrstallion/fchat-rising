@@ -101,8 +101,7 @@
 <script lang="ts">
     import {Component, Hook} from '@f-list/vue-ts';
 
-    import * as SortableBase from 'sortablejs';
-    const Sortable = (SortableBase as any).Sortable;
+    import Sortable from 'sortablejs';
 
     import Vue from 'vue';
     import {Keys} from '../keys';
@@ -159,7 +158,7 @@
             Sortable.create(<HTMLElement>this.$refs['privateConversations'], {
                 animation: 50,
                 fallbackTolerance: 5,
-                onEnd: async(e: any) => {
+                onEnd: async(e) => {
                     if(e.oldIndex === e.newIndex) return;
                     return core.conversations.privateConversations[e.oldIndex!].sort(e.newIndex!);
                 }
@@ -167,7 +166,7 @@
             Sortable.create(<HTMLElement>this.$refs['channelConversations'], {
                 animation: 50,
                 fallbackTolerance: 5,
-                onEnd: async(e: any) => {
+                onEnd: async(e) => {
                     if(e.oldIndex === e.newIndex) return;
                     return core.conversations.channelConversations[e.oldIndex!].sort(e.newIndex!);
                 }

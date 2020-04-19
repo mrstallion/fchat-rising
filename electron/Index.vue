@@ -85,7 +85,7 @@
     import * as fs from 'fs';
     import * as path from 'path';
     import * as qs from 'querystring';
-    import * as Raven from 'raven-js';
+    import Raven from 'raven-js';
     import {promisify} from 'util';
     import Vue from 'vue';
     import Chat from '../chat/Chat.vue';

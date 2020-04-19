@@ -181,11 +181,11 @@ export class AdManager {
     }
 
 
-    protected static recoverableCharacter: string = '';
+    protected static recoverableCharacter = '';
     protected static recoverableAds: RecoverableAd[] = [];
 
 
-    static onConnectionClosed() {
+    static onConnectionClosed(): void {
         AdManager.recoverableCharacter = core.characters.ownCharacter.name;
 
         AdManager.recoverableAds = _.map(
@@ -210,7 +210,7 @@ export class AdManager {
     }
 
 
-    static onNewChannelAvailable(channel: ChannelConversation) {
+    static onNewChannelAvailable(channel: ChannelConversation): void {
         if (AdManager.recoverableCharacter !== core.characters.ownCharacter.name) {
             AdManager.recoverableAds = [];
             AdManager.recoverableCharacter = '';

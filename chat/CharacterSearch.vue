@@ -109,8 +109,21 @@
         resultsComplete = false;
         characterImage = characterImage;
         options!: ExtendedSearchData;
-        data: ExtendedSearchData = {kinks: [], genders: [], orientations: [], languages: [], furryprefs: [], roles: [], positions: [], species: []};
-        listItems: ReadonlyArray<keyof SearchData> = ['genders', 'orientations', 'languages', 'furryprefs', 'roles', 'positions']; // SearchData is correct
+
+        data: ExtendedSearchData = {
+            kinks: [],
+            genders: [],
+            orientations: [],
+            languages: [],
+            furryprefs: [],
+            roles: [],
+            positions: [],
+            species: []
+        };
+
+        listItems: ReadonlyArray<keyof SearchData> = [
+            'genders', 'orientations', 'languages', 'furryprefs', 'roles', 'positions'
+        ]; // SearchData is correct
 
         searchString = '';
 
@@ -233,15 +246,15 @@
             return false;
           }
 
-          return !!_.find(this.data.species, (s) => (s.id === species));
+          return !!_.find(this.data.species, (s: SearchSpecies) => (s.id === species));
         }
 
 
         getSpeciesOptions(): SearchSpecies[] {
             const species = _.map(
                 _.filter(Species, (s) => (_.isString(s))) as unknown[] as string[],
-                (speciesName: string) => {
-                    const speciesId = (Species as any)[speciesName];
+                (speciesName: keyof typeof Species): SearchSpecies => {
+                    const speciesId: number = Species[speciesName];
 
                     if (speciesId in speciesNames) {
                         return {
@@ -255,7 +268,7 @@
                         id: speciesId
                     };
                 }
-            );
+            ) as unknown[] as SearchSpecies[];
 
             return _.sortBy(species, 'name');
         }

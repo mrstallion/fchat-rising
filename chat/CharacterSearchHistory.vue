@@ -38,7 +38,7 @@
         @Prop({required: true})
         readonly curSearch!: ExtendedSearchData | undefined;
 
-        history: (ExtendedSearchData|SearchData)[] = [];
+        history: (ExtendedSearchData | SearchData)[] = [];
 
         selectedSearch: number | null = null;
 

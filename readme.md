@@ -84,7 +84,6 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 1. 'Underage' kink is considered to apply to characters aged 16 or above; 'ageplay' kink is considered to apply to characters aged 16 or below.
 1. 'Older characters' and 'younger characters' kink preferences are interpreted as age difference of 5+ years.
 1. Comparison results will get faster over time, as more and more character data is cached.
-1. Loading animation
 
 
 ## Todo / Ideas
@@ -97,6 +96,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Bug? Usually submissive vs usually submissive shows up as 'maybe'
 *   Bug? YOU have 'loves humans'; THEY have 'no furry characters, just humans' -- THEIR ad shows green, not red -- your side of comparison is fully green, they just have 'no furry pairings' in red
 *   Bug? [color] acts weird
+*   Add new chat is case sensitive
 
 
 # F-List Exported
