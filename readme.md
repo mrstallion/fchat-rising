@@ -97,7 +97,6 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Bug? Usually submissive vs usually submissive shows up as 'maybe'
 *   Bug? YOU have 'loves humans'; THEY have 'no furry characters, just humans' -- THEIR ad shows green, not red -- your side of comparison is fully green, they just have 'no furry pairings' in red
 *   Bug? [color] acts weird
-*   Add new chat is case sensitive
 
 
 # F-List Exported

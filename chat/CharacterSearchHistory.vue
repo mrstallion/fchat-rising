@@ -5,10 +5,12 @@
                 <div class="form-col radio-col">
                     <input type="radio" :id="'search_history_' + index" :name="'search_history_' + index" v-model="selectedSearch" v-bind:value="index" />
                 </div>
-                <div class="form-col content-col">
-                    <label class="custom-control-label" :for="'search_history_' + index" @dblclick="submit">
+                <div class="form-col content-col" @click="select(index)" @dblclick="submit">
+                    <span class="before-content"><i class="fas" :class="{ 'fa-check-circle': (index === selectedSearch) }" /></span>
+                    <label class="custom-control-label" :for="'search_history_' + index">
                         {{describeSearch(search)}}
                     </label>
+                    <span class="content-action" @click="removeSearchHistoryEntry(index)"><i class="fas fa-times-circle" /></span>
                 </div>
             </div>
         </form>
@@ -85,6 +87,18 @@
                 ', '
             );
         }
+
+
+        async removeSearchHistoryEntry(index: number): Promise<void> {
+          this.history.splice(index, 1);
+
+          await core.settingsStore.set('searchHistory', this.history);
+        }
+
+
+        select(index: number): void {
+            this.selectedSearch = index;
+        }
     }
 </script>
 
@@ -100,9 +114,28 @@
 
         .content-col {
             min-width: 100%;
+            display: flex;
 
             label {
-                min-width: 100%;
+                flex: 1;
+            }
+
+            .before-content {
+                width: 1.3rem;
+                margin-bottom: auto;
+                margin-top: auto;
+            }
+
+            .content-action {
+                float: right;
+                opacity: 0.2;
+                margin-bottom: auto;
+                margin-top: auto;
+                margin-left: 1rem;
+
+                &:hover {
+                    opacity: 0.8;
+                }
             }
         }
 

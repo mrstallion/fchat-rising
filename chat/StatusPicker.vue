@@ -5,10 +5,12 @@
                 <div class="form-col radio-col">
                     <input type="radio" :id="'history_status_' + index" :name="'history_status_' + index" v-model="selectedStatus" v-bind:value="index" />
                 </div>
-                <div class="form-col content-col">
-                    <label class="custom-control-label" :for="'history_status_' + index" @dblclick="submit">
+                <div class="form-col content-col" @click="select(index)" @dblclick="submit">
+                    <span class="before-content"><i class="fas" :class="{ 'fa-check-circle': (index === selectedStatus) }" /></span>
+                    <label class="custom-control-label" :for="'history_status_' + index">
                         <bbcode :text="historicStatus"></bbcode>
                     </label>
+                    <span class="content-action" @click="removeStatusHistoryEntry(index)"><i class="fas fa-times-circle" /></span>
                 </div>
             </div>
         </form>
@@ -70,6 +72,20 @@
                 this.callback(this.history[this.selectedStatus]);
             }
         }
+
+
+        async removeStatusHistoryEntry(index: number): Promise<void> {
+          if(confirm('Are you sure you want to remove this status message?')) {
+              this.history.splice(index, 1);
+
+              await core.settingsStore.set('statusHistory', this.history);
+          }
+        }
+
+
+        select(index: number): void {
+            this.selectedStatus = index;
+        }
     }
 </script>
 
@@ -85,9 +101,28 @@
 
         .content-col {
             min-width: 100%;
+            display: flex;
 
             label {
-                min-width: 100%;
+                flex: 1;
+            }
+
+            .before-content {
+                width: 1.3rem;
+                margin-bottom: auto;
+                margin-top: auto;
+            }
+
+            .content-action {
+                float: right;
+                opacity: 0.2;
+                margin-bottom: auto;
+                margin-top: auto;
+                margin-left: 1rem;
+
+                &:hover {
+                    opacity: 0.8;
+                }
             }
         }
 
