@@ -133,7 +133,8 @@ export class ImageDomMutator {
         this.add('default', this.getBaseJsMutatorScript(['.content video', '.content img', '#video, video', '#image, img']));
         this.add('e621.net', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('e-hentai.org', this.getBaseJsMutatorScript(['video', '#img']));
-        this.add('gelbooru.com', this.getBaseJsMutatorScript(['video', '#image']));
+        this.add('gelbooru.com', this.getBaseJsMutatorScript(['.post-view video', '#image']));
+        this.add('gyazo.com', this.getBaseJsMutatorScript(['.image-view video', '.image-view img']));
         this.add('chan.sankakucomplex.com', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('danbooru.donmai.us', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('gfycat.com', this.getBaseJsMutatorScript(['video']) /*, undefined, 'dom-ready' */);
@@ -156,6 +157,7 @@ export class ImageDomMutator {
         this.add('sexbot.gallery', this.getBaseJsMutatorScript(['video.hero', 'video']));
         this.add('imagefap.com', this.getBaseJsMutatorScript(['.image-wrapper img', 'video', 'img']));
         this.add('myhentaicomics.com', this.getBaseJsMutatorScript(['#entire_image img', 'video', 'img']));
+        this.add('gifmixxx.com', this.getBaseJsMutatorScript(['.gif.fit', '.gif', 'video', 'img']));
 
         this.add(
             'pornhub.com',
@@ -226,7 +228,7 @@ export class ImageDomMutator {
     }
 
 
-    getBaseJsMutatorScript(elSelector: string[], skipElementRemove: boolean = false, safeTags: string[] = []): string {
+    protected getBaseJsMutatorScript(elSelector: string[], skipElementRemove: boolean = false, safeTags: string[] = []): string {
         const js = this.scripts.processor; // ./assets/browser.processor.raw.js
 
         const settings = {
@@ -238,7 +240,7 @@ export class ImageDomMutator {
 
         const settingsJson = JSON.stringify(settings, null, 0);
 
-        return js.replace(/\/\* ## SETTINGS_START[^]*SETTINGS_END ## \*\//m, `this.settings = ${settingsJson}`);
+        return js.replace(/\/\* ## SETTINGS_START[^]*SETTINGS_END ## \*\//m, `this.settings = ${settingsJson};`);
     }
 
 
