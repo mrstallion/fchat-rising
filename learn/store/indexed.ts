@@ -81,7 +81,7 @@ export class IndexedStore implements PermanentIndexedStore {
             furryPreference: ca.furryPreference,
             species: ca.species,
             age: ca.age,
-            domSubRole: null, // domSubRole
+            domSubRole: ca.subDomRole, // domSubRole
             position: null, // position
 
             lastMetaFetched: null,

@@ -117,20 +117,7 @@ export class CacheManager {
             }
         );
 
-        _.each(
-            core.conversations.channelConversations,
-            (ch: ChannelConversation) => {
-                _.each(
-                    ch.messages, (m: Conversation.Message) => {
-                        if ((m.type === Message.Type.Ad) && (m.sender) && (m.sender.name === c.character.name)) {
-                            // console.log('Update score', score, ch.name, m.sender.name, m.text, m.id);
-
-                            m.score = score;
-                        }
-                    }
-                );
-            }
-        );
+        this.populateAllConversationsWithScore(c.character.name, score);
     }
 
 
@@ -226,6 +213,15 @@ export class CacheManager {
             }
         );
 
+        EventBus.$on(
+            'conversation-load-more',
+            async(data: SelectConversationEvent) => {
+              // this promise is intentionally NOT chained
+                // tslint:disable-next-line: no-floating-promises
+              this.onLoadMoreConversation(data);
+            }
+        );
+
 
         // EventBus.$on(
         //     'private-message',
@@ -240,6 +236,7 @@ export class CacheManager {
 
                     if (next) {
                         try {
+                            // tslint:disable-next-line: binary-expression-operand-order
                             if ((false) && (next)) {
                               console.log(`Fetch '${next.name}' for channel '${next.channelId}', gap: ${(Date.now() - this.lastFetch)}ms`);
                               this.lastFetch = Date.now();
@@ -305,6 +302,12 @@ export class CacheManager {
         // this.addProfile(message.sender.name);
     }
 
+
+    async onLoadMoreConversation(data: SelectConversationEvent): Promise<void> {
+      await this.onSelectConversation(data);
+    }
+
+
     async onSelectConversation(data: SelectConversationEvent): Promise<void> {
         const conversation = data.conversation;
         const channel = _.get(conversation, 'channel') as (Channel.Channel | undefined);
@@ -345,7 +348,7 @@ export class CacheManager {
                     return;
                 }
 
-                const p = await this.resolvePScore(false, chatMessage.sender, conversation as ChannelConversation, chatMessage);
+                const p = await this.resolvePScore(false, chatMessage.sender, conversation as ChannelConversation, chatMessage, true);
 
                 if (!p) {
                     await this.queueForFetching(chatMessage.sender.name, true, channel.id);
@@ -360,7 +363,8 @@ export class CacheManager {
       skipStore: boolean,
       char: Character.Character,
       conv: ChannelConversation,
-      msg?: Message
+      msg?: Message,
+      populateAll: boolean = true
     ): Promise<CharacterCacheRecord | undefined> {
       if (!core.characters.ownProfile) {
           return undefined;
@@ -376,10 +380,43 @@ export class CacheManager {
       ) || undefined;
 
       if ((p) && (msg)) {
+          // if (p.matchScore === 0) {
+          //     console.log(`Fetched score 0 for character ${char.name}`);
+          //
+          //     p.matchScore = ProfileCache.score(p.character);
+          //
+          //     await core.cache.profileCache.register(p.character, false);
+          //
+          //     console.log(`Re-scored character ${char.name} to ${p.matchScore}`);
+          // }
+
           msg.score = p.matchScore;
+
+          if (populateAll) {
+            this.populateAllConversationsWithScore(char.name, p.matchScore);
+          }
       }
 
       return p;
+    }
+
+
+    // tslint:disable-next-line: prefer-function-over-method
+    protected populateAllConversationsWithScore(characterName: string, score: number): void {
+        _.each(
+            core.conversations.channelConversations,
+            (ch: ChannelConversation) => {
+                _.each(
+                    ch.messages, (m: Conversation.Message) => {
+                        if ((m.type === Message.Type.Ad) && (m.sender) && (m.sender.name === characterName)) {
+                            // console.log('Update score', score, ch.name, m.sender.name, m.text, m.id);
+
+                            m.score = score;
+                        }
+                    }
+                );
+            }
+        );
     }
 
 

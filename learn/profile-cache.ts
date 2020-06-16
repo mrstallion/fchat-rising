@@ -137,6 +137,10 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
         const k = AsyncCache.nameKey(c.character.name);
         const score = ProfileCache.score(c);
 
+        if (score === 0) {
+            console.log(`Storing score 0 for character ${c.character.name}`);
+        }
+
         if ((this.store) && (!skipStore)) {
             await this.store.storeProfile(c);
         }

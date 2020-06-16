@@ -100,6 +100,9 @@ abstract class Conversation implements Interfaces.Conversation {
         if(this.messages.length >= this.allMessages.length) return false;
         this.maxMessages += 50;
         this.messages = this.allMessages.slice(-this.maxMessages);
+
+        EventBus.$emit('conversation-load-more', { conversation: this });
+
         return true;
     }
 
