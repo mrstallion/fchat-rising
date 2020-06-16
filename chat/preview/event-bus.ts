@@ -13,6 +13,7 @@ import ChannelConversation = Conversation.ChannelConversation;
  * 'private-message': {message: Message}
  * 'channel-ad': {message: Message, channel: Conversation, profile: ComplexCharacter | undefined}
  * 'channel-message': {message: Message, channel: Conversation}
+ * 'select-conversation': { conversation: Conversation }
  */
 
 

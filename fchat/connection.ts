@@ -6,7 +6,14 @@ import ReadyState = WebSocketConnection.ReadyState;
 const fatalErrors = [2, 3, 4, 9, 30, 31, 33, 39, 40, 62, -4];
 const dieErrors = [9, 30, 31, 39, 40];
 
+let lastFetch = Date.now();
+
 async function queryApi(this: void, endpoint: string, data: object): Promise<AxiosResponse> {
+    if (false) {
+        console.log(`https://www.f-list.net/json/api/${endpoint}, gap: ${Date.now() - lastFetch}ms`);
+        lastFetch = Date.now();
+    }
+
     return Axios.post(`https://www.f-list.net/json/api/${endpoint}`, qs.stringify(data));
 }
 
@@ -194,7 +201,13 @@ export default class Connection implements Interfaces.Connection {
     //tslint:enable
 
     private async getTicket(password: string): Promise<string> {
-        console.log('GET TICKET GET TICKET GET TICKET GET TICKET');
+        console.log('Acquiring new API ticket');
+
+        if (false) {
+            console.log(`https://www.f-list.net/json/getApiTicket.php, gap: ${Date.now() - lastFetch}ms`);
+            lastFetch = Date.now();
+        }
+
         const data = <{ticket?: string, error: string}>(await Axios.post('https://www.f-list.net/json/getApiTicket.php', qs.stringify(
             {account: this.account, password, no_friends: true, no_bookmarks: true, no_characters: true}))).data;
         if(data.ticket !== undefined) return data.ticket;

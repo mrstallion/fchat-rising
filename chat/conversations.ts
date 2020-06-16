@@ -1,6 +1,6 @@
 import {queuedJoin} from '../fchat/channels';
 import {decodeHTML} from '../fchat/common';
-import { CharacterCacheRecord } from '../learn/profile-cache';
+// import { CharacterCacheRecord } from '../learn/profile-cache';
 import { AdManager } from './ads/ad-manager';
 import { characterImage, ConversationSettings, EventMessage, Message, messageToString } from './common';
 import core from './core';
@@ -496,6 +496,7 @@ class State implements Interfaces.State {
         this.selectedConversation.onHide();
         conversation.unread = Interfaces.UnreadState.None;
         this.selectedConversation = conversation;
+        EventBus.$emit('select-conversation', { conversation });
     }
 
     async reloadSettings(): Promise<void> {
@@ -552,6 +553,7 @@ export default function(this: any): Interfaces.State {
             state.privateMap = {};
         } else state.consoleTab.unread = Interfaces.UnreadState.None;
         state.selectedConversation = state.consoleTab;
+        EventBus.$emit('select-conversation', { conversation: state.selectedConversation });
         await state.reloadSettings();
     });
     connection.onEvent('connected', (isReconnect) => {
@@ -643,16 +645,12 @@ export default function(this: any): Interfaces.State {
 
         const msg = new Message(MessageType.Ad, char, decodeHTML(data.message), time);
 
-        // this is done here so that the message will be rendered correctly when cache is hit
-        let p: CharacterCacheRecord | undefined;
-
-        if (core.characters.ownProfile) {
-            p = await core.cache.profileCache.get(char.name) || undefined;
-
-            if (p) {
-                msg.score = p.matchScore;
-            }
-        }
+        const p = await core.cache.resolvePScore(
+            (core.conversations.selectedConversation !== conv),
+            char,
+            conv,
+            msg
+        );
 
         EventBus.$emit('channel-ad', { message: msg, channel: conv, profile: p });
 

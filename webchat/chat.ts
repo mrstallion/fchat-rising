@@ -53,7 +53,7 @@ if(process.env.NODE_ENV === 'production')
 declare const chatSettings: {account: string, theme: string, characters: ReadonlyArray<SimpleCharacter>, defaultCharacter: number | null};
 
 const ticketProvider = async() => {
-    // console.log('PROVIDER GET TICKET GET TICKET GET TICKET');
+    console.log('TICK TICK TICK TICK');
 
     const data = (await Axios.post<{ticket?: string, error: string}>(
         '/json/getApiTicket.php?no_friends=true&no_bookmarks=true&no_characters=true')).data;

@@ -36,6 +36,8 @@ export interface CharacterCacheRecord {
 export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
     protected store?: PermanentIndexedStore;
 
+    protected lastFetch = Date.now();
+
 
     setStore(store: PermanentIndexedStore): void {
         this.store = store;
@@ -53,7 +55,7 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
     }
 
 
-    async get(name: string, skipStore: boolean = false): Promise<CharacterCacheRecord | null> {
+    async get(name: string, skipStore: boolean = false, fromChannel?: string): Promise<CharacterCacheRecord | null> {
         const key = AsyncCache.nameKey(name);
 
         if (key in this.cache) {
@@ -62,6 +64,11 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
 
         if ((!this.store) || (skipStore)) {
             return null;
+        }
+
+        if (false) {
+            console.log(`Retrieve '${name}' for channel '${fromChannel}, gap: ${(Date.now() - this.lastFetch)}ms`);
+            this.lastFetch = Date.now();
         }
 
         const pd = await this.store.getProfile(name);
