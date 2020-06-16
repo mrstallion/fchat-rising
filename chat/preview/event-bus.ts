@@ -35,5 +35,9 @@ export interface CharacterDataEvent {
 }
 
 
+export interface SelectConversationEvent extends EventBusEvent {
+    conversation: Conversation;
+}
+
 export const EventBus = new Vue();
 

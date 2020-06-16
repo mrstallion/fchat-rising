@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import core from '../chat/core';
-import { ChannelAdEvent, ChannelMessageEvent, CharacterDataEvent, EventBus } from '../chat/preview/event-bus';
+import { ChannelAdEvent, ChannelMessageEvent, CharacterDataEvent, EventBus, SelectConversationEvent } from '../chat/preview/event-bus';
 import { Channel, Conversation } from '../chat/interfaces';
 import { methods } from '../site/character_page/data_store';
 import { Character as ComplexCharacter } from '../site/character_page/interfaces';
@@ -43,6 +43,8 @@ export class CacheManager {
     protected profileStore?: IndexedStore;
 
     protected lastPost: Date = new Date();
+
+    protected lastFetch = Date.now();
 
 
     markLastPostTime(): void {
@@ -191,103 +193,36 @@ export class CacheManager {
         EventBus.$on(
             'character-data',
             async(data: CharacterDataEvent) => {
-                await this.addProfile(data.character);
+                // this promise is intentionally NOT chained
+                // tslint:disable-next-line: no-floating-promises
+              this.onCharacterData(data);
             }
         );
 
         EventBus.$on(
             'channel-message',
             async(data: ChannelMessageEvent) => {
-                const message = data.message;
-                const channel = data.channel;
-
-                this.channelConversationCache.register(
-                    {
-                        name: message.sender.name,
-                        channelName : channel.name,
-                        datePosted: message.time,
-                        message: message.text
-                    }
-                );
-
-                // await this.addProfile(message.sender.name);
+                // this promise is intentionally NOT chained
+                // tslint:disable-next-line: no-floating-promises
+                this.onChannelMessage(data);
             }
         );
 
         EventBus.$on(
             'channel-ad',
             async(data: ChannelAdEvent) => {
-                const message = data.message;
-                const channel = data.channel;
-
-                this.adCache.register(
-                    {
-                        name: message.sender.name,
-                        channelName : channel.name,
-                        datePosted: message.time,
-                        message: message.text
-                    }
-                );
-
-                if ((!data.profile) && (core.conversations.selectedConversation === data.channel)) {
-                    await this.queueForFetching(message.sender.name, true, data.channel.channel.id);
-                }
-
-                // this.addProfile(message.sender.name);
+                // this promise is intentionally NOT chained
+                // tslint:disable-next-line: no-floating-promises
+                this.onChannelAd(data);
             }
         );
 
-
         EventBus.$on(
             'select-conversation',
-            async(data: ChannelAdEvent) => {
-                const conversation = data.conversation as Conversation;
-                const channel = _.get(conversation, 'channel') as (Channel.Channel | undefined);
-                const channelId = _.get(channel, 'id', '<missing>');
-
-                // Remove unfinished fetches related to other channels
-                this.queue = _.reject(
-                    this.queue,
-                  (q) => (!!q.channelId) && (q.channelId !== channelId)
-                );
-
-                if (channel) {
-                    const checkedNames: Record<string, boolean> = {};
-
-                    // Add fetchers for unknown profiles in ads
-                    await Bluebird.each(
-                      _.filter(
-                        conversation.messages,
-                        (m) => {
-                          if (m.type !== Message.Type.Ad) {
-                            return false;
-                          }
-
-                          const chatMessage = m as unknown as ChatMessage;
-
-                          if (chatMessage.sender.name in checkedNames) {
-                            return false;
-                          }
-
-                          checkedNames[chatMessage.sender.name] = true;
-                          return true;
-                        }
-                      ),
-                      async(m: Message) => {
-                        const chatMessage: ChatMessage = m as unknown as ChatMessage;
-
-                        if (chatMessage.score) {
-                            return;
-                        }
-
-                        const p = await this.resolvePScore(false, chatMessage.sender, conversation as ChannelConversation, chatMessage);
-
-                        if (!p) {
-                            await this.queueForFetching(chatMessage.sender.name, true, channel.id);
-                        }
-                      }
-                    );
-                }
+            async(data: SelectConversationEvent) => {
+              // this promise is intentionally NOT chained
+                // tslint:disable-next-line: no-floating-promises
+              this.onSelectConversation(data);
             }
         );
 
@@ -328,7 +263,97 @@ export class CacheManager {
     }
 
 
-    protected lastFetch = Date.now();
+    async onCharacterData(data: CharacterDataEvent): Promise<void> {
+      await this.addProfile(data.character);
+    }
+
+
+    async onChannelMessage(data: ChannelMessageEvent): Promise<void> {
+        const message = data.message;
+        const channel = data.channel;
+
+        this.channelConversationCache.register(
+            {
+                name: message.sender.name,
+                channelName : channel.name,
+                datePosted: message.time,
+                message: message.text
+            }
+        );
+
+        // await this.addProfile(message.sender.name);
+    }
+
+
+    async onChannelAd(data: ChannelAdEvent): Promise<void> {
+        const message = data.message;
+        const channel = data.channel;
+
+        this.adCache.register(
+            {
+                name: message.sender.name,
+                channelName : channel.name,
+                datePosted: message.time,
+                message: message.text
+            }
+        );
+
+        if ((!data.profile) && (core.conversations.selectedConversation === data.channel)) {
+            await this.queueForFetching(message.sender.name, true, data.channel.channel.id);
+        }
+
+        // this.addProfile(message.sender.name);
+    }
+
+    async onSelectConversation(data: SelectConversationEvent): Promise<void> {
+        const conversation = data.conversation;
+        const channel = _.get(conversation, 'channel') as (Channel.Channel | undefined);
+        const channelId = _.get(channel, 'id', '<missing>');
+
+        // Remove unfinished fetches related to other channels
+        this.queue = _.reject(
+            this.queue,
+          (q) => (!!q.channelId) && (q.channelId !== channelId)
+        );
+
+        if (channel) {
+            const checkedNames: Record<string, boolean> = {};
+
+            // Add fetchers for unknown profiles in ads
+            await Bluebird.each(
+              _.filter(
+                conversation.messages,
+                (m) => {
+                  if (m.type !== Message.Type.Ad) {
+                    return false;
+                  }
+
+                  const chatMessage = m as unknown as ChatMessage;
+
+                  if (chatMessage.sender.name in checkedNames) {
+                    return false;
+                  }
+
+                  checkedNames[chatMessage.sender.name] = true;
+                  return true;
+                }
+              ),
+              async(m: Message) => {
+                const chatMessage: ChatMessage = m as unknown as ChatMessage;
+
+                if (chatMessage.score) {
+                    return;
+                }
+
+                const p = await this.resolvePScore(false, chatMessage.sender, conversation as ChannelConversation, chatMessage);
+
+                if (!p) {
+                    await this.queueForFetching(chatMessage.sender.name, true, channel.id);
+                }
+              }
+            );
+        }
+    }
 
 
     async resolvePScore(
