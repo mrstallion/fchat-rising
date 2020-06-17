@@ -95,7 +95,7 @@
     import { CharacterImage, SimpleCharacter } from '../../interfaces';
 
     const CHARACTER_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 7 days (milliseconds)
-    const CHARACTER_META_CACHE_EXPIRE = 10 * 24 * 60 * 60 * 1000; // 10 days (milliseconds)
+    const CHARACTER_META_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 10 days (milliseconds)
 
     interface ShowableVueTab extends Vue {
         show?(): void
@@ -128,9 +128,11 @@
         readonly oldApi?: true;
         @Prop
         readonly imagePreview?: true;
+
         shared: SharedStore = Store;
         character: Character | undefined;
         loading = true;
+        refreshing = false;
         error = '';
         tab = '0';
 
@@ -200,6 +202,7 @@
 
         async load(mustLoad: boolean = true, skipCache: boolean = false): Promise<void> {
             this.loading = true;
+            this.refreshing = false;
             this.error = '';
 
             try {
@@ -337,15 +340,7 @@
             }
 
             // tslint:disable-next-line: await-promise
-            const cachedCharacter = await core.cache.profileCache.get(this.name);
-
-            if (cachedCharacter) {
-                if (Date.now() - cachedCharacter.lastFetched.getTime() <= CHARACTER_CACHE_EXPIRE) {
-                    return cachedCharacter;
-                }
-            }
-
-            return null;
+            return (await core.cache.profileCache.get(this.name)) || null;
         }
 
         private async _getCharacter(skipCache: boolean = false): Promise<void> {
@@ -371,20 +366,53 @@
                 (cache && !skipCache)
                 && (cache.meta)
                 && (cache.meta.lastFetched)
-                && (Date.now() - cache.meta.lastFetched.getTime() < CHARACTER_META_CACHE_EXPIRE)
+                && (Date.now() - cache.meta.lastFetched.getTime() > CHARACTER_META_CACHE_EXPIRE)
             ) {
                 this.guestbook = cache.meta.guestbook;
                 this.friends = cache.meta.friends;
                 this.groups = cache.meta.groups;
                 this.images = cache.meta.images;
             } else {
-                // No awaits on these on purpose:
+                // No await on purpose:
                 // tslint:disable-next-line no-floating-promises
                 this.updateMeta(this.name);
             }
 
             // console.log('LoadChar', this.name, this.character);
             this.updateMatches();
+
+
+            // old profile cache, let's refresh
+            if ((cache) && (cache.lastFetched)) {
+                if (Date.now() - cache.lastFetched.getTime() >= CHARACTER_CACHE_EXPIRE) {
+                    // No await on purpose:
+                    // tslint:disable-next-line no-floating-promises
+                    this.refreshCharacter();
+                }
+            }
+        }
+
+
+        private async refreshCharacter(): Promise<void> {
+            this.refreshing = true;
+
+            try {
+                const character = await methods.characterData(this.name, this.id, false);
+
+                if ((!this.refreshing) || (this.name !== character.character.name)) {
+                  return;
+                }
+
+                this.character = character;
+
+                this.updateMatches();
+
+                // No awaits on these on purpose:
+                // tslint:disable-next-line no-floating-promises
+                this.updateMeta(this.name);
+            } finally {
+                this.refreshing = false;
+            }
         }
 
 

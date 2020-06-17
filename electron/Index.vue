@@ -62,6 +62,8 @@
                 <a class="btn" @click="openProfileInBrowser"><i class="fa fa-external-link-alt"/></a>
                 <a class="btn" @click="openConversation"><i class="fa fa-comment"></i></a>
                 <a class="btn" @click="reloadCharacter"><i class="fa fa-sync" /></a>
+
+                <i class="fas fa-circle-notch fa-spin profileRefreshSpinner" v-show="isRefreshingProfile()"></i>
             </template>
         </modal>
         <modal :action="l('fixLogs.action')" ref="fixLogsModal" @submit="fixLogs" buttonClass="btn-danger">
@@ -308,6 +310,13 @@
         }
 
 
+        isRefreshingProfile(): boolean {
+          const cp = this.$refs.characterPage as CharacterPage;
+
+          return cp && cp.refreshing;
+        }
+
+
         reloadCharacter(): void {
             // tslint:disable-next-line: no-any no-unsafe-any
             (this.$refs.characterPage as any).reload();
@@ -345,5 +354,11 @@
     a[href^="#"]:not([draggable]) {
         -webkit-user-drag: none;
         -webkit-app-region: no-drag;
+    }
+
+
+    .profileRefreshSpinner {
+        font-size: 12pt;
+        opacity: 0.5;
     }
 </style>
