@@ -1,3 +1,9 @@
+# Installer Download
+[Windows](https://github.com/mrstallion/flist-rising/releases/download/v3.0.13-rising-v1/F-Chat.Rising.Setup.exe) (72 MB)
+
+[MacOS](https://github.com/mrstallion/flist-rising/releases/download/v3.0.13-rising-v1/F-Chat.Rising.dmg) (68 MB)
+
+
 # F-Chat Rising
 
 This repository contains a heavily customized version of the mainline F-Chat 3.0 client.
