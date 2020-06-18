@@ -1,7 +1,7 @@
 {
-  "name": "fchat",
+  "name": "fchat-rising",
   "version": "3.0.13-rising-v1",
-  "author": "The F-List Team",
+  "author": "The F-List Team and Mister Stallion (Esq.)",
   "description": "F-List.net Chat Client",
   "main": "main.js",
   "id": "fchat",
