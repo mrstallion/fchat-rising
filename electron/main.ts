@@ -44,7 +44,7 @@ import {defaultHost, GeneralSettings} from './common';
 import { getSafeLanguages, knownLanguageNames, updateSupportedLanguages } from './language';
 import * as windowState from './window_state';
 import BrowserWindow = Electron.BrowserWindow;
-import MenuItem = Electron.MenuItem;
+// import MenuItem = Electron.MenuItem;
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'node-fetch';
 import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
