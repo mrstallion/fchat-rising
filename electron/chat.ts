@@ -43,7 +43,7 @@ import {getKey} from '../chat/common';
 import { EventBus } from '../chat/preview/event-bus';
 import {init as initCore} from '../chat/core';
 import l from '../chat/localize';
-import {setupRaven} from '../chat/vue-raven';
+// import {setupRaven} from '../chat/vue-raven';
 import Socket from '../chat/WebSocket';
 import Connection from '../fchat/connection';
 import {Keys} from '../keys';
