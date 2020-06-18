@@ -74,7 +74,7 @@ const spellchecker = new sc.Spellchecker();*/
 Axios.defaults.params = {__fchat: `desktop/${electron.remote.app.getVersion()}`};
 
 if(process.env.NODE_ENV === 'production') {
-    setupRaven('https://a9239b17b0a14f72ba85e8729b9d1612@sentry.f-list.net/2', electron.remote.app.getVersion());
+    // setupRaven('https://a9239b17b0a14f72ba85e8729b9d1612@sentry.f-list.net/2', electron.remote.app.getVersion());
 
     electron.remote.getCurrentWebContents().on('devtools-opened', () => {
         console.log(`%c${l('consoleWarning.head')}`, 'background: red; color: yellow; font-size: 30pt');

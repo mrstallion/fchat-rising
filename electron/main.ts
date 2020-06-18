@@ -306,41 +306,41 @@ function onReady(): void {
         setGeneralSettings(settings);
     }
 
-    const updaterUrl = `https://client.f-list.net/${process.platform}`;
-    if(process.env.NODE_ENV === 'production') {
-        electron.autoUpdater.setFeedURL({url: updaterUrl + (settings.beta ? '?channel=beta' : ''), serverType: 'json'});
-        setTimeout(() => electron.autoUpdater.checkForUpdates(), 10000);
-        const updateTimer = setInterval(() => electron.autoUpdater.checkForUpdates(), 3600000);
-        electron.autoUpdater.on('update-downloaded', () => {
-            clearInterval(updateTimer);
-            const menu = electron.Menu.getApplicationMenu()!;
-            const item = menu.getMenuItemById('update') as MenuItem | null;
-            if(item !== null) item.visible = true;
-            else
-                menu.append(new electron.MenuItem({
-                    label: l('action.updateAvailable'),
-                    submenu: electron.Menu.buildFromTemplate([{
-                        label: l('action.update'),
-                        click: () => {
-                            for(const w of windows) w.webContents.send('quit');
-                            electron.autoUpdater.quitAndInstall();
-                        }
-                    }, {
-                        label: l('help.changelog'),
-                        click: showPatchNotes
-                    }]),
-                    id: 'update'
-                }));
-            electron.Menu.setApplicationMenu(menu);
-            for(const w of windows) w.webContents.send('update-available', true);
-        });
-        electron.autoUpdater.on('update-not-available', () => {
-            for(const w of windows) w.webContents.send('update-available', false);
-            const item = electron.Menu.getApplicationMenu()!.getMenuItemById('update') as MenuItem | null;
-            if(item !== null) item.visible = false;
-        });
-        electron.autoUpdater.on('error', (e) => log.error(e));
-    }
+    // const updaterUrl = `https://client.f-list.net/${process.platform}`;
+    // if(process.env.NODE_ENV === 'production') {
+    //     electron.autoUpdater.setFeedURL({url: updaterUrl + (settings.beta ? '?channel=beta' : ''), serverType: 'json'});
+    //     setTimeout(() => electron.autoUpdater.checkForUpdates(), 10000);
+    //     const updateTimer = setInterval(() => electron.autoUpdater.checkForUpdates(), 3600000);
+    //     electron.autoUpdater.on('update-downloaded', () => {
+    //         clearInterval(updateTimer);
+    //         const menu = electron.Menu.getApplicationMenu()!;
+    //         const item = menu.getMenuItemById('update') as MenuItem | null;
+    //         if(item !== null) item.visible = true;
+    //         else
+    //             menu.append(new electron.MenuItem({
+    //                 label: l('action.updateAvailable'),
+    //                 submenu: electron.Menu.buildFromTemplate([{
+    //                     label: l('action.update'),
+    //                     click: () => {
+    //                         for(const w of windows) w.webContents.send('quit');
+    //                         electron.autoUpdater.quitAndInstall();
+    //                     }
+    //                 }, {
+    //                     label: l('help.changelog'),
+    //                     click: showPatchNotes
+    //                 }]),
+    //                 id: 'update'
+    //             }));
+    //         electron.Menu.setApplicationMenu(menu);
+    //         for(const w of windows) w.webContents.send('update-available', true);
+    //     });
+    //     electron.autoUpdater.on('update-not-available', () => {
+    //         for(const w of windows) w.webContents.send('update-available', false);
+    //         const item = electron.Menu.getApplicationMenu()!.getMenuItemById('update') as MenuItem | null;
+    //         if(item !== null) item.visible = false;
+    //     });
+    //     electron.autoUpdater.on('error', (e) => log.error(e));
+    // }
 
     const viewItem = {
         label: `&${l('action.view')}`,
@@ -429,8 +429,8 @@ function onReady(): void {
                     click: async(item: Electron.MenuItem) => {
                         settings.beta = item.checked;
                         setGeneralSettings(settings);
-                        electron.autoUpdater.setFeedURL({url: updaterUrl + (item.checked ? '?channel=beta' : ''), serverType: 'json'});
-                        return electron.autoUpdater.checkForUpdates();
+                        // electron.autoUpdater.setFeedURL({url: updaterUrl + (item.checked ? '?channel=beta' : ''), serverType: 'json'});
+                        // return electron.autoUpdater.checkForUpdates();
                     }
                 }, {
                     label: l('fixLogs.action'),
