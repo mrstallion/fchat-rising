@@ -62,7 +62,7 @@ require('electron-packager')({
     if(process.platform === 'win32') {
         console.log('Creating Windows installer');
         const icon = path.join(__dirname, 'build', 'icon.ico');
-        const setupName = `F-Chat Setup.exe`;
+        const setupName = `F-Chat Rising Setup.exe`;
         if(fs.existsSync(path.join(distDir, setupName))) fs.unlinkSync(path.join(distDir, setupName));
         const nupkgName = path.join(distDir, `fchat-${pkg.version}-full.nupkg`);
         const deltaName = path.join(distDir, `fchat-${pkg.version}-delta.nupkg`);
@@ -76,14 +76,14 @@ require('electron-packager')({
             setupIcon: icon,
             noMsi: true,
             exe: 'F-Chat.exe',
-            title: 'F-Chat',
+            title: 'F-Chat Rising',
             setupExe: setupName,
-            remoteReleases: 'https://client.f-list.net/win32/' + (isBeta ? '?channel=beta' : ''),
-            signWithParams: process.argv.length > 3 ? `/a /f ${process.argv[2]} /p ${process.argv[3]} /fd sha256 /tr http://timestamp.digicert.com /td sha256` : undefined
+            // remoteReleases: 'https://client.f-list.net/win32/' + (isBeta ? '?channel=beta' : ''),
+            // signWithParams: process.argv.length > 3 ? `/a /f ${process.argv[2]} /p ${process.argv[3]} /fd sha256 /tr http://timestamp.digicert.com /td sha256` : undefined
         }).catch((e) => console.error(`Error while creating installer: ${e.message}`));
     } else if(process.platform === 'darwin') {
         console.log('Creating Mac DMG');
-        const target = path.join(distDir, `F-Chat.dmg`);
+        const target = path.join(distDir, `F-Chat Rising.dmg`);
         if(fs.existsSync(target)) fs.unlinkSync(target);
         const appPath = path.join(appPaths[0], 'F-Chat.app');
         if(process.argv.length <= 2) console.warn('Warning: Creating unsigned DMG');
@@ -91,7 +91,7 @@ require('electron-packager')({
             basepath: appPaths[0],
             target,
             specification: {
-                title: 'F-Chat',
+                title: 'F-Chat Rising',
                 icon: path.join(__dirname, 'build', 'icon.png'),
                 background: path.join(__dirname, 'build', 'dmg.png'),
                 contents: [{x: 555, y: 345, type: 'link', path: '/Applications'}, {x: 555, y: 105, type: 'file', path: appPath}],
@@ -100,7 +100,7 @@ require('electron-packager')({
                 } : undefined
             }
         }).on('error', console.error);
-        const zipName = `F-Chat_${pkg.version}.zip`;
+        const zipName = `F-Chat_Rising_${pkg.version}.zip`;
         const zipPath = path.join(distDir, zipName);
         if(fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
         const child = child_process.spawn('zip', ['-r', '-y', '-9', zipPath, 'F-Chat.app'], {cwd: appPaths[0]});
