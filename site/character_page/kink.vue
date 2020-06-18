@@ -20,13 +20,11 @@
 </template>
 
 <script lang="ts">
-    import {Component, Prop} from '@f-list/vue-ts';
+    import { Component, Prop, Watch } from '@f-list/vue-ts';
     import Vue from 'vue';
-    import {DisplayKink} from './interfaces';
+    import { DisplayKink } from './interfaces';
 
-    @Component({
-        name: 'kink'
-    })
+    @Component({ name: 'kink' })
     export default class KinkView extends Vue {
         @Prop({required: true})
         readonly kink!: DisplayKink;
@@ -40,8 +38,18 @@
         expandedCustom = false;
 
         listClosed = true;
+        initialListClosedState = true;
         showTooltip = false;
 
+        @Watch('expandedCustom')
+        onExpandedCustomChange(): void {
+            if (this.expandedCustom) {
+                this.initialListClosedState = this.listClosed;
+                this.listClosed = false;
+            } else {
+                this.listClosed = this.initialListClosedState;
+            }
+        }
 
         toggleExpandedCustoms(): void {
             this.expandedCustom = !this.expandedCustom;
@@ -50,7 +58,9 @@
         toggleSubkinks(): void {
             if(!this.kink.hasSubkinks)
                 return;
+
             this.listClosed = !this.listClosed;
+            this.initialListClosedState = this.listClosed;
         }
 
         get kinkClasses(): {[key: string]: boolean} {

@@ -147,8 +147,8 @@
             ) as CharacterKink[];
         }
 
-        async compareKinks(overridingCharacter?: Character): Promise<void> {
-            if(this.comparing) {
+        async compareKinks(overridingCharacter?: Character, forced: boolean = false): Promise<void> {
+            if ((this.comparing) && (!forced)) {
                 this.comparison = {};
                 this.comparing = false;
                 this.loading = false;
@@ -194,7 +194,7 @@
                 return;
 
             if (core.state.settings.risingAutoCompareKinks) {
-                await this.compareKinks(core.characters.ownProfile);
+                await this.compareKinks(core.characters.ownProfile, true);
             }
         }
 
@@ -203,7 +203,9 @@
             if ((this.character) && (this.character.is_self))
                 return;
 
-            await this.compareKinks(core.characters.ownProfile);
+            if (core.state.settings.risingAutoCompareKinks) {
+                await this.compareKinks(core.characters.ownProfile, true);
+            }
         }
 
         get kinkGroups(): KinkGroup[] {

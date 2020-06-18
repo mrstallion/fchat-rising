@@ -36,7 +36,7 @@
                         <div class="card-body">
                             <div class="tab-content">
                                 <div role="tabpanel" v-show="tab === '0'" id="overview">
-                                    <match-report :characterMatch="characterMatch" :minimized="character.is_self" v-if="shouldShowMatch()"></match-report>
+                                    <match-report :characterMatch="characterMatch" v-if="shouldShowMatch()"></match-report>
 
                                     <div style="margin-bottom:10px">
                                         <bbcode :text="character.character.description"></bbcode>

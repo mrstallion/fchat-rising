@@ -171,6 +171,8 @@ export namespace Settings {
         hiddenUsers: string[]
         statusHistory: string[]
         searchHistory: (ExtendedSearchData | SearchData)[]
+        hideNonMatchingAds: boolean
+        hideProfileComparisonSummary: boolean
     };
 
     export interface Store {

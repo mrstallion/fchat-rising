@@ -31,11 +31,12 @@
 </template>
 
 <script lang="ts">
-    import { Component, Prop, Watch } from '@f-list/vue-ts';
+    import { Component, Hook, Prop } from '@f-list/vue-ts';
     import * as _ from 'lodash';
     import Vue from 'vue';
     import * as Utils from '../utils';
     import { MatchReport, MatchResult, Score, Scoring } from '../../learn/matcher';
+    import core from '../../chat/core';
 
     export interface CssClassMap {
         [key: string]: boolean;
@@ -47,17 +48,24 @@
         @Prop({required: true})
         readonly characterMatch!: MatchReport;
 
-        @Prop({required: true})
-        readonly minimized = false;
+        // @Prop({required: true})
+        // readonly minimized = false;
 
         readonly avatarUrl = Utils.avatarURL;
 
         isMinimized = false;
 
-        @Watch('minimized')
-        onMinimizedChange(): void {
-            this.isMinimized = this.minimized;
+
+        @Hook('beforeMount')
+        async beforeMount(): Promise<void> {
+          this.isMinimized = !!await core.settingsStore.get('hideProfileComparisonSummary');
         }
+
+
+        // @Watch('minimized')
+        // onMinimizedChange(): void {
+        //     this.isMinimized = this.minimized;
+        // }
 
         getScoreClass(score: Score): CssClassMap {
             const classes: CssClassMap = {};
@@ -83,8 +91,10 @@
             return _.map(result.scores, (s: Score) => (s));
         }
 
-        toggleMinimize(): void {
+        async toggleMinimize(): Promise<void> {
             this.isMinimized = !this.isMinimized;
+
+            await core.settingsStore.set('hideProfileComparisonSummary', this.isMinimized);
         }
     }
 </script>

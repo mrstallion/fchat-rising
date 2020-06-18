@@ -245,6 +245,13 @@
         isPrivate = Conversation.isPrivate;
         showNonMatchingAds = true;
 
+
+        @Hook('beforeMount')
+        async onBeforeMount(): Promise<void> {
+          this.showNonMatchingAds = !await core.settingsStore.get('hideNonMatchingAds');
+        }
+
+
         @Hook('mounted')
         mounted(): void {
             this.extraButtons = [{
@@ -432,8 +439,10 @@
         }
 
 
-        toggleNonMatchingAds(): void {
+        async toggleNonMatchingAds(): Promise<void> {
             this.showNonMatchingAds = !this.showNonMatchingAds;
+
+            await core.settingsStore.set('hideNonMatchingAds', !this.showNonMatchingAds);
         }
 
 

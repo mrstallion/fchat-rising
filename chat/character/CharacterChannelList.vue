@@ -68,7 +68,6 @@ export default class CharacterChannelList extends CustomDialog {
     jumpToChannel(channel: ChannelConversation): void {
         channel.show();
     }
-
 }
 </script>
 
