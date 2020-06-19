@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Download Now!
 
 F-Chat Rising v1 
