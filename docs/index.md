@@ -19,22 +19,22 @@ See a [detailed list of features](https://github.com/mrstallion/flist-rising/blo
 ## Link Previews
 Hover your mouse on any link to view the image.
 
-![Smarter Ads](assets/link-preview.png)
+![Smarter Ads](assets/images/link-preview.png)
 
 
 ## Smarter Ads
 Characters who match your preferences have highlighted ads.
 
-![Smarter Ads](assets/smarter-ads.png)
+![Smarter Ads](assets/images/smarter-ads.png)
 
 
 ## Improved Search
 See immediately who is a good match for you.
 
-![Improved Search](assets/improved-search.png)
+![Improved Search](assets/images/improved-search.png)
 
 
 ## UI Tweaks
 Dozens of useful improvements all around!
 
-![UI Tweaks](assets/ui-tweaks.png)
+![UI Tweaks](assets/images/ui-tweaks.png)

@@ -26,12 +26,15 @@ show_downloads: true
 markdown: kramdown
 
 # theme: jekyll-theme-slate
-plugins:
-  - jekyll-feed
+# plugins:
+#  - jekyll-feed
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
 # to override the default setting.
+exclude:
+    - summary.psd
+
 # exclude:
 #   - Gemfile
 #   - Gemfile.lock
