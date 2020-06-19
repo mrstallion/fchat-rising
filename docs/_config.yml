@@ -17,7 +17,7 @@ title: F-Chat Rising
 email: nope@nope.com
 description: >- # this means to ignore newlines until "baseurl:"
   A heavily modded F-Chat 3.0 client
-baseurl: "" # the subpath of your site, e.g. /blog
+baseurl: "/flist-rising" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  mrstallion
 show_downloads: true
