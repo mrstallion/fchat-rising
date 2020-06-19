@@ -16,11 +16,11 @@
 title: F-Chat Rising
 email: nope@nope.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Heavily modded F-Chat 3.0 client
+  A heavily modded F-Chat 3.0 client
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  mrstallion
-show_downloads: false
+show_downloads: true
 
 # Build settings
 markdown: kramdown
@@ -42,3 +42,9 @@ plugins:
 #   - vendor/ruby/
 
 theme: jekyll-theme-slate
+
+
+download:
+  win_url: https://github.com/mrstallion/flist-rising/releases/download/v3.0.13-rising-v1/F-Chat.Rising.Setup.exe
+  mac_url: https://github.com/mrstallion/flist-rising/releases/download/v3.0.13-rising-v1/F-Chat.Rising.dmg
+
