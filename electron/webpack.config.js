@@ -130,7 +130,10 @@ module.exports = function(mode) {
         mainConfig.devtool = rendererConfig.devtool = 'source-map';
         rendererConfig.plugins.push(new OptimizeCssAssetsPlugin());
     } else {
-        mainConfig.devtool = rendererConfig.devtool = 'none';
+        // mainConfig.devtool = rendererConfig.devtool = 'none';
+
+        mainConfig.devtool = 'inline-source-map';
+        rendererConfig.devtool = 'inline-source-map';
     }
     return [mainConfig, rendererConfig];
 };

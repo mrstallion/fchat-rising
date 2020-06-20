@@ -2,14 +2,6 @@
 layout: rising
 ---
 
-# Download Now!
-
-F-Chat Rising v1 
-
-[Windows](https://github.com/mrstallion/flist-rising/releases/download/v3.0.13-rising-v1/F-Chat.Rising.Setup.exe) (72 MB)
-
-[MacOS](https://github.com/mrstallion/flist-rising/releases/download/v3.0.13-rising-v1/F-Chat.Rising.dmg) (68 MB)
-
 
 # Features
 

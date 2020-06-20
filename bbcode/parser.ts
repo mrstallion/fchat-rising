@@ -128,6 +128,10 @@ export class BBCodeParser {
             currentTag = this._currentTag = {tag: self.tag, line: this._line, column: this._column};
         }
         let tagStart = -1, paramStart = -1, mark = start;
+
+        // @ts-ignore
+        let depth = 0;
+
         for(let i = start; i < input.length; ++i) {
             const c = input[i];
             ++this._column;
@@ -136,64 +140,83 @@ export class BBCodeParser {
                 this._column = 1;
             }
             if(c === '[') {
-                tagStart = i;
-                paramStart = -1;
-            } else if(c === '=' && paramStart === -1)
-                paramStart = i;
-            else if(c === ']') {
-                const paramIndex = paramStart === -1 ? i : paramStart;
-                let tagKey = input.substring(tagStart + 1, paramIndex).trim().toLowerCase();
-                if(tagKey.length === 0) {
-                    tagStart = -1;
-                    continue;
+                depth++;
+
+                if (depth === 1) {
+                    tagStart = i;
+                    paramStart = -1;
+                } else {
+                    console.log('Hit depth tagOpen', depth);
                 }
-                const param = paramStart > tagStart ? input.substring(paramStart + 1, i).trim() : '';
-                const close = tagKey[0] === '/';
-                if(close) tagKey = tagKey.substr(1).trim();
-                if(this._tags[tagKey] === undefined) {
-                    tagStart = -1;
-                    continue;
+            } else if(c === '=' && paramStart === -1) {
+                if (depth <= 1) {
+                  paramStart = i;
+                } else {
+                    console.log('Hit depth paramStart', depth);
                 }
-                if(!close) {
-                    const tag = this._tags[tagKey]!;
-                    const allowed = isAllowed(tagKey);
-                    if(parent !== undefined) {
-                        parent.appendChild(document.createTextNode(input.substring(mark, allowed ? tagStart : i + 1)));
-                        mark = i + 1;
-                    }
-                    if(!allowed || parent === undefined) {
-                        i = this.parse(input, i + 1, tag, parent, isAllowed);
-                        mark = i + 1;
+            } else if(c === ']') {
+                depth--;
+
+                if (depth !== 0) {
+                    console.log('Hit depth tagClose', depth);
+                }
+
+                if (depth === 0) {
+                    const paramIndex = paramStart === -1 ? i : paramStart;
+                    let tagKey = input.substring(tagStart + 1, paramIndex).trim().toLowerCase();
+                    if(tagKey.length === 0) {
+                        tagStart = -1;
                         continue;
                     }
-                    let element: HTMLElement | undefined;
-                    if(tag instanceof BBCodeTextTag) {
-                        i = this.parse(input, i + 1, tag, undefined, isAllowed);
-                        element = tag.createElement(this, parent, param, input.substring(mark, input.lastIndexOf('[', i)));
-                        if(element === undefined) parent.appendChild(document.createTextNode(input.substring(tagStart, i + 1)));
-                    } else {
-                        element = tag.createElement(this, parent, param, '');
-                        if(element === undefined) parent.appendChild(document.createTextNode(input.substring(tagStart, i + 1)));
-                        if(!tag.noClosingTag)
-                            i = this.parse(input, i + 1, tag, element !== undefined ? element : parent, isAllowed);
-                        if(element === undefined)
-                            parent.appendChild(document.createTextNode(input.substring(input.lastIndexOf('[', i), i + 1)));
+                    const param = paramStart > tagStart ? input.substring(paramStart + 1, i).trim() : '';
+                    const close = tagKey[0] === '/';
+                    if(close) tagKey = tagKey.substr(1).trim();
+                    if(this._tags[tagKey] === undefined) {
+                        tagStart = -1;
+                        continue;
                     }
-                    mark = i + 1;
-                    this._currentTag = currentTag;
-                    if(element === undefined) continue;
-                    (<HTMLElement & {bbcodeTag: string}>element).bbcodeTag = tagKey;
-                    if(param.length > 0) (<HTMLElement & {bbcodeParam: string}>element).bbcodeParam = param;
-                } else if(self !== undefined) { //tslint:disable-line:curly
-                    if(self.tag === tagKey) {
-                        if(parent !== undefined)
-                            parent.appendChild(document.createTextNode(input.substring(mark, selfAllowed ? tagStart : i + 1)));
-                        return i;
-                    }
-                    if(!selfAllowed) return mark - 1;
-                    if(isAllowed(tagKey))
-                         this.warning(`Unexpected closing ${tagKey} tag. Needed ${self.tag} tag instead.`);
-                } else if(isAllowed(tagKey)) this.warning(`Found closing ${tagKey} tag that was never opened.`);
+                    if(!close) {
+                        const tag = this._tags[tagKey]!;
+                        const allowed = isAllowed(tagKey);
+                        if(parent !== undefined) {
+                            parent.appendChild(document.createTextNode(input.substring(mark, allowed ? tagStart : i + 1)));
+                            mark = i + 1;
+                        }
+                        if(!allowed || parent === undefined) {
+                            i = this.parse(input, i + 1, tag, parent, isAllowed);
+
+                            mark = i + 1;
+                            continue;
+                        }
+                        let element: HTMLElement | undefined;
+                        if(tag instanceof BBCodeTextTag) {
+                            i = this.parse(input, i + 1, tag, undefined, isAllowed);
+                            element = tag.createElement(this, parent, param, input.substring(mark, input.lastIndexOf('[', i)));
+                            if(element === undefined) parent.appendChild(document.createTextNode(input.substring(tagStart, i + 1)));
+                        } else {
+                            element = tag.createElement(this, parent, param, '');
+                            if(element === undefined) parent.appendChild(document.createTextNode(input.substring(tagStart, i + 1)));
+                            if(!tag.noClosingTag)
+                                i = this.parse(input, i + 1, tag, element !== undefined ? element : parent, isAllowed);
+                            if(element === undefined)
+                                parent.appendChild(document.createTextNode(input.substring(input.lastIndexOf('[', i), i + 1)));
+                        }
+                        mark = i + 1;
+                        this._currentTag = currentTag;
+                        if(element === undefined) continue;
+                        (<HTMLElement & {bbcodeTag: string}>element).bbcodeTag = tagKey;
+                        if(param.length > 0) (<HTMLElement & {bbcodeParam: string}>element).bbcodeParam = param;
+                    } else if(self !== undefined) { //tslint:disable-line:curly
+                        if(self.tag === tagKey) {
+                            if(parent !== undefined)
+                                parent.appendChild(document.createTextNode(input.substring(mark, selfAllowed ? tagStart : i + 1)));
+                            return i;
+                        }
+                        if(!selfAllowed) return mark - 1;
+                        if(isAllowed(tagKey))
+                             this.warning(`Unexpected closing ${tagKey} tag. Needed ${self.tag} tag instead.`);
+                    } else if(isAllowed(tagKey)) this.warning(`Found closing ${tagKey} tag that was never opened.`);
+                }
             }
         }
         if(mark < input.length && parent !== undefined) {

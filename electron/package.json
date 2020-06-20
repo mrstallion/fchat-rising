@@ -11,6 +11,8 @@
     "build:dist": "node ../webpack production",
     "watch": "node ../webpack watch",
     "start": "../node_modules/.bin/electron app",
+    "startDebugMain": "../node_modules/.bin/electron  --serve --inspect-brk=9229 app",
+    "startDebugRender": "../node_modules/.bin/electron --remote-debugging-port=9229 app",
     "pack": "node ./pack"
   }
 }

@@ -27,8 +27,11 @@ export function analyzeUrlTag(parser: BBCodeParser, param: string, content: stri
     if(param.length > 0) {
         url = param.trim();
         if(content.length === 0) textContent = param;
-    } else if(content.length > 0) url = content;
-    else {
+    } else if(content.length > 0) {
+        const m = content.match(/^\[url=?](.+)\[\/url]$/i);
+
+        url = m ? m[1] : content;
+    } else {
         parser.warning('url tag contains no url.');
         textContent = '';
         success = false;

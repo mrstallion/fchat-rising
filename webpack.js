@@ -24,6 +24,8 @@ function compilerCallback(err, stats) {
     if(mode !== 'watch' && stats.hasErrors()) process.exitCode = 2;
 }
 
+console.log(config);
+
 const compiler = webpack(config);
 if(mode === 'watch') compiler.watch({}, compilerCallback);
 else compiler.run(compilerCallback);

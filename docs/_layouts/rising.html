@@ -8,46 +8,73 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
 
     <style>
-        .mac_download_link {
-          display: block;
-          float: left;
-          width: 45px;
-          height:45px;
-          text-indent: -5000px;
-          overflow: hidden;
-          background: url(assets/images/mac.png) no-repeat bottom left;
-          margin-left: 18px;
-          background-size: contain;
+        .download_link {
+          clear: both;
+          margin-left: 25px;
         }
 
-        .win_download_link {
-          display: block;
-          float: left;
-          width: 45px;
-          height:45px;
-          text-indent: -5000px;
-          overflow: hidden;
-          background: url(assets/images/win.png) no-repeat bottom right;
-          background-size: contain;
+        .download_link a {
+          color: #da9e0f;
         }
 
-        .mac_download_link:hover {
-          background: url(assets/images/mac.png) no-repeat top left;
-          background-size: contain;
+
+        .download_link a:hover {
           filter: brightness(1.2);
         }
 
-        .win_download_link:hover {
-          background: url(assets/images/win.png) no-repeat top right;
-          background-size: contain;
-          filter: brightness(1.2);
+
+        .download_link a i {
+          float: left;
+          width: 20px;
+          height: 20px;
+          padding-right: 5px;
+          display: inline-block;
         }
 
+
+        .download_link.mac a i {
+          background: url(assets/images/mac.png) no-repeat;
+          background-size: contain;
+          margin-top: -1px;
+          margin-left: -1px;
+          margin-right: 1px;
+        }
+
+
+        .download_link.win a i {
+          background: url(assets/images/win.png) no-repeat;
+          background-size: contain;
+        }
+
+
+        .download_link.win {
+          margin-bottom: 6px;
+        }
 
         #downloads_small {
-          height: 45px;
+
+        }
+
+
+        #downloads_small h3 {
+          color: #da9e0f;
+          font-weight: normal;
+        }
+
+
+        #downloads_small div small {
+          color: #7d7d7d;
+          font-size: 80%;
+          padding-left: 1px;
+        }
+
+
+        h1, h2, h3, h4, h5, h6 {
+          font-weight: normal !important;
         }
     </style>
+
+
 
 {% seo %}
   </head>
@@ -57,17 +84,24 @@
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
         <header class="inner">
-          {% if site.github.is_project_page %}
-            <a id="forkme_banner" href="{{ site.github.repository_url }}">View on GitHub</a>
-          {% endif %}
+          <a id="forkme_banner" href="{{ site.github.repository_url }}">View on GitHub</a>
 
           <h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
           <h2 id="project_tagline">{{ site.description | default: site.github.project_tagline }}</h2>
 
           {% if site.show_downloads %}
             <section id="downloads_small">
-              <a class="win_download_link" href="{{ site.download.win_url }}">Download for Windows</a>
-              <a class="mac_download_link" href="{{ site.download.mac_url }}">Download for MacOS</a>
+              <h3>Downloads</h3>
+
+              <div class="download_link win">
+                <a href="{{ site.download.win_url }}"><i></i> Windows</a>
+                <small>(72 MB)</small>
+              </div>
+
+              <div class="download_link mac">
+                <a href="{{ site.download.mac_url }}"><i></i> MacOS</a>
+                <small>(68 MB)</small>
+              </div>
             </section>
           {% endif %}
         </header>
