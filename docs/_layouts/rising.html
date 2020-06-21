@@ -47,7 +47,14 @@
         }
 
 
-        .download_link.win {
+        .download_link.linux a i {
+          background: url(assets/images/linux.png) no-repeat;
+          background-size: contain;
+        }
+
+
+        .download_link.win,
+        .download_link.mac {
           margin-bottom: 6px;
         }
 
@@ -81,6 +88,22 @@
         #header_wrap {
           background-image: url(assets/images/bg.jpg);
         }
+
+
+        #main_content h1 + h2 {
+            margin-top: 35px;
+        }
+
+
+        #main_content h1 {
+            margin-top: 70px;
+        }
+
+
+        #main_content h1:first-of-type {
+            margin-top: 0;
+        }
+
     </style>
 
 
@@ -104,12 +127,17 @@
 
               <div class="download_link win">
                 <a href="{{ site.download.win_url }}"><i></i> Windows</a>
-                <small>(72 MB)</small>
+                <small>(68 MB)</small>
               </div>
 
               <div class="download_link mac">
                 <a href="{{ site.download.mac_url }}"><i></i> MacOS</a>
-                <small>(68 MB)</small>
+                <small>(72 MB)</small>
+              </div>
+
+              <div class="download_link linux">
+                <a href="{{ site.download.linux_url }}"><i></i> Linux</a>
+                <small>(71 MB)</small>
               </div>
             </section>
           {% endif %}
