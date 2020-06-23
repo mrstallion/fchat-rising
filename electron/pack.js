@@ -78,6 +78,7 @@ require('electron-packager')({
             exe: 'F-Chat.exe',
             title: 'F-Chat Rising',
             setupExe: setupName,
+            name: 'fchat'
             // remoteReleases: 'https://client.f-list.net/win32/' + (isBeta ? '?channel=beta' : ''),
             // signWithParams: process.argv.length > 3 ? `/a /f ${process.argv[2]} /p ${process.argv[3]} /fd sha256 /tr http://timestamp.digicert.com /td sha256` : undefined
         }).catch((e) => console.error(`Error while creating installer: ${e.message}`));

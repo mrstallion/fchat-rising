@@ -44,12 +44,14 @@ import {defaultHost, GeneralSettings} from './common';
 import { getSafeLanguages, knownLanguageNames, updateSupportedLanguages } from './language';
 import * as windowState from './window_state';
 import BrowserWindow = Electron.BrowserWindow;
-// import MenuItem = Electron.MenuItem;
+import MenuItem = Electron.MenuItem;
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'node-fetch';
 import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
 import * as _ from 'lodash';
 import DownloadItem = Electron.DownloadItem;
+
+const pck = require('./package.json');
 
 // Module to control application life.
 const app = electron.app;
@@ -306,41 +308,49 @@ function onReady(): void {
         setGeneralSettings(settings);
     }
 
-    // const updaterUrl = `https://client.f-list.net/${process.platform}`;
-    // if(process.env.NODE_ENV === 'production') {
-    //     electron.autoUpdater.setFeedURL({url: updaterUrl + (settings.beta ? '?channel=beta' : ''), serverType: 'json'});
-    //     setTimeout(() => electron.autoUpdater.checkForUpdates(), 10000);
-    //     const updateTimer = setInterval(() => electron.autoUpdater.checkForUpdates(), 3600000);
-    //     electron.autoUpdater.on('update-downloaded', () => {
-    //         clearInterval(updateTimer);
-    //         const menu = electron.Menu.getApplicationMenu()!;
-    //         const item = menu.getMenuItemById('update') as MenuItem | null;
-    //         if(item !== null) item.visible = true;
-    //         else
-    //             menu.append(new electron.MenuItem({
-    //                 label: l('action.updateAvailable'),
-    //                 submenu: electron.Menu.buildFromTemplate([{
-    //                     label: l('action.update'),
-    //                     click: () => {
-    //                         for(const w of windows) w.webContents.send('quit');
-    //                         electron.autoUpdater.quitAndInstall();
-    //                     }
-    //                 }, {
-    //                     label: l('help.changelog'),
-    //                     click: showPatchNotes
-    //                 }]),
-    //                 id: 'update'
-    //             }));
-    //         electron.Menu.setApplicationMenu(menu);
-    //         for(const w of windows) w.webContents.send('update-available', true);
-    //     });
-    //     electron.autoUpdater.on('update-not-available', () => {
-    //         for(const w of windows) w.webContents.send('update-available', false);
-    //         const item = electron.Menu.getApplicationMenu()!.getMenuItemById('update') as MenuItem | null;
-    //         if(item !== null) item.visible = false;
-    //     });
-    //     electron.autoUpdater.on('error', (e) => log.error(e));
-    // }
+    // require('update-electron-app')(
+    //   {
+    //     repo: 'https://github.com/mrstallion/fchat-rising.git',
+    //     updateInterval: '3 hours',
+    //     logger: require('electron-log')
+    //   }
+    // );
+
+    const updaterUrl = `https://update.electronjs.org/mrstallion/fchat-rising/${process.platform}-${process.arch}/${pck.version}`;
+    if(process.env.NODE_ENV === 'production') {
+        electron.autoUpdater.setFeedURL({url: updaterUrl + (settings.beta ? '?channel=beta' : ''), serverType: 'json'});
+        setTimeout(() => electron.autoUpdater.checkForUpdates(), 10000);
+        const updateTimer = setInterval(() => electron.autoUpdater.checkForUpdates(), 3600000);
+        electron.autoUpdater.on('update-downloaded', () => {
+            clearInterval(updateTimer);
+            const menu = electron.Menu.getApplicationMenu()!;
+            const item = menu.getMenuItemById('update') as MenuItem | null;
+            if(item !== null) item.visible = true;
+            else
+                menu.append(new electron.MenuItem({
+                    label: l('action.updateAvailable'),
+                    submenu: electron.Menu.buildFromTemplate([{
+                        label: l('action.update'),
+                        click: () => {
+                            for(const w of windows) w.webContents.send('quit');
+                            electron.autoUpdater.quitAndInstall();
+                        }
+                    }, {
+                        label: l('help.changelog'),
+                        click: showPatchNotes
+                    }]),
+                    id: 'update'
+                }));
+            electron.Menu.setApplicationMenu(menu);
+            for(const w of windows) w.webContents.send('update-available', true);
+        });
+        electron.autoUpdater.on('update-not-available', () => {
+            for(const w of windows) w.webContents.send('update-available', false);
+            const item = electron.Menu.getApplicationMenu()!.getMenuItemById('update') as MenuItem | null;
+            if(item !== null) item.visible = false;
+        });
+        electron.autoUpdater.on('error', (e) => log.error(e));
+    }
 
     const viewItem = {
         label: `&${l('action.view')}`,

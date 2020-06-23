@@ -48,11 +48,11 @@ theme: jekyll-theme-slate
 
 
 download:
-  win_url: https://github.com/mrstallion/fchat-rising/releases/download/v3.0.13-rising-v1/F-Chat.Rising.Setup.exe
+  win_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.0.0/F-Chat-Rising-v1.0.0-win.exe
   win_size: 68 MB
-  mac_url: https://github.com/mrstallion/fchat-rising/releases/download/v3.0.13-rising-v1/F-Chat.Rising.dmg
+  mac_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.0.0/F-Chat-Rising-v1.0.0-macos.dmg
   mac_size: 72 MB
-  linux_url: https://github.com/mrstallion/fchat-rising/releases/download/v3.0.13-rising-v1/fchat-rising.AppImage
+  linux_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.0.0/F-Chat-Rising-v1.0.0-linux.AppImage
   linux_size: 74 MB
 
 
