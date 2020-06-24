@@ -287,7 +287,7 @@ function createWindow(): Electron.BrowserWindow | undefined {
 }
 
 function showPatchNotes(): void {
-    electron.shell.openExternal('https://wiki.f-list.net/F-Chat_3.0#Changelog'); //tslint:disable-line:no-floating-promises
+    electron.shell.openExternal('https://github.com/mrstallion/fchat-rising/blob/master/CHANGELOG.md'); //tslint:disable-line:no-floating-promises
 }
 
 function onReady(): void {
@@ -481,12 +481,12 @@ function onReady(): void {
             submenu: [
                 {
                     label: l('help.fchat'),
-                    click: () => electron.shell.openExternal('https://wiki.f-list.net/F-Chat_3.0')
+                    click: () => electron.shell.openExternal('https://github.com/mrstallion/fchat-rising/blob/master/README.md')
                 },
-                {
-                    label: l('help.feedback'),
-                    click: () => electron.shell.openExternal('https://goo.gl/forms/WnLt3Qm3TPt64jQt2')
-                },
+                // {
+                //     label: l('help.feedback'),
+                //     click: () => electron.shell.openExternal('https://goo.gl/forms/WnLt3Qm3TPt64jQt2')
+                // },
                 {
                     label: l('help.rules'),
                     click: () => electron.shell.openExternal('https://wiki.f-list.net/Rules')

@@ -29,7 +29,7 @@ const strings: {[key: string]: string | undefined} = {
     'consoleWarning.head': 'THIS IS THE DANGER ZONE.',
     'consoleWarning.body': `ANYTHING YOU WRITE OR PASTE IN HERE COULD BE USED TO STEAL YOUR PASSWORDS OR TAKE OVER YOUR ENTIRE COMPUTER. This is where happiness goes to die. If you aren't a developer or a special kind of daredevil, please get out of here!`,
     'help': 'Help',
-    'help.fchat': 'FChat 3.0 Help and Changelog',
+    'help.fchat': 'F-Chat Rising Help and Changelog',
     'help.feedback': 'Report a Bug / Suggest Something',
     'help.rules': 'F-List Rules',
     'help.faq': 'F-List FAQ',
