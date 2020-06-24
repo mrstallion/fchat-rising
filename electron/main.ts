@@ -317,7 +317,7 @@ function onReady(): void {
     // );
 
     const updaterUrl = `https://update.electronjs.org/mrstallion/fchat-rising/${process.platform}-${process.arch}/${pck.version}`;
-    if(process.env.NODE_ENV === 'production') {
+    if((process.env.NODE_ENV === 'production') && (process.platform !== 'darwin')) {
         electron.autoUpdater.setFeedURL({url: updaterUrl + (settings.beta ? '?channel=beta' : ''), serverType: 'json'});
         setTimeout(() => electron.autoUpdater.checkForUpdates(), 10000);
         const updateTimer = setInterval(() => electron.autoUpdater.checkForUpdates(), 3600000);
