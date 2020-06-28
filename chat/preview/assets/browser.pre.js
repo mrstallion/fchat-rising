@@ -16,7 +16,7 @@ contextBridge.exposeInMainWorld(
             const cleanedArgs = args.map(v => cleanValue(v));
             const cleanedChannel = cleanValue(channel);
 
-            console.log('REAL.IPC', cleanedChannel, cleanedArgs);
+            // console.log('REAL.IPC', cleanedChannel, cleanedArgs);
 
             ipcRenderer.sendToHost(cleanedChannel, ...cleanedArgs);
         }
