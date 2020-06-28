@@ -2,6 +2,7 @@
 
 
 ## 1.0.1
+Enabled auto-updates for Windows; MacOS and Linux not supported, sorry!
 
 Reviewed security with:
 * [Electron Security](https://www.electronjs.org/docs/tutorial/security)
