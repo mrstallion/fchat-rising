@@ -290,6 +290,7 @@ function showPatchNotes(): void {
     electron.shell.openExternal('https://github.com/mrstallion/fchat-rising/blob/master/CHANGELOG.md'); //tslint:disable-line:no-floating-promises
 }
 
+
 function onReady(): void {
     log.transports.file.level = 'debug';
     log.transports.console.level = 'debug';

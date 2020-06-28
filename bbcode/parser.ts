@@ -127,9 +127,8 @@ export class BBCodeParser {
             isAllowed = (name) => self.isAllowed(name) && parentAllowed(name);
             currentTag = this._currentTag = {tag: self.tag, line: this._line, column: this._column};
         }
-        let tagStart = -1, paramStart = -1, mark = start;
 
-        // @ts-ignore
+        let tagStart = -1, paramStart = -1, mark = start;
         let depth = 0;
 
         for(let i = start; i < input.length; ++i) {
