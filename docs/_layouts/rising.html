@@ -76,6 +76,19 @@
           padding-left: 1px;
         }
 
+        #downloads_small h3 small {
+          color: #7d7d7d;
+          font-size: smaller;
+        }
+
+        #downloads_small h3 small a {
+          color: #7d7d7d;
+        }
+
+        #downloads_small h3 small a:hover {
+          color: #9a9a9a;
+        }
+
 
         h1, h2, h3, h4, h5, h6 {
           font-weight: normal !important;
@@ -130,7 +143,7 @@
 
           {% if site.show_downloads %}
             <section id="downloads_small">
-              <h3>Downloads</h3>
+              <h3>Downloads <small>| {{site.download.version}} | <a href="{{site.changelog}}">Changelog</a></small></h3>
 
               <div class="download_link win">
                 <a href="{{ site.download.win_url }}"><i></i> Windows</a>
