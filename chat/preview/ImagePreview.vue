@@ -13,8 +13,11 @@
         <webview
             preload="./preview/assets/browser.pre.js"
             src="about:blank"
-            nodeintegration
-            webpreferences="allowRunningInsecureContent, autoplayPolicy=no-user-gesture-required"
+            webpreferences="autoplayPolicy=no-user-gesture-required,contextIsolation,sandbox,disableDialogs,disableHtmlFullScreenWindowResize,enableWebSQL=no,nodeIntegration=no"
+            enableremotemodule="false"
+            allowpopups="false"
+            nodeIntegration="false"
+
             id="image-preview-ext"
             ref="imagePreviewExt"
             class="image-preview-external"

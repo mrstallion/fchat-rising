@@ -36,9 +36,11 @@ class FListImagePreviewDomMutator {
         this.body = document.querySelector('body');
         this.html = document.querySelector('html');
 
-        this.ipcRenderer = (typeof require !== 'undefined')
-            ? require('electron').ipcRenderer
-            : { sendToHost: (...args) => (this.debug('ipc.sendToHost', ...args)) };
+        this.ipcRenderer = {
+            sendToHost: ((window) && (window.rising) && (window.rising.sendToHost))
+                ? window.rising.sendToHost
+                : (...args) => (this.debug('MOCK.ipc.sendToHost', ...args))
+        };
 
         this.preprocess();
 
