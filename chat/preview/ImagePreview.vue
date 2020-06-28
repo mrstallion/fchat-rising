@@ -13,7 +13,7 @@
         <webview
             preload="./preview/assets/browser.pre.js"
             src="about:blank"
-            webpreferences="autoplayPolicy=no-user-gesture-required,contextIsolation,sandbox,disableDialogs,disableHtmlFullScreenWindowResize,enableWebSQL=no,nodeIntegration=no"
+            webpreferences="autoplayPolicy=no-user-gesture-required,contextIsolation,sandbox,disableDialogs,disableHtmlFullScreenWindowResize,webSecurity,enableWebSQL=no,nodeIntegration=no,nativeWindowOpen=no,nodeIntegrationInWorker=no,nodeIntegrationInSubFrames=no,webviewTag=no"
             enableremotemodule="false"
             allowpopups="false"
             nodeIntegration="false"
