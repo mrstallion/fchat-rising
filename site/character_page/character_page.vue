@@ -303,7 +303,7 @@
             await core.cache.profileCache.registerMeta(
                 name,
                 {
-                    lastFetched: new Date(),
+                    lastMetaFetched: new Date(),
                     groups: this.groups,
                     friends: this.friends,
                     guestbook: this.guestbook,
@@ -365,8 +365,8 @@
             if (
                 (cache && !skipCache)
                 && (cache.meta)
-                && (cache.meta.lastFetched)
-                && (Date.now() - cache.meta.lastFetched.getTime() > CHARACTER_META_CACHE_EXPIRE)
+                && (cache.meta.lastMetaFetched)
+                && (Date.now() - cache.meta.lastMetaFetched.getTime() > CHARACTER_META_CACHE_EXPIRE)
             ) {
                 this.guestbook = cache.meta.guestbook;
                 this.friends = cache.meta.friends;

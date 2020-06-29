@@ -13,7 +13,7 @@ export interface MetaRecord {
     groups: CharacterGroup[] | null;
     friends: SimpleCharacter[] | null;
     guestbook: Guestbook | null;
-    lastFetched: Date | null;
+    lastMetaFetched: Date | null;
 }
 
 
@@ -83,7 +83,7 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
         cacheRecord.added = new Date(pd.firstSeen * 1000);
 
         cacheRecord.meta = {
-            lastFetched: pd.lastMetaFetched ? new Date(pd.lastMetaFetched) : null,
+            lastMetaFetched: pd.lastMetaFetched ? new Date(pd.lastMetaFetched) : null,
             groups: pd.groups,
             friends: pd.friends,
             images: pd.images,
