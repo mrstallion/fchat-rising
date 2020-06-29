@@ -54,6 +54,11 @@ const previewInitiationTime = Date.now();
 (() => {
     try {
         const clear = () => {
+            if (window.location.href.match(/^https?:\/\/[a-zA-Z0-9-]+\.tumblr\.com/)) {
+                // Because Tumblr sucks with their iframes
+                return;
+            }
+
             try {
                 const frameCount = window.frames.length;
 

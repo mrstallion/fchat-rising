@@ -60,16 +60,23 @@ export class ImageDomMutator {
     getMutatorJsForSite(url: string, eventName: string): string | undefined {
         let mutator = this.matchMutator(url);
 
-        if (!mutator)
+        if (!mutator) {
             mutator = this.hostMutators['default'];
+        }
 
         if (mutator.eventName !== eventName)
             return;
+
+        // console.log(`Mutator match: ${mutator.match}`, (mutator === this.hostMutators['default']), url);
 
         return this.wrapJs(mutator.injectJs) + this.getReShowMutator();
     }
 
     matchMutator(url: string): DomMutator | undefined {
+        if (url === 'about:blank') {
+            return this.hostMutators['about:blank'];
+        }
+
         const urlDomain = extractDomain(url);
 
         if (!urlDomain)
@@ -131,9 +138,10 @@ export class ImageDomMutator {
         await this.loadScripts();
 
         this.add('default', this.getBaseJsMutatorScript(['.content video', '.content img', '#video, video', '#image, img']));
+        this.add('about:blank', '');
         this.add('e621.net', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('e-hentai.org', this.getBaseJsMutatorScript(['video', '#img']));
-        this.add('gelbooru.com', this.getBaseJsMutatorScript(['.post-view video', '#image']));
+        this.add('gelbooru.com', this.getBaseJsMutatorScript(['.post-view video', '.contain-push video', '#image']));
         this.add('gyazo.com', this.getBaseJsMutatorScript(['.image-view video', '.image-view img']));
         this.add('chan.sankakucomplex.com', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('danbooru.donmai.us', this.getBaseJsMutatorScript(['video', '#image']));
@@ -144,7 +152,9 @@ export class ImageDomMutator {
         this.add('webmshare.com', this.getBaseJsMutatorScript(['video']));
         this.add('vimeo.com', this.getBaseJsMutatorScript(['#video, video', '#image, img']));
         this.add('sex.com', this.getBaseJsMutatorScript(['.image_frame video', '.image_frame img']));
-        this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript(['picture video', 'picture img']));
+        // this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript(['picture video', 'picture img']));
+        this.add(/^[a-zA-Z0-9-]+\.media\.tumblr\.com$/, this.getBaseJsMutatorScript(['.photoset video', '.photoset img', '#base-container video', '#base-container img', 'picture video', 'picture img', 'video', 'img']));
+        this.add(/^[a-zA-Z0-9-]+\.tumblr\.com$/, this.getBaseJsMutatorScript(['.photoset iframe', '.photoset video', '.photoset img', 'picture video', 'picture img', 'video', 'img']));
         this.add('postimg.cc', this.getBaseJsMutatorScript(['video', '#main-image']));
         this.add('gifsauce.com', this.getBaseJsMutatorScript(['video']));
         // this.add('motherless.com', this.getBaseJsMutatorScript(['.content video', '.content img']));
@@ -157,11 +167,25 @@ export class ImageDomMutator {
         this.add('sexbot.gallery', this.getBaseJsMutatorScript(['video.hero', 'video']));
         this.add('imagefap.com', this.getBaseJsMutatorScript(['.image-wrapper img', 'video', 'img']));
         this.add('myhentaicomics.com', this.getBaseJsMutatorScript(['#entire_image img', 'video', 'img']));
-        this.add('gifmixxx.com', this.getBaseJsMutatorScript(['.gif.fit', '.gif', 'video', 'img']));
+        this.add('redgifs.com', this.getBaseJsMutatorScript(['video']));
 
         this.add(
             'pornhub.com',
             this.getBaseJsMutatorScript([/*'#__flistCore', '#player', */ '#photoImageSection img', 'video', 'img', '#player'], false)
+        );
+
+
+        this.add(
+            'gifmixxx.com',
+            `
+                const bgImage = document.querySelector('.gif.fit');
+                const bgImageStyle = bgImage.style.backgroundImage;
+                ${this.getBaseJsMutatorScript(['.gif.fit', '.gif', 'video', 'img'])};
+                bgImage.style.backgroundImage = bgImageStyle;
+                bgImage.style.backgroundSize = 'contain';
+                bgImage.style.backgroundRepeat = 'no-repeat';
+                bgImage.style.color = 'transparent';
+            `
         );
 
         this.add(

@@ -47,6 +47,15 @@ export class ImageUrlMutator {
         );
 
         this.add(
+          /^https?:\/\/(www.)?redgifs.com\/watch\/([a-z0-9A-Z]+)/,
+          async(_url: string, match: RegExpMatchArray): Promise<string> => {
+            const redgifId = match[2];
+
+            return `https://www.gifdeliverynetwork.com/ifr/${redgifId}?controls=0&hd=1`;
+          }
+        );
+
+        this.add(
           /^https?:\/\/(www.)?gfycat.com\/([a-z0-9A-Z\-]+)\/?$/,
           async(_url: string, match: RegExpMatchArray): Promise<string> => {
             const gfyId = match[2];

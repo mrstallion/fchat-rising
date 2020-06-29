@@ -1,8 +1,8 @@
 # Changelog
 
 ## Canary
-* Fix caching issue that causes cache misses on charater page metadata
-
+*   Fix caching issue that causes cache misses on charater page metadata
+*   URL preview fixes for Redgifs, Gelbooru, Tumblr, and Gifmixxx 
 
 ## 1.0.1
 
