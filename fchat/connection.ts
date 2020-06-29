@@ -2,11 +2,15 @@ import Axios, {AxiosError, AxiosResponse} from 'axios';
 import * as qs from 'qs';
 import {Connection as Interfaces, WebSocketConnection} from './interfaces';
 import ReadyState = WebSocketConnection.ReadyState;
+import log from 'electron-log'; //tslint:disable-line:match-default-export-name
+import core from '../chat/core';
 
 const fatalErrors = [2, 3, 4, 9, 30, 31, 33, 39, 40, 62, -4];
 const dieErrors = [9, 30, 31, 39, 40];
 
 let lastFetch = Date.now();
+let lastApiTicketFetch = Date.now();
+
 
 async function queryApi(this: void, endpoint: string, data: object): Promise<AxiosResponse> {
     if (false) {
@@ -117,15 +121,41 @@ export default class Connection implements Interfaces.Connection {
 
     async queryApi<T = object>(endpoint: string, data?: {account?: string, ticket?: string}): Promise<T> {
         if(!this.ticketProvider) throw new Error('No credentials set!');
+
         if(data === undefined) data = {};
+
         data.account = this.account;
         data.ticket = this.ticket;
+
         let res = <T & {error: string}>(await queryApi(endpoint, data)).data;
+
         if(res.error === 'Invalid ticket.' || res.error === 'Your login ticket has expired (five minutes) or no ticket requested.') {
+            log.debug(
+              {
+                type: 'api.ticket.loss',
+                error: res.error,
+                character: core.characters.ownCharacter?.name,
+                deltaToLastApiCall: Date.now() - lastFetch,
+                deltaToLastApiTicket: Date.now() - lastApiTicketFetch
+              }
+            );
+
             data.ticket = this.ticket = await this.ticketProvider();
             res = <T & {error: string}>(await queryApi(endpoint, data)).data;
         }
+
         if(res.error !== '') {
+            log.debug(
+              {
+                type: 'error.api.query',
+                error: res.error,
+                endpoint,
+                character: core.characters.ownCharacter?.name,
+                deltaToLastApiCall: Date.now() - lastFetch,
+                deltaToLastApiTicket: Date.now() - lastApiTicketFetch
+              }
+            );
+
             const error = new Error(res.error);
             (<Error & {request: true}>error).request = true;
             throw error;
@@ -203,14 +233,42 @@ export default class Connection implements Interfaces.Connection {
     private async getTicket(password: string): Promise<string> {
         console.log('Acquiring new API ticket');
 
-        if (false) {
-            console.log(`https://www.f-list.net/json/getApiTicket.php, gap: ${Date.now() - lastFetch}ms`);
-            lastFetch = Date.now();
+        if(process.env.NODE_ENV !== 'production') {
+            console.log(`https://www.f-list.net/json/getApiTicket.php, gap: ${Date.now() - lastApiTicketFetch}ms`);
+
+            log.debug(
+              {
+                type: 'api.getTicket',
+                character: core.characters.ownCharacter?.name,
+                deltaToLastApiCall: Date.now() - lastFetch,
+                deltaToLastApiTicket: Date.now() - lastApiTicketFetch
+              }
+            );
+
+            lastApiTicketFetch = Date.now();
         }
 
         const data = <{ticket?: string, error: string}>(await Axios.post('https://www.f-list.net/json/getApiTicket.php', qs.stringify(
             {account: this.account, password, no_friends: true, no_bookmarks: true, no_characters: true}))).data;
+
         if(data.ticket !== undefined) return data.ticket;
+
+        if(process.env.NODE_ENV !== 'production') {
+            console.error('API Ticket Error', data.error);
+
+            log.error(
+              {
+                type: 'error.api.getTicket',
+                character: core.characters.ownCharacter.name,
+                error: data.error,
+                deltaToLastApiCall: Date.now() - lastFetch,
+                deltaToLastApiTicket: Date.now() - lastApiTicketFetch
+              }
+            );
+
+            lastApiTicketFetch = Date.now();
+        }
+
         throw new Error(data.error);
     }
 

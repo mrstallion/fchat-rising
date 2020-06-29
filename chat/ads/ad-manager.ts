@@ -1,6 +1,8 @@
 import throat from 'throat';
 import * as _ from 'lodash';
 
+import log from 'electron-log'; //tslint:disable-line:match-default-export-name
+
 import core from '../core';
 import { Conversation } from '../interfaces';
 import Timer = NodeJS.Timer;
@@ -53,12 +55,32 @@ export class AdManager {
 
     // This makes sure there is a 5s delay between channel posts
     private async sendAdToChannel(msg: string, conv: Conversation.ChannelConversation): Promise<void> {
+        const initTime = Date.now();
+
         await adManagerThroat(
             async() => {
+                const throatTime = Date.now();
+
                 const delta = Date.now() - core.cache.getLastPost().getTime();
 
                 if ((delta > 0) && (delta < AdManager.POST_MANUAL_THRESHOLD)) {
                     await this.delay(delta);
+                }
+
+                const delayTime = Date.now();
+
+                if (process.env.NODE_ENV !== 'production') {
+                    log.debug(
+                      {
+                        type: 'sendAdToChannel',
+                        character: core.characters.ownCharacter?.name,
+                        channel: conv.channel.name,
+                        throatDelta: throatTime - initTime,
+                        delayDelta: delayTime - throatTime,
+                        totalWait: delayTime - initTime,
+                        msg
+                      }
+                    );
                 }
 
                 await conv.sendAd(msg);

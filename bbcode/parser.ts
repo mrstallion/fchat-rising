@@ -145,19 +145,19 @@ export class BBCodeParser {
                     tagStart = i;
                     paramStart = -1;
                 } else {
-                    console.log('Hit depth tagOpen', depth);
+                    // console.log('Hit depth tagOpen', depth);
                 }
             } else if(c === '=' && paramStart === -1) {
                 if (depth <= 1) {
                   paramStart = i;
                 } else {
-                    console.log('Hit depth paramStart', depth);
+                    // console.log('Hit depth paramStart', depth);
                 }
             } else if(c === ']') {
                 depth--;
 
                 if (depth !== 0) {
-                    console.log('Hit depth tagClose', depth);
+                    // console.log('Hit depth tagClose', depth);
                 }
 
                 if (depth === 0) {

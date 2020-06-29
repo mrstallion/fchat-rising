@@ -33,6 +33,7 @@ import {InlineDisplayMode} from '../interfaces';
 </template>
 
 <script lang="ts">
+    import log from 'electron-log'; //tslint:disable-line:match-default-export-name
     import {Component, Hook, Prop} from '@f-list/vue-ts';
     import Vue from 'vue';
     import Modal from '../components/Modal.vue';
@@ -123,6 +124,17 @@ import {InlineDisplayMode} from '../interfaces';
                 }
             });
             core.connection.onEvent('closed', (isReconnect) => {
+                if(process.env.NODE_ENV !== 'production') {
+                    log.debug(
+                      {
+                        type: 'connection.closed',
+                        character: core.characters.ownCharacter?.name,
+                        error: this.error,
+                        isReconnect
+                      }
+                    );
+                }
+
                 if(isReconnect) (<Modal>this.$refs['reconnecting']).show(true);
                 if(this.connected) core.notifications.playSound('logout');
                 this.connected = false;
@@ -152,6 +164,17 @@ import {InlineDisplayMode} from '../interfaces';
                 document.title = (hasNew ? '💬 ' : '') + l(core.connection.isOpen ? 'title.connected' : 'title', core.connection.character);
             });
             core.connection.onError((e) => {
+
+                if(process.env.NODE_ENV !== 'production') {
+                    log.debug(
+                      {
+                        type: 'connection.error',
+                        error: errorToString(e),
+                        character: core.characters.ownCharacter?.name
+                      }
+                    );
+                }
+
                 if((<Error & {request?: object}>e).request !== undefined) {//catch axios network errors
                     this.error = l('login.connectError', errorToString(e));
                     this.connecting = false;

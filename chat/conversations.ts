@@ -11,6 +11,7 @@ import MessageType = Interfaces.Message.Type;
 import {EventBus} from './preview/event-bus';
 import throat from 'throat';
 import Bluebird from 'bluebird';
+import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 
 function createMessage(this: any, type: MessageType, sender: Character, text: string, time?: Date): Message {
     if(type === MessageType.Message && isAction(text)) {
@@ -395,12 +396,32 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
         if (text.length < 1)
             return;
 
+        const initTime = Date.now();
+
         await Conversation.conversationThroat(
             async() => {
+                const throatTime = Date.now();
+
                 await Conversation.testPostDelay();
+
+                const delayTime = Date.now();
 
                 core.connection.send('LRP', {channel: this.channel.id, message: text});
                 core.cache.markLastPostTime();
+
+                if (process.env.NODE_ENV !== 'production') {
+                    log.debug(
+                      {
+                        type: 'sendAd',
+                        character: core.characters.ownCharacter?.name,
+                        channel: this.channel.name,
+                        throatDelta: throatTime - initTime,
+                        delayDelta: delayTime - throatTime,
+                        totalWait: delayTime - initTime,
+                        text
+                      }
+                    );
+                }
 
                 await this.addMessage(
                     createMessage(MessageType.Ad, core.characters.ownCharacter, text, new Date())
