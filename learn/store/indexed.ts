@@ -165,7 +165,7 @@ export class IndexedStore implements PermanentIndexedStore {
         const data = _.merge(
             existing,
             {
-                lastFetched: Math.round(Date.now() / 1000),
+                lastMetaFetched: Math.round(Date.now() / 1000),
                 guestbook,
                 friends,
                 groups,
