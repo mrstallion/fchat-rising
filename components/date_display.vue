@@ -4,7 +4,7 @@
 
 <script lang="ts">
     import {Component, Hook, Prop, Watch} from '@f-list/vue-ts';
-    import {distanceInWordsToNow, format} from 'date-fns';
+    import {formatDistanceToNow, format} from 'date-fns';
     import Vue from 'vue';
     import {settings} from '../site/utils';
 
@@ -21,8 +21,8 @@
             if(this.time === null || this.time === 0)
                 return;
             const date = isNaN(+this.time) ? new Date(`${this.time}+00:00`) : new Date(+this.time * 1000);
-            const absolute = format(date, 'YYYY-MM-DD HH:mm');
-            const relative = distanceInWordsToNow(date, {addSuffix: true});
+            const absolute = format(date, 'yyyy-MM-DD HH:mm');
+            const relative = formatDistanceToNow(date, {addSuffix: true});
             if(settings.fuzzyDates) {
                 this.primary = relative;
                 this.secondary = absolute;

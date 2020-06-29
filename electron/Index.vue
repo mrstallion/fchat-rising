@@ -203,6 +203,7 @@
             this.loggingIn = true;
             try {
                 if(!this.saveLogin) await keyStore.deletePassword(this.settings.account);
+
                 const data = <{ticket?: string, error: string, characters: {[key: string]: number}, default_character: number}>
                     (await Axios.post('https://www.f-list.net/json/getApiTicket.php', qs.stringify({
                         account: this.settings.account, password: this.password, no_friends: true, no_bookmarks: true,

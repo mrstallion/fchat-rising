@@ -99,9 +99,15 @@ const mainConfig = {
         }),
         new VueLoaderPlugin(),
         new CopyPlugin(
-            [
-                { from: path.resolve(__dirname, '..', 'chat', 'preview', 'assets', '**/*'), to: path.join('preview', 'assets'), context: path.resolve(__dirname, '..', 'chat', 'preview', 'assets') }
-            ]
+            {
+                patterns: [
+                    {
+                        from: path.resolve(__dirname, '..', 'chat', 'preview', 'assets', '**/*'),
+                        to: path.join('preview', 'assets'),
+                        context: path.resolve(__dirname, '..', 'chat', 'preview', 'assets')
+                    }
+                ]
+            }
         )
     ],
     resolve: {

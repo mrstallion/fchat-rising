@@ -1,3 +1,5 @@
+// import path from 'path';
+
 import core from './core';
 import {Conversation, Notifications as Interface} from './interfaces';
 
@@ -28,7 +30,9 @@ export default class Notifications implements Interface {
 
     getOptions(conversation: Conversation, body: string, icon: string):
         NotificationOptions & {badge: string, silent: boolean, renotify: boolean} {
-        const badge = <string>require(`./assets/ic_notification.png`); //tslint:disable-line:no-require-imports
+
+        const badge = <string>require(`./assets/ic_notification.png`).default; //tslint:disable-line:no-require-imports no-unsafe-any
+
         return {
             body, icon: core.state.settings.showAvatars ? icon : undefined, badge, silent: true,  data: {key: conversation.key},
             tag: conversation.key, renotify: true
@@ -55,13 +59,13 @@ export default class Notifications implements Interface {
             for(const name in codecs) {
                 const src = document.createElement('source');
                 src.type = `audio/${name}`;
-                //tslint:disable-next-line:no-require-imports
-                src.src = <string>require(`./assets/${sound}.${codecs[name]}`);
+                src.src = <string>require(`./assets/${sound}.${codecs[name]}`).default; // tslint:disable-line: no-unsafe-any
                 audio.appendChild(src);
             }
             document.body.appendChild(audio);
             audio.volume = 0;
             audio.muted = true;
+
             const promise = audio.play();
             if(promise instanceof Promise)
                 promises.push(promise.catch((e) => console.error(e)));

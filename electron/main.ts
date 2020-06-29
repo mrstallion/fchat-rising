@@ -51,6 +51,7 @@ import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
 import * as _ from 'lodash';
 import DownloadItem = Electron.DownloadItem;
 
+//tslint:disable-next-line:no-require-imports
 const pck = require('./package.json');
 
 // Module to control application life.
@@ -287,7 +288,8 @@ function createWindow(): Electron.BrowserWindow | undefined {
 }
 
 function showPatchNotes(): void {
-    electron.shell.openExternal('https://github.com/mrstallion/fchat-rising/blob/master/CHANGELOG.md'); //tslint:disable-line:no-floating-promises
+    //tslint:disable-next-line: no-floating-promises
+    electron.shell.openExternal('https://github.com/mrstallion/fchat-rising/blob/master/CHANGELOG.md');
 }
 
 
@@ -317,6 +319,7 @@ function onReady(): void {
     //   }
     // );
 
+    //tslint:disable-next-line: no-unsafe-any
     const updaterUrl = `https://update.electronjs.org/mrstallion/fchat-rising/${process.platform}-${process.arch}/${pck.version}`;
     if((process.env.NODE_ENV === 'production') && (process.platform !== 'darwin')) {
         electron.autoUpdater.setFeedURL({url: updaterUrl + (settings.beta ? '?channel=beta' : ''), serverType: 'json'});
@@ -540,8 +543,10 @@ function onReady(): void {
         if(index !== -1) characters.splice(index, 1);
     });
     const emptyBadge = electron.nativeImage.createEmpty();
-    //tslint:disable-next-line:no-require-imports
-    const badge = electron.nativeImage.createFromPath(path.join(__dirname, <string>require('./build/badge.png')));
+
+    //tslint:disable-next-line:no-require-imports no-unsafe-any
+    const badge = electron.nativeImage.createFromPath(path.join(__dirname, <string>require('./build/badge.png').default));
+
     electron.ipcMain.on('has-new', (e: Event & {sender: Electron.WebContents}, hasNew: boolean) => {
         if(process.platform === 'darwin') app.dock.setBadge(hasNew ? '!' : '');
         const window = electron.BrowserWindow.fromWebContents(e.sender) as BrowserWindow | undefined;

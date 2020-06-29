@@ -146,6 +146,16 @@ import {InlineDisplayMode} from '../interfaces';
             });
             core.connection.onEvent('connecting', async() => {
                 this.connecting = true;
+
+                if(process.env.NODE_ENV !== 'production') {
+                    log.debug(
+                      {
+                        type: 'connection.connecting',
+                        character: core.characters.ownCharacter?.name
+                      }
+                    );
+                }
+
                 profileApiInit({
                     defaultCharacter: this.defaultCharacter, animateEicons: core.state.settings.animatedEicons, fuzzyDates: true,
                     inlineDisplayMode: InlineDisplayMode.DISPLAY_ALL
@@ -153,6 +163,15 @@ import {InlineDisplayMode} from '../interfaces';
                 if(core.state.settings.notifications) await core.notifications.requestPermission();
             });
             core.connection.onEvent('connected', () => {
+                if(process.env.NODE_ENV !== 'production') {
+                    log.debug(
+                      {
+                        type: 'connection.connected',
+                        character: core.characters.ownCharacter?.name
+                      }
+                    );
+                }
+
                 (<Modal>this.$refs['reconnecting']).hide();
                 this.error = '';
                 this.connecting = false;
@@ -164,7 +183,6 @@ import {InlineDisplayMode} from '../interfaces';
                 document.title = (hasNew ? '💬 ' : '') + l(core.connection.isOpen ? 'title.connected' : 'title', core.connection.character);
             });
             core.connection.onError((e) => {
-
                 if(process.env.NODE_ENV !== 'production') {
                     log.debug(
                       {
@@ -193,7 +211,11 @@ import {InlineDisplayMode} from '../interfaces';
 
         async connect(): Promise<void> {
             this.connecting = true;
+
+            // skipping await
+            // tslint:disable-next-line: no-floating-promises
             await core.notifications.initSounds(['attention', 'login', 'logout', 'modalert', 'newnote']);
+
             core.connection.connect(this.selectedCharacter.name);
         }
     }

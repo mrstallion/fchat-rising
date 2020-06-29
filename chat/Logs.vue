@@ -74,7 +74,7 @@
     import Zip from './zip';
 
     function formatDate(this: void, date: Date): string {
-        return format(date, 'YYYY-MM-DD');
+        return format(date, 'yyyy-MM-DD');
     }
 
     function getLogs(messages: ReadonlyArray<Conversation.Message>): string {
