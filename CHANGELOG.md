@@ -2,7 +2,10 @@
 
 ## Canary
 *   Fix caching issue that causes cache misses on charater page metadata
-*   URL preview fixes for Redgifs, Gelbooru, Tumblr, and Gifmixxx 
+*   Fix ad posting issue that sometimes disconnects characters if multiple characters are in use
+*   URL preview fixes for Redgifs, Gelbooru, Tumblr, and Gifmixxx
+*   All dependencies are now up to date
+
 
 ## 1.0.1
 

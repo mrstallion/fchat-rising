@@ -5,6 +5,7 @@ import BBCodeParser from './bbcode';
 import {Settings as SettingsImpl} from './common';
 import Conversations from './conversations';
 import {Channel, Character, Connection, Conversation, Logs, Notifications, Settings, State as StateInterface} from './interfaces';
+import { AdCoordinatorGuest } from './ads/ad-coordinator-guest';
 
 function createBBCodeParser(): BBCodeParser {
     const parser = new BBCodeParser();
@@ -65,6 +66,8 @@ const data = {
     characters: <Character.State | undefined>undefined,
     notifications: <Notifications | undefined>undefined,
     cache: <CacheManager | undefined>undefined,
+    adCoordinator: <AdCoordinatorGuest | undefined>undefined,
+
     register<K extends 'characters' | 'conversations' | 'channels'>(module: K, subState: VueState[K]): void {
         Vue.set(vue, module, subState);
         (<VueState[K]>data[module]) = subState;
@@ -86,6 +89,7 @@ export function init(this: any, connection: Connection, logsClass: new() => Logs
     data.settingsStore = new settingsClass();
     data.notifications = new notificationsClass();
     data.cache = new CacheManager();
+    data.adCoordinator = new AdCoordinatorGuest();
 
     // tslint:disable-next-line no-floating-promises
     data.cache.start();
@@ -111,6 +115,7 @@ export interface Core {
     readonly bbCodeParser: BBCodeParser
     readonly notifications: Notifications
     readonly cache: CacheManager
+    readonly adCoordinator: AdCoordinatorGuest;
 
     watch<T>(getter: (this: VueState) => T, callback: WatchHandler<T>): void
 }

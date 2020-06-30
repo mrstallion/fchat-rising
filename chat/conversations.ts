@@ -147,6 +147,7 @@ abstract class Conversation implements Interfaces.Conversation {
     }
 }
 
+
 class PrivateConversation extends Conversation implements Interfaces.PrivateConversation {
     readonly name = this.character.name;
     readonly context = CommandContext.Private;
@@ -402,7 +403,12 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
             async() => {
                 const throatTime = Date.now();
 
-                await Conversation.testPostDelay();
+                await Promise.all(
+                    [
+                        await Conversation.testPostDelay(),
+                        await core.adCoordinator.requestTurnToPostAd()
+                    ]
+                );
 
                 const delayTime = Date.now();
 
@@ -411,8 +417,8 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
 
                 if (process.env.NODE_ENV !== 'production') {
                     log.debug(
+                    'conversation.sendAd',
                       {
-                        type: 'sendAd',
                         character: core.characters.ownCharacter?.name,
                         channel: this.channel.name,
                         throatDelta: throatTime - initTime,

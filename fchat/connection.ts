@@ -131,8 +131,8 @@ export default class Connection implements Interfaces.Connection {
 
         if(res.error === 'Invalid ticket.' || res.error === 'Your login ticket has expired (five minutes) or no ticket requested.') {
             log.debug(
+              'api.ticket.loss',
               {
-                type: 'api.ticket.loss',
                 error: res.error,
                 character: core.characters.ownCharacter?.name,
                 deltaToLastApiCall: Date.now() - lastFetch,
@@ -146,8 +146,8 @@ export default class Connection implements Interfaces.Connection {
 
         if(res.error !== '') {
             log.debug(
+              'error.api.query',
               {
-                type: 'error.api.query',
                 error: res.error,
                 endpoint,
                 character: core.characters.ownCharacter?.name,
@@ -237,8 +237,8 @@ export default class Connection implements Interfaces.Connection {
             console.log(`https://www.f-list.net/json/getApiTicket.php, gap: ${Date.now() - lastApiTicketFetch}ms`);
 
             log.debug(
+              'api.getTicket',
               {
-                type: 'api.getTicket',
                 character: core.characters.ownCharacter?.name,
                 deltaToLastApiCall: Date.now() - lastFetch,
                 deltaToLastApiTicket: Date.now() - lastApiTicketFetch
@@ -257,8 +257,8 @@ export default class Connection implements Interfaces.Connection {
             console.error('API Ticket Error', data.error);
 
             log.error(
+              'error.api.getTicket',
               {
-                type: 'error.api.getTicket',
                 character: core.characters.ownCharacter.name,
                 error: data.error,
                 deltaToLastApiCall: Date.now() - lastFetch,

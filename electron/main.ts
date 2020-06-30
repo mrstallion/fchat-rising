@@ -50,6 +50,8 @@ import fetch from 'node-fetch';
 import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
 import * as _ from 'lodash';
 import DownloadItem = Electron.DownloadItem;
+import { AdCoordinatorHost } from '../chat/ads/ad-coordinator-host';
+import { IpcMainEvent } from 'electron';
 
 //tslint:disable-next-line:no-require-imports
 const pck = require('./package.json');
@@ -542,6 +544,12 @@ function onReady(): void {
         const index = characters.indexOf(character);
         if(index !== -1) characters.splice(index, 1);
     });
+
+
+    const adCoordinator = new AdCoordinatorHost();
+    electron.ipcMain.on('request-send-ad', (event: IpcMainEvent, adId: string) => (adCoordinator.processAdRequest(event, adId)));
+
+
     const emptyBadge = electron.nativeImage.createEmpty();
 
     //tslint:disable-next-line:no-require-imports no-unsafe-any

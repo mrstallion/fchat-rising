@@ -126,8 +126,8 @@ import {InlineDisplayMode} from '../interfaces';
             core.connection.onEvent('closed', (isReconnect) => {
                 if(process.env.NODE_ENV !== 'production') {
                     log.debug(
+                      'connection.closed',
                       {
-                        type: 'connection.closed',
                         character: core.characters.ownCharacter?.name,
                         error: this.error,
                         isReconnect
@@ -141,6 +141,7 @@ import {InlineDisplayMode} from '../interfaces';
                 this.connecting = false;
 
                 AdManager.onConnectionClosed();
+                core.adCoordinator.clear();
 
                 document.title = l('title');
             });
@@ -149,8 +150,8 @@ import {InlineDisplayMode} from '../interfaces';
 
                 if(process.env.NODE_ENV !== 'production') {
                     log.debug(
+                      'connection.connecting',
                       {
-                        type: 'connection.connecting',
                         character: core.characters.ownCharacter?.name
                       }
                     );
@@ -165,8 +166,8 @@ import {InlineDisplayMode} from '../interfaces';
             core.connection.onEvent('connected', () => {
                 if(process.env.NODE_ENV !== 'production') {
                     log.debug(
+                      'connection.connected',
                       {
-                        type: 'connection.connected',
                         character: core.characters.ownCharacter?.name
                       }
                     );
@@ -185,8 +186,8 @@ import {InlineDisplayMode} from '../interfaces';
             core.connection.onError((e) => {
                 if(process.env.NODE_ENV !== 'production') {
                     log.debug(
+                      'connection.error',
                       {
-                        type: 'connection.error',
                         error: errorToString(e),
                         character: core.characters.ownCharacter?.name
                       }
@@ -214,7 +215,7 @@ import {InlineDisplayMode} from '../interfaces';
 
             // skipping await
             // tslint:disable-next-line: no-floating-promises
-            await core.notifications.initSounds(['attention', 'login', 'logout', 'modalert', 'newnote']);
+            core.notifications.initSounds(['attention', 'login', 'logout', 'modalert', 'newnote']);
 
             core.connection.connect(this.selectedCharacter.name);
         }

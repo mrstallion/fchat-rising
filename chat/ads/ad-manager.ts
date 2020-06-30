@@ -71,8 +71,8 @@ export class AdManager {
 
                 if (process.env.NODE_ENV !== 'production') {
                     log.debug(
+                      'adManager.sendAdToChannel',
                       {
-                        type: 'sendAdToChannel',
                         character: core.characters.ownCharacter?.name,
                         channel: conv.channel.name,
                         throatDelta: throatTime - initTime,
