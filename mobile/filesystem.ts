@@ -1,3 +1,5 @@
+import * as _ from 'lodash';
+
 import {Message as MessageImpl} from '../chat/common';
 import core from '../chat/core';
 import {Conversation, Logs as Logging, Settings} from '../chat/interfaces';
@@ -135,7 +137,7 @@ export class Logs implements Logging {
 export async function getGeneralSettings(): Promise<GeneralSettings | undefined> {
     const file = await NativeFile.read('!settings');
     if(file === undefined) return undefined;
-    const settings = <GeneralSettings>JSON.parse(file);
+    const settings = <GeneralSettings>_.merge(new GeneralSettings(),  JSON.parse(file));
     if(settings.host === 'wss://chat.f-list.net:9799') settings.host = 'wss://chat.f-list.net/chat2';
     return settings;
 }

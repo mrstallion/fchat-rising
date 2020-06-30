@@ -6,6 +6,7 @@ import {Settings as SettingsImpl} from './common';
 import Conversations from './conversations';
 import {Channel, Character, Connection, Conversation, Logs, Notifications, Settings, State as StateInterface} from './interfaces';
 import { AdCoordinatorGuest } from './ads/ad-coordinator-guest';
+import { GeneralSettings } from '../electron/common';
 
 function createBBCodeParser(): BBCodeParser {
     const parser = new BBCodeParser();
@@ -82,8 +83,9 @@ const data = {
     }
 };
 
-export function init(this: any, connection: Connection, logsClass: new() => Logs, settingsClass: new() => Settings.Store,
-                     notificationsClass: new() => Notifications): void {
+export function init(
+    this: any, connection: Connection, settings: GeneralSettings, logsClass: new() => Logs,
+    settingsClass: new() => Settings.Store, notificationsClass: new() => Notifications): void {
     data.connection = connection;
     data.logs = new logsClass();
     data.settingsStore = new settingsClass();
@@ -91,8 +93,7 @@ export function init(this: any, connection: Connection, logsClass: new() => Logs
     data.cache = new CacheManager();
     data.adCoordinator = new AdCoordinatorGuest();
 
-    // tslint:disable-next-line no-floating-promises
-    data.cache.start();
+    (data.state as any).generalSettings = settings;
 
     data.register('characters', Characters(connection));
     data.register('channels', Channels(connection, core.characters));

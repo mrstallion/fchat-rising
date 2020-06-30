@@ -52,6 +52,7 @@ import {Logs, SettingsStore} from './filesystem';
 import Notifications from './notifications';
 import * as SlimcatImporter from './importer';
 import Index from './Index.vue';
+import log from 'electron-log'; // tslint:disable-line: match-default-export-name
 
 
 document.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -192,6 +193,9 @@ if(process.platform === 'win32') //get the path in DOS (8-character) format as s
 function onSettings(s: GeneralSettings): void {
     settings = s;
 
+    log.transports.file.level = settings.risingSystemLogLevel;
+    log.transports.console.level = settings.risingSystemLogLevel;
+
     // spellchecker.setDictionary(s.spellcheckLang, dictDir);
     // for(const word of s.customDictionary) spellchecker.add(word);
 }
@@ -200,6 +204,9 @@ electron.ipcRenderer.on('settings', (_: Event, s: GeneralSettings) => onSettings
 
 const params = <{[key: string]: string | undefined}>qs.parse(window.location.search.substr(1));
 let settings = <GeneralSettings>JSON.parse(params['settings']!);
+
+// console.log('SETTINGS', settings);
+
 if(params['import'] !== undefined)
     try {
         if(SlimcatImporter.canImportGeneral() && confirm(l('importer.importGeneral'))) {
@@ -212,7 +219,7 @@ if(params['import'] !== undefined)
 onSettings(settings);
 
 const connection = new Connection(`F-Chat 3.0 (${process.platform})`, electron.remote.app.getVersion(), Socket);
-initCore(connection, Logs, SettingsStore, Notifications);
+initCore(connection, settings, Logs, SettingsStore, Notifications);
 
 //tslint:disable-next-line:no-unused-expression
 new Index({

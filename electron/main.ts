@@ -134,7 +134,11 @@ async function toggleDictionary(lang: string): Promise<void> {
 function setGeneralSettings(value: GeneralSettings): void {
     fs.writeFileSync(path.join(settingsDir, 'settings'), JSON.stringify(value));
     for(const w of electron.webContents.getAllWebContents()) w.send('settings', settings);
+
     shouldImportSettings = false;
+
+    log.transports.file.level = settings.risingSystemLogLevel;
+    log.transports.console.level = settings.risingSystemLogLevel;
 }
 
 async function addSpellcheckerItems(menu: Electron.Menu): Promise<void> {
@@ -380,6 +384,12 @@ function onReady(): void {
         settings.theme = theme;
         setGeneralSettings(settings);
     };
+
+    const setSystemLogLevel = (logLevel: log.LevelOption) => {
+        settings.risingSystemLogLevel = logLevel;
+        setGeneralSettings(settings);
+    };
+
     electron.Menu.setApplicationMenu(electron.Menu.buildFromTemplate([
         {
             label: `&${l('title')}`,
@@ -442,18 +452,40 @@ function onReady(): void {
                         settings.hwAcceleration = item.checked;
                         setGeneralSettings(settings);
                     }
-                }, {
-                    label: l('settings.beta'), type: 'checkbox', checked: settings.beta,
-                    click: async(item: Electron.MenuItem) => {
-                        settings.beta = item.checked;
-                        setGeneralSettings(settings);
-                        // electron.autoUpdater.setFeedURL({url: updaterUrl + (item.checked ? '?channel=beta' : ''), serverType: 'json'});
-                        // return electron.autoUpdater.checkForUpdates();
-                    }
-                }, {
+                },
+
+                // {
+                //     label: l('settings.beta'), type: 'checkbox', checked: settings.beta,
+                //     click: async(item: Electron.MenuItem) => {
+                //         settings.beta = item.checked;
+                //         setGeneralSettings(settings);
+                //         // electron.autoUpdater.setFeedURL({url: updaterUrl+(item.checked ? '?channel=beta' : ''), serverType: 'json'});
+                //         // return electron.autoUpdater.checkForUpdates();
+                //     }
+                // },
+                {
                     label: l('fixLogs.action'),
                     click: (_m, window: BrowserWindow) => window.webContents.send('fix-logs')
                 },
+
+                {type: 'separator'},
+                {
+                    label: 'Rising',
+                    submenu: [
+                        {
+                            label: 'System log level',
+                            submenu: ['error', 'warn', 'info', 'verbose', 'debug', 'silly'].map((level: string) => (
+                                {
+                                    checked: settings.risingSystemLogLevel === level,
+                                    label: `${level.substr(0, 1).toUpperCase()}${level.substr(1)}`,
+                                    click: () => setSystemLogLevel(level as log.LevelOption),
+                                    type: <'radio'>'radio'
+                                }
+                            ))
+                        }
+                    ]
+                },
+
                 {type: 'separator'},
                 {role: 'minimize'},
                 {

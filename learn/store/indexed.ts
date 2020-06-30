@@ -1,9 +1,12 @@
+import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 import * as _ from 'lodash';
 
 import {Character as ComplexCharacter, CharacterGroup, Guestbook} from '../../site/character_page/interfaces';
 import { CharacterAnalysis } from '../matcher';
 import { PermanentIndexedStore, ProfileRecord } from './sql-store';
 import { CharacterImage, SimpleCharacter } from '../../interfaces';
+
+import Bluebird from 'bluebird';
 
 
 async function promisifyRequest<T>(req: IDBRequest): Promise<T> {
@@ -19,6 +22,7 @@ export class IndexedStore implements PermanentIndexedStore {
     protected db: IDBDatabase;
 
     protected static readonly STORE_NAME = 'profiles';
+    protected static readonly LAST_FETCHED_INDEX_NAME = 'idxLastFetched';
 
     constructor(db: IDBDatabase, dbName: string) {
         this.dbName = dbName;
@@ -26,12 +30,27 @@ export class IndexedStore implements PermanentIndexedStore {
     }
 
     static async open(dbName: string = 'flist-ascending-profiles'): Promise<IndexedStore> {
-        const request = window.indexedDB.open(dbName, 1);
+        const request = window.indexedDB.open(dbName, 2);
 
-        request.onupgradeneeded = () => {
+        request.onupgradeneeded = (event) => {
             const db = request.result;
 
-            db.createObjectStore(IndexedStore.STORE_NAME, { keyPath: 'id' });
+            if (event.oldVersion < 1) {
+                db.createObjectStore(IndexedStore.STORE_NAME, { keyPath: 'id' });
+            }
+
+            if (event.oldVersion < 2) {
+                const store = request.transaction!.objectStore(IndexedStore.STORE_NAME);
+
+                store.createIndex(
+                    IndexedStore.LAST_FETCHED_INDEX_NAME,
+                    'lastFetched',
+                  {
+                      unique: false,
+                      multiEntry: false
+                  }
+                );
+            }
         };
 
         return new IndexedStore(await promisifyRequest<IDBDatabase>(request), dbName);
@@ -189,6 +208,29 @@ export class IndexedStore implements PermanentIndexedStore {
 
     async stop(): Promise<void> {
         // empty
+    }
+
+
+    async flushProfiles(daysToExpire: number): Promise<void> {
+        const tx = this.db.transaction(IndexedStore.STORE_NAME, 'readwrite');
+        const store = tx.objectStore(IndexedStore.STORE_NAME);
+        const idx = store.index(IndexedStore.LAST_FETCHED_INDEX_NAME);
+
+        const totalRecords = await promisifyRequest<number>(store.count());
+
+        const expirationTime = Math.round(Date.now() / 1000) - (daysToExpire * 24 * 60 * 60);
+        const getAllKeysRequest = idx.getAllKeys(IDBKeyRange.upperBound(expirationTime));
+        const result = await promisifyRequest<IDBValidKey[]>(getAllKeysRequest);
+
+        log.info('character.cache.expire', {daysToExpire, totalRecords, removableRecords: result.length});
+
+        await Bluebird.mapSeries(
+            result,
+            async(pk: IDBValidKey) => {
+                log.silly('character.cache.expire.name', { name: pk });
+                await promisifyRequest(store.delete(pk));
+            }
+        );
     }
 }
 

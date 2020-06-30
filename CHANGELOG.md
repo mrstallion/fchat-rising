@@ -1,10 +1,11 @@
 # Changelog
 
 ## Canary
-*   Fixed caching issue that causes cache misses on charater page metadata
-*   Fixed ad posting issue that sometimes disconnects characters if multiple characters are in use
+*   Fixed a caching issue that caused cache misses on character page metadata
+*   Fixed rate limit issues that sometimes disconnected characters when multiple characters were connected
 *   URL preview fixes for Redgifs, Gelbooru, Tumblr, and Gifmixxx
 *   All dependencies are now up to date
+*   F-Chat Rising now flushes character profiles out of its cache after 30 days
 
 
 ## 1.0.1

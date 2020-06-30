@@ -16,6 +16,7 @@ import Message = Conversation.Message;
 import { Character } from '../fchat/interfaces';
 import Bluebird from 'bluebird';
 import ChatMessage = Conversation.ChatMessage;
+import { GeneralSettings } from '../electron/common';
 
 
 export interface ProfileCacheQueueEntry {
@@ -170,12 +171,14 @@ export class CacheManager {
     }
 
 
-    async start(): Promise<void> {
+    async start(settings: GeneralSettings): Promise<void> {
         await this.stop();
 
         this.profileStore = await IndexedStore.open();
 
         this.profileCache.setStore(this.profileStore);
+
+        await this.profileStore.flushProfiles(settings.risingCacheExpiryDays);
 
         EventBus.$on(
             'character-data',

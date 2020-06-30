@@ -48,6 +48,8 @@ export interface PermanentIndexedStore {
         groups: CharacterGroup[] | null
     ): Promise<void>;
 
+    flushProfiles(daysToExpire: number): Promise<void>;
+
     start(): Promise<void>;
     stop(): Promise<void>;
 }

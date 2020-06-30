@@ -1,6 +1,8 @@
 import * as electron from 'electron';
 import * as path from 'path';
 
+import log from 'electron-log'; //tslint:disable-line:match-default-export-name
+
 export const defaultHost = 'wss://chat.f-list.net/chat2';
 
 export class GeneralSettings {
@@ -15,6 +17,8 @@ export class GeneralSettings {
     beta = false;
     customDictionary: string[] = [];
     hwAcceleration = true;
+    risingCacheExpiryDays = 45;
+    risingSystemLogLevel: log.LevelOption = 'info';
 }
 
 //tslint:disable

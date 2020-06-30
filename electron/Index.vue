@@ -3,8 +3,16 @@
         <div v-html="styling"></div>
         <div v-if="!characters" style="display:flex; align-items:center; justify-content:center; height: 100%;">
             <div class="card bg-light" style="width: 400px;">
+                <div class="initializer" v-show="showSpinner">
+                    <div class="title">
+                        Getting ready, please wait...
+                    </div>
+                    <i class="fas fa-circle-notch fa-spin search-spinner"></i>
+                </div>
+
                 <h3 class="card-header" style="margin-top:0;display:flex">
                     {{l('title')}}
+
                     <a href="#" @click.prevent="showLogs()" class="btn" style="flex:1;text-align:right">
                         <span class="fa fa-file-alt"></span> <span class="btn-text">{{l('logs.title')}}</span>
                     </a>
@@ -92,7 +100,7 @@
     import Vue from 'vue';
     import Chat from '../chat/Chat.vue';
     import {getKey, Settings} from '../chat/common';
-    import core from '../chat/core';
+    import core /*, { init as initCore }*/ from '../chat/core';
     import l from '../chat/localize';
     import Logs from '../chat/Logs.vue';
     import Socket from '../chat/WebSocket';
@@ -103,8 +111,10 @@
 //     import { Sqlite3Store } from '../learn/store/sqlite3';
     import CharacterPage from '../site/character_page/character_page.vue';
     import {defaultHost, GeneralSettings, nativeRequire} from './common';
-    import {fixLogs} from './filesystem';
+    import { fixLogs /*SettingsStore, Logs as FSLogs*/ } from './filesystem';
     import * as SlimcatImporter from './importer';
+    // import Connection from '../fchat/connection';
+    // import Notifications from './notifications';
 
     const webContents = electron.remote.getCurrentWebContents();
     const parent = electron.remote.getCurrentWindow().webContents;
@@ -163,8 +173,17 @@
         fixCharacters: ReadonlyArray<string> = [];
         fixCharacter = '';
 
+        showSpinner = true;
+
+
         @Hook('created')
-        created(): void {
+        async created(): Promise<void> {
+            // tslint:disable-next-line no-floating-promises
+            await core.cache.start(this.settings);
+
+            // await this.prepper;
+            this.showSpinner = false;
+
             if(this.settings.account.length > 0) this.saveLogin = true;
             keyStore.getPassword(this.settings.account)
                 .then((value: string) => this.password = value, (err: Error) => this.error = err.message);
@@ -347,7 +366,7 @@
     }
 </script>
 
-<style>
+<style lang="scss">
     html, body, #page {
         height: 100%;
     }
@@ -361,5 +380,38 @@
     .profileRefreshSpinner {
         font-size: 12pt;
         opacity: 0.5;
+    }
+
+
+    .initializer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.25s;
+        backdrop-filter: blur(3px) grayscale(35%);
+
+        i {
+            font-size: 130pt;
+            top: 50%;
+            right: 50%;
+            transform: translate(-50%, -50%);
+            width: fit-content;
+        }
+
+        .title {
+            position: absolute;
+            top: 0;
+            background: rgba(19, 19, 19, 0.6);
+            width: 100%;
+            text-align: center;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            font-weight: bold;
+        }
     }
 </style>

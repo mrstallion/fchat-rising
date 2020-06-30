@@ -45,6 +45,7 @@
     import l from '../chat/localize';
     import {GeneralSettings} from './common';
     import { getSafeLanguages, updateSupportedLanguages } from './language';
+    import log from 'electron-log'; // tslint:disable-line: match-default-export-name
 
     const browserWindow = electron.remote.getCurrentWindow();
 
@@ -97,7 +98,13 @@
 
             await this.addTab();
 
-            electron.ipcRenderer.on('settings', (_e: Event, settings: GeneralSettings) => this.settings = settings);
+            electron.ipcRenderer.on('settings', (_e: Event, settings: GeneralSettings) => {
+                this.settings = settings;
+
+                log.transports.file.level = settings.risingSystemLogLevel;
+                log.transports.console.level = settings.risingSystemLogLevel;
+            });
+
             electron.ipcRenderer.on('allow-new-tabs', (_e: Event, allow: boolean) => this.canOpenTab = allow);
             electron.ipcRenderer.on('open-tab', () => this.addTab());
             electron.ipcRenderer.on('update-available', (_e: Event, available: boolean) => this.hasUpdate = available);
