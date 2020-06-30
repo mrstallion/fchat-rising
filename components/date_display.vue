@@ -21,7 +21,7 @@
             if(this.time === null || this.time === 0)
                 return;
             const date = isNaN(+this.time) ? new Date(`${this.time}+00:00`) : new Date(+this.time * 1000);
-            const absolute = format(date, 'yyyy-MM-DD HH:mm');
+            const absolute = format(date, 'yyyy-MM-dd HH:mm');
             const relative = formatDistanceToNow(date, {addSuffix: true});
             if(settings.fuzzyDates) {
                 this.primary = relative;
