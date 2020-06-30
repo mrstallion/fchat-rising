@@ -124,16 +124,14 @@ import {InlineDisplayMode} from '../interfaces';
                 }
             });
             core.connection.onEvent('closed', (isReconnect) => {
-                if(process.env.NODE_ENV !== 'production') {
-                    log.debug(
-                      'connection.closed',
-                      {
-                        character: core.characters.ownCharacter?.name,
-                        error: this.error,
-                        isReconnect
-                      }
-                    );
-                }
+                log.debug(
+                  'connection.closed',
+                  {
+                    character: core.characters.ownCharacter?.name,
+                    error: this.error,
+                    isReconnect
+                  }
+                );
 
                 if(isReconnect) (<Modal>this.$refs['reconnecting']).show(true);
                 if(this.connected) core.notifications.playSound('logout');
@@ -148,14 +146,12 @@ import {InlineDisplayMode} from '../interfaces';
             core.connection.onEvent('connecting', async() => {
                 this.connecting = true;
 
-                if(process.env.NODE_ENV !== 'production') {
-                    log.debug(
-                      'connection.connecting',
-                      {
-                        character: core.characters.ownCharacter?.name
-                      }
-                    );
-                }
+                log.debug(
+                  'connection.connecting',
+                  {
+                    character: core.characters.ownCharacter?.name
+                  }
+                );
 
                 profileApiInit({
                     defaultCharacter: this.defaultCharacter, animateEicons: core.state.settings.animatedEicons, fuzzyDates: true,
@@ -164,14 +160,12 @@ import {InlineDisplayMode} from '../interfaces';
                 if(core.state.settings.notifications) await core.notifications.requestPermission();
             });
             core.connection.onEvent('connected', () => {
-                if(process.env.NODE_ENV !== 'production') {
-                    log.debug(
-                      'connection.connected',
-                      {
-                        character: core.characters.ownCharacter?.name
-                      }
-                    );
-                }
+                log.debug(
+                  'connection.connected',
+                  {
+                    character: core.characters.ownCharacter?.name
+                  }
+                );
 
                 (<Modal>this.$refs['reconnecting']).hide();
                 this.error = '';
@@ -184,15 +178,13 @@ import {InlineDisplayMode} from '../interfaces';
                 document.title = (hasNew ? '💬 ' : '') + l(core.connection.isOpen ? 'title.connected' : 'title', core.connection.character);
             });
             core.connection.onError((e) => {
-                if(process.env.NODE_ENV !== 'production') {
-                    log.debug(
-                      'connection.error',
-                      {
-                        error: errorToString(e),
-                        character: core.characters.ownCharacter?.name
-                      }
-                    );
-                }
+                log.debug(
+                  'connection.error',
+                  {
+                    error: errorToString(e),
+                    character: core.characters.ownCharacter?.name
+                  }
+                );
 
                 if((<Error & {request?: object}>e).request !== undefined) {//catch axios network errors
                     this.error = l('login.connectError', errorToString(e));

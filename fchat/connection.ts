@@ -4,6 +4,7 @@ import {Connection as Interfaces, WebSocketConnection} from './interfaces';
 import ReadyState = WebSocketConnection.ReadyState;
 import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 import core from '../chat/core';
+import throat from 'throat';
 
 const fatalErrors = [2, 3, 4, 9, 30, 31, 33, 39, 40, 62, -4];
 const dieErrors = [9, 30, 31, 39, 40];
@@ -11,12 +12,12 @@ const dieErrors = [9, 30, 31, 39, 40];
 let lastFetch = Date.now();
 let lastApiTicketFetch = Date.now();
 
+const queryApiThroat = throat(2);
+const queryTicketThroat = throat(1);
+
 
 async function queryApi(this: void, endpoint: string, data: object): Promise<AxiosResponse> {
-    if (false) {
-        console.log(`https://www.f-list.net/json/api/${endpoint}, gap: ${Date.now() - lastFetch}ms`);
-        lastFetch = Date.now();
-    }
+    lastFetch = Date.now();
 
     return Axios.post(`https://www.f-list.net/json/api/${endpoint}`, qs.stringify(data));
 }
@@ -115,12 +116,58 @@ export default class Connection implements Interfaces.Connection {
         if(!keepState) this.character = '';
     }
 
+
     get isOpen(): boolean {
         return this.socket !== undefined && this.socket.readyState === ReadyState.OPEN;
     }
 
+
     async queryApi<T = object>(endpoint: string, data?: {account?: string, ticket?: string}): Promise<T> {
+        return queryApiThroat(async() => this.queryApiExec<T>(endpoint, data));
+    }
+
+
+    protected async refreshTicket(oldTicket: string): Promise<string> {
+        if (this.ticket !== oldTicket) {
+            log.debug(
+              'api.ticket.renew.resolve.cache',
+              {
+                character: core.characters.ownCharacter?.name
+              }
+            );
+
+            return this.ticket;
+        }
+
+        if (!this.ticketProvider) {
+            throw new Error('No credentials set!');
+        }
+
+        this.ticket = await queryTicketThroat(async() => this.ticketProvider!());
+
+        log.debug(
+          'api.ticket.renew.resolve.refresh',
+          {
+            character: core.characters.ownCharacter?.name
+          }
+        );
+
+        return this.ticket;
+    }
+
+
+    protected async queryApiExec<T = object>(endpoint: string, data?: {account?: string, ticket?: string}): Promise<T> {
         if(!this.ticketProvider) throw new Error('No credentials set!');
+
+        log.debug(
+          'api.query.start',
+          {
+            endpoint,
+            character: core.characters.ownCharacter?.name,
+            deltaToLastApiCall: Date.now() - lastFetch,
+            deltaToLastApiTicket: Date.now() - lastApiTicketFetch
+          }
+        );
 
         if(data === undefined) data = {};
 
@@ -140,13 +187,13 @@ export default class Connection implements Interfaces.Connection {
               }
             );
 
-            data.ticket = this.ticket = await this.ticketProvider();
+            data.ticket = await this.refreshTicket(data.ticket);
             res = <T & {error: string}>(await queryApi(endpoint, data)).data;
         }
 
         if(res.error !== '') {
             log.debug(
-              'error.api.query',
+              'api.query.error',
               {
                 error: res.error,
                 endpoint,
@@ -160,6 +207,17 @@ export default class Connection implements Interfaces.Connection {
             (<Error & {request: true}>error).request = true;
             throw error;
         }
+
+        log.debug(
+          'api.query.success',
+          {
+            endpoint,
+            character: core.characters.ownCharacter?.name,
+            deltaToLastApiCall: Date.now() - lastFetch,
+            deltaToLastApiTicket: Date.now() - lastApiTicketFetch
+          }
+        );
+
         return res;
     }
 
@@ -232,42 +290,47 @@ export default class Connection implements Interfaces.Connection {
 
     private async getTicket(password: string): Promise<string> {
         console.log('Acquiring new API ticket');
+        const oldLastApiTicketFetch = lastApiTicketFetch;
 
-        if(process.env.NODE_ENV !== 'production') {
-            console.log(`https://www.f-list.net/json/getApiTicket.php, gap: ${Date.now() - lastApiTicketFetch}ms`);
+        log.debug(
+          'api.getTicket.start',
+          {
+            character: core.characters.ownCharacter?.name,
+            deltaToLastApiCall: Date.now() - lastFetch,
+            deltaToLastApiTicket: Date.now() - oldLastApiTicketFetch
+          }
+        );
 
-            log.debug(
-              'api.getTicket',
-              {
-                character: core.characters.ownCharacter?.name,
-                deltaToLastApiCall: Date.now() - lastFetch,
-                deltaToLastApiTicket: Date.now() - lastApiTicketFetch
-              }
-            );
-
-            lastApiTicketFetch = Date.now();
-        }
+        lastApiTicketFetch = Date.now();
 
         const data = <{ticket?: string, error: string}>(await Axios.post('https://www.f-list.net/json/getApiTicket.php', qs.stringify(
             {account: this.account, password, no_friends: true, no_bookmarks: true, no_characters: true}))).data;
 
-        if(data.ticket !== undefined) return data.ticket;
-
-        if(process.env.NODE_ENV !== 'production') {
-            console.error('API Ticket Error', data.error);
-
-            log.error(
-              'error.api.getTicket',
+        if(data.ticket !== undefined) {
+            log.debug(
+              'api.getTicket.success',
               {
-                character: core.characters.ownCharacter.name,
-                error: data.error,
+                character: core.characters.ownCharacter?.name,
                 deltaToLastApiCall: Date.now() - lastFetch,
-                deltaToLastApiTicket: Date.now() - lastApiTicketFetch
+                deltaToLastApiTicket: Date.now() - oldLastApiTicketFetch
               }
             );
 
-            lastApiTicketFetch = Date.now();
+            return data.ticket;
         }
+
+
+        console.error('API Ticket Error', data.error);
+
+        log.error(
+          'error.api.getTicket',
+          {
+            character: core.characters.ownCharacter.name,
+            error: data.error,
+            deltaToLastApiCall: Date.now() - lastFetch,
+            deltaToLastApiTicket: Date.now() - oldLastApiTicketFetch
+          }
+        );
 
         throw new Error(data.error);
     }

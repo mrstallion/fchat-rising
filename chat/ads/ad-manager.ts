@@ -69,19 +69,17 @@ export class AdManager {
 
                 const delayTime = Date.now();
 
-                if (process.env.NODE_ENV !== 'production') {
-                    log.debug(
-                      'adManager.sendAdToChannel',
-                      {
-                        character: core.characters.ownCharacter?.name,
-                        channel: conv.channel.name,
-                        throatDelta: throatTime - initTime,
-                        delayDelta: delayTime - throatTime,
-                        totalWait: delayTime - initTime,
-                        msg
-                      }
-                    );
-                }
+                log.debug(
+                  'adManager.sendAdToChannel',
+                  {
+                    character: core.characters.ownCharacter?.name,
+                    channel: conv.channel.name,
+                    throatDelta: throatTime - initTime,
+                    delayDelta: delayTime - throatTime,
+                    totalWait: delayTime - initTime,
+                    msg
+                  }
+                );
 
                 await conv.sendAd(msg);
             }

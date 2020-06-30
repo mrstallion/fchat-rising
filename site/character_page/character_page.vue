@@ -295,10 +295,14 @@
 
 
         async updateMeta(name: string): Promise<void> {
-            await this.updateImages();
-            await this.updateGuestbook();
-            await this.updateFriends();
-            await this.updateGroups();
+            await Promise.all(
+                [
+                    this.updateImages(),
+                    this.updateGuestbook(),
+                    this.updateFriends(),
+                    this.updateGroups()
+                ]
+            );
 
             await core.cache.profileCache.registerMeta(
                 name,

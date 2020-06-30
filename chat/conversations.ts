@@ -415,19 +415,17 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
                 core.connection.send('LRP', {channel: this.channel.id, message: text});
                 core.cache.markLastPostTime();
 
-                if (process.env.NODE_ENV !== 'production') {
-                    log.debug(
-                    'conversation.sendAd',
-                      {
-                        character: core.characters.ownCharacter?.name,
-                        channel: this.channel.name,
-                        throatDelta: throatTime - initTime,
-                        delayDelta: delayTime - throatTime,
-                        totalWait: delayTime - initTime,
-                        text
-                      }
-                    );
-                }
+                log.debug(
+                'conversation.sendAd',
+                  {
+                    character: core.characters.ownCharacter?.name,
+                    channel: this.channel.name,
+                    throatDelta: throatTime - initTime,
+                    delayDelta: delayTime - throatTime,
+                    totalWait: delayTime - initTime,
+                    text
+                  }
+                );
 
                 await this.addMessage(
                     createMessage(MessageType.Ad, core.characters.ownCharacter, text, new Date())

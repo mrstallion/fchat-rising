@@ -3,9 +3,15 @@ import { ipcRenderer, IpcRendererEvent } from 'electron';
 import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 import core from '../core';
 
+interface PendingAd {
+    resolve(): void,
+    reject(err: Error): void,
+    from: number;
+}
+
 
 export class AdCoordinatorGuest {
-    protected pendingAds: Record<string, any> = {};
+    protected pendingAds: Record<string, PendingAd> = {};
     protected adCounter = 0;
 
     constructor() {
@@ -26,7 +32,7 @@ export class AdCoordinatorGuest {
     }
 
 
-    requestTurnToPostAd(): Promise<void> {
+    async requestTurnToPostAd(): Promise<void> {
         return new Promise(
           (resolve, reject) => {
             const adId = `${Math.round(Math.random() * 1000000)}-${this.adCounter++}-${Date.now()}`;
@@ -42,7 +48,7 @@ export class AdCoordinatorGuest {
 
 
     clear(): void {
-      _.each(this.pendingAds, (pa) => (pa.reject()));
+      _.each(this.pendingAds, (pa) => (pa.reject(new Error('Pending ad cleared'))));
 
       console.debug('adid.clear', _.keys(this.pendingAds), core.characters.ownCharacter?.name);
 
