@@ -511,7 +511,7 @@ export class Matcher {
             return new Score(Scoring.MISMATCH, `No <span>${description}</span>`);
 
         if (score === KinkPreference.Maybe)
-            return new Score(Scoring.WEAK_MISMATCH, `Hesitant on <span>${description}</span>`);
+            return new Score(Scoring.WEAK_MISMATCH, `Hesitant about <span>${description}</span>`);
 
         if (score === KinkPreference.Yes)
             return new Score(Scoring.WEAK_MATCH, `Likes <span>${description}</span>`);
@@ -565,7 +565,7 @@ export class Matcher {
                 break;
 
             case Scoring.WEAK_MISMATCH:
-                type = 'Hesitant on';
+                type = 'Hesitant about';
                 break;
 
             case Scoring.WEAK_MATCH:
@@ -716,7 +716,7 @@ export class Matcher {
             if ((yourSubDomRole === SubDomRole.AlwaysDominant) && (theirSubDomRole === SubDomRole.AlwaysDominant))
                 return new Score(Scoring.MISMATCH, 'No <span>dominants</span>');
 
-            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant on <span>dominants</span>');
+            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant about <span>dominants</span>');
         }
 
         if ((yourSubDomRole === SubDomRole.AlwaysSubmissive) || (yourSubDomRole === SubDomRole.UsuallySubmissive)) {
@@ -735,7 +735,7 @@ export class Matcher {
             if ((yourSubDomRole === SubDomRole.AlwaysSubmissive) && (theirSubDomRole === SubDomRole.AlwaysSubmissive))
                 return new Score(Scoring.MISMATCH, 'No <span>submissives</span>');
 
-            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant on <span>submissives</span>');
+            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant about <span>submissives</span>');
         }
 
         // You must be a switch
