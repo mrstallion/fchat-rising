@@ -296,10 +296,12 @@ function showPatchNotes(): void {
 
 
 function onReady(): void {
-    log.transports.file.level = 'debug';
-    log.transports.console.level = 'debug';
+    const logLevel = (process.env.NODE_ENV === 'production') ? 'info' : 'silly';
+
+    log.transports.file.level = logLevel;
+    log.transports.console.level = logLevel;
     log.transports.file.maxSize = 5 * 1024 * 1024;
-    log.transports.file.file = path.join(baseDir, 'log.txt');
+
     log.info('Starting application.');
 
     app.setAppUserModelId('com.squirrel.fchat.F-Chat');

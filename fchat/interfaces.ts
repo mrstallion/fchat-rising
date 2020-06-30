@@ -245,7 +245,7 @@ export interface WebSocketConnection {
     close(): void
     onMessage(handler: (message: string) => Promise<void>): void
     onOpen(handler: () => void): void
-    onClose(handler: () => void): void
+    onClose(handler: (e: CloseEvent) => void): void
     onError(handler: (error: Error) => void): void
     send(message: string): void
     readyState: WebSocketConnection.ReadyState

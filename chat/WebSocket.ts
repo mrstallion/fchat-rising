@@ -30,7 +30,7 @@ export default class Socket implements WebSocketConnection {
         this.socket.addEventListener('open', handler);
     }
 
-    onClose(handler: () => void): void {
+    onClose(handler: (e: CloseEvent) => void): void {
         this.socket.addEventListener('close', handler);
     }
 

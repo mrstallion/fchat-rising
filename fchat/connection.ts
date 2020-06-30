@@ -94,7 +94,14 @@ export default class Connection implements Interfaces.Connection {
             const data = msg.length > 6 ? <object>JSON.parse(msg.substr(4)) : undefined;
             return this.handleMessage(type, data);
         });
-        this.socket.onClose(async() => {
+        this.socket.onClose(async(event: CloseEvent) => {
+            log.debug(
+                'socket.onclose',
+              {
+                event
+              }
+            );
+
             if(this.pinTimeout) clearTimeout(this.pinTimeout);
             if(!this.cleanClose) this.reconnect();
             this.socket = undefined;
