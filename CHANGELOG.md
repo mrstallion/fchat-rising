@@ -3,9 +3,11 @@
 ## Canary
 *   Fixed a caching issue that caused cache misses on character page metadata
 *   Fixed rate limit issues that sometimes disconnected characters when multiple characters were connected
+*   Fixed a bug in age matching
 *   URL preview fixes for Redgifs, Gelbooru, Tumblr, and Gifmixxx
 *   All dependencies are now up to date
 *   F-Chat Rising now flushes character profiles out of its cache after 30 days
+*   Age difference for 'older' and 'younger' character kinks is now 8 years
 
 
 ## 1.0.1
