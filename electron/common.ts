@@ -17,7 +17,7 @@ export class GeneralSettings {
     beta = false;
     customDictionary: string[] = [];
     hwAcceleration = true;
-    risingCacheExpiryDays = 45;
+    risingCacheExpiryDays = 30;
     risingSystemLogLevel: log.LevelOption = 'info';
 }
 
