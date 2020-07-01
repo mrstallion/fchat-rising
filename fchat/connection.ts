@@ -106,6 +106,9 @@ export default class Connection implements Interfaces.Connection {
             log.debug(
                 'socket.onclose',
               {
+                code: event.code,
+                reason: event.reason,
+                wasClean: event.wasClean,
                 event
               }
             );
