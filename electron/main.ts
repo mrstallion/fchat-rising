@@ -302,8 +302,8 @@ function showPatchNotes(): void {
 function onReady(): void {
     const logLevel = (process.env.NODE_ENV === 'production') ? 'info' : 'silly';
 
-    log.transports.file.level = logLevel;
-    log.transports.console.level = logLevel;
+    log.transports.file.level = settings.risingSystemLogLevel || logLevel;
+    log.transports.console.level = settings.risingSystemLogLevel || logLevel;
     log.transports.file.maxSize = 5 * 1024 * 1024;
 
     log.info('Starting application.');
