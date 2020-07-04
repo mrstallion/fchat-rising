@@ -3,9 +3,10 @@
         <div v-html="styling"></div>
         <div v-if="!characters" style="display:flex; align-items:center; justify-content:center; height: 100%;">
             <div class="card bg-light" style="width: 400px;">
-                <div class="initializer" v-show="showSpinner">
+                <div class="initializer" :class="{visible: !hasCompletedUpgrades, complete: hasCompletedUpgrades, shouldShow: shouldShowSpinner}">
                     <div class="title">
                         Getting ready, please wait...
+                        <small>You should only experience this delay once per software update</small>
                     </div>
                     <i class="fas fa-circle-notch fa-spin search-spinner"></i>
                 </div>
@@ -113,6 +114,7 @@
     import {defaultHost, GeneralSettings, nativeRequire} from './common';
     import { fixLogs /*SettingsStore, Logs as FSLogs*/ } from './filesystem';
     import * as SlimcatImporter from './importer';
+    import Bluebird from 'bluebird';
     // import Connection from '../fchat/connection';
     // import Notifications from './notifications';
 
@@ -167,22 +169,40 @@
         defaultCharacter?: number;
         l = l;
         settings!: GeneralSettings;
+        hasCompletedUpgrades!: boolean;
         importProgress = 0;
         profileName = '';
         adName = '';
         fixCharacters: ReadonlyArray<string> = [];
         fixCharacter = '';
 
-        showSpinner = true;
+        shouldShowSpinner = false;
+
+
+        async startAndUpgradeCache(): Promise<void> {
+            const timer = setTimeout(
+              () => {
+                this.shouldShowSpinner = true;
+              },
+              250
+            );
+
+            // tslint:disable-next-line no-floating-promises
+            await core.cache.start(this.settings, this.hasCompletedUpgrades);
+
+            await Bluebird.delay(1000);
+
+            clearTimeout(timer);
+
+            parent.send('rising-upgrade-complete');
+
+            this.hasCompletedUpgrades = true;
+        }
 
 
         @Hook('created')
         async created(): Promise<void> {
-            // tslint:disable-next-line no-floating-promises
-            await core.cache.start(this.settings);
-
-            // await this.prepper;
-            this.showSpinner = false;
+            await this.startAndUpgradeCache();
 
             if(this.settings.account.length > 0) this.saveLogin = true;
             keyStore.getPassword(this.settings.account)
@@ -384,7 +404,7 @@
 
 
     .initializer {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         right: 0;
@@ -392,8 +412,20 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.25s;
+        opacity: 0;
         backdrop-filter: blur(3px) grayscale(35%);
+
+        &.shouldShow {
+            transition: all 0.25s;
+
+            &.visible {
+                opacity: 1;
+            }
+        }
+
+        &.complete {
+            pointer-events: none !important;
+        }
 
         i {
             font-size: 130pt;
@@ -406,12 +438,17 @@
         .title {
             position: absolute;
             top: 0;
-            background: rgba(19, 19, 19, 0.6);
+            background: rgba(147, 255, 215, 0.6);
             width: 100%;
             text-align: center;
             padding-top: 20px;
             padding-bottom: 20px;
             font-weight: bold;
+
+            small {
+                display: block;
+                opacity: 0.8;
+            }
         }
     }
 </style>

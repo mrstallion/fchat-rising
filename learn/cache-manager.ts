@@ -171,14 +171,16 @@ export class CacheManager {
     }
 
 
-    async start(settings: GeneralSettings): Promise<void> {
+    async start(settings: GeneralSettings, skipFlush: boolean): Promise<void> {
         await this.stop();
 
         this.profileStore = await IndexedStore.open();
 
         this.profileCache.setStore(this.profileStore);
 
-        await this.profileStore.flushProfiles(settings.risingCacheExpiryDays);
+        if (!skipFlush) {
+          await this.profileStore.flushProfiles(settings.risingCacheExpiryDays);
+        }
 
         EventBus.$on(
             'character-data',

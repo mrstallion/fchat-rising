@@ -224,5 +224,8 @@ initCore(connection, settings, Logs, SettingsStore, Notifications);
 //tslint:disable-next-line:no-unused-expression
 new Index({
     el: '#app',
-    data: {settings}
+    data: {
+        settings,
+        hasCompletedUpgrades: JSON.parse(params['hasCompletedUpgrades']!)
+    }
 });

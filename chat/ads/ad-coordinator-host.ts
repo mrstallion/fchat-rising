@@ -10,7 +10,7 @@ export class AdCoordinatorHost {
   static readonly MIN_DISTANCE = 5000;
   private lastPost = Date.now();
 
-  async processAdRequest(event: IpcMainEvent, adId: string) {
+  async processAdRequest(event: IpcMainEvent, adId: string): Promise<void> {
     await adCoordinatorThroat(
       async() => {
         const sinceLastPost = Date.now() - this.lastPost;

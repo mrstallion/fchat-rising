@@ -385,8 +385,8 @@ function onReady(): void {
         setGeneralSettings(settings);
     };
 
-    const setSystemLogLevel = (logLevel: log.LevelOption) => {
-        settings.risingSystemLogLevel = logLevel;
+    const setSystemLogLevel = (logLevell: log.LevelOption) => {
+        settings.risingSystemLogLevel = logLevell;
         setGeneralSettings(settings);
     };
 
@@ -594,6 +594,11 @@ function onReady(): void {
         const window = electron.BrowserWindow.fromWebContents(e.sender) as BrowserWindow | undefined;
         if(window !== undefined) window.setOverlayIcon(hasNew ? badge : emptyBadge, hasNew ? 'New messages' : '');
     });
+
+    electron.ipcMain.on('rising-upgrade-complete', () => {
+        for(const w of electron.webContents.getAllWebContents()) w.send('rising-upgrade-complete');
+    });
+
     createWindow();
 }
 

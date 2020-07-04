@@ -1,5 +1,5 @@
 <template>
-    <div style="display:flex;flex-direction:column;height:100%" :class="'platform-' + platform" @auxclick.prevent>
+    <div style="display: flex;flex-direction:column;height:100%" :class="'platform-' + platform" @auxclick.prevent>
         <div v-html="styling"></div>
         <div style="display:flex;align-items:stretch;border-bottom-width:1px" class="border-bottom" id="window-tabs">
             <h4 style="padding:2px 0">F-Chat</h4>
@@ -17,7 +17,7 @@
                         </a>
                     </a>
                 </li>
-                <li v-show="canOpenTab" class="addTab nav-item" id="addTab">
+                <li v-show="(canOpenTab && hasCompletedUpgrades)" class="addTab nav-item" id="addTab">
                     <a href="#" @click.prevent="addTab()" class="nav-link"><i class="fa fa-plus"></i></a>
                 </li>
             </ul>
@@ -84,6 +84,8 @@
         hasUpdate = false;
         platform = process.platform;
         lockTab = false;
+        hasCompletedUpgrades = false;
+
 
         @Hook('mounted')
         async mounted(): Promise<void> {
@@ -105,6 +107,7 @@
                 log.transports.console.level = settings.risingSystemLogLevel;
             });
 
+            electron.ipcRenderer.on('rising-upgrade-complete', () => { this.hasCompletedUpgrades = true; });
             electron.ipcRenderer.on('allow-new-tabs', (_e: Event, allow: boolean) => this.canOpenTab = allow);
             electron.ipcRenderer.on('open-tab', () => this.addTab());
             electron.ipcRenderer.on('update-available', (_e: Event, available: boolean) => this.hasUpdate = available);
@@ -244,7 +247,7 @@
                 pathname: path.join(__dirname, 'index.html'),
                 protocol: 'file:',
                 slashes: true,
-                query: {settings: JSON.stringify(this.settings)}
+                query: {settings: JSON.stringify(this.settings), hasCompletedUpgrades: JSON.stringify(this.hasCompletedUpgrades)}
             }));
             tab.view.setBounds(getWindowBounds());
             this.lockTab = false;
