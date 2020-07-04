@@ -114,7 +114,7 @@
     import {defaultHost, GeneralSettings, nativeRequire} from './common';
     import { fixLogs /*SettingsStore, Logs as FSLogs*/ } from './filesystem';
     import * as SlimcatImporter from './importer';
-    import Bluebird from 'bluebird';
+    // import Bluebird from 'bluebird';
     // import Connection from '../fchat/connection';
     // import Notifications from './notifications';
 
@@ -189,8 +189,6 @@
 
             // tslint:disable-next-line no-floating-promises
             await core.cache.start(this.settings, this.hasCompletedUpgrades);
-
-            await Bluebird.delay(1000);
 
             clearTimeout(timer);
 
