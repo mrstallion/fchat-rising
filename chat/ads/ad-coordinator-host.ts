@@ -7,7 +7,7 @@ const adCoordinatorThroat = throat(1);
 
 
 export class AdCoordinatorHost {
-  static readonly MIN_DISTANCE = 5000;
+  static readonly MIN_DISTANCE = 7500;
   private lastPost = Date.now();
 
   async processAdRequest(event: IpcMainEvent, adId: string): Promise<void> {
