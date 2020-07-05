@@ -55,6 +55,8 @@ import Index from './Index.vue';
 import log from 'electron-log'; // tslint:disable-line: match-default-export-name
 
 
+log.debug('init.chat');
+
 document.addEventListener('keydown', (e: KeyboardEvent) => {
     if(e.ctrlKey && e.shiftKey && getKey(e) === Keys.KeyI)
         electron.remote.getCurrentWebContents().toggleDevTools();
@@ -218,8 +220,13 @@ if(params['import'] !== undefined)
     }
 onSettings(settings);
 
+
+log.debug('init.chat.core');
+
 const connection = new Connection(`F-Chat 3.0 (${process.platform})`, electron.remote.app.getVersion(), Socket);
 initCore(connection, settings, Logs, SettingsStore, Notifications);
+
+log.debug('init.chat.vue');
 
 //tslint:disable-next-line:no-unused-expression
 new Index({

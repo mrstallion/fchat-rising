@@ -94,7 +94,7 @@ export default class Connection implements Interfaces.Connection {
             const data = msg.length > 6 ? <object>JSON.parse(msg.substr(4)) : undefined;
 
             log.silly(
-              'socket.message',
+              'socket.recv',
               {
                 type, data
               }
@@ -268,8 +268,13 @@ export default class Connection implements Interfaces.Connection {
     }
 
     send<K extends keyof Interfaces.ClientCommands>(command: K, data?: Interfaces.ClientCommands[K]): void {
-        if(this.socket !== undefined && this.socket.readyState === WebSocketConnection.ReadyState.OPEN)
-            this.socket.send(<string>command + (data !== undefined ? ` ${JSON.stringify(data)}` : ''));
+        if(this.socket !== undefined && this.socket.readyState === WebSocketConnection.ReadyState.OPEN) {
+            const msg = <string>command + (data !== undefined ? ` ${JSON.stringify(data)}` : '');
+
+            log.debug('socket.send', { data: msg });
+
+            this.socket.send(msg);
+        }
     }
 
     //tslint:disable:no-unsafe-any no-any
@@ -366,6 +371,13 @@ export default class Connection implements Interfaces.Connection {
 
     private resetPinTimeout(): void {
         if(this.pinTimeout) clearTimeout(this.pinTimeout);
-        this.pinTimeout = setTimeout(() => this.socket!.close(), 90000);
+
+        this.pinTimeout = setTimeout(
+            () => {
+                log.error('pin.timeout');
+                this.socket!.close();
+            },
+            90000
+        );
     }
 }

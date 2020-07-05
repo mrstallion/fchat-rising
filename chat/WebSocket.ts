@@ -1,4 +1,5 @@
 import {WebSocketConnection} from '../fchat';
+import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 
 export default class Socket implements WebSocketConnection {
     static host = 'wss://chat.f-list.net/chat2';
@@ -14,6 +15,7 @@ export default class Socket implements WebSocketConnection {
     }
 
     close(): void {
+        log.debug('socket.close');
         this.socket.close();
     }
 

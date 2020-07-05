@@ -141,7 +141,7 @@
     );
 
 
-    log.info('About to load keytar');
+    log.info('init.chat.keytar.load.start');
 
     /* tslint:disable: no-any no-unsafe-any */ //because this is hacky
 
@@ -153,7 +153,8 @@
     }>('keytar/build/Release/keytar.node');
     for(const key in keyStore) keyStore[key] = promisify(<(...args: any[]) => any>keyStore[key].bind(keyStore, 'fchat'));
     //tslint:enable
-    log.info('Loaded keytar.');
+
+    log.info('init.chat.keytar.load.done');
 
     @Component({
         components: {chat: Chat, modal: Modal, characterPage: CharacterPage, logs: Logs}
@@ -180,6 +181,8 @@
 
 
         async startAndUpgradeCache(): Promise<void> {
+            log.debug('init.chat.cache.start');
+
             const timer = setTimeout(
               () => {
                 this.shouldShowSpinner = true;
@@ -190,11 +193,20 @@
             // tslint:disable-next-line no-floating-promises
             await core.cache.start(this.settings, this.hasCompletedUpgrades);
 
+            log.debug('init.chat.cache.done');
+
             clearTimeout(timer);
 
             parent.send('rising-upgrade-complete');
+            electron.ipcRenderer.send('rising-upgrade-complete');
 
             this.hasCompletedUpgrades = true;
+        }
+
+
+        @Hook('mounted')
+        onMounted(): void {
+            log.debug('init.chat.mounted');
         }
 
 
@@ -203,8 +215,11 @@
             await this.startAndUpgradeCache();
 
             if(this.settings.account.length > 0) this.saveLogin = true;
+
             keyStore.getPassword(this.settings.account)
                 .then((value: string) => this.password = value, (err: Error) => this.error = err.message);
+
+            log.debug('init.chat.keystore.get.done');
 
             Vue.set(core.state, 'generalSettings', this.settings);
 
@@ -222,10 +237,13 @@
                 this.fixCharacter = this.fixCharacters[0];
                 (<Modal>this.$refs['fixLogsModal']).show();
             });
+
             window.addEventListener('keydown', (e) => {
                 if(getKey(e) === Keys.Tab && e.ctrlKey && !e.altKey && !e.shiftKey)
                     parent.send('switch-tab', this.character);
             });
+
+            log.debug('init.chat.listeners.done');
 
             /*if (process.env.NODE_ENV !== 'production') {
                 const dt = require('@vue/devtools');

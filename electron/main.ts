@@ -300,6 +300,8 @@ function showPatchNotes(): void {
 
 
 function onReady(): void {
+    let hasCompletedUpgrades = false;
+
     const logLevel = (process.env.NODE_ENV === 'production') ? 'info' : 'silly';
 
     log.transports.file.level = settings.risingSystemLogLevel || logLevel;
@@ -394,11 +396,17 @@ function onReady(): void {
         {
             label: `&${l('title')}`,
             submenu: [
-                {label: l('action.newWindow'), click: createWindow, accelerator: 'CmdOrCtrl+n'},
+                {
+                    label: l('action.newWindow'),
+                    click: () => {
+                        if (hasCompletedUpgrades) createWindow();
+                    },
+                    accelerator: 'CmdOrCtrl+n'
+                },
                 {
                     label: l('action.newTab'),
                     click: (_m: Electron.MenuItem, w: Electron.BrowserWindow) => {
-                        if(tabCount < 3) w.webContents.send('open-tab');
+                        if((hasCompletedUpgrades) && (tabCount < 3)) w.webContents.send('open-tab');
                     },
                     accelerator: 'CmdOrCtrl+t'
                 },
@@ -596,6 +604,7 @@ function onReady(): void {
     });
 
     electron.ipcMain.on('rising-upgrade-complete', () => {
+        hasCompletedUpgrades = true;
         for(const w of electron.webContents.getAllWebContents()) w.send('rising-upgrade-complete');
     });
 

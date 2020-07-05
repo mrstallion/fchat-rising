@@ -89,16 +89,22 @@
 
         @Hook('mounted')
         async mounted(): Promise<void> {
+            log.debug('init.window.mounting');
             // top bar devtools
             // browserWindow.webContents.openDevTools({ mode: 'detach' });
 
             updateSupportedLanguages(browserWindow.webContents.session.availableSpellCheckerLanguages);
 
+            log.debug('init.window.languages.supported');
             // console.log('MOUNT DICTIONARIES', getSafeLanguages(this.settings.spellcheckLang), this.settings.spellcheckLang);
 
             browserWindow.webContents.session.setSpellCheckerLanguages(getSafeLanguages(this.settings.spellcheckLang));
 
+            log.debug('init.window.languages');
+
             await this.addTab();
+
+            log.debug('init.window.tab');
 
             electron.ipcRenderer.on('settings', (_e: Event, settings: GeneralSettings) => {
                 this.settings = settings;
@@ -113,7 +119,6 @@
             electron.ipcRenderer.on('update-available', (_e: Event, available: boolean) => this.hasUpdate = available);
             electron.ipcRenderer.on('fix-logs', () => this.activeTab!.view.webContents.send('fix-logs'));
             electron.ipcRenderer.on('quit', () => this.destroyAllTabs());
-
             electron.ipcRenderer.on('update-dictionaries', (_e: Event, langs: string[]) => {
                 // console.log('UPDATE DICTIONARIES', langs);
 
@@ -189,6 +194,8 @@
                 return false;
             };
             this.isMaximized = browserWindow.isMaximized();
+
+            log.debug('init.window.mounted');
         }
 
         destroyAllTabs(): void {
@@ -243,12 +250,18 @@
             this.tabMap[view.webContents.id] = tab;
             this.show(tab);
             this.lockTab = true;
+
+            log.debug('init.window.tab.load');
+
             await view.webContents.loadURL(url.format({
                 pathname: path.join(__dirname, 'index.html'),
                 protocol: 'file:',
                 slashes: true,
                 query: {settings: JSON.stringify(this.settings), hasCompletedUpgrades: JSON.stringify(this.hasCompletedUpgrades)}
             }));
+
+            log.debug('init.window.tab.load.complete');
+
             tab.view.setBounds(getWindowBounds());
             this.lockTab = false;
         }
