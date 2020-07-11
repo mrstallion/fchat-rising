@@ -1,6 +1,6 @@
 # Changelog
 
-## Canary
+## 1.0.2
 *   Fixed a caching issue that caused cache misses on character page metadata
 *   Fixed rate limit issues that sometimes disconnected characters when multiple characters were connected
 *   Fixed a bug in age matching

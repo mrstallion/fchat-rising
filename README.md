@@ -91,7 +91,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
    *   Species
 1. Maching for non-binary genders relies on kinks. For example, if your non-binary character has a preference for females, make sure 'females' are listed as a favorite kink.
 1. 'Underage' kink is considered to apply to characters aged 16 or above; 'ageplay' kink is considered to apply to characters aged 16 or below.
-1. 'Older characters' and 'younger characters' kink preferences are interpreted as age difference of 5+ years.
+1. 'Older characters' and 'younger characters' kink preferences are interpreted as age difference of 8+ years.
 1. Comparison results will get faster over time, as more and more character data is cached.
 
 
