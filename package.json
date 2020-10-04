@@ -46,7 +46,7 @@
     "webpack": "^4.43.0"
   },
   "dependencies": {
-    "@cliqz/adblocker-electron": "^1.16.0",
+    "@cliqz/adblocker-electron": "^1.16.1",
     "bluebird": "^3.7.2",
     "jquery": "^3.5.1",
     "keytar": "^5.4.0",
