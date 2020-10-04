@@ -2,6 +2,7 @@
 
 ## 1.1.0
 *   Upgraded to Electron 10.x
+*   Upgraded to Keytar 6.x – you will need to re-enter your password
 *   Added Furaffinity image previews (non-adult only)
 *   Added support for species-fluid characters
 *   Fixed logging out and then logging in with a new character breaking character comparison
