@@ -51,10 +51,10 @@ changelog: https://github.com/mrstallion/fchat-rising/blob/master/CHANGELOG.md
 download:
   version: v1.1.0
   win_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-win.exe
-  win_size: 68 MB
+  win_size: 75 MB
   mac_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-macos.dmg
-  mac_size: 72 MB
+  mac_size: 76 MB
   linux_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-linux.AppImage
-  linux_size: 74 MB
+  linux_size: 76 MB
 
 
