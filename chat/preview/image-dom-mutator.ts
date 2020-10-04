@@ -168,6 +168,7 @@ export class ImageDomMutator {
         this.add('imagefap.com', this.getBaseJsMutatorScript(['.image-wrapper img', 'video', 'img']));
         this.add('myhentaicomics.com', this.getBaseJsMutatorScript(['#entire_image img', 'video', 'img']));
         this.add('redgifs.com', this.getBaseJsMutatorScript(['video']));
+        this.add('furaffinity.net', this.getBaseJsMutatorScript(['#submissionImg', 'video', 'img']));
 
         this.add(
             'pornhub.com',
