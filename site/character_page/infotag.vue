@@ -14,8 +14,9 @@
     import {formatContactLink, formatContactValue} from './contact_utils';
     import {Store} from './data_store';
     import {CONTACT_GROUP_ID} from './interfaces';
-    import { MatchReport, TagId } from '../../learn/matcher';
+    import { MatchReport } from '../../learn/matcher';
     import { CssClassMap } from './match-report.vue';
+    import { TagId } from '../../learn/matcher-types';
 
     @Component
     export default class InfotagView extends Vue {

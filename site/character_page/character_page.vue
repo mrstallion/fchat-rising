@@ -428,7 +428,7 @@
             if ((!this.selfCharacter) || (!this.character))
                 return;
 
-            this.characterMatch = Matcher.generateReport(this.selfCharacter.character, this.character.character);
+            this.characterMatch = Matcher.identifyBestMatchReport(this.selfCharacter.character, this.character.character);
 
             // console.log('Match', this.selfCharacter.character.name, this.character.character.name, this.characterMatch);
         }
@@ -777,6 +777,12 @@
 
             &.them {
                 margin-left: 1rem;
+            }
+
+            .species {
+              display: inline-block;
+              color: var(--characterInfotagColor);
+              // opacity: 0.7;
             }
 
             ul {

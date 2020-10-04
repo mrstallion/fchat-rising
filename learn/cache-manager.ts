@@ -4,7 +4,6 @@ import { ChannelAdEvent, ChannelMessageEvent, CharacterDataEvent, EventBus, Sele
 import { Channel, Conversation } from '../chat/interfaces';
 import { methods } from '../site/character_page/data_store';
 import { Character as ComplexCharacter } from '../site/character_page/interfaces';
-import { Gender } from './matcher';
 import { AdCache } from './ad-cache';
 import { ChannelConversationCache } from './channel-conversation-cache';
 import { CharacterProfiler } from './character-profiler';
@@ -17,6 +16,7 @@ import { Character } from '../fchat/interfaces';
 import Bluebird from 'bluebird';
 import ChatMessage = Conversation.ChatMessage;
 import { GeneralSettings } from '../electron/common';
+import { Gender } from './matcher-types';
 
 
 export interface ProfileCacheQueueEntry {

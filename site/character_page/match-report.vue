@@ -6,6 +6,7 @@
             <h3>
                 <img :src="avatarUrl(characterMatch.you.you.name)" class="thumbnail"/>
                 {{characterMatch.you.you.name}}
+                <small v-if="characterMatch.youMultiSpecies" class="species">as {{getSpeciesStr(characterMatch.you)}}</small>
             </h3>
 
             <ul>
@@ -21,6 +22,7 @@
             <h3>
                 <img :src="avatarUrl(characterMatch.them.you.name)" class="thumbnail" />
                 {{characterMatch.them.you.name}}
+                <small v-if="characterMatch.themMultiSpecies" class="species">as {{getSpeciesStr(characterMatch.them)}}</small>
             </h3>
 
             <ul>
@@ -35,8 +37,9 @@
     import * as _ from 'lodash';
     import Vue from 'vue';
     import * as Utils from '../utils';
-    import { MatchReport, MatchResult, Score, Scoring } from '../../learn/matcher';
+    import { Matcher, MatchReport, MatchResult, Score, Scoring } from '../../learn/matcher';
     import core from '../../chat/core';
+    import { TagId } from '../../learn/matcher-types';
 
     export interface CssClassMap {
         [key: string]: boolean;
@@ -89,6 +92,12 @@
 
         getScores(result: MatchResult): Score[] {
             return _.map(result.scores, (s: Score) => (s));
+        }
+
+        getSpeciesStr(m: MatchResult): string {
+          const t = Matcher.getTagValue(TagId.Species, m.you);
+
+          return _.get(t, 'string', 'unknown');
         }
 
         async toggleMinimize(): Promise<void> {

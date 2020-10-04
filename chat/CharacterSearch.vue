@@ -60,7 +60,8 @@
     import * as _ from 'lodash';
     import {EventBus} from './preview/event-bus';
     import CharacterSearchHistory from './CharacterSearchHistory.vue';
-    import { Matcher, Species, speciesNames } from '../learn/matcher';
+    import { Matcher } from '../learn/matcher';
+    import { Species, speciesNames } from '../learn/matcher-types';
 
     type Options = {
         kinks: SearchKink[],

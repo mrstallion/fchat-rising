@@ -1,9 +1,10 @@
 import core from '../chat/core';
 import { Character as CharacterFChatInf } from '../fchat';
 import { Character as ComplexCharacter } from '../site/character_page/interfaces';
-import { Matcher, TagId } from './matcher';
+import { Matcher } from './matcher';
 import { AdCache } from './ad-cache';
 import { ProfileCacheQueueEntry } from './cache-manager';
+import { TagId } from './matcher-types';
 
 
 export class CharacterProfiler {

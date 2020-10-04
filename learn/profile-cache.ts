@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import core from '../chat/core';
 import {Character as ComplexCharacter, CharacterGroup, Guestbook} from '../site/character_page/interfaces';
 import { AsyncCache } from './async-cache';
-import { Matcher, Score, Scoring } from './matcher';
+import { Matcher, Scoring } from './matcher';
 import { PermanentIndexedStore } from './store/sql-store';
 import { CharacterImage, SimpleCharacter } from '../interfaces';
 
@@ -175,52 +175,8 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
             return 0;
         }
 
-        const m = Matcher.generateReport(you.character, c.character);
+        const m = Matcher.identifyBestMatchReport(you.character, c.character);
 
-        // let mul = Math.sign(Math.min(m.you.total, m.them.total));
-
-        // if (mul === 0)
-        //    mul = 0.5;
-
-        // const score =  Math.min(m.them.total, m.you.total); // mul * (Math.abs(m.you.total) + Math.abs(m.them.total));
-
-        const yourScores = _.values(m.you.scores);
-        const theirScores = _.values(m.them.scores);
-
-        const finalScore = _.reduce(
-            _.concat(yourScores, theirScores),
-            (accum: Scoring | null, score: Score) => {
-                if (accum === null) {
-                    return (score.score !== Scoring.NEUTRAL) ? score.score : null;
-                }
-
-                return (score.score === Scoring.NEUTRAL) ? accum : Math.min(accum, score.score);
-            },
-            null
-        );
-
-
-        if ((finalScore !== null) && (finalScore > 0)) {
-            // Manage edge cases where high score may not be ideal
-
-            // Nothing to score
-            if ((yourScores.length === 0) || (theirScores.length === 0)) {
-                // can't know
-                return Scoring.NEUTRAL;
-            }
-
-            // Only neutral scores given
-            if (
-                (_.every(yourScores, (n: Scoring) => n === Scoring.NEUTRAL)) ||
-                (_.every(theirScores, (n: Scoring) => n === Scoring.NEUTRAL))
-            ) {
-                return Scoring.NEUTRAL;
-            }
-        }
-
-        // console.log('Profile score', c.character.name, score, m.you.total, m.them.total,
-        //    m.you.total + m.them.total, m.you.total * m.them.total);
-
-        return (finalScore === null) ? Scoring.NEUTRAL : finalScore;
+        return m.score === null ? Scoring.NEUTRAL : m.score;
     }
 }
