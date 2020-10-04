@@ -213,8 +213,12 @@
 
                 await methods.fieldsGet();
 
-                if ((this.selfCharacter === undefined) && (Utils.settings.defaultCharacter >= 0))
+                if (
+                  ((this.selfCharacter === undefined) && (Utils.settings.defaultCharacter >= 0))
+                  || (_.get(this.selfCharacter, 'character.name') !== core.characters.ownCharacter.name)
+                ) {
                     due.push(this.loadSelfCharacter());
+                }
 
                 if((mustLoad) || (this.character === undefined))
                     due.push(this._getCharacter(skipCache));
