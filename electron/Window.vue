@@ -234,7 +234,17 @@
             const tray = new electron.remote.Tray(trayIcon);
             tray.setToolTip(l('title'));
             tray.on('click', (_e) => this.trayClicked(tab));
-            const view = new electron.remote.BrowserView({webPreferences: {webviewTag: true, nodeIntegration: true, spellcheck: true}});
+
+            const view = new electron.remote.BrowserView(
+              {
+                webPreferences: {
+                  webviewTag: true,
+                  nodeIntegration: true,
+                  spellcheck: true,
+                  enableRemoteModule: true
+                }
+              }
+            );
 
             // tab devtools
             // view.webContents.openDevTools();

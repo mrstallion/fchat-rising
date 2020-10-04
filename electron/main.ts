@@ -179,7 +179,7 @@ function createWindow(): Electron.BrowserWindow | undefined {
     const lastState = windowState.getSavedWindowState();
     const windowProperties: Electron.BrowserWindowConstructorOptions & {maximized: boolean} = {
         ...lastState, center: lastState.x === undefined, show: false,
-        webPreferences: { webviewTag: true, nodeIntegration: true, spellcheck: true }
+        webPreferences: { webviewTag: true, nodeIntegration: true, spellcheck: true, enableRemoteModule: true }
     };
 
     if(process.platform === 'darwin') {

@@ -61,7 +61,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Message search matches character names
     *    PM list shows characters' online status as a colored icon
 *   Technical Details for Nerds
-    *    Upgraded to Electron 9.x
+    *    Upgraded to Electron 10.x
     *    Replaced `node-spellchecker` with the built-in spellchecker that ships with Electron 8+
     *    Multi-language support for spell checking (Windows only – language is autodetected on MacOS) 
 

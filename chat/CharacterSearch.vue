@@ -210,7 +210,7 @@
                     this.scoreWatcher
                 );
 
-                delete this.scoreWatcher;
+                this.scoreWatcher = null;
             }
         }
 

@@ -1,0 +1,3 @@
+{
+  "reject": "keytar,@types/node,@f-list/fork-ts-checker-webpack-plugin,@f-list/vue-ts,typescript"
+}

@@ -244,7 +244,7 @@ export class ImageDomMutator {
                 // tslint:disable-next-line no-any
                 (u.query as any).enterAgree = 1;
 
-                delete u.search;
+                u.search = null;
 
                 return urlHelper.format(u);
             }

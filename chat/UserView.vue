@@ -84,7 +84,7 @@ export default class UserView extends Vue {
                     if (this.scoreWatcher) {
                         EventBus.$off('character-score', this.scoreWatcher);
 
-                        delete this.scoreWatcher;
+                        this.scoreWatcher = null;
                     }
                 }
             };

@@ -131,7 +131,10 @@ export default class Connection implements Interfaces.Connection {
         this.reconnectTimer = undefined;
         this.cleanClose = true;
         if(this.socket !== undefined) this.socket.close();
-        if(!keepState) this.character = '';
+
+        if(!keepState) {
+            this.character = '';
+        }
     }
 
 

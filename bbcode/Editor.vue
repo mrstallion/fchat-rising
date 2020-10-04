@@ -56,7 +56,7 @@
         readonly classes?: string;
 
         @Prop
-        readonly value?: string | undefined;
+        readonly value?: string | undefined = undefined;
 
         @Prop
         readonly disabled?: boolean;

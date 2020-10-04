@@ -38,9 +38,9 @@
         @Prop({default: () => ((filter: RegExp, value: string) => filter.test(value))})
         readonly filterFunc!: (filter: RegExp, value: object) => boolean;
         @Prop
-        readonly multiple?: true;
+        readonly multiple?: true = undefined;
         @Prop
-        readonly value?: object | object[];
+        readonly value?: object | object[] = undefined;
         @Prop
         readonly title?: string;
         filter = '';
