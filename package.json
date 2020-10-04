@@ -50,7 +50,7 @@
     "bluebird": "^3.7.2",
     "jquery": "^3.5.1",
     "keytar": "^5.4.0",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.1"
   },
   "optionalDependencies": {
     "appdmg": "^0.6.0",
