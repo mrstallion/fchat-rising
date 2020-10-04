@@ -183,7 +183,7 @@ export class Matcher {
         const theirCharacterAnalyses = Matcher.generateAnalysisVariations(them);
 
         let bestScore = null;
-        let bestScoreLevelCount = 10000;
+        let bestScoreLevelCount = -10000;
         let bestReport: MatchReport;
 
         for(const yourAnalysis of yourCharacterAnalyses) {
@@ -209,11 +209,11 @@ export class Matcher {
                         (report.score !== null)
                         && (report.score >= bestScore)
                         && (scoreLevelCount !== null)
-                        && (scoreLevelCount < bestScoreLevelCount)
+                        && (report.score * scoreLevelCount > bestScoreLevelCount)
                     )
                 ) {
                     bestScore = report.score;
-                    bestScoreLevelCount = (scoreLevelCount !== null) ? scoreLevelCount : 1000;
+                    bestScoreLevelCount = ((scoreLevelCount !== null) && (report.score !== null)) ? report.score * scoreLevelCount : -1000;
                     bestReport = report;
                 }
             }
