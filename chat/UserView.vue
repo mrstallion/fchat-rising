@@ -3,7 +3,7 @@
 
 
 <script lang="ts">
-import { Component, Hook, Prop } from '@f-list/vue-ts';
+import { Component, Hook, Prop, Watch } from '@f-list/vue-ts';
 import Vue from 'vue';
 import {Channel, Character} from '../fchat';
 import { Score, Scoring } from '../learn/matcher';
@@ -108,6 +108,10 @@ export default class UserView extends Vue {
         this.update();
     }
 
+    @Watch('character.status')
+    onStatusUpdate(): void {
+      this.update();
+    }
 
     update(): void {
         this.rankIcon = null;
