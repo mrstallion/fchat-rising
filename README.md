@@ -1,7 +1,7 @@
 # Download
-[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.0.2/F-Chat-Rising-v1.0.2-win.exe) (68 MB)
-| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.0.2/F-Chat-Rising-v1.0.2-macos.dmg) (72 MB)
-| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.0.2/F-Chat-Rising-v1.0.2-linux.AppImage) (74 MB)
+[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-win.exe) (68 MB)
+| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-macos.dmg) (72 MB)
+| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-linux.AppImage) (74 MB)
 
 
 # F-Chat Rising
@@ -91,6 +91,13 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 1. 'Underage' kink is considered to apply to characters aged 16 or above; 'ageplay' kink is considered to apply to characters aged 16 or below.
 1. 'Older characters' and 'younger characters' kink preferences are interpreted as age difference of 8+ years.
 1. Comparison results will get faster over time, as more and more character data is cached.
+1. If you have a species-fluid character (e.g. you play both your character as both a human and an anthro), you can indicate this by setting your **species** in your character profile in the following ways. F-List Rising will then score you against the best fitting type. 
+    * Human or tiger
+    * Human, tiger, or dragon 
+    * Anthro (Horse or Tiger)
+    * Dragon (Dwarf, Elf, or Human)
+    * Elf (optionally vampire or dwarf)
+    * Feline (optionally horse, tiger, or elf)
 
 
 ## Todo / Ideas

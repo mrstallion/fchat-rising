@@ -49,12 +49,12 @@ theme: jekyll-theme-slate
 changelog: https://github.com/mrstallion/fchat-rising/blob/master/CHANGELOG.md
 
 download:
-  version: v1.0.2
-  win_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.0.2/F-Chat-Rising-v1.0.2-win.exe
+  version: v1.1.0
+  win_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-win.exe
   win_size: 68 MB
-  mac_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.0.2/F-Chat-Rising-v1.0.2-macos.dmg
+  mac_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-macos.dmg
   mac_size: 72 MB
-  linux_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.0.2/F-Chat-Rising-v1.0.2-linux.AppImage
+  linux_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-linux.AppImage
   linux_size: 74 MB
 
 

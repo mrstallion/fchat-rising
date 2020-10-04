@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0
+*   Upgraded to Electron 10.x
+*   Added Furaffinity image previews (non-adult only)
+*   Added support for species-fluid characters
+*   Fixed logging out and then logging in with a new character breaking character comparison
+*   Fixed friends list not updating character status
+
+
 ## 1.0.2
 *   Fixed a caching issue that caused cache misses on character page metadata
 *   Fixed rate limit issues that sometimes disconnected characters when multiple characters were connected
