@@ -91,7 +91,7 @@
         async mounted(): Promise<void> {
             log.debug('init.window.mounting');
             // top bar devtools
-            browserWindow.webContents.openDevTools({ mode: 'detach' });
+            // browserWindow.webContents.openDevTools({ mode: 'detach' });
 
             updateSupportedLanguages(browserWindow.webContents.session.availableSpellCheckerLanguages);
 
