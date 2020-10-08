@@ -73,6 +73,11 @@
                 <a class="btn" @click="reloadCharacter"><i class="fa fa-sync" /></a>
 
                 <i class="fas fa-circle-notch fa-spin profileRefreshSpinner" v-show="isRefreshingProfile()"></i>
+
+                <div class="profile-title-right">
+                  <button class="btn" @click="prevProfile" :disabled="!prevProfileAvailable()"><i class="fas fa-arrow-left"></i></button>
+                  <button class="btn" @click="nextProfile" :disabled="!nextProfileAvailable()"><i class="fas fa-arrow-right"></i></button>
+                </div>
             </template>
         </modal>
         <modal :action="l('fixLogs.action')" ref="fixLogsModal" @submit="fixLogs" buttonClass="btn-danger">
@@ -89,7 +94,7 @@
 </template>
 
 <script lang="ts">
-    import {Component, Hook} from '@f-list/vue-ts';
+    import { Component, Hook, Watch } from '@f-list/vue-ts';
     import Axios from 'axios';
     import * as electron from 'electron';
     import log from 'electron-log'; //tslint:disable-line:match-default-export-name
@@ -108,12 +113,13 @@
     import Modal from '../components/Modal.vue';
     import {SimpleCharacter} from '../interfaces';
     import {Keys} from '../keys';
-//    import { BetterSqliteStore } from '../learn/store/better-sqlite3';
-//     import { Sqlite3Store } from '../learn/store/sqlite3';
+    // import { BetterSqliteStore } from '../learn/store/better-sqlite3';
+    // import { Sqlite3Store } from '../learn/store/sqlite3';
     import CharacterPage from '../site/character_page/character_page.vue';
     import {defaultHost, GeneralSettings, nativeRequire} from './common';
     import { fixLogs /*SettingsStore, Logs as FSLogs*/ } from './filesystem';
     import * as SlimcatImporter from './importer';
+    import _ from 'lodash';
     // import Bluebird from 'bluebird';
     // import Connection from '../fchat/connection';
     // import Notifications from './notifications';
@@ -145,14 +151,17 @@
 
     /* tslint:disable: no-any no-unsafe-any */ //because this is hacky
     //
-    const keyStore = nativeRequire<{
+
+    const keyStore = nativeRequire<
+      {
         getPassword(service: string, account: string): Promise<string>
         setPassword(service: string, account: string, password: string): Promise<void>
         deletePassword(service: string, account: string): Promise<void>
-        findCredentials(service: string): Promise<{ account: string, password: string }>,
+        findCredentials(service: string): Promise<{ account: string, password: string }>
         findPassword(service: string): Promise<string>
         [key: string]: (...args: any[]) => Promise<any>
-    }>('keytar/build/Release/keytar.node');
+      }
+    >('keytar/build/Release/keytar.node');
 
     // const keyStore = import('keytar');
     //
@@ -184,6 +193,9 @@
 
         shouldShowSpinner = false;
 
+        profileNameHistory: string[] = [];
+        profilePointer = 0;
+
 
         async startAndUpgradeCache(): Promise<void> {
             log.debug('init.chat.cache.start');
@@ -209,6 +221,24 @@
         }
 
 
+        @Watch('profileName')
+        onProfileNameChange(newName: string): void {
+          if (this.profileNameHistory[this.profilePointer] !== newName) {
+            this.profileNameHistory = _.takeRight(
+              _.filter(
+                _.take(this.profileNameHistory, this.profilePointer + 1),
+                (n) => (n !== newName)
+              ),
+              30
+            );
+
+            this.profileNameHistory.push(newName);
+
+            this.profilePointer = this.profileNameHistory.length - 1;
+          }
+        }
+
+
         @Hook('mounted')
         onMounted(): void {
             log.debug('init.chat.mounted');
@@ -229,12 +259,31 @@
             Vue.set(core.state, 'generalSettings', this.settings);
 
             electron.ipcRenderer.on('settings',
-                (_: Event, settings: GeneralSettings) => core.state.generalSettings = this.settings = settings);
+                (_e: Event, settings: GeneralSettings) => core.state.generalSettings = this.settings = settings);
 
-            electron.ipcRenderer.on('open-profile', (_: Event, name: string) => {
+            electron.ipcRenderer.on('open-profile', (_e: Event, name: string) => {
                 const profileViewer = <Modal>this.$refs['profileViewer'];
                 this.profileName = name;
                 profileViewer.show();
+            });
+
+            electron.ipcRenderer.on('reopen-profile', (_e: Event) => {
+              if (
+                (this.profileNameHistory.length > 0)
+                && (this.profilePointer < this.profileNameHistory.length)
+                && (this.profilePointer >= 0)
+              ) {
+                const name = this.profileNameHistory[this.profilePointer];
+                const profileViewer = <Modal>this.$refs['profileViewer'];
+
+                if ((this.profileName === name) && (profileViewer.isShown)) {
+                  profileViewer.hide();
+                  return;
+                }
+
+                this.profileName = name;
+                profileViewer.show();
+              }
             });
 
             electron.ipcRenderer.on('fix-logs', async() => {
@@ -389,6 +438,36 @@
         }
 
 
+        nextProfile(): void {
+          if (!this.nextProfileAvailable()) {
+            return;
+          }
+
+          this.profilePointer++;
+          this.profileName = this.profileNameHistory[this.profilePointer];
+        }
+
+
+        nextProfileAvailable(): boolean {
+          return (this.profilePointer < this.profileNameHistory.length - 1);
+        }
+
+
+        prevProfile(): void {
+          if (!this.prevProfileAvailable()) {
+            return;
+          }
+
+          this.profilePointer--;
+          this.profileName = this.profileNameHistory[this.profilePointer];
+        }
+
+
+        prevProfileAvailable(): boolean {
+          return (this.profilePointer > 0);
+        }
+
+
         get styling(): string {
             try {
                 return `<style>${fs.readFileSync(path.join(__dirname, `themes/${this.settings.theme}.css`), 'utf8').toString()}</style>`;
@@ -421,6 +500,21 @@
     .profileRefreshSpinner {
         font-size: 12pt;
         opacity: 0.5;
+    }
+
+
+    .profile-viewer {
+      .modal-title {
+        width: 100%;
+        position: relative;
+
+        .profile-title-right {
+          float: right;
+          bottom: 7px;
+          right: 0;
+          position: absolute;
+        }
+      }
     }
 
 

@@ -91,7 +91,7 @@
         async mounted(): Promise<void> {
             log.debug('init.window.mounting');
             // top bar devtools
-            // browserWindow.webContents.openDevTools({ mode: 'detach' });
+            browserWindow.webContents.openDevTools({ mode: 'detach' });
 
             updateSupportedLanguages(browserWindow.webContents.session.availableSpellCheckerLanguages);
 
@@ -119,6 +119,7 @@
             electron.ipcRenderer.on('update-available', (_e: Event, available: boolean) => this.hasUpdate = available);
             electron.ipcRenderer.on('fix-logs', () => this.activeTab!.view.webContents.send('fix-logs'));
             electron.ipcRenderer.on('quit', () => this.destroyAllTabs());
+            electron.ipcRenderer.on('reopen-profile', () => this.activeTab!.view.webContents.send('reopen-profile'));
             electron.ipcRenderer.on('update-dictionaries', (_e: Event, langs: string[]) => {
                 // console.log('UPDATE DICTIONARIES', langs);
 

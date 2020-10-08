@@ -493,6 +493,14 @@ function onReady(): void {
                         }
                     ]
                 },
+                {
+                    label: 'Show/hide current profile',
+                    click: (_m: Electron.MenuItem, w: Electron.BrowserWindow) => {
+                        w.webContents.send('reopen-profile');
+                    },
+                    accelerator: 'CmdOrCtrl+p'
+                },
+
 
                 {type: 'separator'},
                 {role: 'minimize'},

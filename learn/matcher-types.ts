@@ -190,7 +190,7 @@ export const speciesMapping: SpeciesMap = {
         'appaloosa', 'friesian', 'draft', 'draught', 'alicorn', 'amazon', 'amazonian', 'horsie', 'hoss', 'pegasus', 'colt', 'filly'],
     [Species.Feline]: ['cat', 'kitten', 'catgirl', 'neko', 'tiger', 'puma', 'lion', 'lioness',
         'tigress', 'feline', 'jaguar', 'cheetah', 'lynx', 'leopard', 'cougar', 'kitty', 'migote', 'miqo\'te', 'miqote', 'ocelot',
-        'sabertooth', 'saber tooth', 'tabby', 'liger'],
+        'sabertooth', 'saber tooth', 'tabby', 'liger', 'serval'],
     [Species.Canine]: ['dog', 'wolf', 'dingo', 'coyote', 'jackal', 'canine', 'doberman', 'husky', 'hound', 'akita', 'pitbull', 'pit bull', 'terrier',
         'bull terrier', 'australian shepherd', 'australian shepard', 'german shepherd', 'german shepard', 'malinois', 'woof', 'labrador', 'collie',
         'canis', 'canid', 'chihuahua', 'poodle', 'chinchilla', 'chowchow', 'corgi', 'anubis', 'anubian', 'dalmatian', 'inumimi', 'lupine', 'malamute', 'mastiff',

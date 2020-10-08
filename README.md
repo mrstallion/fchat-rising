@@ -1,7 +1,7 @@
 # Download
-[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-win.exe) (75 MB)
-| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-macos.dmg) (76 MB)
-| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.1.0-linux.AppImage) (76 MB)
+[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.2.0-win.exe) (75 MB)
+| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.2.0-macos.dmg) (76 MB)
+| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-v1.2.0-linux.AppImage) (76 MB)
 
 
 # F-Chat Rising
@@ -46,6 +46,8 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Cleaner guestbook view
     *    Profiles, images, guestbook posts, and groups are cached for faster view
     *    Character view tabs (overview, images, etc.) stick to the top 
+    *    Show/hide current profile with Ctrl+P or Command+P
+    *    Navigate back and forward in character profile view history
 *   Character Search
     *    Search results are sorted based on match scores
     *    Display match score in search results
@@ -112,6 +114,9 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 *   Bug? [color] acts weird
 *   Bug? inline images act weird on profiles
 *   Better disconnect management / API tickets?
+*   Ctrl+P to re-open closed profile; navigate back and forward in profiles (e.g. when you click one); 'back to top' button
+*   What are the things that would make your profile more compatible with others?
+
 
 
 # F-List Exported

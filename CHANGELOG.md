@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+*   Hide/show current character profile with Ctrl+P or Command+P
+*   Navigate back and forward in character profile view history
+
+
 ## 1.1.0
 *   Upgraded to Electron 10.x
 *   Upgraded to Keytar 6.x – you will need to re-enter your password
@@ -20,7 +25,6 @@
 
 
 ## 1.0.1
-
 *   Enabled auto-updates for Windows; MacOS and Linux not supported, sorry!
 *   Reviewed security with:
     *   [Electron Security](https://www.electronjs.org/docs/tutorial/security)
@@ -32,7 +36,6 @@
 
 
 ## 1.0.0
-
 *   Channel Conversations
     *    Highlight ads from characters most interesting to you
     *    Hide clearly unmatched ads
