@@ -50,11 +50,11 @@ changelog: https://github.com/mrstallion/fchat-rising/blob/master/CHANGELOG.md
 
 download:
   version: v1.2.0
-  win_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.2.0/F-Chat-Rising-v1.2.0-win.exe
+  win_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.2.0/F-Chat-Rising-1.2.0-win.exe
   win_size: 75 MB
-  mac_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.2.0/F-Chat-Rising-v1.2.0-macos.dmg
+  mac_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.2.0/F-Chat-Rising-1.2.0-macos.dmg
   mac_size: 76 MB
-  linux_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.2.0/F-Chat-Rising-v1.2.0-linux.AppImage
+  linux_url: https://github.com/mrstallion/fchat-rising/releases/download/v1.2.0/F-Chat-Rising-1.2.0-linux.AppImage
   linux_size: 76 MB
 
 
