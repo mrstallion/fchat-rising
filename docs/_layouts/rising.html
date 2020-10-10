@@ -138,27 +138,19 @@
         <header class="inner">
           <a id="forkme_banner" href="{{ site.github.repository_url }}">View on GitHub</a>
 
-          <h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
-          <h2 id="project_tagline">{{ site.description | default: site.github.project_tagline }}</h2>
+          <h1 id="project_title">{{ site.title }}</h1>
+          <h2 id="project_tagline">{{ site.description }}</h2>
 
           {% if site.show_downloads %}
             <section id="downloads_small">
-              <h3>Downloads <small>| {{site.download.version}} | <a href="{{site.changelog}}">Changelog</a></small></h3>
+              <h3>Downloads <small>| v{{site.download.version}} | <a href="{{site.changelog}}">Changelog</a></small></h3>
 
-              <div class="download_link win">
-                <a href="{{ site.download.win_url }}"><i></i> Windows</a>
-                <small>({{ site.download.win_size }})</small>
+              {% for platform in site.download.downloads %}
+              <div class="download_link {{platform.type}}">
+                <a href="{{ site.download.url | replace: '%PLATFORM_TAIL%', platform.tail | replace: '%VERSION%', site.download.version }}"><i></i> {{platform.name}}</a>
+                <small>({{ platform.size }})</small>
               </div>
-
-              <div class="download_link mac">
-                <a href="{{ site.download.mac_url }}"><i></i> MacOS</a>
-                <small>({{ site.download.mac_size }})</small>
-              </div>
-
-              <div class="download_link linux">
-                <a href="{{ site.download.linux_url }}"><i></i> Linux</a>
-                <small>({{ site.download.linux_size }})</small>
-              </div>
+              {% endfor %}
             </section>
           {% endif %}
         </header>
