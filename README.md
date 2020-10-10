@@ -1,7 +1,7 @@
 # Download
 [Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.2.0/F-Chat-Rising-1.2.0-win.exe) (75 MB)
-| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-1.2.0-macos.dmg) (76 MB)
-| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.1.0/F-Chat-Rising-1.2.0-linux.AppImage) (76 MB)
+| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.2.0/F-Chat-Rising-1.2.0-macos.dmg) (76 MB)
+| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.2.0/F-Chat-Rising-1.2.0-linux.AppImage) (76 MB)
 
 
 # F-Chat Rising
