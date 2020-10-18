@@ -11,9 +11,9 @@
                 v-model="data[item]" :placeholder="l('filter')" :title="l('characterSearch.' + item)" :options="options[item]" :key="item">
             </filterable-select>
 
-            <filterable-select v-model="data.species" :multiple="true" :placeholder="l('filter')"
+            <filterable-select class="species-filter" v-model="data.species" :multiple="true" :placeholder="l('filter')"
                 :title="l('characterSearch.species')" :options="options.species">
-                <template slot-scope="s">{{s.option.name}}</template>
+                <template slot-scope="s">{{s.option.shortName}} <small>{{s.option.details}}</small></template>
             </filterable-select>
 
             <div v-if="searchString" class="search-string">
@@ -61,7 +61,7 @@
     import {EventBus} from './preview/event-bus';
     import CharacterSearchHistory from './CharacterSearchHistory.vue';
     import { Matcher } from '../learn/matcher';
-    import { Species, speciesNames } from '../learn/matcher-types';
+    import { Species, speciesMapping, speciesNames } from '../learn/matcher-types';
 
     type Options = {
         kinks: SearchKink[],
@@ -250,26 +250,37 @@
           return !!_.find(this.data.species, (s: SearchSpecies) => (s.id === species));
         }
 
-
         getSpeciesOptions(): SearchSpecies[] {
             const species = _.map(
-                _.filter(Species, (s) => (_.isString(s))) as unknown[] as string[],
-                (speciesName: keyof typeof Species): SearchSpecies => {
-                    const speciesId: number = Species[speciesName];
+                speciesMapping,
+                (keywords: string[], speciesIdStr: Species): SearchSpecies => {
+                    // const speciesId: number = Species[speciesName];
+                    const details = `${keywords.join(', ').substr(0, 24)}...`;
+                    const speciesId = parseInt(speciesIdStr as any, 10);
 
                     if (speciesId in speciesNames) {
+                        const name = `${speciesNames[speciesId].substr(0, 1).toUpperCase()}${speciesNames[speciesId].substr(1)}`;
+
                         return {
-                            name: `${speciesNames[speciesId].substr(0, 1).toUpperCase()}${speciesNames[speciesId].substr(1)} (species)`,
+                            details,
+                            name: `${name} (species)`,
+                            shortName: name,
                             id: speciesId
                         };
                     }
 
+                    const speciesName = Species[speciesId];
+
                     return {
+                        details,
                         name: `${speciesName}s (species)`,
+                        shortName: `${speciesName}s`,
                         id: speciesId
                     };
                 }
             ) as unknown[] as SearchSpecies[];
+
+            // console.log('SPECIES', species);
 
             return _.sortBy(species, 'name');
         }
@@ -364,6 +375,12 @@
 
 <style lang="scss">
     .character-search {
+        .species-filter {
+          small {
+            color: var(--tabSecondaryFgColor)
+          }
+        }
+
         .dropdown {
             margin-bottom: 10px;
         }

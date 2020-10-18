@@ -144,7 +144,7 @@ export interface Logs {
 }
 
 export type SearchKink = {id: number, name: string, description: string};
-export type SearchSpecies = {id: number, name: string};
+export type SearchSpecies = {id: number, name: string, shortName: string, details: string};
 
 export interface SearchData {
     kinks: SearchKink[]

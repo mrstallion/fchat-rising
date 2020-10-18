@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0
+*   Improved species search and matching
+
+
 ## 1.2.0
 *   Hide/show current character profile with Ctrl+P or Command+P
 *   Navigate back and forward in character profile view history

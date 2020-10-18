@@ -10,9 +10,9 @@ import {
     Gender, genderKinkMapping,
     Kink,
     kinkMapping,
-    KinkPreference, mammalSpecies, nonAnthroSpecies,
+    KinkPreference, likelyHuman, mammalSpecies, nonAnthroSpecies,
     Orientation,
-    Species, speciesMapping,
+    Species, SpeciesMap, speciesMapping, SpeciesMappingCache,
     speciesNames,
     SubDomRole,
     TagId
@@ -421,6 +421,7 @@ export class Matcher {
         const speciesScore = Matcher.getKinkSpeciesPreference(you, theirSpecies);
 
         if (speciesScore !== null) {
+            // console.log(this.them.name, speciesScore, theirSpecies);
             const speciesName = speciesNames[theirSpecies] || `${Species[theirSpecies].toLowerCase()}s`;
 
             return Matcher.formatKinkScore(speciesScore, speciesName);
@@ -744,23 +745,50 @@ export class Matcher {
             return Species.Human; // best guess
         }
 
-        return Matcher.getMappedSpecies(mySpecies.string);
+        const s = Matcher.getMappedSpecies(mySpecies.string);
+
+        if (!s) {
+            console.log('Unknown species', c.name, mySpecies.string);
+        }
+
+        return s;
     }
 
-    static getMappedSpecies(species: string): Species | null {
+    static generateSpeciesMappingCache(mapping: SpeciesMap): SpeciesMappingCache {
+        return _.mapValues(
+            mapping,
+            (keywords: string[]) => _.map(
+                keywords,
+                (keyword: string) => {
+                    const keywordPlural = `${keyword}s`; // this is weak: elf -> elves doesn't occur
+                    return {
+                        keyword,
+                        regexp: RegExp(`(^|\\b)(${keyword}|${keywordPlural})($|\\b)`)
+                    };
+                }
+            )
+        );
+    }
+
+    private static speciesMappingCache?: SpeciesMappingCache;
+    private static likelyHumanCache?: SpeciesMappingCache;
+
+    private static matchMappedSpecies(species: string, mapping: SpeciesMappingCache): Species | null {
         let foundSpeciesId: Species | null = null;
         let match = '';
 
         const finalSpecies = species.toLowerCase().trim();
 
         _.each(
-            speciesMapping,
-            (keywords: string[], speciesId: string) => {
+            mapping,
+            (matchers, speciesId: string) => {
                 _.each(
-                    keywords,
-                    (k: string) => {
-                        if ((k.length > match.length) && (finalSpecies.indexOf(k) >= 0)) {
-                            match = k;
+                    matchers,
+                    (matcher) => {
+
+                        // finalSpecies.indexOf(k) >= 0)
+                        if ((matcher.keyword.length > match.length) && (matcher.regexp.test(finalSpecies))) {
+                            match = matcher.keyword;
                             foundSpeciesId = parseInt(speciesId, 10);
                         }
                     }
@@ -769,6 +797,19 @@ export class Matcher {
         );
 
         return foundSpeciesId;
+    }
+
+    static getMappedSpecies(species: string): Species | null {
+        if (!Matcher.speciesMappingCache) {
+            Matcher.speciesMappingCache = Matcher.generateSpeciesMappingCache(speciesMapping);
+        }
+
+        if (!Matcher.likelyHumanCache) {
+            Matcher.likelyHumanCache = Matcher.generateSpeciesMappingCache(likelyHuman);
+        }
+
+        return Matcher.matchMappedSpecies(species, Matcher.speciesMappingCache)
+            || Matcher.matchMappedSpecies(species, Matcher.likelyHumanCache);
     }
 
     static getAllSpecies(c: Character): Species[] {
@@ -783,7 +824,8 @@ export class Matcher {
             return [];
         }
 
-        const speciesStr = mySpecies.string.trim().toLowerCase().replace(/optionally|alternatively/g, ',').replace(/[)(]/g, '');
+        const speciesStr = mySpecies.string.toLowerCase().replace(/optionally|alternatively/g, ',')
+            .replace(/[)(]/g, ' ').trim();
         const matches = speciesStr.split(/[,]? or |,/);
 
         return _.filter(_.map(matches, (m) => m.toLowerCase().trim()), (m) => (m !== ''));
