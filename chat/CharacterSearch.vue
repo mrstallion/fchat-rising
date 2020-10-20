@@ -11,7 +11,7 @@
                 v-model="data[item]" :placeholder="l('filter')" :title="l('characterSearch.' + item)" :options="options[item]" :key="item">
             </filterable-select>
 
-            <filterable-select class="species-filter" v-model="data.species" :multiple="true" :placeholder="l('filter')"
+            <filterable-select class="species-filter" v-model="data.species" :filterFunc="filterSpecies" :multiple="true" :placeholder="l('filter')"
                 :title="l('characterSearch.species')" :options="options.species">
                 <template slot-scope="s">{{s.option.shortName}} <small>{{s.option.details}}</small></template>
             </filterable-select>
@@ -61,7 +61,7 @@
     import {EventBus} from './preview/event-bus';
     import CharacterSearchHistory from './CharacterSearchHistory.vue';
     import { Matcher } from '../learn/matcher';
-    import { Species, speciesMapping, speciesNames } from '../learn/matcher-types';
+    import { nonAnthroSpecies, Species, speciesMapping, speciesNames } from '../learn/matcher-types';
 
     type Options = {
         kinks: SearchKink[],
@@ -241,13 +241,21 @@
             return true;
           }
 
+          const isSearchingForAnthro = (!!_.find(this.data.species, (s) => s.id === Species.Anthro));
+          const isSearchingForHuman = (!!_.find(this.data.species, (s) => s.id === Species.Human));
+
           const species = Matcher.species(knownCharacter.character.character);
 
           if (!species) {
-            return false;
+            // returns TRUE if we're only searching for humans -- we suck at identifying humans
+            return ((isSearchingForHuman) && (this.data.species.length === 1));
           }
 
-          return !!_.find(this.data.species, (s: SearchSpecies) => (s.id === species));
+          return ((isSearchingForAnthro) && (_.indexOf(nonAnthroSpecies, species) < 0))
+            // || ((isSearchingForMammal) && (_.indexOf(mammalSpecies, s.id) >= 0))
+            || !!_.find(this.data.species, (s: SearchSpecies) => (
+              (s.id === species)
+            ));
         }
 
         getSpeciesOptions(): SearchSpecies[] {
@@ -255,7 +263,8 @@
                 speciesMapping,
                 (keywords: string[], speciesIdStr: Species): SearchSpecies => {
                     // const speciesId: number = Species[speciesName];
-                    const details = `${keywords.join(', ').substr(0, 24)}...`;
+                    const keywordsStr = `${keywords.join(', ')}`;
+                    const details = `${keywordsStr.substr(0, 24)}...`;
                     const speciesId = parseInt(speciesIdStr as any, 10);
 
                     if (speciesId in speciesNames) {
@@ -263,6 +272,7 @@
 
                         return {
                             details,
+                            keywords: `${name}: ${keywordsStr}`,
                             name: `${name} (species)`,
                             shortName: name,
                             id: speciesId
@@ -273,6 +283,7 @@
 
                     return {
                         details,
+                        keywords: `${speciesName}s: ${keywordsStr}`,
                         name: `${speciesName}s (species)`,
                         shortName: `${speciesName}s`,
                         id: speciesId
@@ -298,6 +309,11 @@
             if(this.data.kinks.length >= 5)
                 return this.data.kinks.indexOf(kink) !== -1;
             return filter.test(kink.name);
+        }
+
+
+        filterSpecies(filter: RegExp, species: SearchSpecies): boolean {
+            return filter.test(species.keywords);
         }
 
         get showAvatars(): boolean {

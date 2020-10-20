@@ -2,6 +2,7 @@
 
 ## 1.3.0
 *   Improved species search and matching
+*   Toggle ad buttons show up in channels list, if the channel has ads set up
 
 
 ## 1.2.0

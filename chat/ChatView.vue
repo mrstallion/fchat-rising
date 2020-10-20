@@ -57,6 +57,9 @@
                     @click.middle.prevent="conversation.close()">
                     <span class="name">{{conversation.name}}</span>
                     <span>
+                        <span v-if="conversation.hasAutomatedAds()" class="fas fa-ad" :class="{'active': conversation.isSendingAutomatedAds()}" aria-label="Toggle ads"
+                          @click.stop="conversation.toggleAutomatedAds()"
+                          ></span>
                         <span class="pin fas fa-thumbtack" :class="{'active': conversation.isPinned}" :aria-label="l('chat.pinTab')"
                             @click.stop="conversation.isPinned = !conversation.isPinned" @mousedown.prevent></span>
                         <span class="fas fa-times leave" @click.stop="conversation.close()" :aria-label="l('chat.closeTab')"></span>

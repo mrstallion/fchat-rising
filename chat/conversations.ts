@@ -145,6 +145,20 @@ abstract class Conversation implements Interfaces.Conversation {
             await Bluebird.delay(Conversation.POST_DELAY - lastPostDelta);
         }
     }
+
+    isSendingAutomatedAds(): boolean {
+        return this.adManager.isActive();
+    }
+
+
+    toggleAutomatedAds(): void {
+        this.adManager.isActive() ? this.adManager.stop() : this.adManager.start();
+    }
+
+
+    hasAutomatedAds(): boolean {
+        return (this.adManager.getAds().length > 0);
+    }
 }
 
 

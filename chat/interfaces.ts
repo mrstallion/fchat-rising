@@ -65,6 +65,11 @@ export namespace Conversation {
         mode: Channel.Mode
         readonly nextAd: number
         isSendingAds: boolean
+
+        isSendingAutomatedAds(): boolean
+        toggleAutomatedAds(): void
+        hasAutomatedAds(): boolean
+
         sendAd(text: string): Promise<void>
     }
 
@@ -144,7 +149,7 @@ export interface Logs {
 }
 
 export type SearchKink = {id: number, name: string, description: string};
-export type SearchSpecies = {id: number, name: string, shortName: string, details: string};
+export type SearchSpecies = {id: number, name: string, shortName: string, details: string, keywords: string};
 
 export interface SearchData {
     kinks: SearchKink[]

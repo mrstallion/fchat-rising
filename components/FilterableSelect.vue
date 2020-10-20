@@ -68,6 +68,7 @@
         }
 
         get filtered(): object[] {
+            // tslint:disable-next-line:no-unsafe-any
             return this.options.filter((x) => this.filterFunc(this.filterRegex, x));
         }
 
