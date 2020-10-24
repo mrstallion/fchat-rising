@@ -56,6 +56,13 @@ const previewInitiationTime = Date.now();
         const clear = () => {
             if (window.location.href.match(/^https?:\/\/[a-zA-Z0-9-]+\.tumblr\.com/)) {
                 // Because Tumblr sucks with their iframes
+                const og = document.querySelectorAll('meta[property="og:image"]:not([content=""])');
+
+                if (og.length > 0) {
+                    window.location.href = og[0].content;
+                }
+
+                // Must return anyway because... Tumblr sucks with their iframes
                 return;
             }
 
