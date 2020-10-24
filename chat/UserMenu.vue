@@ -9,6 +9,11 @@
             </div>
             <bbcode id="userMenuStatus" :text="character.statusText" v-show="character.statusText" class="list-group-item"
                 style="max-height:200px;overflow:auto;clear:both"></bbcode>
+
+            <div v-if="match" class="list-group-item menu-character-score">
+              <span v-for="(score, key) in match" :class="score.getRecommendedClass()"><i :class="score.getRecommendedIcon()"></i> {{getTagDesc(key)}}</span>
+            </div>
+
             <a tabindex="-1" :href="profileLink" target="_blank" v-if="showProfileFirst" class="list-group-item list-group-item-action">
                 <span class="fa fa-fw fa-user"></span>{{l('user.profile')}}</a>
             <a tabindex="-1" href="#" @click.prevent="openConversation(true)" class="list-group-item list-group-item-action">
@@ -44,18 +49,21 @@
 </template>
 
 <script lang="ts">
-    import {Component, Prop} from '@f-list/vue-ts';
-    import Vue from 'vue';
-    import {BBCodeView} from '../bbcode/view';
-    import Modal from '../components/Modal.vue';
-    import CharacterAdView from './character/CharacterAdView.vue';
-    import {characterImage, errorToString, getByteLength, profileLink} from './common';
-    import core from './core';
-    import {Channel, Character} from './interfaces';
-    import l from './localize';
-    import ReportDialog from './ReportDialog.vue';
+import { Component, Prop } from '@f-list/vue-ts';
+import Vue from 'vue';
+import { BBCodeView } from '../bbcode/view';
+import Modal from '../components/Modal.vue';
+import CharacterAdView from './character/CharacterAdView.vue';
+import { characterImage, errorToString, getByteLength, profileLink } from './common';
+import core from './core';
+import { Channel, Character } from './interfaces';
+import l from './localize';
+import ReportDialog from './ReportDialog.vue';
+import { Matcher, MatchResultScores } from '../learn/matcher';
+import { TagId } from '../learn/matcher-types';
+import _ from 'lodash';
 
-    @Component({
+@Component({
         components: {bbcode: BBCodeView(core.bbCodeParser), modal: Modal, 'ad-view': CharacterAdView}
     })
     export default class UserMenu extends Vue {
@@ -72,6 +80,7 @@
         memo = '';
         memoId = 0;
         memoLoading = false;
+        match: MatchResultScores | null = null;
 
         openConversation(jump: boolean): void {
             const conversation = core.conversations.getPrivate(this.character!);
@@ -195,6 +204,7 @@
             switch(e.type) {
                 case 'click':
                     if(node.dataset['character'] === undefined)
+                        // tslint:disable-next-line no-floating-promises
                         if(node === this.touchedElement) this.openMenu(touch, node.character, node.channel || undefined);
                         else this.onClick(node.character);
                     e.preventDefault();
@@ -203,6 +213,7 @@
                     this.touchedElement = node;
                     break;
                 case 'contextmenu':
+                    // tslint:disable-next-line no-floating-promises
                     this.openMenu(touch, node.character, node.channel || undefined);
                     e.preventDefault();
             }
@@ -215,12 +226,29 @@
             this.showContextMenu = false;
         }
 
-        private openMenu(touch: MouseEvent | Touch, character: Character, channel: Channel | undefined): void {
+        getTagDesc(key: any): any {
+          return TagId[key].toString().replace(/([A-Z])/g, ' $1').trim();
+        }
+
+        private async openMenu(touch: MouseEvent | Touch, character: Character, channel: Channel | undefined): Promise<void> {
             this.channel = channel;
             this.character = character;
             this.characterImage = undefined;
             this.showContextMenu = true;
             this.position = {left: `${touch.clientX}px`, top: `${touch.clientY}px`};
+            this.match = null;
+
+            const myProfile = core.characters.ownProfile;
+            const theirProfile = await core.cache.profileCache.get(this.character.name);
+
+            if (myProfile && theirProfile) {
+              const match = Matcher.identifyBestMatchReport(myProfile.character, theirProfile.character.character);
+
+              if (_.keys(match.merged).length > 0) {
+                this.match = match.merged;
+              }
+            }
+
             this.$nextTick(() => {
                 const menu = <HTMLElement>this.$refs['menu'];
                 this.characterImage = characterImage(character.name);
@@ -233,7 +261,7 @@
     }
 </script>
 
-<style>
+<style lang="scss">
     #userMenu .list-group-item {
         padding: 3px;
     }
@@ -242,4 +270,45 @@
         border-top-width: 0;
         z-index: -1;
     }
+
+    #userMenu {
+      .menu-character-score {
+        span {
+          padding-left: 3px;
+          padding-right: 3px;
+          margin-bottom: 3px;
+          margin-right: 3px;
+          display: inline-block;
+          border: 1px solid;
+          border-radius: 3px;
+
+          i {
+            color: white;
+          }
+
+          &.match {
+            background-color: var(--scoreMatchBg);
+            border: solid 1px var(--scoreMatchFg);
+          }
+
+          &.weak-match {
+            background-color: var(--scoreWeakMatchBg);
+            border: 1px solid var(--scoreWeakMatchFg);
+          }
+
+          &.weak-mismatch {
+            background-color: var(--scoreWeakMismatchBg);
+            border: 1px solid var(--scoreWeakMismatchFg);
+          }
+
+          &.mismatch {
+            background-color: var(--scoreMismatchBg);
+            border: 1px solid var(--scoreMismatchFg);
+          }
+        }
+      }
+    }
 </style>
+
+
+

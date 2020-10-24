@@ -29,6 +29,7 @@ export interface MatchReport {
     them: MatchResult;
     youMultiSpecies: boolean;
     themMultiSpecies: boolean;
+    merged: MatchResultScores;
     score: Scoring | null;
 }
 
@@ -78,24 +79,42 @@ const scoreClasses: ScoreClassMap = {
     [Scoring.MISMATCH]: 'mismatch'
 };
 
+const scoreIcons: ScoreClassMap = {
+    [Scoring.MATCH]: 'fas fa-heart',
+    [Scoring.WEAK_MATCH]: 'fas fa-thumbs-up',
+    [Scoring.NEUTRAL]: 'fas fa-meh',
+    [Scoring.WEAK_MISMATCH]: 'fas fa-question-circle',
+    [Scoring.MISMATCH]: 'fas fa-heart-broken'
+};
+
 export class Score {
     readonly score: Scoring;
     readonly description: string;
+    readonly shortDesc: string;
 
-    constructor(score: Scoring, description: string = '') {
+    constructor(score: Scoring, description: string = '', shortDesc: string = '') {
         if ((score !== Scoring.NEUTRAL) && (description === ''))
             throw new Error('Description must be provided if score is not neutral');
 
         this.score = score;
         this.description = description;
+        this.shortDesc = shortDesc;
     }
 
     getRecommendedClass(): string {
         return Score.getClasses(this.score);
     }
 
+    getRecommendedIcon(): string {
+        return Score.getIcon(this.score);
+    }
+
     static getClasses(score: Scoring): string {
         return scoreClasses[score];
+    }
+
+    static getIcon(score: Scoring): string {
+        return scoreIcons[score];
     }
 }
 
@@ -168,11 +187,15 @@ export class Matcher {
         const youThem = new Matcher(you, them, yourAnalysis, theirAnalysis);
         const themYou = new Matcher(them, you, theirAnalysis, yourAnalysis);
 
+        const youThemMatch = youThem.match();
+        const themYouMatch = themYou.match();
+
         const report: MatchReport = {
-            you: youThem.match(),
-            them: themYou.match(),
+            you: youThemMatch,
+            them: themYouMatch,
             youMultiSpecies: false,
             themMultiSpecies: false,
+            merged: Matcher.mergeResults(youThemMatch, themYouMatch),
             score: null
         };
 
@@ -196,11 +219,15 @@ export class Matcher {
                 const youThem = new Matcher(yourAnalysis.character, theirAnalysis.character, yourAnalysis.analysis, theirAnalysis.analysis);
                 const themYou = new Matcher(theirAnalysis.character, yourAnalysis.character, theirAnalysis.analysis, yourAnalysis.analysis);
 
+                const youThemMatch = youThem.match();
+                const themYouMatch = themYou.match();
+
                 const report: MatchReport = {
-                    you: youThem.match(),
-                    them: themYou.match(),
+                    you: youThemMatch,
+                    them: themYouMatch,
                     youMultiSpecies: (yourCharacterAnalyses.length > 1),
                     themMultiSpecies: (theirCharacterAnalyses.length > 1),
+                    merged: Matcher.mergeResults(youThemMatch, themYouMatch),
                     score: null
                 };
 
@@ -228,6 +255,32 @@ export class Matcher {
 
         return bestReport!;
     }
+
+
+    // tslint:disable-next-line
+    private static mergeResultScores(scores: MatchResultScores, results: MatchResultScores): void {
+      _.each(scores, (v: Score, k: any) => {
+          if (
+            // tslint:disable-next-line no-unsafe-any
+            ((!(k in results)) || (v.score < results[k].score))
+            && (v.score !== Scoring.NEUTRAL)
+          ) {
+            results[k] = v;
+          }
+        }
+      );
+    }
+
+
+    static mergeResults(you: MatchResult, them: MatchResult): MatchResultScores {
+        const results: MatchResultScores = {} as any;
+
+        Matcher.mergeResultScores(you.scores, results);
+        Matcher.mergeResultScores(them.scores, results);
+
+        return results;
+    }
+
 
     static generateAnalysisVariations(c: Character): CharacterAnalysisVariation[] {
         const speciesOptions = Matcher.getAllSpeciesAsStr(c);
@@ -753,7 +806,7 @@ export class Matcher {
         const s = Matcher.getMappedSpecies(mySpecies.string);
 
         if (!s) {
-            console.log('Unknown species', c.name, mySpecies.string);
+            log.silly('matcher.species.unknown', { character: c.name, species: mySpecies.string });
         }
 
         return s;
