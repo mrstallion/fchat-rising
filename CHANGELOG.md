@@ -5,11 +5,13 @@
 *   Toggle ads button shows up in channels list if you have set up ads for the channel
 *   Ad editor is now a BBCode editor
 *   Improved Tumblr previews
-*   Twitter previews have been disabled for now because they crash the client
+*   Twitter previews have been disabled for now (they crash the client)
+*   Right-click character menu now displays match results
+*   Fixed issues with image preview ad blocker
 
 
 ## 1.2.0
-*   Hide/show current character profile with Ctrl+P or Command+P
+*   Hide/show current character profile with `Ctrl+P` or `Command+P`
 *   Navigate back and forward in character profile view history
 
 

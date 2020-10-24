@@ -4,6 +4,8 @@ node_modules/
 /mobile/www
 /webchat/dist
 
+/electron/adblocker.bin
+
 .idea/
 
 
