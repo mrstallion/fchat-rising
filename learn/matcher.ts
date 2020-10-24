@@ -4,6 +4,9 @@ import * as _ from 'lodash';
 import { Character, CharacterInfotag } from '../interfaces';
 import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 
+import anyAscii from 'any-ascii';
+
+
 import {
     BodyType, fchatGenderMap,
     FurryPreference,
@@ -773,11 +776,11 @@ export class Matcher {
     private static speciesMappingCache?: SpeciesMappingCache;
     private static likelyHumanCache?: SpeciesMappingCache;
 
-    private static matchMappedSpecies(species: string, mapping: SpeciesMappingCache): Species | null {
+    private static matchMappedSpecies(species: string, mapping: SpeciesMappingCache, skipAscii: boolean = false): Species | null {
         let foundSpeciesId: Species | null = null;
         let match = '';
 
-        const finalSpecies = species.toLowerCase().trim();
+        const finalSpecies = (skipAscii ? species : anyAscii(species)).toLowerCase().trim();
 
         _.each(
             mapping,
@@ -809,7 +812,9 @@ export class Matcher {
         }
 
         return Matcher.matchMappedSpecies(species, Matcher.speciesMappingCache)
-            || Matcher.matchMappedSpecies(species, Matcher.likelyHumanCache);
+            || Matcher.matchMappedSpecies(species, Matcher.speciesMappingCache, true)
+            || Matcher.matchMappedSpecies(species, Matcher.likelyHumanCache)
+            || Matcher.matchMappedSpecies(species, Matcher.likelyHumanCache, true);
     }
 
     static getAllSpecies(c: Character): Species[] {
