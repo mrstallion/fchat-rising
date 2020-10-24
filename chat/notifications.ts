@@ -31,7 +31,8 @@ export default class Notifications implements Interface {
     getOptions(conversation: Conversation, body: string, icon: string):
         NotificationOptions & {badge: string, silent: boolean, renotify: boolean} {
 
-        const badge = <string>require(`./assets/ic_notification.png`).default; //tslint:disable-line:no-require-imports no-unsafe-any
+        //tslint:disable-next-line:no-require-imports no-unsafe-any
+        const badge = <string>require(`./assets/ic_notification.png`).default;
 
         return {
             body, icon: core.state.settings.showAvatars ? icon : undefined, badge, silent: true,  data: {key: conversation.key},

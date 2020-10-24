@@ -69,8 +69,11 @@
         tray: Electron.Tray
     }
 
+    // console.log(require('./build/tray.png').default);
+
     //tslint:disable-next-line:no-require-imports no-unsafe-any
     const trayIcon = path.join(__dirname, <string>require('./build/tray.png').default);
+    //path.join(__dirname, <string>require('./build/tray.png').default);
 
     @Component
     export default class Window extends Vue {

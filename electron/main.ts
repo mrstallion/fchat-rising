@@ -602,8 +602,10 @@ function onReady(): void {
 
     const emptyBadge = electron.nativeImage.createEmpty();
 
-    //tslint:disable-next-line:no-require-imports no-unsafe-any
-    const badge = electron.nativeImage.createFromPath(path.join(__dirname, <string>require('./build/badge.png').default));
+    const badge = electron.nativeImage.createFromPath(
+        //tslint:disable-next-line:no-require-imports no-unsafe-any
+        path.join(__dirname, <string>require('./build/badge.png').default)
+    );
 
     electron.ipcMain.on('has-new', (e: Event & {sender: Electron.WebContents}, hasNew: boolean) => {
         if(process.platform === 'darwin') app.dock.setBadge(hasNew ? '!' : '');

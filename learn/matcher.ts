@@ -4,6 +4,8 @@ import * as _ from 'lodash';
 import { Character, CharacterInfotag } from '../interfaces';
 import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 
+// tslint:disable-next-line ban-ts-ignore
+// @ts-ignore
 import anyAscii from 'any-ascii';
 
 

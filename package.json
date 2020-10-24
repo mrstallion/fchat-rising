@@ -19,12 +19,12 @@
     "axios": "^0.21.0",
     "bootstrap": "^4.5.3",
     "copy-webpack-plugin": "^6.2.1",
-    "css-loader": "^4.3.0",
+    "css-loader": "^5.0.0",
     "date-fns": "^2.16.1",
     "electron": "^10.1.5",
     "electron-log": "^4.2.4",
     "electron-packager": "^15.1.0",
-    "electron-rebuild": "^1.11.0",
+    "electron-rebuild": "^2.3.2",
     "extract-loader": "^5.1.0",
     "file-loader": "^6.1.1",
     "lodash": "^4.17.20",
@@ -35,7 +35,7 @@
     "raw-loader": "^4.0.2",
     "sass-loader": "^10.0.4",
     "sortablejs": "^1.12.0",
-    "style-loader": "^1.3.0",
+    "style-loader": "^2.0.0",
     "throat": "^5.0.0",
     "ts-loader": "^8.0.7",
     "tslib": "^2.0.3",
@@ -44,7 +44,7 @@
     "vue": "^2.6.12",
     "vue-loader": "^15.9.3",
     "vue-template-compiler": "^2.6.12",
-    "webpack": "^4.44.2"
+    "webpack": "^5.2.0"
   },
   "dependencies": {
     "@cliqz/adblocker-electron": "^1.18.3",

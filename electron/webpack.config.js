@@ -24,8 +24,8 @@ const mainConfig = {
                     transpileOnly: true
                 }
             },
-            {test: path.join(__dirname, 'package.json'), loader: 'file-loader?name=package.json', type: 'javascript/auto'},
-            {test: /\.(png|html)$/, loader: 'file-loader?name=[name].[ext]'},
+            {test: path.join(__dirname, 'package.json'), loader: 'file-loader', options: {name: 'package.json'}, type: 'javascript/auto'},
+            {test: /\.(png|html)$/, loader: 'file-loader', options: {name: '[name].[ext]'}},
             {test: /\.raw\.js$/, loader: 'raw-loader'}
         ]
     },
@@ -50,6 +50,7 @@ const mainConfig = {
     },
     output: {
         path: __dirname + '/app',
+        publicPath: './',
         filename: '[name].js'
     },
     context: __dirname,
@@ -79,10 +80,25 @@ const mainConfig = {
             {test: /\.(woff2?)$/, loader: 'file-loader'},
             {test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader'},
             {test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader'},
-            {test: /\.(wav|mp3|ogg)$/, loader: 'file-loader?name=sounds/[name].[ext]'},
-            {test: /\.(png|html)$/, loader: 'file-loader?name=[name].[ext]'},
-            {test: /\.vue\.scss/, loader: ['vue-style-loader', {loader: 'css-loader', options: {esModule: false}},'sass-loader']},
-            {test: /\.vue\.css/, loader: ['vue-style-loader', {loader: 'css-loader', options: {esModule: false}}]},
+            {test: /\.(wav|mp3|ogg)$/, loader: 'file-loader', options: {name: 'sounds/[name].[ext]'}},
+            {test: /\.(png|html)$/, loader: 'file-loader', options: {name: '[name].[ext]'}},
+            {
+                test: /\.vue\.scss/,
+                // loader: ['vue-style-loader', {loader: 'css-loader', options: {esModule: false}},'sass-loader']
+                use: [
+                    'vue-style-loader',
+                    {loader: 'css-loader', options: {esModule: false}},
+                    'sass-loader'
+                ]
+            },
+            {
+                test: /\.vue\.css/,
+                // loader: ['vue-style-loader', {loader: 'css-loader', options: {esModule: false}}]
+                use: [
+                    'vue-style-loader',
+                    {loader: 'css-loader', options: {esModule: false}}
+                ]
+            },
             {test: /\.raw\.js$/, loader: 'raw-loader'}
         ]
     },
@@ -112,7 +128,7 @@ const mainConfig = {
     ],
     resolve: {
         extensions: ['.ts', '.js', '.vue', '.css'],
-        alias: {qs: 'querystring'}
+        // alias: {qs: 'querystring'}
     },
     optimization: {
         splitChunks: {chunks: 'all', minChunks: 2, name: 'common'}
@@ -126,11 +142,35 @@ module.exports = function(mode) {
         if(!theme.endsWith('.scss')) continue;
         const absPath = path.join(themesDir, theme);
         rendererConfig.entry.chat.push(absPath);
-        rendererConfig.module.rules.unshift({test: absPath, loader: ['file-loader?name=themes/[name].css', 'extract-loader', {loader: 'css-loader', options: {esModule: false}}, 'sass-loader']});
+
+        rendererConfig.module.rules.unshift(
+            {
+                test: absPath,
+                use: [
+                    {loader: 'file-loader', options: {name: 'themes/[name].css'}},
+                    'extract-loader',
+                    {loader: 'css-loader', options: {esModule: false}},
+                    'sass-loader'
+                ]
+            }
+        );
     }
+
     const faPath = path.join(themesDir, '../../fa.scss');
     rendererConfig.entry.chat.push(faPath);
-    rendererConfig.module.rules.unshift({test: faPath, loader: ['file-loader?name=fa.css', 'extract-loader', {loader: 'css-loader', options: {esModule: false}}, 'sass-loader']});
+
+    rendererConfig.module.rules.unshift(
+        {
+            test: faPath,
+            use: [
+                {loader: 'file-loader', options: {name: 'fa.css'}},
+                'extract-loader',
+                {loader: 'css-loader', options: {esModule: false}},
+                'sass-loader'
+            ]
+        }
+    );
+
     if(mode === 'production') {
         process.env.NODE_ENV = 'production';
         mainConfig.devtool = rendererConfig.devtool = 'source-map';
@@ -141,5 +181,6 @@ module.exports = function(mode) {
         mainConfig.devtool = 'inline-source-map';
         rendererConfig.devtool = 'inline-source-map';
     }
+
     return [mainConfig, rendererConfig];
 };
