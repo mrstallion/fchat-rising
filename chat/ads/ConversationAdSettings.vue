@@ -8,8 +8,8 @@
                 <a @click="removeAd(index)" title="Remove Ad"><i class="fas fa-times-circle"></i></a>
             </label>
 
-            <bbcode-editor :id="'ad' + conversation.key + '-' + index" v-model="ads[index]" :hasToolbar="true" class="form-control">
-            </bbcode-editor>
+            <editor :id="'ad' + conversation.key + '-' + index" v-model="ads[index]" :hasToolbar="true" class="form-control">
+            </editor>
         </div>
         <button class="btn btn-outline-secondary" @click="addAd()">Add Another</button>
 
@@ -22,9 +22,10 @@
     import Modal from '../../components/Modal.vue';
     import {Conversation} from '../interfaces';
     import l from '../localize';
+    import {Editor} from '../bbcode';
 
     @Component({
-        components: {modal: Modal}
+        components: {modal: Modal, editor: Editor}
     })
     export default class ConversationAdSettings extends CustomDialog {
         @Prop({required: true})
