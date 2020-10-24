@@ -2,7 +2,10 @@
 
 ## 1.3.0
 *   Improved species search and matching
-*   Toggle ad buttons show up in channels list, if the channel has ads set up
+*   Toggle ads button shows up in channels list if you have set up ads for the channel
+*   Ad editor is now a BBCode editor
+*   Improved Tumblr previews
+*   Twitter previews have been disabled for now because they crash the client
 
 
 ## 1.2.0
