@@ -407,6 +407,12 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
     }
 
 
+    hasAutomatedAds(): boolean {
+        return ((this.mode === 'both') || (this.mode === 'ads'))
+            && super.hasAutomatedAds();
+    }
+
+
     async sendAd(text: string): Promise<void> {
         if (text.length < 1)
             return;

@@ -189,7 +189,7 @@
     import CommandHelp from './CommandHelp.vue';
     import { characterImage, getByteLength, getKey } from './common';
     import ConversationSettings from './ConversationSettings.vue';
-    import ConversationAdSettings from './ConversationAdSettings.vue';
+    import ConversationAdSettings from './ads/ConversationAdSettings.vue';
     import core from './core';
     import {Channel, channelModes, Character, Conversation, Settings} from './interfaces';
     import l from './localize';

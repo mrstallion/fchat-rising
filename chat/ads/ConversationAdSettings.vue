@@ -1,13 +1,15 @@
 <template>
-    <modal :action="`Ad settings for ${conversation.name}`" @submit="submit" ref="dialog" @open="load()" dialogClass="w-100"
+    <modal :action="`Ads for ${conversation.name}`" @submit="submit" ref="dialog" @open="load()" dialogClass="w-100"
         :buttonText="l('conversationSettings.save')">
         <div class="form-group ad-list" v-for="(ad, index) in ads">
             <label :for="'ad' + conversation.key + '-' + index" class="control-label">Ad #{{(index + 1)}}
                 <a v-if="(index > 0)" @click="moveAdUp(index)" title="Move Up"><i class="fa fa-arrow-up"></i></a>
                 <a v-if="(index < ads.length - 1)" @click="moveAdDown(index)" title="Move Down"><i class="fa fa-arrow-down"></i></a>
-                <a @click="removeAd(index)" title="Remove Ad"><i class="fa fa-minus-circle"></i></a>
+                <a @click="removeAd(index)" title="Remove Ad"><i class="fas fa-times-circle"></i></a>
             </label>
-            <textarea :id="'ad' + conversation.key + '-' + index" class="form-control" v-model="ads[index]"></textarea>
+
+            <bbcode-editor :id="'ad' + conversation.key + '-' + index" v-model="ads[index]" :hasToolbar="true" class="form-control">
+            </bbcode-editor>
         </div>
         <button class="btn btn-outline-secondary" @click="addAd()">Add Another</button>
 
@@ -16,10 +18,10 @@
 
 <script lang="ts">
     import {Component, Prop} from '@f-list/vue-ts';
-    import CustomDialog from '../components/custom_dialog';
-    import Modal from '../components/Modal.vue';
-    import {Conversation} from './interfaces';
-    import l from './localize';
+    import CustomDialog from '../../components/custom_dialog';
+    import Modal from '../../components/Modal.vue';
+    import {Conversation} from '../interfaces';
+    import l from '../localize';
 
     @Component({
         components: {modal: Modal}
@@ -84,13 +86,46 @@
 </script>
 
 <style lang="scss">
-    .form-group.ad-list label a {
+  .w-100 {
+    min-width: 70%;
+  }
+
+  .form-group.ad-list {
+    label {
+      font-size: 140%;
+
+      a {
         padding-right: 0.3rem;
-        opacity:0.3
+        opacity:0.3;
+        font-size: 70%;
+
+        &:hover {
+          opacity:0.6
+        }
+      }
     }
 
-    .form-group.ad-list label a:hover {
-        opacity:0.6
+    .bbcode-preview {
+      margin-top: 0;
+      border: 1px solid;
+      padding: 5px;
+      border-radius: 0 5px 5px 5px;
+      background: var(--input-bg);
+      border-color: var(--secondary);
     }
+
+    .bbcode-editor {
+      border: none;
+      background: none;
+      height: auto;
+
+      textarea {
+        width: 100%;
+        color: var(--input-color);
+        background-color: var(--input-bg);
+        border-radius: 0 5px 5px 5px;
+      }
+    }
+  }
 </style>
 
