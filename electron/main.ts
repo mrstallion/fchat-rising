@@ -219,10 +219,31 @@ function createWindow(): Electron.BrowserWindow | undefined {
             'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt', // uBlock Origin Badware
             'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/resource-abuse.txt', // uBlock Origin Resource Abuse
             'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt' // uBlock Origin Unbreak
-        ]
+        ],
+        {
+            enableCompression: true
+        },
+        {
+            path: path.join(baseDir, 'adblocker.bin'),
+            read: fs.promises.readFile,
+            write: fs.promises.writeFile
+        }
     ).then(
         (blocker) => {
             blocker.enableBlockingInSession(electron.session.defaultSession);
+
+            // Temp fix -- manually override adblocker's preload script 1) to point to CJS; 2) to use absolute path
+            const preloadScript = path.resolve(path.dirname(require.resolve('@cliqz/adblocker-electron-preload')), 'preload.cjs.js');
+
+            electron.session.defaultSession.setPreloads(
+                _.concat(
+                    _.filter(
+                        electron.session.defaultSession.getPreloads(),
+                        (p) => (p.indexOf('adblocker-electron-preload') < 0)
+                    ),
+                    [preloadScript]
+                )
+            );
 
             // blocker.on('request-blocked', (request: Request) => {
             //     console.log('blocked', request.url);
