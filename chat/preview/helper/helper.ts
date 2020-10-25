@@ -1,15 +1,22 @@
 import ImagePreview from '../ImagePreview.vue';
 
 export abstract class ImagePreviewHelper {
+    static readonly HTTP_TESTER = /^https?:\/\//;
+
     protected visible = false;
-    protected url: string | null = 'about:blank';
+    protected url: string | undefined = 'about:blank';
     protected parent: ImagePreview;
     protected debug: boolean;
 
-    abstract show(url: string): void;
+    abstract show(url: string | undefined): void;
     abstract hide(): void;
-    abstract match(domainName: string): boolean;
+    abstract match(domainName: string | undefined, url: string | undefined): boolean;
     abstract renderStyle(): Record<string, any>;
+
+    abstract reactsToSizeUpdates(): boolean;
+    abstract setRatio(ratio: number): void;
+    abstract shouldTrackLoading(): boolean;
+    abstract usesWebView(): boolean;
 
     constructor(parent: ImagePreview) {
         if (!parent) {
@@ -24,7 +31,7 @@ export abstract class ImagePreviewHelper {
         return this.visible;
     }
 
-    getUrl(): string | null {
+    getUrl(): string | undefined {
         return this.url;
     }
 

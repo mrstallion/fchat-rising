@@ -1,13 +1,12 @@
 <template>
     <div id="character-page-sidebar" class="card bg-light">
-        <div class="card-header">
-            <span class="character-name">{{ character.character.name }}</span>
+        <div class="card-body">
+            <img :src="avatarUrl(character.character.name)" class="character-avatar" style="margin-right:10px">
+
             <div v-if="character.character.title" class="character-title">{{ character.character.title }}</div>
             <character-action-menu :character="character" @rename="showRename()" @delete="showDelete()"
                 @block="showBlock()"></character-action-menu>
-        </div>
-        <div class="card-body">
-            <img :src="avatarUrl(character.character.name)" class="character-avatar" style="margin-right:10px">
+
             <div v-if="authenticated" class="d-flex justify-content-between flex-wrap character-links-block">
                 <template v-if="character.is_self">
                     <a :href="editUrl" class="edit-link"><i class="fa fa-fw fa-pencil-alt"></i>Edit</a>

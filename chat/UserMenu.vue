@@ -10,9 +10,7 @@
             <bbcode id="userMenuStatus" :text="character.statusText" v-show="character.statusText" class="list-group-item"
                 style="max-height:200px;overflow:auto;clear:both"></bbcode>
 
-            <div v-if="match" class="list-group-item menu-character-score">
-              <span v-for="(score, key) in match" :class="score.getRecommendedClass()"><i :class="score.getRecommendedIcon()"></i> {{getTagDesc(key)}}</span>
-            </div>
+            <match-tags v-if="match" :match="match" class="list-group-item"></match-tags>
 
             <a tabindex="-1" :href="profileLink" target="_blank" v-if="showProfileFirst" class="list-group-item list-group-item-action">
                 <span class="fa fa-fw fa-user"></span>{{l('user.profile')}}</a>
@@ -59,12 +57,12 @@ import core from './core';
 import { Channel, Character } from './interfaces';
 import l from './localize';
 import ReportDialog from './ReportDialog.vue';
-import { Matcher, MatchResultScores } from '../learn/matcher';
-import { TagId } from '../learn/matcher-types';
+import { Matcher, MatchReport } from '../learn/matcher';
 import _ from 'lodash';
+import MatchTags from './preview/MatchTags.vue';
 
 @Component({
-        components: {bbcode: BBCodeView(core.bbCodeParser), modal: Modal, 'ad-view': CharacterAdView}
+        components: {'match-tags': MatchTags, bbcode: BBCodeView(core.bbCodeParser), modal: Modal, 'ad-view': CharacterAdView}
     })
     export default class UserMenu extends Vue {
         @Prop({required: true})
@@ -80,7 +78,7 @@ import _ from 'lodash';
         memo = '';
         memoId = 0;
         memoLoading = false;
-        match: MatchResultScores | null = null;
+        match: MatchReport | null = null;
 
         openConversation(jump: boolean): void {
             const conversation = core.conversations.getPrivate(this.character!);
@@ -226,9 +224,6 @@ import _ from 'lodash';
             this.showContextMenu = false;
         }
 
-        getTagDesc(key: any): any {
-          return TagId[key].toString().replace(/([A-Z])/g, ' $1').trim();
-        }
 
         private async openMenu(touch: MouseEvent | Touch, character: Character, channel: Channel | undefined): Promise<void> {
             this.channel = channel;
@@ -246,7 +241,7 @@ import _ from 'lodash';
                 const match = Matcher.identifyBestMatchReport(myProfile.character, theirProfile.character.character);
 
                 if (_.keys(match.merged).length > 0) {
-                  this.match = match.merged;
+                  this.match = match;
                 }
               }
             }
@@ -271,44 +266,6 @@ import _ from 'lodash';
     #userMenu .list-group-item-action {
         border-top-width: 0;
         z-index: -1;
-    }
-
-    #userMenu {
-      .menu-character-score {
-        span {
-          padding-left: 3px;
-          padding-right: 3px;
-          margin-bottom: 3px;
-          margin-right: 3px;
-          display: inline-block;
-          border: 1px solid;
-          border-radius: 3px;
-
-          i {
-            color: white;
-          }
-
-          &.match {
-            background-color: var(--scoreMatchBg);
-            border: solid 1px var(--scoreMatchFg);
-          }
-
-          &.weak-match {
-            background-color: var(--scoreWeakMatchBg);
-            border: 1px solid var(--scoreWeakMatchFg);
-          }
-
-          &.weak-mismatch {
-            background-color: var(--scoreWeakMismatchBg);
-            border: 1px solid var(--scoreWeakMismatchFg);
-          }
-
-          &.mismatch {
-            background-color: var(--scoreMismatchBg);
-            border: 1px solid var(--scoreMismatchFg);
-          }
-        }
-      }
     }
 </style>
 

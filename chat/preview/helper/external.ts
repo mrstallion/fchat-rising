@@ -3,7 +3,7 @@ import { ImagePreviewHelper } from './helper';
 import * as _ from 'lodash';
 
 export class ExternalImagePreviewHelper extends ImagePreviewHelper {
-    protected lastExternalUrl: string | null = null;
+    protected lastExternalUrl: string | undefined = undefined;
 
     protected allowCachedUrl = true;
 
@@ -47,6 +47,21 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
     }
 
 
+    reactsToSizeUpdates(): boolean {
+        return true;
+    }
+
+
+    shouldTrackLoading(): boolean {
+        return true;
+    }
+
+
+    usesWebView(): boolean {
+        return true;
+    }
+
+
     setDebug(debug: boolean): void {
         this.debug = debug;
 
@@ -54,7 +69,7 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
     }
 
 
-    show(url: string): void {
+    show(url: string | undefined): void {
         const webview = this.parent.getWebview();
 
         if (!this.parent) {
@@ -63,6 +78,10 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
 
         if (!webview) {
             throw new Error('Empty webview!');
+        }
+
+        if (!url) {
+            throw new Error('Empty URL!');
         }
 
         // const oldUrl = this.url;
@@ -113,8 +132,13 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
     }
 
 
-    match(domainName: string): boolean {
-        return !((domainName === 'f-list.net') || (domainName === 'static.f-list.net'));
+    match(domainName: string | undefined, url: string | undefined): boolean {
+        if ((!domainName) || (!url)) {
+            return false;
+        }
+
+        return (ImagePreviewHelper.HTTP_TESTER.test(url))
+            && (!((domainName === 'f-list.net') || (domainName === 'static.f-list.net')));
     }
 
 
@@ -151,6 +175,7 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
             };
         }
     }
+
 
     renderStyle(): Record<string, any> {
         return this.isVisible()

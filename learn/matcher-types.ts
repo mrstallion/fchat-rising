@@ -92,6 +92,15 @@ export enum FurryPreference {
     FurriesPreferredHumansOk = 149
 }
 
+export const furryPreferenceMapping = {
+    [FurryPreference.FurriesOnly]: 'furries only',
+    [FurryPreference.FursAndHumans]: 'loves furries and humans',
+    [FurryPreference.HumansOnly]: 'humans only',
+    [FurryPreference.HumansPreferredFurriesOk]: 'loves humans, likes furries',
+    [FurryPreference.FurriesPreferredHumansOk]: 'loves furries, likes humans'
+};
+
+
 export interface GenderKinkIdMap {
     [key: number]: Kink
 }

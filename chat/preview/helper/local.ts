@@ -1,20 +1,46 @@
 import { ImagePreviewHelper } from './helper';
 
+
 export class LocalImagePreviewHelper extends ImagePreviewHelper {
     hide(): void {
         this.visible = false;
-        this.url = null;
+        this.url = undefined;
     }
 
 
-    show(url: string): void {
+    show(url: string | undefined): void {
         this.visible = true;
         this.url = url;
     }
 
 
-    match(domainName: string): boolean {
-        return ((domainName === 'f-list.net') || (domainName === 'static.f-list.net'));
+    setRatio(_ratio: number): void {
+        // do nothing
+    }
+
+
+    reactsToSizeUpdates(): boolean {
+        return false;
+    }
+
+
+    shouldTrackLoading(): boolean {
+        return false;
+    }
+
+
+    usesWebView(): boolean {
+        return false;
+    }
+
+
+    match(domainName: string | undefined, url: string | undefined): boolean {
+        if ((!domainName) || (!url)) {
+            return false;
+        }
+
+        return (ImagePreviewHelper.HTTP_TESTER.test(url))
+            && ((domainName === 'f-list.net') || (domainName === 'static.f-list.net'));
     }
 
 

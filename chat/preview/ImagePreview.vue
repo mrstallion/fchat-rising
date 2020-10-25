@@ -21,14 +21,19 @@
             id="image-preview-ext"
             ref="imagePreviewExt"
             class="image-preview-external"
-            :style="externalPreviewStyle">
+            :style="previewStyles.ExternalImagePreviewHelper">
         </webview>
 
         <div
             class="image-preview-local"
-            :style="localPreviewStyle"
+            :style="previewStyles.LocalImagePreviewHelper"
         >
         </div>
+
+        <character-preview
+            :style="previewStyles.CharacterPreviewHelper"
+            ref="characterPreview"
+        ></character-preview>
 
         <i id="preview-spinner" class="fas fa-circle-notch fa-spin" v-show="shouldShowSpinner"></i>
         <i id="preview-error" class="fas fa-times" v-show="shouldShowError"></i>
@@ -44,12 +49,17 @@
     import {domain} from '../../bbcode/core';
     import {ImageDomMutator} from './image-dom-mutator';
 
-    import { ExternalImagePreviewHelper, LocalImagePreviewHelper } from './helper';
+    import {
+      ExternalImagePreviewHelper,
+      LocalImagePreviewHelper,
+      PreviewManager,
+      CharacterPreviewHelper, RenderStyle
+    } from './helper';
 
     import {Point, WebviewTag, remote} from 'electron';
     import Timer = NodeJS.Timer;
     import IpcMessageEvent = Electron.IpcMessageEvent;
-
+    import CharacterPreview from './CharacterPreview.vue';
 
     const screen = remote.screen;
 
@@ -63,15 +73,30 @@
         httpStatusText: string;
     }
 
-
-    @Component
+    @Component({
+        components: {
+          'character-preview': CharacterPreview
+        }
+    })
     export default class ImagePreview extends Vue {
         private readonly MinTimePreviewVisible = 100;
 
         visible = false;
 
-        externalPreviewHelper = new ExternalImagePreviewHelper(this);
-        localPreviewHelper = new LocalImagePreviewHelper(this);
+        previewManager = new PreviewManager(
+          this,
+          [
+            new ExternalImagePreviewHelper(this),
+            new LocalImagePreviewHelper(this),
+            new CharacterPreviewHelper(this)
+            // new ChannelPreviewHelper(this)
+          ]
+        );
+
+        // externalPreviewHelper = new ExternalImagePreviewHelper(this);
+        // localPreviewHelper = new LocalImagePreviewHelper(this);
+        // externalPreviewStyle: Record<string, any> = {};
+        // localPreviewStyle: Record<string, any> = {};
 
         url: string | null = null;
         domain: string | undefined;
@@ -82,14 +107,10 @@
 
         jsMutator = new ImageDomMutator(this.debug);
 
-        externalPreviewStyle: Record<string, any> = {};
-        localPreviewStyle: Record<string, any> = {};
-
         state = 'hidden';
 
         shouldShowSpinner = false;
         shouldShowError = true;
-
 
         private interval: Timer | null = null;
 
@@ -99,6 +120,9 @@
         private initialCursorPosition: Point | null = null;
         private shouldDismiss = false;
         private visibleSince = 0;
+
+        previewStyles: Record<string, RenderStyle> = {};
+
 
         @Hook('mounted')
         onMounted(): void {
@@ -299,43 +323,33 @@
 
 
         reRenderStyles(): void {
-            // tslint:disable-next-line:no-unsafe-any
-            this.externalPreviewStyle = this.externalPreviewHelper.renderStyle();
-            // tslint:disable-next-line:no-unsafe-any
-            this.localPreviewStyle = this.localPreviewHelper.renderStyle();
-
-            this.debugLog(
-                'ImagePreview: reRenderStyles', 'external',
-                JSON.parse(JSON.stringify(this.externalPreviewStyle)),
-                'local', JSON.parse(JSON.stringify(this.localPreviewStyle))
-            );
+            this.previewStyles = this.previewManager.renderStyles();
         }
 
 
         updatePreviewSize(width: number, height: number): void {
-            if (!this.externalPreviewHelper.isVisible()) {
-                return;
+            const helper = this.previewManager.getVisiblePreview();
+
+            if ((!helper) || (!helper.reactsToSizeUpdates())) {
+              return;
             }
 
             if ((width) && (height)) {
                 this.debugLog('ImagePreview: updatePreviewSize', width, height, width / height);
 
-                this.externalPreviewHelper.setRatio(width / height);
+                helper.setRatio(width / height);
                 this.reRenderStyles();
             }
         }
 
 
         hide(): void {
-            this.debugLog('ImagePreview: hide', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible());
-
             this.cancelExitTimer();
 
             this.url = null;
             this.visible = false;
 
-            this.localPreviewHelper.hide();
-            this.externalPreviewHelper.hide();
+            this.previewManager.hide();
 
             this.exitUrl = null;
             this.exitInterval = null;
@@ -378,7 +392,7 @@
             if ((!this.hasMouseMovedSince()) && (!force))
                 return;
 
-            this.debugLog('ImagePreview: dismiss.exec', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible(), url);
+            this.debugLog('ImagePreview: dismiss.exec', this.previewManager.getVisibilityStatus(), url);
 
             // This timeout makes the preview window disappear with a slight delay, which helps UX
             // when dealing with situations such as quickly scrolling text that moves the cursor away
@@ -393,7 +407,7 @@
         show(initialUrl: string): void {
             const url = this.jsMutator.mutateUrl(initialUrl);
 
-            this.debugLog('ImagePreview: show', this.externalPreviewHelper.isVisible(), this.localPreviewHelper.isVisible(),
+            this.debugLog('ImagePreview: show', this.previewManager.getVisibilityStatus(),
                 this.visible, this.hasMouseMovedSince(), !!this.interval, this.sticky, url);
 
             // console.log('SHOW');
@@ -430,15 +444,7 @@
                 () => {
                     this.debugLog('ImagePreview: show.timeout', this.url);
 
-                    const isLocal = this.localPreviewHelper.match(this.domain as string);
-
-                    isLocal
-                        ? this.localPreviewHelper.show(this.url as string)
-                        : this.localPreviewHelper.hide();
-
-                    this.externalPreviewHelper.match(this.domain as string)
-                        ? this.externalPreviewHelper.show(this.url as string)
-                        : this.externalPreviewHelper.hide();
+                    const helper = this.previewManager.show(this.url || undefined, this.domain);
 
                     this.interval = null;
                     this.visible = true;
@@ -449,7 +455,11 @@
 
                     this.reRenderStyles();
 
-                    this.setState(isLocal ? 'loaded' : 'loading');
+                    if (helper) {
+                      this.setState(helper.shouldTrackLoading() ? 'loading' : 'loaded');
+                    } else {
+                      this.setState('loaded');
+                    }
                 },
                 due
             ) as Timer;
@@ -504,8 +514,7 @@
             this.debug = !this.debug;
 
             this.jsMutator.setDebug(this.debug);
-            this.localPreviewHelper.setDebug(this.debug);
-            this.externalPreviewHelper.setDebug(this.debug);
+            this.previewManager.setDebug(this.debug);
 
             if (this.debug) {
                 const webview = this.getWebview();
@@ -550,26 +559,44 @@
                 this.hide();
         }
 
+
         toggleJsMode(): void {
             this.runJs = !this.runJs;
         }
 
-        reloadUrl(): void {
-            if (this.externalPreviewHelper.isVisible()) {
-                const webview = this.getWebview();
 
-                webview.reload();
+        reloadUrl(): void {
+            const helper = this.previewManager.getVisiblePreview();
+
+            if ((!helper) || (!helper.usesWebView())) {
+              return;
             }
+
+            // helper.reload();
+            this.getWebview().reload();
         }
+
 
         getWebview(): WebviewTag {
             return this.$refs.imagePreviewExt as WebviewTag;
         }
 
 
+        getCharacterPreview(): CharacterPreview {
+          return this.$refs.characterPreview as CharacterPreview;
+        }
+
+
         reset(): void {
-            this.externalPreviewHelper = new ExternalImagePreviewHelper(this);
-            this.localPreviewHelper = new LocalImagePreviewHelper(this);
+            this.previewManager = new PreviewManager(
+              this,
+              [
+                new ExternalImagePreviewHelper(this),
+                new LocalImagePreviewHelper(this),
+                new CharacterPreviewHelper(this)
+                // new ChannelPreviewHelper(this)
+              ]
+            );
 
             this.url = null;
             this.domain = undefined;
@@ -612,8 +639,15 @@
                 : false;
         }
 
+
         testError(): boolean {
-            return ((this.state === 'error') && (this.externalPreviewHelper.isVisible()));
+            const helper = this.previewManager.getVisiblePreview();
+
+            if ((!helper) || (!helper.usesWebView())) {
+              return false;
+            }
+
+            return (this.state === 'error');
         }
     }
 </script>
@@ -693,6 +727,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             padding: 0.5rem;
             box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
 
             a i.fa {
                 font-size: 1.25rem;

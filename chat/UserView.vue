@@ -1,5 +1,5 @@
 <!-- Linebreaks inside this template will break BBCode views -->
-<template><span :class="userClass" v-bind:bbcodeTag.prop="'user'" v-bind:character.prop="character" v-bind:channel.prop="channel"><span v-if="!!statusClass" :class="statusClass"></span><span v-if="!!rankIcon" :class="rankIcon"></span>{{character.name}}<span v-if="!!matchClass" :class="matchClass">{{getMatchScoreTitle(matchScore)}}</span></span></template>
+<template><span :class="userClass" v-bind:bbcodeTag.prop="'user'" v-bind:character.prop="character" v-bind:channel.prop="channel" @mouseover.prevent="show()" @mouseenter.prevent="show()" @mouseleave.prevent="dismiss()" @mouseout.prevent="dismiss()" @click.middle.prevent="toggleStickyness()" @click.right.passive="dismiss(true)" @click.left.passive="dismiss(true)"><span v-if="!!statusClass" :class="statusClass"></span><span v-if="!!rankIcon" :class="rankIcon"></span>{{character.name}}<span v-if="!!matchClass" :class="matchClass">{{getMatchScoreTitle(matchScore)}}</span></span></template>
 
 
 <script lang="ts">
@@ -33,6 +33,70 @@ export function getStatusIcon(status: Character.Status): string {
 }
 
 
+export interface StatusClasses {
+  rankIcon: string | null;
+  statusClass: string | null;
+  matchClass: string | null;
+  matchScore: number | null;
+  userClass: string;
+  isBookmark: boolean;
+}
+
+export function getStatusClasses(
+  character: Character,
+  channel: Channel | undefined,
+  showStatus: boolean,
+  showBookmark: boolean,
+  showMatch: boolean
+): StatusClasses {
+    let rankIcon: string | null = null;
+    let statusClass = null;
+    let matchClass = null;
+    let matchScore = null;
+
+    if(character.isChatOp) {
+        rankIcon = 'far fa-gem';
+    } else if(channel !== undefined) {
+        rankIcon = (channel.owner === character.name)
+            ? 'fa fa-key'
+            : channel.opList.indexOf(character.name) !== -1
+                ? (channel.id.substr(0, 4) === 'adh-' ? 'fa fa-shield-alt' : 'fa fa-star')
+                : null;
+    }
+
+    if ((showStatus) || (character.status === 'crown'))
+        statusClass = `fa-fw ${getStatusIcon(character.status)}`;
+
+    if ((core.state.settings.risingAdScore) && (showMatch)) {
+        const cache = core.cache.profileCache.getSync(character.name);
+
+        if (cache) {
+            matchClass = `match-found ${Score.getClasses(cache.matchScore)}`;
+            matchScore = cache.matchScore;
+        } else {
+            /* tslint:disable-next-line no-floating-promises */
+            core.cache.addProfile(character.name);
+        }
+    }
+
+    const gender = character.gender !== undefined ? character.gender.toLowerCase() : 'none';
+
+    const isBookmark = (showBookmark) && (core.connection.isOpen) && (core.state.settings.colorBookmarks) &&
+        ((character.isFriend) || (character.isBookmarked));
+
+    const userClass = `user-view gender-${gender}${isBookmark ? ' user-bookmark' : ''}`;
+
+    return {
+      rankIcon,
+      statusClass,
+      matchClass,
+      matchScore,
+      userClass,
+      isBookmark
+    };
+}
+
+
 @Component({
     components: {
 
@@ -53,6 +117,9 @@ export default class UserView extends Vue {
 
     @Prop()
     readonly match?: boolean = false;
+
+    @Prop({default: true})
+    readonly preview: boolean = true;
 
     userClass = '';
 
@@ -100,8 +167,14 @@ export default class UserView extends Vue {
     onBeforeDestroy(): void {
         if (this.scoreWatcher)
             EventBus.$off('character-score', this.scoreWatcher);
+
+        this.dismiss();
     }
 
+    @Hook('deactivated')
+    deactivate(): void {
+        this.dismiss();
+    }
 
     @Hook('beforeUpdate')
     onBeforeUpdate(): void {
@@ -114,55 +187,13 @@ export default class UserView extends Vue {
     }
 
     update(): void {
-        this.rankIcon = null;
-        this.statusClass = null;
-        this.matchClass = null;
-        this.matchScore = null;
+      const res = getStatusClasses(this.character, this.channel, !!this.showStatus, !!this.bookmark, !!this.match);
 
-        // if (this.match) console.log('Update', this.character.name);
-
-        if(this.character.isChatOp) {
-            this.rankIcon = 'far fa-gem';
-        } else if(this.channel !== undefined) {
-            this.rankIcon = (this.channel.owner === this.character.name)
-                ? 'fa fa-key'
-                : this.channel.opList.indexOf(this.character.name) !== -1
-                    ? (this.channel.id.substr(0, 4) === 'adh-' ? 'fa fa-shield-alt' : 'fa fa-star')
-                    : null;
-        }
-
-        if ((this.showStatus) || (this.character.status === 'crown'))
-            this.statusClass = `fa-fw ${getStatusIcon(this.character.status)}`;
-
-        // if (this.match) console.log('Update prematch', this.character.name);
-
-        if ((core.state.settings.risingAdScore) && (this.match)) {
-            const cache = core.cache.profileCache.getSync(this.character.name);
-
-            if (cache) {
-                this.matchClass = `match-found ${Score.getClasses(cache.matchScore)}`;
-                this.matchScore = cache.matchScore;
-
-                // console.log('Found match data', this.character.name, cache.matchScore);
-            } else {
-                // console.log('Need match data', this.character.name);
-
-                /* tslint:disable-next-line no-floating-promises */
-                core.cache.addProfile(this.character.name);
-            }
-        }
-
-        // if (this.match) console.log('Update post match', this.character.name);
-
-        const gender = this.character.gender !== undefined ? this.character.gender.toLowerCase() : 'none';
-
-        const isBookmark = (this.bookmark) && (core.connection.isOpen) && (core.state.settings.colorBookmarks) &&
-            ((this.character.isFriend) || (this.character.isBookmarked));
-
-
-        this.userClass = `user-view gender-${gender}${isBookmark ? ' user-bookmark' : ''}`;
-
-        // if (this.match) console.log('Update done');
+      this.rankIcon = res.rankIcon;
+      this.statusClass = res.statusClass;
+      this.matchClass = res.matchClass;
+      this.matchScore = res.matchScore;
+      this.userClass = res.userClass;
     }
 
 
@@ -183,47 +214,37 @@ export default class UserView extends Vue {
 
         return '';
     }
-}
 
-//tslint:disable-next-line:variable-name
-/* const UserView = Vue.extend({
-    functional: true,
-    render(this: void | Vue, createElement: CreateElement, context?: RenderContext): VNode {
-        const props = <{character: Character, channel?: Channel, showStatus?: true, bookmark?: false, match?: false}>(
-            context !== undefined ? context.props : (<Vue>this).$options.propsData);
 
-        const character = props.character;
+    getCharacterUrl(): string {
+      return `flist-character://${this.character.name}`;
+    }
 
-        let matchClasses: string | undefined;
 
-        if (props.match) {
-            const cache = core.cache.profileCache.getSync(character.name);
-
-            if (cache) {
-                matchClasses = Score.getClasses(cache.matchScore);
-            }
+    dismiss(force: boolean = false): void {
+        if (!this.preview) {
+          return;
         }
 
-        let rankIcon;
-        if(character.isChatOp) rankIcon = 'far fa-gem';
-        else if(props.channel !== undefined)
-            rankIcon = props.channel.owner === character.name ? 'fa fa-key' : props.channel.opList.indexOf(character.name) !== -1 ?
-                (props.channel.id.substr(0, 4) === 'adh-' ? 'fa fa-shield-alt' : 'fa fa-star') : '';
-        else rankIcon = '';
-        const children: (VNode | string)[] = [character.name];
-        if(rankIcon !== '') children.unshift(createElement('span', {staticClass: rankIcon}));
-        if(props.showStatus !== undefined || character.status === 'crown')
-            children.unshift(createElement('span', {staticClass: `fa-fw ${getStatusIcon(character.status)}`}));
-        const gender = character.gender !== undefined ? character.gender.toLowerCase() : 'none';
-        const isBookmark = props.bookmark !== false && core.connection.isOpen && core.state.settings.colorBookmarks &&
-            (character.isFriend || character.isBookmarked);
-        return createElement('span', {
-            attrs: {class: `user-view gender-${gender}${isBookmark ? ' user-bookmark' : ''} ${matchClasses}`},
-            domProps: {character, channel: props.channel, bbcodeTag: 'user'}
-        }, children);
+        EventBus.$emit('imagepreview-dismiss', {url: this.getCharacterUrl(), force});
     }
-});
 
-export default UserView;
-*/
+
+    show(): void {
+        if (!this.preview) {
+          return;
+        }
+
+        EventBus.$emit('imagepreview-show', {url: this.getCharacterUrl()});
+    }
+
+
+    toggleStickyness(): void {
+        if (!this.preview) {
+          return;
+        }
+
+        EventBus.$emit('imagepreview-toggle-stickyness', {url: this.getCharacterUrl()});
+    }
+}
 </script>

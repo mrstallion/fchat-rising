@@ -1,7 +1,8 @@
 # Changelog
 
 ## Canary
-*   More conifugrable settings for F-Chat Rising
+*   More configurable settings for F-Chat Rising
+*   Hover mouse over a character name to see a character preview
 
 
 ## 1.3.0
