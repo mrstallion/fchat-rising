@@ -1,7 +1,7 @@
 <template>
     <modal :action="l('settings.action')" @submit="submit" @open="load()" id="settings" dialogClass="w-100">
         <tabs style="flex-shrink:0;margin-bottom:10px" v-model="selectedTab"
-            :tabs="[l('settings.tabs.general'), l('settings.tabs.notifications'), 'Rising', l('settings.tabs.hideAds'), l('settings.tabs.import')]"></tabs>
+            :tabs="[l('settings.tabs.general'), l('settings.tabs.notifications'), 'F-Chat Rising 🦄', l('settings.tabs.hideAds'), l('settings.tabs.import')]"></tabs>
         <div v-show="selectedTab === '0'">
             <div class="form-group">
                 <label class="control-label" for="disallowedTags">{{l('settings.disallowedTags')}}</label>
@@ -119,22 +119,70 @@
             </div>
         </div>
         <div v-show="selectedTab === '2'">
+            <h5>Matching</h5>
+
             <div class="form-group">
                 <label class="control-label" for="risingAdScore">
                     <input type="checkbox" id="risingAdScore" v-model="risingAdScore"/>
                     Colorize ads, profiles, and names of compatible and incompatible characters
                 </label>
+            </div>
 
+            <div class="form-group">
+                <label class="control-label" for="risingComparisonInUserMenu">
+                    <input type="checkbox" id="risingComparisonInUserMenu" v-model="risingComparisonInUserMenu"/>
+                    Show quick match results in the right click character menu
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label" for="risingComparisonInSearch">
+                    <input type="checkbox" id="risingComparisonInSearch" v-model="risingComparisonInSearch"/>
+                    Show quick match results in search results
+                </label>
+            </div>
+
+<!--            <div class="form-group">-->
+<!--                <label class="control-label" for="hideProfileComparisonSummary">-->
+<!--                    <input type="checkbox" id="hideProfileComparisonSummary" :checked="!hideProfileComparisonSummary" @input="hideProfileComparisonSummary = !$event.target.checked"/>-->
+<!--                    Show quick match results at the top of the character profile-->
+<!--                </label>-->
+<!--            </div>-->
+
+
+            <h5>Preview</h5>
+
+            <div class="form-group">
                 <label class="control-label" for="risingLinkPreview">
                     <input type="checkbox" id="risingLinkPreview" v-model="risingLinkPreview"/>
-                    Show link previews when the mouse hovers over a link
+                    Show a link/image preview when the mouse hovers over a link
                 </label>
+            </div>
 
+            <div class="form-group">
+                <label class="control-label" for="risingCharacterPreview">
+                    <input type="checkbox" id="risingCharacterPreview" v-model="risingCharacterPreview"/>
+                    Show a character preview when mouse hovers over a character name
+                </label>
+            </div>
+
+
+            <h5>Profile</h5>
+
+            <div class="form-group">
                 <label class="control-label" for="risingAutoCompareKinks">
                     <input type="checkbox" id="risingAutoCompareKinks" v-model="risingAutoCompareKinks"/>
                     Automatically compare kinks when viewing a character profile
                 </label>
             </div>
+
+            <div class="form-group">
+                <label class="control-label" for="risingAutoExpandCustomKinks">
+                    <input type="checkbox" id="risingAutoExpandCustomKinks" v-model="risingAutoExpandCustomKinks"/>
+                    Automatically expand custom kinks
+                </label>
+            </div>
+
         </div>
         <div v-show="selectedTab === '3'">
             <template v-if="hidden.length">
@@ -197,6 +245,12 @@
         risingLinkPreview!: boolean;
         risingAutoCompareKinks!: boolean;
 
+        risingAutoExpandCustomKinks!: boolean;
+        risingCharacterPreview!: boolean;
+        risingComparisonInUserMenu!: boolean;
+        risingComparisonInSearch!: boolean;
+
+
         async load(): Promise<void> {
             const settings = core.state.settings;
             this.playSound = settings.playSound;
@@ -224,6 +278,11 @@
             this.risingAdScore = settings.risingAdScore;
             this.risingLinkPreview = settings.risingLinkPreview;
             this.risingAutoCompareKinks = settings.risingAutoCompareKinks;
+
+            this.risingAutoExpandCustomKinks = settings.risingAutoExpandCustomKinks;
+            this.risingCharacterPreview = settings.risingCharacterPreview;
+            this.risingComparisonInUserMenu = settings.risingComparisonInUserMenu;
+            this.risingComparisonInSearch = settings.risingComparisonInSearch;
         }
 
         async doImport(): Promise<void> {
@@ -270,7 +329,12 @@
 
                 risingAdScore: this.risingAdScore,
                 risingLinkPreview: this.risingLinkPreview,
-                risingAutoCompareKinks: this.risingAutoCompareKinks
+                risingAutoCompareKinks: this.risingAutoCompareKinks,
+
+                risingAutoExpandCustomKinks: this.risingAutoExpandCustomKinks,
+                risingCharacterPreview: this.risingCharacterPreview,
+                risingComparisonInUserMenu: this.risingComparisonInUserMenu,
+                risingComparisonInSearch: this.risingComparisonInSearch
             };
             if(this.notifications) await core.notifications.requestPermission();
         }

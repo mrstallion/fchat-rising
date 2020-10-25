@@ -89,6 +89,9 @@
         readonly character!: Character;
         @Prop
         readonly oldApi?: true;
+        @Prop({required: true})
+        readonly autoExpandCustoms!: boolean;
+
         shared = Store;
         characterToCompare = Utils.settings.defaultCharacter;
         highlightGroup: number | undefined;
@@ -193,6 +196,8 @@
             if ((this.character) && (this.character.is_self))
                 return;
 
+            this.expandedCustoms = this.autoExpandCustoms;
+
             if (core.state.settings.risingAutoCompareKinks) {
                 await this.compareKinks(core.characters.ownProfile, true);
             }
@@ -202,6 +207,8 @@
         async characterChanged(): Promise<void> {
             if ((this.character) && (this.character.is_self))
                 return;
+
+            this.expandedCustoms = this.autoExpandCustoms;
 
             if (core.state.settings.risingAutoCompareKinks) {
                 await this.compareKinks(core.characters.ownProfile, true);

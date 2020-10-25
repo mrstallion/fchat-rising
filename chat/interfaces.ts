@@ -211,6 +211,11 @@ export namespace Settings {
         readonly risingAdScore: boolean;
         readonly risingLinkPreview: boolean;
         readonly risingAutoCompareKinks: boolean;
+
+        readonly risingAutoExpandCustomKinks: boolean;
+        readonly risingCharacterPreview: boolean;
+        readonly risingComparisonInUserMenu: boolean;
+        readonly risingComparisonInSearch: boolean;
     }
 }
 

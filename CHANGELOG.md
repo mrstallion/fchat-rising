@@ -1,5 +1,9 @@
 # Changelog
 
+## Canary
+*   More conifugrable settings for F-Chat Rising
+
+
 ## 1.3.0
 *   Improved species search and matching
 *   Toggle ads button shows up in channels list if you have set up ads for the channel

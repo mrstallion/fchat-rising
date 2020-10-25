@@ -238,14 +238,16 @@ import _ from 'lodash';
             this.position = {left: `${touch.clientX}px`, top: `${touch.clientY}px`};
             this.match = null;
 
-            const myProfile = core.characters.ownProfile;
-            const theirProfile = await core.cache.profileCache.get(this.character.name);
+            if (core.state.settings.risingComparisonInUserMenu) {
+              const myProfile = core.characters.ownProfile;
+              const theirProfile = await core.cache.profileCache.get(this.character.name);
 
-            if (myProfile && theirProfile) {
-              const match = Matcher.identifyBestMatchReport(myProfile.character, theirProfile.character.character);
+              if (myProfile && theirProfile) {
+                const match = Matcher.identifyBestMatchReport(myProfile.character, theirProfile.character.character);
 
-              if (_.keys(match.merged).length > 0) {
-                this.match = match.merged;
+                if (_.keys(match.merged).length > 0) {
+                  this.match = match.merged;
+                }
               }
             }
 

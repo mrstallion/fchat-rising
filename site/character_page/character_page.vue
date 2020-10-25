@@ -42,7 +42,7 @@
                                         <bbcode :text="character.character.description"></bbcode>
                                     </div>
 
-                                    <character-kinks :character="character" :oldApi="oldApi" ref="tab0"></character-kinks>
+                                    <character-kinks :character="character" :oldApi="oldApi" ref="tab0" :autoExpandCustoms="autoExpandCustoms"></character-kinks>
                                 </div>
                                 <div role="tabpanel" v-show="tab === '1'" id="infotags">
                                     <character-infotags :character="character" ref="tab1" :characterMatch="characterMatch"></character-infotags>
@@ -135,6 +135,7 @@
         refreshing = false;
         error = '';
         tab = '0';
+        autoExpandCustoms = false;
 
         /* guestbookPostCount: number | null = null;
         friendCount: number | null = null;
@@ -173,6 +174,8 @@
         @Watch('name')
         async onCharacterSet(): Promise<void> {
             this.tab = '0';
+            this.autoExpandCustoms = core.state.settings.risingAutoExpandCustomKinks;
+
             await this.load();
 
             // Kludge kluge

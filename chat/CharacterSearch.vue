@@ -36,10 +36,10 @@
             <div v-for="character in results" :key="character.name" class="search-result" :class="'status-' + character.status">
                 <template v-if="character.status === 'looking'" v-once>
                     <img :src="characterImage(character.name)" v-if="showAvatars"/>
-                    <user :character="character" :showStatus="true" :match="true"></user>
+                    <user :character="character" :showStatus="true" :match="shouldShowMatch"></user>
                     <bbcode :text="character.statusText"></bbcode>
                 </template>
-                <user v-else :character="character" :showStatus="true" :match="true" v-once></user>
+                <user v-else :character="character" :showStatus="true" :match="shouldShowMatch" v-once></user>
             </div>
         </div>
     </modal>
@@ -110,6 +110,7 @@
         resultsComplete = false;
         characterImage = characterImage;
         options!: ExtendedSearchData;
+        shouldShowMatch = true;
 
         data: ExtendedSearchData = {
             kinks: [],
@@ -354,6 +355,9 @@
                 this.results = undefined;
                 return;
             }
+
+            this.shouldShowMatch = core.state.settings.risingComparisonInSearch;
+
             this.error = '';
             const data: Connection.ClientCommands['FKS'] & {[key: string]: (string | number)[]} = {kinks: []};
             for(const key in this.data) {
