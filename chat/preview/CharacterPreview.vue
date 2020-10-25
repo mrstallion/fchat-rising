@@ -23,6 +23,11 @@
 
         <match-tags v-if="match" :match="match"></match-tags>
 
+        <div class="status-message" v-if="statusMessage">
+          <h4>Status</h4>
+          <bbcode :text="statusMessage"></bbcode>
+        </div>
+
         <div v-if="latestAd">
           <h4>Latest Ad <span class="message-time">{{formatTime(latestAd.datePosted)}}</span></h4>
           <bbcode :text="latestAd.message"></bbcode>
@@ -77,6 +82,7 @@ export default class CharacterPreview extends Vue {
   onlineCharacter?: CharacterStatus;
   statusClasses?: StatusClasses;
   latestAd?: AdCachedPosting;
+  statusMessage?: string;
 
   age?: string;
   sexualOrientation?: string;
@@ -126,6 +132,7 @@ export default class CharacterPreview extends Vue {
       return;
     }
 
+    this.statusMessage = this.onlineCharacter.statusText;
     this.statusClasses = getStatusClasses(this.onlineCharacter, undefined, true, true, false);
   }
 
@@ -271,8 +278,9 @@ export default class CharacterPreview extends Vue {
     }
 
     h4 {
-      font-size: 1rem;
-      margin-top: 1rem;
+      font-size: 1.25rem;
+      margin-top: 1.3rem;
+      margin-bottom: 0;
 
       .message-time {
         font-size: 80%;
