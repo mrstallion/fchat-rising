@@ -806,7 +806,7 @@ export class Matcher {
         const s = Matcher.getMappedSpecies(mySpecies.string);
 
         if (!s) {
-            log.silly('matcher.species.unknown', { character: c.name, species: mySpecies.string });
+            log.debug('matcher.species.unknown', { character: c.name, species: mySpecies.string });
         }
 
         return s;

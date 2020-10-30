@@ -63,6 +63,8 @@
 
     const screen = remote.screen;
 
+    const FLIST_PROFILE_MATCH = _.cloneDeep(/https?:\/\/(www.)?f-list.net\/c\/([a-zA-Z0-9+%_.!~*'()]+)\/?/);
+
     interface DidFailLoadEvent extends Event {
         errorCode: number;
         errorDescription: string;
@@ -135,7 +137,7 @@
                 'imagepreview-dismiss',
                 (eventData: EventBusEvent) => {
                     // console.log('Event dismiss', eventData.url);
-                    this.dismiss(eventData.url as string, eventData.force as boolean);
+                    this.dismiss(this.negotiateUrl(eventData.url as string || ''), eventData.force as boolean);
                 }
             );
 
@@ -144,11 +146,17 @@
                 (eventData: EventBusEvent) => {
                     // console.log('Event show', eventData.url);
 
-                    if (!core.state.settings.risingLinkPreview) {
-                        return;
+                    const url = this.negotiateUrl(eventData.url as string || '');
+                    const isInternalPreview = CharacterPreviewHelper.FLIST_CHARACTER_PROTOCOL_TESTER.test(url);
+
+                    if (
+                      ((!core.state.settings.risingCharacterPreview) && (isInternalPreview))
+                      || ((!core.state.settings.risingLinkPreview) && (!isInternalPreview))
+                    ) {
+                      return;
                     }
 
-                    this.show(eventData.url as string);
+                    this.show(url);
                 }
             );
 
@@ -159,7 +167,7 @@
                         return;
                     }
 
-                    const eventUrl = this.jsMutator.mutateUrl(eventData.url as string);
+                    const eventUrl = this.jsMutator.mutateUrl(this.negotiateUrl(eventData.url as string || ''));
 
                     if ((this.url === eventUrl) && (this.visible))
                         this.sticky = !this.sticky;
@@ -327,6 +335,16 @@
         }
 
 
+        negotiateUrl(url: string): string {
+          const match = url.match(FLIST_PROFILE_MATCH);
+
+          if (!match) {
+            return url;
+          }
+
+          return `flist-character://${decodeURI(match[2])}`;
+        }
+
         updatePreviewSize(width: number, height: number): void {
             const helper = this.previewManager.getVisiblePreview();
 
@@ -392,7 +410,7 @@
             if ((!this.hasMouseMovedSince()) && (!force))
                 return;
 
-            this.debugLog('ImagePreview: dismiss.exec', this.previewManager.getVisibilityStatus(), url);
+            this.debugLog('ImagePreview: dismiss.exec', due, this.previewManager.getVisibilityStatus(), url);
 
             // This timeout makes the preview window disappear with a slight delay, which helps UX
             // when dealing with situations such as quickly scrolling text that moves the cursor away

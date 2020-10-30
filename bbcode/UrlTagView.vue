@@ -11,7 +11,6 @@
             @mouseover.prevent="show()"
             @mouseenter.prevent="show()"
             @mouseleave.prevent="dismiss()"
-            @mouseout.prevent="dismiss()"
             @click.middle.prevent="toggleStickyness()"
         >{{text}}</a>
         <span

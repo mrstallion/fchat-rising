@@ -1,7 +1,7 @@
 <template>
     <div id="character-page-sidebar" class="card bg-light">
         <div class="card-body">
-            <img :src="avatarUrl(character.character.name)" class="character-avatar" style="margin-right:10px">
+            <img :src="avatarUrl(character.character.name)" class="character-avatar" style="width: 100%; height: auto;">
 
             <div v-if="character.character.title" class="character-title">{{ character.character.title }}</div>
             <character-action-menu :character="character" @rename="showRename()" @delete="showDelete()"

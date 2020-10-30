@@ -5,7 +5,7 @@
         <img :src="avatarUrl(character.character.name)" class="character-avatar">
       </div>
 
-      <div class="col-8">
+      <div class="col-10">
         <h1><span class="character-name" :class="(statusClasses || {}).userClass">{{ character.character.name }}</span></h1>
         <h3>{{ getOnlineStatus() }}</h3>
 
@@ -24,11 +24,11 @@
         <match-tags v-if="match" :match="match"></match-tags>
 
         <div class="status-message" v-if="statusMessage">
-          <h4>Status</h4>
+          <h4>Status <span v-if="latestAd && (statusMessage === latestAd.message)">&amp; Latest Ad</span></h4>
           <bbcode :text="statusMessage"></bbcode>
         </div>
 
-        <div v-if="latestAd">
+        <div class="latest-ad-message" v-if="latestAd && (latestAd.message !== statusMessage)">
           <h4>Latest Ad <span class="message-time">{{formatTime(latestAd.datePosted)}}</span></h4>
           <bbcode :text="latestAd.message"></bbcode>
         </div>
@@ -166,11 +166,15 @@ export default class CharacterPreview extends Vue {
     const rawSpecies = Matcher.getTagValue(TagId.Species, c);
     const rawAge = Matcher.getTagValue(TagId.Age, c);
 
-    if ((a.species) && (!Species[a.species])) {
-      console.log('SPECIES', a.species, rawSpecies);
+    // if ((a.species) && (!Species[a.species])) {
+      // console.log('SPECIES', a.species, rawSpecies);
+    // }
+
+    if ((a.orientation) && (!Orientation[a.orientation])) {
+      console.error('Missing Orientation', a.orientation, c.name);
     }
 
-    this.age = a.age ? this.readable(`${a.age}`) : (rawAge && rawAge.string) || undefined;
+    this.age = a.age ? this.readable(`${a.age}`) : (rawAge && /[0-9]/.test(rawAge.string || '') && rawAge.string) || undefined;
     this.species = a.species ? this.readable(Species[a.species]) : (rawSpecies && rawSpecies.string) || undefined;
     this.gender = a.gender ? this.readable(Gender[a.gender]) : undefined;
     this.furryPref = a.furryPreference ? this.readable(furryPreferenceMapping[a.furryPreference]) : undefined;
@@ -228,7 +232,13 @@ export default class CharacterPreview extends Vue {
 <style lang="scss">
   .character-preview {
     padding: 10px;
+    padding-right: 15px;
     background-color: var(--input-bg);
+    max-height: 100%;
+    overflow: hidden;
+    opacity: 0.95;
+    border-radius: 0 5px 5px 5px;
+    border: 1px solid var(--secondary);
 
     .summary {
       font-size: 125%;
@@ -279,7 +289,6 @@ export default class CharacterPreview extends Vue {
 
     h4 {
       font-size: 1.25rem;
-      margin-top: 1.3rem;
       margin-bottom: 0;
 
       .message-time {
@@ -288,6 +297,15 @@ export default class CharacterPreview extends Vue {
         color: var(--messageTimeFgColor);
         margin-left: 2px;
       }
+    }
+
+    .status-message,
+    .latest-ad-message {
+      display: block;
+      background-color: rgba(0,0,0,0.2);
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 1.3rem;
     }
 
     .character-avatar {

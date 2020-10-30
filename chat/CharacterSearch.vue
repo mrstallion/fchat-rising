@@ -1,7 +1,7 @@
 <template>
     <modal :action="l('characterSearch.action')" @submit.prevent="submit()" dialogClass="w-100"
-        :buttonText="results ? l('characterSearch.again') : undefined" class="character-search">
-        <div v-if="options && !results">
+        :buttonText="state === 'results' ? l('characterSearch.again') : undefined" class="character-search">
+        <div v-if="options && state === 'search'">
             <div v-show="error" class="alert alert-danger">{{error}}</div>
             <filterable-select v-model="data.kinks" :multiple="true" :placeholder="l('filter')"
                 :title="l('characterSearch.kinks')" :filterFunc="filterKink" :options="options.kinks">
@@ -27,19 +27,23 @@
 
             <search-history ref="searchHistory" :callback="updateSearch" :curSearch="data"></search-history>
         </div>
-        <div v-else-if="results" class="results">
+        <div v-else-if="state === 'results'" class="results">
             <h4>
-                {{l('characterSearch.results')}}
-                <i class="fas fa-circle-notch fa-spin search-spinner" v-if="!resultsComplete"></i>
+                {{results.length}} {{l('characterSearch.results')}}
+
+                <span v-if="resultsPending > 0" class="pending">Scoring {{resultsPending}}... <i class="fas fa-circle-notch fa-spin search-spinner"></i></span>
             </h4>
 
-            <div v-for="character in results" :key="character.name" class="search-result" :class="'status-' + character.status">
-                <template v-if="character.status === 'looking'" v-once>
-                    <img :src="characterImage(character.name)" v-if="showAvatars"/>
-                    <user :character="character" :showStatus="true" :match="shouldShowMatch"></user>
-                    <bbcode :text="character.statusText"></bbcode>
+            <div v-for="record in results" :key="record.character.name" class="search-result" :class="'status-' + record.character.status">
+                <template v-if="record.character.status === 'looking'" v-once>
+                    <img :src="characterImage(record.character.name)" v-if="showAvatars"/>
+                    <user :character="record.character" :showStatus="true" :match="shouldShowMatch"></user>
+                    <bbcode :text="record.character.statusText" class="status-text"></bbcode>
                 </template>
-                <user v-else :character="character" :showStatus="true" :match="shouldShowMatch" v-once></user>
+                <template v-else v-once>
+                  <user :character="record.character" :showStatus="true" :match="shouldShowMatch"></user>
+                  <bbcode :text="record.character.statusText" v-if="!!record.character.statusText" class="status-text"></bbcode>
+                </template>
             </div>
         </div>
     </modal>
@@ -62,6 +66,7 @@
     import CharacterSearchHistory from './CharacterSearchHistory.vue';
     import { Matcher } from '../learn/matcher';
     import { nonAnthroSpecies, Species, speciesMapping, speciesNames } from '../learn/matcher-types';
+    import { CharacterCacheRecord } from '../learn/profile-cache';
 
     type Options = {
         kinks: SearchKink[],
@@ -70,7 +75,16 @@
 
     let options: Options | undefined;
 
-    function sort(x: Character, y: Character): number {
+    interface SearchResult {
+      character: Character;
+      profile: CharacterCacheRecord | null;
+    }
+
+
+    function sort(resultX: SearchResult, resultY: SearchResult): number {
+        const x = resultX.character;
+        const y = resultY.character;
+
         if(x.status === 'looking' && y.status !== 'looking') return -1;
         if(x.status !== 'looking' && y.status === 'looking') return 1;
 
@@ -106,11 +120,12 @@
         l = l;
         kinksFilter = '';
         error = '';
-        results: Character[] | undefined;
-        resultsComplete = false;
+        results: SearchResult[] = [];
+        resultsPending = 0;
         characterImage = characterImage;
         options!: ExtendedSearchData;
         shouldShowMatch = true;
+        state = 'search';
 
         data: ExtendedSearchData = {
             kinks: [],
@@ -150,6 +165,7 @@
             });
         }
 
+
         @Hook('mounted')
         mounted(): void {
             core.connection.onMessage('ERR', (data) => {
@@ -165,12 +181,12 @@
                 }
             });
             core.connection.onMessage('FKS', (data) => {
-                this.results = data.characters.map((x) => core.characters.get(x))
-                    .filter((x) => core.state.hiddenUsers.indexOf(x.name) === -1 && !x.isIgnored)
+                this.results = data.characters.map((x) => ({ character: core.characters.get(x), profile: null }))
+                    .filter((x) => core.state.hiddenUsers.indexOf(x.character.name) === -1 && !x.character.isIgnored)
                     .filter((x) => this.isSpeciesMatch(x))
                     .sort(sort);
 
-                this.resultsComplete = this.checkResultCompletion();
+                this.resultsPending = this.countPendingResults();
             });
 
             if (this.scoreWatcher) {
@@ -182,18 +198,18 @@
                 // console.log('scoreWatcher', event);
 
                 if (
-                    (this.results)
+                    (this.state === 'results')
                     // tslint:disable-next-line no-unsafe-any no-any
                     && (event.character)
                     // tslint:disable-next-line no-unsafe-any no-any
-                    && (_.find(this.results, (c: Character) => c.name === event.character.character.name))
+                    && (_.find(this.results, (s: SearchResult) => s.character.name === event.character.character.name))
                 ) {
                     this.results = (_.filter(
                         this.results,
                         (x) => this.isSpeciesMatch(x)
-                    ) as Character[]).sort(sort);
+                    ) as SearchResult[]).sort(sort);
 
-                    this.resultsComplete = this.checkResultCompletion();
+                    this.resultsPending = this.countPendingResults();
                 }
             };
 
@@ -231,16 +247,19 @@
         }
 
 
-        isSpeciesMatch(c: Character): boolean {
+        isSpeciesMatch(result: SearchResult): boolean {
           if (this.data.species.length === 0) {
             return true;
           }
 
-          const knownCharacter = core.cache.profileCache.getSync(c.name);
+          const knownCharacter = core.cache.profileCache.getSync(result.character.name);
 
           if (!knownCharacter) {
             return true;
           }
+
+          // optimization
+          result.profile = knownCharacter;
 
           const isSearchingForAnthro = (!!_.find(this.data.species, (s) => s.id === Species.Anthro));
           const isSearchingForHuman = (!!_.find(this.data.species, (s) => s.id === Species.Human));
@@ -298,10 +317,18 @@
         }
 
 
-        checkResultCompletion(): boolean {
-            return _.every(
+        countPendingResults(): number {
+            return _.reduce(
                 this.results,
-                (c: Character) => (!!core.cache.profileCache.getSync(c.name))
+                (accum: number, result: SearchResult) => {
+                  if (!!result.profile) {
+                    return accum;
+                  }
+
+                  result.profile = core.cache.profileCache.getSync(result.character.name);
+                  return !!result.profile ? accum : accum + 1;
+                },
+                0
             );
         }
 
@@ -351,12 +378,16 @@
 
 
         submit(): void {
-            if(this.results !== undefined) {
-                this.results = undefined;
+            if(this.state === 'results') {
+                this.results = [];
+                this.state = 'search';
                 return;
             }
 
             this.shouldShowMatch = core.state.settings.risingComparisonInSearch;
+
+            this.results = [];
+            this.state = 'results';
 
             this.error = '';
             const data: Connection.ClientCommands['FKS'] & {[key: string]: (string | number)[]} = {kinks: []};
@@ -407,7 +438,7 @@
 
         .results {
             .user-view {
-                display: block;
+                // display: block;
             }
             & > .search-result {
                 clear: both;
@@ -415,11 +446,37 @@
             & > .status-looking {
                 margin-bottom: 5px;
                 min-height: 50px;
+
+              .status-text {
+                display: block;
+              }
             }
+
+            & > .status-offline,
+            & > .status-online,
+            & > .status-away,
+            & > .status-idle,
+            & > .status-busy,
+            & > .status-dnd,
+            & > .status-crown {
+              overflow: hidden;
+              width: 100%;
+              height: 23px;
+
+              .status-text {
+                opacity: 0.75;
+                padding-left: 4px;
+              }
+            }
+
             img {
                 float: left;
                 margin-right: 5px;
                 width: 50px;
+            }
+
+            .search-result:nth-child(2n) {
+                background-color: rgba(0,0,0, 0.15);
             }
         }
 
@@ -434,8 +491,14 @@
             font-weight: bold;
         }
 
-        .search-spinner {
+        .pending {
             float: right;
+            color: var(--gray);
+            font-size: 80%;
+        }
+
+        .search-spinner {
+            // float: right;
         }
     }
 </style>

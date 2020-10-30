@@ -137,6 +137,7 @@ export class ImageDomMutator {
     async init(): Promise<void> {
         await this.loadScripts();
 
+        /* tslint:disable max-line-length */
         this.add('default', this.getBaseJsMutatorScript(['.content video', '.content img', '#video, video', '#image, img']));
         this.add('about:blank', '');
         this.add('e621.net', this.getBaseJsMutatorScript(['video', '#image']));
@@ -170,6 +171,7 @@ export class ImageDomMutator {
         this.add('redgifs.com', this.getBaseJsMutatorScript(['video']));
         this.add('furaffinity.net', this.getBaseJsMutatorScript(['#submissionImg', 'video', 'img']));
         this.add('rule34.paheal.net', this.getBaseJsMutatorScript(['#main_image', 'video', 'img']));
+        this.add('xhamster.com', this.getBaseJsMutatorScript(['#photo_slider video', '#photo_slider img', 'video', 'img']));
 
         this.add(
             'pornhub.com',

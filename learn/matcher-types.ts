@@ -38,6 +38,7 @@ export enum Orientation {
     Bisexual = 6,
     Asexual = 7,
     Unsure = 8,
+    Cuntboy = 59,
     BiMalePreference = 89,
     BiFemalePreference = 90,
     Pansexual = 127,
@@ -241,7 +242,7 @@ export const speciesMapping: SpeciesMap = {
         gen('(beast|anthro|furry)')
         ],
 
-    [Species.Human]: ['human', 'homo sapiens', 'human.*', 'homo[ -]?sapi[ea]ns?', 'woman', 'h[o]+m[ai]n', 'humaine?',
+    [Species.Human]: ['human', 'homo sapiens', 'human.*', 'homo[ -]?sapi[ea]ns?', 'woman', 'h[uo]+m[aie]n', 'humaine?',
         'meat[ -]?popsicle',
         // where should these go?
         'angel', 'neph[ai]l[ei]m', 'arch[ -]?angel'
@@ -255,8 +256,8 @@ export const speciesMapping: SpeciesMap = {
     [Species.Canine]: ['dog', 'dingo', 'coyote', 'jackal', 'husky', 'canine', 'wolf.*', 'doberman[n]?', 'hound', 'akita', 'pit ?bull',
         'terrier', 'bull[ -]?terrier', 'australian[ -]?shepherd', 'australian[ -]?shep[h]?ard', 'german[ -]?shep[h]?([ea]rd)?',
         'malinois', 'woof', 'labrador', 'collie', 'canis', 'lupus', 'canid', 'chihuahua', 'poodle', 'chinchilla',
-        'chow[ -]?chow', 'corgi', 'anubis', 'beagle', '.*wolf', 'direwolf', 'pointer', 'dhole',
-        'anubian', 'dalmatian', 'dalmation', 'inumimi', 'lupine', 'malamute', 'mastiff', 'mutt', 'rottweill?er', 'shih[ -]?tzu', 'worgen',
+        'chow[ -]?chow', 'corgi', 'anubis', 'beagle', '.*wolf', 'direwolf', 'pointer', 'dhole', 'worg(en)?',
+        'anubian', 'dalmatian', 'dalmation', 'inumimi', 'lupine', 'malamute', 'mastiff', 'mutt', 'rottweill?er', 'shih[ -]?tzu',
         'vallhund', 'puppy', 'oo?kami', 'great[ -]?dane', 'golden[ -]?(retriever|lab|labrador)', 'cocker[ -]?spaniel', 'samoyed', 'awoo',
         'borzoi', 'spaniel', 'ookamimimi', 'jakkarumimi', 'chinchiramimi', 'woffo', 'wuff', 'wolfdog', 'setter', 'papillon',
         '🐶', '🐺', '🐕', '🐩', 'aussie[ -]?doodle', 'shiba', 'inu', 'veil[ -]?hound', 'timber[ -]?wolf', 'hell[ -]?hound', 'hound',
@@ -296,10 +297,10 @@ export const speciesMapping: SpeciesMap = {
         gen('dragon')
         ],
 
-    [Species.Reptile]: ['lizard', 'snake', 'crocodile', 'alligator', 'chameleon', 'anole', 'aligator', 'snake.*', 'gator',
+    [Species.Reptile]: ['lizard', 'snake', 'crocodile', 'alligator', 'chameleon', 'anole', '(all?i)?gator', 'snake.*', 'gator',
         'gecko', 'reptile', 'reptilian', 'scaly', 'scale[ -]?born', 'argonian', 'saxhleel', 'skink', 'cobra', 'turtle', 'tortoise',
-        'nope[ -]rope', 'anaconda', 'python', gen('(lizard|snake)'), 'yuan[ -]?ti', 'crocodilian',
-        'serp[ea]a?nt(ine)?', 'viper', 'titanoboa', 'boa', 'taipan',
+        'nope[ -]rope', 'anaconda', 'python', gen('(lizard|snake|croc)'), 'yuan[ -]?ti', 'crocodilian',
+        'serp[ea]a?nt(ine)?', 'viper', 'titanoboa', 'boa', 'taipan', 'croc',
         'ludroth', 'zvarr', '🐍'],
 
     [Species.Pokemon]: ['charizard', 'charmander', 'pikachu', 'digimon', 'renamon', 'eevee', 'gardev(oi|io)r', 'absol', 'aggron',
@@ -332,7 +333,7 @@ export const speciesMapping: SpeciesMap = {
 
     [Species.Bovine]: ['cow', 'bison', 'bovine', 'antelope', 'gazelle', 'oryx', 'buffalo', 'bison', 'black[ -]?angus', 'bull', 'ox',
         'ushimimi', 'holstaur', 'moo', 'cattle', 'hucow', 'caprin[a]?e', 'goat[ -]?antelope', 'muskox', 'urial', 'mouflon',
-        'taurine', 'aurochs', 'bos', 'bos taurus', 'taurus',
+        'taurine', 'aurochs', 'bos', 'bos taurus', 'taur[u|o]s',
         '🐃', '🐂', '🐄', '🐐'],
 
     [Species.Caprinae]: ['sheep', 'goat', 'ibex', 'takin', 'bharal', 'goral', 'serow', 'lamb', 'faun', 'ram', 'faunus', 'goat.*',
