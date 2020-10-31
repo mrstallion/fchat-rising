@@ -128,7 +128,7 @@
 
         @Hook('mounted')
         onMounted(): void {
-            console.warn('Mounted ImagePreview');
+            console.info('Mounted ImagePreview');
 
             // tslint:disable-next-line:no-floating-promises
             this.jsMutator.init();
