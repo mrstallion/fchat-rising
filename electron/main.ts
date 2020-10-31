@@ -200,6 +200,8 @@ function createWindow(): Electron.BrowserWindow | undefined {
     electron.session.defaultSession.setSpellCheckerLanguages(safeLanguages);
     window.webContents.session.setSpellCheckerLanguages(safeLanguages);
 
+    log.debug('adblock.init');
+
     // tslint:disable-next-line:no-floating-promises
     ElectronBlocker.fromLists(
         fetch,
@@ -230,10 +232,15 @@ function createWindow(): Electron.BrowserWindow | undefined {
         }
     ).then(
         (blocker) => {
+            log.debug('adblock.load.complete');
+
             blocker.enableBlockingInSession(electron.session.defaultSession);
 
             // Temp fix -- manually override adblocker's preload script 1) to point to CJS; 2) to use absolute path
-            const preloadScript = path.resolve(path.dirname(require.resolve('@cliqz/adblocker-electron-preload')), 'preload.cjs.js');
+            const originPath = require.resolve('@cliqz/adblocker-electron-preload');
+            const preloadScript = path.resolve(path.dirname(originPath), 'preload.cjs.js');
+
+            log.debug('adblock.preload.path', { finalPath: preloadScript, originPath });
 
             electron.session.defaultSession.setPreloads(
                 _.concat(
@@ -245,29 +252,31 @@ function createWindow(): Electron.BrowserWindow | undefined {
                 )
             );
 
-            // blocker.on('request-blocked', (request: Request) => {
-            //     console.log('blocked', request.url);
-            // });
-            //
-            // blocker.on('request-redirected', (request: Request) => {
-            //     console.log('redirected', request.url);
-            // });
-            //
-            // blocker.on('request-whitelisted', (request: Request) => {
-            //     console.log('whitelisted', request.url);
-            // });
-            //
-            // blocker.on('csp-injected', (request: Request) => {
-            //     console.log('csp', request.url);
-            // });
-            //
-            // blocker.on('script-injected', (script: string, url: string) => {
-            //     console.log('script', script.length, url);
-            // });
-            //
-            // blocker.on('style-injected', (style: string, url: string) => {
-            //     console.log('style', style.length, url);
-            // });
+            log.debug('adblock.preloaders', { loaders: electron.session.defaultSession.getPreloads() })
+
+            blocker.on('request-blocked', (request: Request) => {
+                log.debug('adblock.request.blocked', { url: request.url });
+            });
+            
+            blocker.on('request-redirected', (request: Request) => {
+                log.debug('adblock.request.redirected', { url: request.url });
+            });
+            
+            blocker.on('request-whitelisted', (request: Request) => {
+                log.debug('adblock.request.whitelisted', { url: request.url });
+            });
+            
+            blocker.on('csp-injected', (request: Request) => {
+                log.debug('adblock.inject.csp', { url: request.url });
+            });
+            
+            blocker.on('script-injected', (script: string, url: string) => {
+                log.debug('adblock.inject.script', { length: script.length, url });
+            });
+            
+            blocker.on('style-injected', (style: string, url: string) => {
+                log.debug('adblock.inject.style', { length: style.length, url });
+            });
         }
       );
 
@@ -278,6 +287,7 @@ function createWindow(): Electron.BrowserWindow | undefined {
         'will-download',
         (e: Event, item: DownloadItem) => {
             if (!item.getURL().match(/^blob:file:/)) {
+                log.info('download.prevent', { item, event: e });
                 e.preventDefault();
             }
         }
