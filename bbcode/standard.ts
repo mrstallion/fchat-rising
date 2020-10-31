@@ -5,7 +5,7 @@ import * as Utils from '../site/utils';
 import {analyzeUrlTag, CoreBBCodeParser} from './core';
 import {BBCodeCustomTag, BBCodeSimpleTag, BBCodeTextTag} from './parser';
 import UrlTagView from './UrlTagView.vue';
-
+import {default as IconView} from '../bbcode/IconView.vue';
 
 const usernameRegex = /^[a-zA-Z0-9_\-\s]+$/;
 
@@ -118,16 +118,26 @@ export class StandardBBCodeParser extends CoreBBCodeParser {
                 parser.warning('Unexpected parameter on icon tag.');
             if(!usernameRegex.test(content))
                 return;
-            const a = parser.createElement('a');
-            a.href = `${Utils.siteDomain}c/${content}`;
-            a.target = '_blank';
-            const img = parser.createElement('img');
-            img.src = `${Utils.staticDomain}images/avatar/${content.toLowerCase()}.png`;
-            img.className = 'character-avatar icon';
-            img.title = img.alt = content;
-            a.appendChild(img);
-            parent.appendChild(a);
-            return a;
+
+            const root = parser.createElement('span');
+            const el = parser.createElement('span');
+            parent.appendChild(root);
+            root.appendChild(el);
+            const view = new IconView({ el, propsData: { character: content }});
+
+            this.cleanup.push(view);
+            return root;
+
+            // const a = parser.createElement('a');
+            // a.href = `${Utils.siteDomain}c/${content}`;
+            // a.target = '_blank';
+            // const img = parser.createElement('img');
+            // img.src = `${Utils.staticDomain}images/avatar/${content.toLowerCase()}.png`;
+            // img.className = 'character-avatar icon';
+            // img.title = img.alt = content;
+            // a.appendChild(img);
+            // parent.appendChild(a);
+            // return a;
         }));
         this.addTag(new BBCodeTextTag('eicon', (parser, parent, param, content) => {
             if(param !== '')
