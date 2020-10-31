@@ -1,7 +1,7 @@
 # Download
-[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.3.0/F-Chat-Rising-1.3.0-win.exe) (75 MB)
-| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.3.0/F-Chat-Rising-1.3.0-macos.dmg) (76 MB)
-| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.3.0/F-Chat-Rising-1.3.0-linux.AppImage) (76 MB)
+[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.4.0/F-Chat-Rising-1.4.0-win.exe) (75 MB)
+| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.4.0/F-Chat-Rising-1.4.0-macos.dmg) (76 MB)
+| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.4.0/F-Chat-Rising-1.4.0-linux.AppImage) (76 MB)
 
 
 # F-Chat Rising
@@ -32,6 +32,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    View a characters' recent ads
 *   Link Previews
     *    Hover cursor over any `[url]` to see a preview of it
+    *    Hover cursor over any character name to see a preview of the character
     *    Middle click any `[url]` to turn the preview into a sticky / interactive mode
     *    Link preview has an ad-blocker to minimize page load times and protect against unfriendly scripts 
 *   Profile
