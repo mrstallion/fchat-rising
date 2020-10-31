@@ -236,11 +236,13 @@ function createWindow(): Electron.BrowserWindow | undefined {
 
             blocker.enableBlockingInSession(electron.session.defaultSession);
 
-            // Temp fix -- manually override adblocker's preload script 1) to point to CJS; 2) to use absolute path
-            const originPath = require.resolve('@cliqz/adblocker-electron-preload');
-            const preloadScript = path.resolve(path.dirname(originPath), 'preload.cjs.js');
+            // Temp fix -- manually override adblocker's preload script
+            // to point to CJS  that has been copied over with config in webpack.config.js
+            const preloadScript = './preview/assets/adblocker/preload.cjs.js'; // require.resolve('@cliqz/adblocker-electron-preload');
 
-            log.debug('adblock.preload.path', { finalPath: preloadScript, originPath });
+            // const originPath = require.resolve('@cliqz/adblocker-electron-preload');
+            // const preloadScript = path.resolve(path.dirname(originPath), 'preload.cjs.js');
+            log.debug('adblock.preload.path', { finalPath: preloadScript /*, originPath */ });
 
             electron.session.defaultSession.setPreloads(
                 _.concat(
@@ -252,28 +254,28 @@ function createWindow(): Electron.BrowserWindow | undefined {
                 )
             );
 
-            log.debug('adblock.preloaders', { loaders: electron.session.defaultSession.getPreloads() })
+            log.debug('adblock.preloaders', { loaders: electron.session.defaultSession.getPreloads() });
 
             blocker.on('request-blocked', (request: Request) => {
                 log.debug('adblock.request.blocked', { url: request.url });
             });
-            
+
             blocker.on('request-redirected', (request: Request) => {
                 log.debug('adblock.request.redirected', { url: request.url });
             });
-            
+
             blocker.on('request-whitelisted', (request: Request) => {
                 log.debug('adblock.request.whitelisted', { url: request.url });
             });
-            
+
             blocker.on('csp-injected', (request: Request) => {
                 log.debug('adblock.inject.csp', { url: request.url });
             });
-            
+
             blocker.on('script-injected', (script: string, url: string) => {
                 log.debug('adblock.inject.script', { length: script.length, url });
             });
-            
+
             blocker.on('style-injected', (style: string, url: string) => {
                 log.debug('adblock.inject.style', { length: style.length, url });
             });

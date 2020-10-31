@@ -133,7 +133,7 @@ export default class CharacterPreview extends Vue {
     }
 
     this.statusMessage = this.onlineCharacter.statusText;
-    this.statusClasses = getStatusClasses(this.onlineCharacter, undefined, true, true, false);
+    this.statusClasses = getStatusClasses(this.onlineCharacter, undefined, true, false, false);
   }
 
 
