@@ -42,7 +42,7 @@ export class PreviewManager {
 
     return _.fromPairs(
       _.map(
-        this.helpers, (h) => ([h.helper.constructor.name, h.renderStyle])
+        this.helpers, (h) => ([h.helper.getName(), h.renderStyle])
       )
     );
   }

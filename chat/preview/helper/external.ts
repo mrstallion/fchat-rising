@@ -47,6 +47,11 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
     }
 
 
+    getName(): string {
+        return 'ExternalImagePreviewHelper';
+    }
+
+
     reactsToSizeUpdates(): boolean {
         return true;
     }

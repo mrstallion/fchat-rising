@@ -12,6 +12,7 @@ export abstract class ImagePreviewHelper {
     abstract hide(): void;
     abstract match(domainName: string | undefined, url: string | undefined): boolean;
     abstract renderStyle(): Record<string, any>;
+    abstract getName(): string;
 
     abstract reactsToSizeUpdates(): boolean;
     abstract setRatio(ratio: number): void;

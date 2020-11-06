@@ -9,6 +9,11 @@ export class CharacterPreviewHelper extends ImagePreviewHelper {
     }
 
 
+    getName(): string {
+        return 'CharacterPreviewHelper';
+    }
+
+
     show(url: string | undefined): void {
         this.visible = true;
         this.url = url;

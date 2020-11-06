@@ -8,6 +8,11 @@ export class LocalImagePreviewHelper extends ImagePreviewHelper {
     }
 
 
+    getName(): string {
+        return 'LocalImagePreviewHelper';
+    }
+
+
     show(url: string | undefined): void {
         this.visible = true;
         this.url = url;

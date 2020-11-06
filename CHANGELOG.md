@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1
+*   Fixed some image previews showing up black
+
+
 ## 1.4.0
 *   More configurable settings for F-Chat Rising
 *   Hover mouse over a character name to see a character preview
