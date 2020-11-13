@@ -63,6 +63,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Conversation dialog can be opened by typing in a character name
     *    Message search matches character names
     *    PM list shows characters' online status as a colored icon
+    *    Use `Ctrl+Tab`, `Ctrl+Shift+Tab`, `Ctrl+PgDown`, and `Ctrl+PgUp` to switch between character tabs
 *   Technical Details for Nerds
     *    Upgraded to Electron 10.x
     *    Replaced `node-spellchecker` with the built-in spellchecker that ships with Electron 8+

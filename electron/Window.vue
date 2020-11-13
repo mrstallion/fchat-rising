@@ -162,6 +162,10 @@
                 const index = this.tabs.indexOf(this.activeTab!);
                 this.show(this.tabs[index + 1 === this.tabs.length ? 0 : index + 1]);
             });
+            electron.ipcRenderer.on('previous-tab', (_e: Event) => {
+                const index = this.tabs.indexOf(this.activeTab!);
+                this.show(this.tabs[index - 1 < 0 ? this.tabs.length - 1 : index - 1]);
+            });
             electron.ipcRenderer.on('show-tab', (_e: Event, id: number) => {
                 this.show(this.tabMap[id]);
             });

@@ -1,5 +1,9 @@
 # Changelog
 
+## Canary
+*   Use `Ctrl+Tab`, `Ctrl+Shift+Tab`, `Ctrl+PgDown`, and `Ctrl+PgUp` to switch between character tabs
+
+
 ## 1.4.1
 *   Fixed some image previews showing up black
 
