@@ -777,11 +777,23 @@
             border-radius: 3px;
             color: rgba(255, 255, 255, 0.8);
             font-size: 75%;
-            padding-top: 0;
-            padding-bottom: 0;
             text-align: center;
             display: inline-block;
             text-transform: uppercase;
+            line-height: 100%;
+            padding-top: 2px;
+            padding-bottom: 2px;
+
+            &.unicorn {
+              background-color: #00adad;
+              border: solid 1px #1d9a9a;
+              box-shadow: 0 0 5px 0 rgba(255, 255, 255, 0.5);
+
+              &::before {
+                content: '🦄';
+                padding-right:3px
+              }
+            }
 
             &.match {
                 background-color: var(--scoreMatchBg);

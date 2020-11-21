@@ -91,24 +91,34 @@
         const xc = core.cache.profileCache.getSync(x.name);
         const yc = core.cache.profileCache.getSync(y.name);
 
-        if (xc && !yc) {
+        if(xc && !yc) {
             return -1;
         }
 
-        if (!xc && yc) {
+        if(!xc && yc) {
             return 1;
         }
 
-        if (xc && yc) {
-            if (xc.matchScore > yc.matchScore)
+        if(xc && yc) {
+            if(xc.match.matchScore > yc.match.matchScore)
                 return -1;
 
-            if (xc.matchScore < yc.matchScore)
+            if(xc.match.matchScore < yc.match.matchScore)
                 return 1;
+
+            if(xc.match.searchScore > yc.match.searchScore)
+              return -1;
+
+            if(xc.match.searchScore < yc.match.searchScore)
+              return 1;
         }
 
-        if(x.name < y.name) return -1;
-        if(x.name > y.name) return 1;
+        if(x.name < y.name)
+          return -1;
+
+        if(x.name > y.name)
+          return 1;
+
         return 0;
     }
 

@@ -242,7 +242,7 @@ export const speciesMapping: SpeciesMap = {
         gen('(beast|anthro|furry)')
         ],
 
-    [Species.Human]: ['human', 'homo sapiens', 'human.*', 'homo[ -]?sapi[ea]ns?', 'woman', 'h[uo]+m[aie]n', 'humaine?',
+    [Species.Human]: ['human', 'homo sapiens', 'human.*', 'homo[ -]?sapi[ea]ns?', 'woman', 'hy?[uo]+m[aie]n', 'humaine?',
         'meat[ -]?popsicle',
         // where should these go?
         'angel', 'neph[ai]l[ei]m', 'arch[ -]?angel'
@@ -257,8 +257,8 @@ export const speciesMapping: SpeciesMap = {
         'terrier', 'bull[ -]?terrier', 'australian[ -]?shepherd', 'australian[ -]?shep[h]?ard', 'german[ -]?shep[h]?([ea]rd)?',
         'malinois', 'woof', 'labrador', 'collie', 'canis', 'lupus', 'canid', 'chihuahua', 'poodle', 'chinchilla',
         'chow[ -]?chow', 'corgi', 'anubis', 'beagle', '.*wolf', 'direwolf', 'pointer', 'dhole', 'worg(en)?',
-        'anubian', 'dalmatian', 'dalmation', 'inumimi', 'lupine', 'malamute', 'mastiff', 'mutt', 'rottweill?er', 'shih[ -]?tzu',
-        'vallhund', 'puppy', 'oo?kami', 'great[ -]?dane', 'golden[ -]?(retriever|lab|labrador)', 'cocker[ -]?spaniel', 'samoyed', 'awoo',
+        'anubian', 'dalmatian', 'dalmation', 'inumimi', 'lupine', 'malamute', 'mastiff', 'mutt', 'rott?w[ea]ill?er', 'shih[ -]?tzu',
+        'vallhund', 'puppy', 'oo?kami', 'great[ -]?dane', 'golden[ -]?(retriever|lab|labrador)', 'cocker[ -]?spaniel', 'samm?oyed', 'awoo+',
         'borzoi', 'spaniel', 'ookamimimi', 'jakkarumimi', 'chinchiramimi', 'woffo', 'wuff', 'wolfdog', 'setter', 'papillon',
         '🐶', '🐺', '🐕', '🐩', 'aussie[ -]?doodle', 'shiba', 'inu', 'veil[ -]?hound', 'timber[ -]?wolf', 'hell[ -]?hound', 'hound',
         'kangal', 'behemoth', 'mongrel', 'fenrir', 'v[aá]na[r]?gand[r]?', 'crux', 'st.?[ -]?bernard',
@@ -313,7 +313,7 @@ export const speciesMapping: SpeciesMap = {
         'vaporeon', 'reshiram', 'quilava', 'decidueye', 'marshadow', 'weavile', 'zubat', 'buizel', 'latias', 'nidorina',
         'chandelur(e|ia)', 'sneasel', 'rockruff', 'lugia', 'komala', 'meowstic', 'leafeon', 'purrloin', 'pokemorph',
         'houndour', 'zoroark', 'mightyena', 'mew', 'nidoqueen', 'zangoose', 'goodra', 'flygon', 'dialga', 'pansear',
-        'bibarel', 'charmeleon',
+        'bibarel', 'charmeleon', 'lapras',
 
         // digimon
         'gatomon', 'impmon', 'guilmon'
@@ -439,7 +439,7 @@ export const speciesMapping: SpeciesMap = {
         'hutt', 'klyntar', 'twi\'?lek', 'sangheili', 'salarian', 't[\']?vaoan', 'yautja', 'zabrak'],
 
     [Species.Robot]: ['android', 'cyborg', 'gynoid', 'automaton', 'robot', 'transformer', 'cybertronian', 'reploid', 'synth', 'ai',
-        'realian', 'replicant'],
+        'realian', 'replicant', 'synthetic'],
 
     [Species.Hub]: ['hub', 'varies', 'various', 'variable', 'many', 'flexible', 'any', 'partner preference']
 };

@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import core from '../chat/core';
 import {Character as ComplexCharacter, CharacterGroup, Guestbook} from '../site/character_page/interfaces';
 import { AsyncCache } from './async-cache';
-import { Matcher, Scoring } from './matcher';
+import { Matcher, MatchReport, Scoring } from './matcher';
 import { PermanentIndexedStore } from './store/sql-store';
 import { CharacterImage, SimpleCharacter } from '../interfaces';
 
@@ -16,7 +16,6 @@ export interface MetaRecord {
     lastMetaFetched: Date | null;
 }
 
-
 export interface CountRecord {
     groupCount: number | null;
     friendCount: number | null;
@@ -24,12 +23,20 @@ export interface CountRecord {
     lastCounted: number | null;
 }
 
+export interface CharacterMatchSummary {
+    matchScore: number;
+    // dimensionsAtScoreLevel: number;
+    // dimensionsAboveScoreLevel: number;
+    // totalScoreDimensions: number;
+    searchScore: number;
+}
+
 export interface CharacterCacheRecord {
     character: ComplexCharacter;
     lastFetched: Date;
     added: Date;
-    matchScore: number;
     // counts?: CountRecord;
+    match: CharacterMatchSummary;
     meta?: MetaRecord;
 }
 
@@ -135,11 +142,18 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
 
     async register(c: ComplexCharacter, skipStore: boolean = false): Promise<CharacterCacheRecord> {
         const k = AsyncCache.nameKey(c.character.name);
-        const score = ProfileCache.score(c);
+        const match = ProfileCache.match(c);
+        const score = (!match || match.score === null) ? Scoring.NEUTRAL : match.score;
 
         if (score === 0) {
             console.log(`Storing score 0 for character ${c.character.name}`);
         }
+
+        // const totalScoreDimensions = match ? Matcher.countScoresTotal(match) : 0;
+        // const dimensionsAtScoreLevel = match ? (Matcher.countScoresAtLevel(match, score) || 0) : 0;
+        // const dimensionsAboveScoreLevel = match ? (Matcher.countScoresAboveLevel(match, Math.max(score, Scoring.WEAK_MATCH))) : 0;
+        const searchScore = match ? Matcher.calculateSearchScoreForMatch(score, match) : 0;
+        const matchDetails = { matchScore: score, searchScore };
 
         if ((this.store) && (!skipStore)) {
             await this.store.storeProfile(c);
@@ -150,7 +164,7 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
 
             rExisting.character = c;
             rExisting.lastFetched = new Date();
-            rExisting.matchScore = score;
+            rExisting.match = matchDetails;
 
             return rExisting;
         }
@@ -159,7 +173,7 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
             character: c,
             lastFetched: new Date(),
             added: new Date(),
-            matchScore: score
+            match: matchDetails
         };
 
         this.cache[k] = rNew;
@@ -168,15 +182,13 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
     }
 
 
-    static score(c: ComplexCharacter): number {
+    static match(c: ComplexCharacter): MatchReport | null {
         const you = core.characters.ownProfile;
 
         if (!you) {
-            return 0;
+            return null;
         }
 
-        const m = Matcher.identifyBestMatchReport(you.character, c.character);
-
-        return m.score === null ? Scoring.NEUTRAL : m.score;
+        return Matcher.identifyBestMatchReport(you.character, c.character);
     }
 }

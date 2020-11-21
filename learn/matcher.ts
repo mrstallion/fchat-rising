@@ -31,6 +31,7 @@ export interface MatchReport {
     themMultiSpecies: boolean;
     merged: MatchResultScores;
     score: Scoring | null;
+    details: MatchScoreDetails;
 }
 
 export interface MatchResultCharacterInfo {
@@ -46,6 +47,11 @@ export interface MatchResultScores {
     [TagId.Age]: Score;
     [TagId.FurryPreference]: Score;
     [TagId.Species]: Score;
+}
+
+export interface MatchScoreDetails {
+    totalScoreDimensions: number;
+    dimensionsAtScoreLevel: number;
 }
 
 export interface MatchResult {
@@ -171,6 +177,8 @@ export class Matcher {
     readonly yourAnalysis: CharacterAnalysis;
     readonly theirAnalysis: CharacterAnalysis;
 
+    static readonly UNICORN_LEVEL = 5.5;
+
 
     constructor(you: Character, them: Character, yourAnalysis?: CharacterAnalysis, theirAnalysis?: CharacterAnalysis) {
         this.you = you;
@@ -196,10 +204,17 @@ export class Matcher {
             youMultiSpecies: false,
             themMultiSpecies: false,
             merged: Matcher.mergeResults(youThemMatch, themYouMatch),
-            score: null
+            score: null,
+            details: {
+                totalScoreDimensions: 0,
+                dimensionsAtScoreLevel: 0
+            }
         };
 
         report.score = Matcher.calculateReportScore(report);
+
+        report.details.totalScoreDimensions = Matcher.countScoresTotal(report);
+        report.details.dimensionsAtScoreLevel = Matcher.countScoresAtLevel(report, report.score) || 0;
 
         return report;
     }
@@ -228,12 +243,19 @@ export class Matcher {
                     youMultiSpecies: (yourCharacterAnalyses.length > 1),
                     themMultiSpecies: (theirCharacterAnalyses.length > 1),
                     merged: Matcher.mergeResults(youThemMatch, themYouMatch),
-                    score: null
+                    score: null,
+                    details: {
+                        totalScoreDimensions: 0,
+                        dimensionsAtScoreLevel: 0
+                    }
                 };
 
                 report.score = Matcher.calculateReportScore(report);
 
                 const scoreLevelCount = Matcher.countScoresAtLevel(report, report.score);
+
+                report.details.totalScoreDimensions = Matcher.countScoresTotal(report);
+                report.details.dimensionsAtScoreLevel = scoreLevelCount || 0;
 
                 if (
                     (bestScore === null)
@@ -251,7 +273,10 @@ export class Matcher {
             }
         }
 
-        log.debug('report.identify.best', {buildTime: Date.now() - reportStartTime});
+        log.debug(
+            'report.identify.best',
+            {buildTime: Date.now() - reportStartTime, variations: yourCharacterAnalyses.length * theirCharacterAnalyses.length}
+        );
 
         return bestReport!;
     }
@@ -298,21 +323,6 @@ export class Matcher {
 
                 return { character: nc, analysis: new CharacterAnalysis(nc) };
             }
-        );
-    }
-
-    static countScoresAtLevel(m: MatchReport, scoreLevel: Scoring | null): number | null {
-        if (scoreLevel === null) {
-            return null;
-        }
-
-        const yourScores = _.values(m.you.scores);
-        const theirScores = _.values(m.them.scores);
-
-        return _.reduce(
-            _.concat(yourScores, theirScores),
-            (accum: number, score: Score) => accum + (score.score === scoreLevel ? 1 : 0),
-            0
         );
     }
 
@@ -647,7 +657,23 @@ export class Matcher {
         if ((!yourSubDomRole) || (!theirSubDomRole))
             return new Score(Scoring.NEUTRAL);
 
-        if ((yourSubDomRole === SubDomRole.AlwaysDominant) || (yourSubDomRole === SubDomRole.UsuallyDominant)) {
+        if (yourSubDomRole === SubDomRole.UsuallyDominant) {
+            if (theirSubDomRole === SubDomRole.Switch)
+                return new Score(Scoring.MATCH, `Loves <span>switches</span>`);
+
+            if ((theirSubDomRole === SubDomRole.AlwaysSubmissive) || (theirSubDomRole === SubDomRole.UsuallySubmissive))
+                return new Score(Scoring.MATCH, `Loves <span>submissives</span>`);
+
+            if (yourRoleReversalPreference === KinkPreference.Favorite)
+                return new Score(Scoring.MATCH, `Loves <span>role reversal</span>`);
+
+            if (yourRoleReversalPreference === KinkPreference.Yes)
+                return new Score(Scoring.MATCH, `Likes <span>role reversal</span>`);
+
+            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant about <span>dominants</span>');
+        }
+
+        if (yourSubDomRole === SubDomRole.AlwaysDominant) {
             if (theirSubDomRole === SubDomRole.Switch)
                 return new Score(Scoring.WEAK_MATCH, `Likes <span>switches</span>`);
 
@@ -666,7 +692,23 @@ export class Matcher {
             return new Score(Scoring.WEAK_MISMATCH, 'Hesitant about <span>dominants</span>');
         }
 
-        if ((yourSubDomRole === SubDomRole.AlwaysSubmissive) || (yourSubDomRole === SubDomRole.UsuallySubmissive)) {
+        if (yourSubDomRole === SubDomRole.UsuallySubmissive) {
+            if (theirSubDomRole === SubDomRole.Switch)
+                return new Score(Scoring.MATCH, `Loves <span>switches</span>`);
+
+            if ((theirSubDomRole === SubDomRole.AlwaysDominant) || (theirSubDomRole === SubDomRole.UsuallyDominant))
+                return new Score(Scoring.MATCH, `Loves <span>dominants</span>`);
+
+            if (yourRoleReversalPreference === KinkPreference.Favorite)
+                return new Score(Scoring.MATCH, `Loves <span>role reversal</span>`);
+
+            if (yourRoleReversalPreference === KinkPreference.Yes)
+                return new Score(Scoring.MATCH, `Likes <span>role reversal</span>`);
+
+            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant about <span>submissives</span>');
+        }
+
+        if (yourSubDomRole === SubDomRole.AlwaysSubmissive) {
             if (theirSubDomRole === SubDomRole.Switch)
                 return new Score(Scoring.WEAK_MATCH, `Likes <span>switches</span>`);
 
@@ -901,5 +943,106 @@ export class Matcher {
         }
 
         return null;
+    }
+
+
+    static countScoresAtLevel(
+        m: MatchReport, scoreLevel: Scoring | null,
+        skipYours: boolean = false,
+        skipTheirs: boolean = false
+    ): number | null {
+        if (scoreLevel === null) {
+            return null;
+        }
+
+        const yourScores = skipYours ? [] : _.values(m.you.scores);
+        const theirScores = skipTheirs ? [] : _.values(m.them.scores);
+
+        return _.reduce(
+            _.concat(yourScores, theirScores),
+            (accum: number, score: Score) => accum + (score.score === scoreLevel ? 1 : 0),
+            0
+        );
+    }
+
+    static countScoresAboveLevel(
+        m: MatchReport, scoreLevel: Scoring | null,
+        skipYours: boolean = false,
+        skipTheirs: boolean = false
+    ): number {
+        if (scoreLevel === null) {
+            return 0;
+        }
+
+        const yourScores = skipYours ? [] : _.values(m.you.scores);
+        const theirScores = skipTheirs ? [] : _.values(m.them.scores);
+
+        return _.reduce(
+            _.concat(yourScores, theirScores),
+            (accum: number, score: Score) => accum + ((score.score > scoreLevel) && (score.score !== Scoring.NEUTRAL) ? 1 : 0),
+            0
+        );
+    }
+
+    static countScoresTotal(m: MatchReport): number {
+        return _.values(m.you.scores).length
+            + _.values(m.them.scores).length;
+    }
+
+    static calculateSearchScoreForMatch(
+        score: Scoring,
+        match: MatchReport
+    ): number {
+        const totalScoreDimensions = match ? Matcher.countScoresTotal(match) : 0;
+        const dimensionsAtScoreLevel = match ? (Matcher.countScoresAtLevel(match, score) || 0) : 0;
+        const dimensionsAboveScoreLevel = match ? (Matcher.countScoresAboveLevel(match, Math.max(score, Scoring.WEAK_MATCH))) : 0;
+
+        let atLevelScore = 0;
+        let aboveLevelScore = 0;
+
+        let theirAtLevelDimensions = 0;
+        let atLevelMul = 0;
+        let theirAboveLevelDimensions = 0;
+        let aboveLevelMul = 0;
+
+        if ((dimensionsAtScoreLevel > 0) && (totalScoreDimensions > 0)) {
+          const matchRatio = dimensionsAtScoreLevel / totalScoreDimensions;
+          theirAtLevelDimensions = Matcher.countScoresAtLevel(match, score, true, false) || 0;
+
+          // 1.0 == bad balance; 0.0 == ideal balance
+          atLevelMul = Math.abs((theirAtLevelDimensions / (dimensionsAtScoreLevel)) - 0.5) * 2;
+
+          atLevelScore = (1 - (atLevelMul * 0.5)) * Math.pow(dimensionsAtScoreLevel, matchRatio);
+        }
+
+        if ((dimensionsAboveScoreLevel > 0) && (totalScoreDimensions > 0)) {
+          const matchRatio = dimensionsAboveScoreLevel / totalScoreDimensions;
+
+          theirAboveLevelDimensions = Matcher.countScoresAboveLevel(match, score, true, false) || 0;
+
+          // 1.0 == bad balance; 0.0 == ideal balance
+          aboveLevelMul = Math.abs((theirAboveLevelDimensions / (dimensionsAboveScoreLevel)) - 0.5) * 2;
+
+          aboveLevelScore = (1 - (aboveLevelMul * 0.5)) * Math.pow(dimensionsAboveScoreLevel, matchRatio);
+        }
+
+        log.debug(
+            'report.score.search',
+            {
+                you: match.you.you.name,
+                them: match.them.you.name,
+                searchScore: (atLevelScore + aboveLevelScore),
+                atLevelScore,
+                aboveLevelScore,
+                atLevelMul,
+                aboveLevelMul,
+                dimensionsAboveScoreLevel,
+                dimensionsAtScoreLevel,
+                theirAtLevelDimensions,
+                theirAboveLevelDimensions
+            }
+        );
+
+        return (atLevelScore + aboveLevelScore);
     }
 }

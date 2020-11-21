@@ -6,7 +6,7 @@
 import { Component, Hook, Prop, Watch } from '@f-list/vue-ts';
 import Vue from 'vue';
 import {Channel, Character} from '../fchat';
-import { Score, Scoring } from '../learn/matcher';
+import { Matcher, Score, Scoring } from '../learn/matcher';
 import core from './core';
 import { EventBus } from './preview/event-bus';
 
@@ -37,7 +37,7 @@ export interface StatusClasses {
   rankIcon: string | null;
   statusClass: string | null;
   matchClass: string | null;
-  matchScore: number | null;
+  matchScore: number | string | null;
   userClass: string;
   isBookmark: boolean;
 }
@@ -71,8 +71,13 @@ export function getStatusClasses(
         const cache = core.cache.profileCache.getSync(character.name);
 
         if (cache) {
-            matchClass = `match-found ${Score.getClasses(cache.matchScore)}`;
-            matchScore = cache.matchScore;
+            if ((cache.match.searchScore > Matcher.UNICORN_LEVEL) && (cache.match.matchScore === Scoring.MATCH)) {
+              matchClass = 'match-found unicorn';
+              matchScore = 'unicorn';
+            } else {
+              matchClass = `match-found ${Score.getClasses(cache.match.matchScore)}`;
+              matchScore = cache.match.matchScore;
+            }
         } else {
             /* tslint:disable-next-line no-floating-promises */
             core.cache.addProfile(character.name);
@@ -126,7 +131,7 @@ export default class UserView extends Vue {
     rankIcon: string | null = null;
     statusClass: string | null = null;
     matchClass: string | null = null;
-    matchScore: number | null = null;
+    matchScore: number | string | null = null;
 
     // tslint:disable-next-line no-any
     scoreWatcher: ((event: any) => void) | null = null;
@@ -197,8 +202,11 @@ export default class UserView extends Vue {
     }
 
 
-    getMatchScoreTitle(score: number | null): string {
+    getMatchScoreTitle(score: number | string | null): string {
         switch (score) {
+            case 'unicorn':
+                return 'Unicorn';
+
             case Scoring.MATCH:
                 return 'Great';
 

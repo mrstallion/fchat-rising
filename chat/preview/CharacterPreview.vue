@@ -1,4 +1,4 @@
-<template>
+                                                                                                                       <template>
   <div class="character-preview">
     <div v-if="match && character" class="row">
       <div class="col-2">
@@ -6,7 +6,10 @@
       </div>
 
       <div class="col-10">
-        <h1><span class="character-name" :class="(statusClasses || {}).userClass">{{ character.character.name }}</span></h1>
+        <h1 class="user-view">
+          <span class="character-name" :class="(statusClasses || {}).userClass">{{ character.character.name }}</span>
+          <span v-if="((statusClasses) && (statusClasses.matchScore === 'unicorn'))" :class="(statusClasses || {}).matchClass">Unicorn</span>
+        </h1>
         <h3>{{ getOnlineStatus() }}</h3>
 
         <div class="summary">
@@ -22,6 +25,10 @@
         </div>
 
         <match-tags v-if="match" :match="match"></match-tags>
+
+<!--        <div v-if="customs">-->
+<!--          <span v-for="c in customs" :class="Score.getClasses(c.score)">{{c.name}}</span>-->
+<!--        </div>-->
 
         <div class="status-message" v-if="statusMessage">
           <h4>Status <span v-if="latestAd && (statusMessage === latestAd.message)">&amp; Latest Ad</span></h4>
@@ -41,12 +48,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from '@f-list/vue-ts';
+import { Component, Hook, Prop } from '@f-list/vue-ts';
 import Vue from 'vue';
 import core from '../core';
 import { methods } from '../../site/character_page/data_store';
 import {Character as ComplexCharacter} from '../../site/character_page/interfaces';
-import { Matcher, MatchReport } from '../../learn/matcher';
+import { Matcher, MatchReport, Score } from '../../learn/matcher';
 import { Character as CharacterStatus } from '../../fchat';
 import { getStatusClasses, StatusClasses } from '../UserView.vue';
 import * as _ from 'lodash';
@@ -56,13 +63,19 @@ import * as Utils from '../../site/utils';
 import MatchTags from './MatchTags.vue';
 import {
   furryPreferenceMapping,
-  Gender,
+  Gender, kinkMapping,
   Orientation,
   Species,
   SubDomRole,
   TagId
 } from '../../learn/matcher-types';
 import { BBCodeView } from '../../bbcode/view';
+import { EventBus } from './event-bus';
+import { Character, CustomKink } from '../../interfaces';
+
+interface CustomKinkWithScore extends CustomKink {
+  score: number;
+}
 
 
 @Component({
@@ -93,11 +106,53 @@ export default class CharacterPreview extends Vue {
 
   formatTime = formatTime;
   readonly avatarUrl = Utils.avatarURL;
-  TagId = TagId;
 
-  async load(characterName: string): Promise<void> {
+  TagId = TagId;
+  Score = Score;
+
+  scoreWatcher: ((event: any) => void) | null = null;
+  customs?: CustomKinkWithScore[];
+
+
+  @Hook('mounted')
+  mounted(): void {
+    // tslint:disable-next-line no-unsafe-any no-any
+    this.scoreWatcher = async(event: {character: Character, score: number}): Promise<void> => {
+        // console.log('scoreWatcher', event);
+
+        if (
+            (event.character)
+            && (this.characterName)
+            && (event.character.name === this.characterName)
+        ) {
+          await this.load(this.characterName, true);
+        }
+    };
+
+    EventBus.$on(
+        'character-score',
+        this.scoreWatcher
+    );
+  }
+
+
+  @Hook('beforeDestroy')
+  beforeDestroy(): void {
+      if (this.scoreWatcher) {
+          EventBus.$off(
+              'character-score',
+              this.scoreWatcher
+          );
+
+          this.scoreWatcher = null;
+      }
+  }
+
+
+  async load(characterName: string, force: boolean = false): Promise<void> {
     if (
       (this.characterName === characterName)
+      && (!force)
       && (this.match)
       && (this.character)
       && (this.ownCharacter)
@@ -112,6 +167,7 @@ export default class CharacterPreview extends Vue {
 
     this.match = undefined;
     this.character = undefined;
+    this.customs = undefined;
     this.ownCharacter = core.characters.ownProfile;
 
     this.updateOnlineStatus();
@@ -120,6 +176,7 @@ export default class CharacterPreview extends Vue {
     this.character = await this.getCharacterData(characterName);
     this.match = Matcher.identifyBestMatchReport(this.ownCharacter.character, this.character.character);
 
+    this.updateCustoms();
     this.updateDetails();
   }
 
@@ -133,9 +190,8 @@ export default class CharacterPreview extends Vue {
     }
 
     this.statusMessage = this.onlineCharacter.statusText;
-    this.statusClasses = getStatusClasses(this.onlineCharacter, undefined, true, false, false);
+    this.statusClasses = getStatusClasses(this.onlineCharacter, undefined, true, false, true);
   }
-
 
   updateAdStatus(): void {
     const cache = core.cache.adCache.get(this.characterName!);
@@ -146,6 +202,25 @@ export default class CharacterPreview extends Vue {
     }
 
     this.latestAd = cache.posts[cache.posts.length - 1];
+  }
+
+
+  updateCustoms(): void {
+    this.customs = _.orderBy(
+      _.map(
+        _.reject(this.character!.character.customs || [], (c) => _.isUndefined(c)) as CustomKink[],
+        (c: CustomKink) => _.assign(
+          {},
+          c,
+          {
+            score: kinkMapping[c.choice],
+            name: c.name.trim().replace(/^\W+/, '').replace(/\W+$/, '')
+          }
+        )
+      ),
+      ['score', 'name'],
+      ['desc', 'asc']
+    );
   }
 
 
@@ -239,6 +314,10 @@ export default class CharacterPreview extends Vue {
     opacity: 0.95;
     border-radius: 0 5px 5px 5px;
     border: 1px solid var(--secondary);
+
+    .unicorn {
+      margin-left: 8px;
+    }
 
     .summary {
       font-size: 125%;

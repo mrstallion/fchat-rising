@@ -2,6 +2,9 @@
 
 ## Canary
 *   Use `Ctrl+Tab`, `Ctrl+Shift+Tab`, `Ctrl+PgDown`, and `Ctrl+PgUp` to switch between character tabs
+*   Better search rankings
+*   Really good matches get 'unicorn' tag
+*   Fixed IMGBB, Shadbase previews
 
 
 ## 1.4.1

@@ -112,7 +112,7 @@ class FListImagePreviewDomMutator {
         }
 
         const removeList = [];
-        const safeIds = ['flistWrapper', 'flistError', 'flistHider'];
+        const safeIds = ['flistWrapper', 'flistError', 'flistHider', 'flistStyle'];
         const safeTags = this.safeTags;
 
         for (const el of body.childNodes) {
@@ -277,7 +277,17 @@ class FListImagePreviewDomMutator {
 
         const el = document.createElement('style');
 
+        el.id = 'flistStyle';
+
         el.textContent = `
+            html {
+                ${this.getWrapperStyleOverrides()}
+            }
+            
+            body {
+                ${this.getWrapperStyleOverrides()}
+            }
+        
             #flistWrapper img, #flistWrapper video {
                 ${this.getImageStyleOverrides()}
             }

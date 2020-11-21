@@ -66,7 +66,7 @@ export class CacheManager {
             const c = await this.profileCache.get(name);
 
             if (c) {
-                this.updateAdScoringForProfile(c.character, c.matchScore);
+                this.updateAdScoringForProfile(c.character, c.match.matchScore);
                 return;
             }
         }
@@ -98,7 +98,7 @@ export class CacheManager {
 
             const r = await this.profileCache.register(c);
 
-            this.updateAdScoringForProfile(c, r.matchScore);
+            this.updateAdScoringForProfile(c, r.match.matchScore);
 
             return c;
         } catch (err) {
@@ -395,10 +395,10 @@ export class CacheManager {
           //     console.log(`Re-scored character ${char.name} to ${p.matchScore}`);
           // }
 
-          msg.score = p.matchScore;
+          msg.score = p.match.matchScore;
 
           if (populateAll) {
-            this.populateAllConversationsWithScore(char.name, p.matchScore);
+            this.populateAllConversationsWithScore(char.name, p.match.matchScore);
           }
       }
 

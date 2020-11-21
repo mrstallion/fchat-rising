@@ -1,6 +1,11 @@
 <template>
     <modal :action="`Ads for ${conversation.name}`" @submit="submit" ref="dialog" @open="load()" dialogClass="w-100"
         :buttonText="l('conversationSettings.save')">
+
+        <div>
+            [] Randomize the order of the ads every time you start automated posting.
+        </div>
+
         <div class="form-group ad-list" v-for="(ad, index) in ads">
             <label :for="'ad' + conversation.key + '-' + index" class="control-label">Ad #{{(index + 1)}}
                 <a v-if="(index > 0)" @click="moveAdUp(index)" title="Move Up"><i class="fa fa-arrow-up"></i></a>
