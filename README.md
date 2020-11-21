@@ -1,7 +1,7 @@
 # Download
-[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.4.1/F-Chat-Rising-1.4.1-win.exe) (75 MB)
-| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.4.1/F-Chat-Rising-1.4.1-macos.dmg) (76 MB)
-| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.4.1/F-Chat-Rising-1.4.1-linux.AppImage) (76 MB)
+[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.5.0/F-Chat-Rising-1.5.0-win.exe) (75 MB)
+| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.5.0/F-Chat-Rising-1.5.0-macos.dmg) (76 MB)
+| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.5.0/F-Chat-Rising-1.5.0-linux.AppImage) (76 MB)
 
 
 # F-Chat Rising
@@ -51,6 +51,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Navigate back and forward in character profile view history
 *   Character Search
     *    Search results are sorted based on match scores
+    *    Best matching profiles get a 'unicorn' tag
     *    Display match score in search results
     *    Current search filters are listed in the search dialog
     *    Search filters can be reset

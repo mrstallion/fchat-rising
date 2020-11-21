@@ -1,9 +1,10 @@
 # Changelog
 
-## Canary
+## 1.5.0
 *   Use `Ctrl+Tab`, `Ctrl+Shift+Tab`, `Ctrl+PgDown`, and `Ctrl+PgUp` to switch between character tabs
 *   Better search rankings
-*   Really good matches get 'unicorn' tag
+*   Really good matches get a 'unicorn' tag
+*   Relaxed matching rules for switches so that they match better against 'usually dominant' and 'usually submissive' profiles
 *   Fixed IMGBB, Shadbase previews
 
 
