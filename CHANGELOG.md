@@ -1,5 +1,10 @@
 # Changelog
 
+## Canary
+*   Fixed max ad length for automated ads to be 50,000 characters
+*   Fixed 'unsure' sexual orientation to display correctly in character preview
+
+
 ## 1.5.0
 *   Use `Ctrl+Tab`, `Ctrl+Shift+Tab`, `Ctrl+PgDown`, and `Ctrl+PgUp` to switch between character tabs
 *   Better search rankings

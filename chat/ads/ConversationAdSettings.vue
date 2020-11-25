@@ -13,7 +13,7 @@
                 <a @click="removeAd(index)" title="Remove Ad"><i class="fas fa-times-circle"></i></a>
             </label>
 
-            <editor :id="'ad' + conversation.key + '-' + index" v-model="ads[index]" :hasToolbar="true" class="form-control">
+            <editor :id="'ad' + conversation.key + '-' + index" v-model="ads[index]" :hasToolbar="true" class="form-control" :maxlength="50000">
             </editor>
         </div>
         <button class="btn btn-outline-secondary" @click="addAd()">Add Another</button>

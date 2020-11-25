@@ -75,7 +75,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 
 1. Open a conversation channel of your preference, such as `#Sex Driven LFRP`
 1. Locate `Ads` dropdown at the top right corner of the channel view
-1. Click `Ads > Edit Channel Ads`
+1. Click `Ads > Edit Channel Ads...`
 1. Enter one or more ads
 1. Click `Save settings`
 1. Click `Ads > Start Posting Ads`

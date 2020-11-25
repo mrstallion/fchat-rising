@@ -69,7 +69,7 @@
 
                     <dropdown :keep-open="false" wrap-class="btn-group ads" link-style="" link-class="btn btn-secondary dropdown-toggle dropdown-toggle-split" v-show="(conversation.channel.mode == 'both' || conversation.channel.mode == 'ads')">
                         <button class="dropdown-item" type="button" @click="toggleAutoPostAds()">{{conversation.adManager.isActive() ? 'Pause' : 'Start'}} Posting Ads</button>
-                        <button class="dropdown-item" type="button" @click="showAdSettings()">Edit Channel Ads</button>
+                        <button class="dropdown-item" type="button" @click="showAdSettings()">Edit Channel Ads...</button>
                         <div class="dropdown-divider"></div>
                         <button class="dropdown-item" :class="{ selected: showNonMatchingAds }" type="button" @click="toggleNonMatchingAds()">Show Incompatible Ads</button>
 
