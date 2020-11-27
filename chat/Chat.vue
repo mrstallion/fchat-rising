@@ -140,6 +140,7 @@ import {InlineDisplayMode} from '../interfaces';
 
                 AdManager.onConnectionClosed();
                 core.adCoordinator.clear();
+                core.siteSession.onConnectionClosed();
 
                 document.title = l('title');
             });
@@ -173,6 +174,7 @@ import {InlineDisplayMode} from '../interfaces';
                 this.connected = true;
                 core.notifications.playSound('login');
                 document.title = l('title.connected', core.connection.character);
+                core.siteSession.onConnectionEstablished();
             });
             core.watch(() => core.conversations.hasNew, (hasNew) => {
                 document.title = (hasNew ? '💬 ' : '') + l(core.connection.isOpen ? 'title.connected' : 'title', core.connection.character);

@@ -98,8 +98,9 @@
         <recent-conversations ref="recentDialog"></recent-conversations>
         <image-preview ref="imagePreview"></image-preview>
         <add-pm-partner ref="addPmPartnerDialog"></add-pm-partner>
+        <note-status></note-status>
     </div>
-</template>
+</template>/me
 
 <script lang="ts">
     import {Component, Hook} from '@f-list/vue-ts';
@@ -127,6 +128,7 @@
     import ImagePreview from './preview/ImagePreview.vue';
     import PrivateConversation = Conversation.PrivateConversation;
     import * as _ from 'lodash';
+    import NoteStatus from '../site/NoteStatus.vue';
 
     const unreadClasses = {
         [Conversation.UnreadState.None]: '',
@@ -140,7 +142,8 @@
             settings: SettingsView, conversation: ConversationView, 'report-dialog': ReportDialog, sidebar: Sidebar,
             'user-menu': UserMenu, 'recent-conversations': RecentConversations,
             'image-preview': ImagePreview,
-            'add-pm-partner': PmPartnerAdder
+            'add-pm-partner': PmPartnerAdder,
+            'note-status': NoteStatus
         }
     })
     export default class ChatView extends Vue {

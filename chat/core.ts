@@ -7,6 +7,7 @@ import Conversations from './conversations';
 import {Channel, Character, Connection, Conversation, Logs, Notifications, Settings, State as StateInterface} from './interfaces';
 import { AdCoordinatorGuest } from './ads/ad-coordinator-guest';
 import { GeneralSettings } from '../electron/common';
+import { SiteSession } from '../site/site-session';
 
 function createBBCodeParser(): BBCodeParser {
     const parser = new BBCodeParser();
@@ -68,6 +69,7 @@ const data = {
     notifications: <Notifications | undefined>undefined,
     cache: <CacheManager | undefined>undefined,
     adCoordinator: <AdCoordinatorGuest | undefined>undefined,
+    siteSession: <SiteSession | undefined>undefined,
 
     register<K extends 'characters' | 'conversations' | 'channels'>(module: K, subState: VueState[K]): void {
         Vue.set(vue, module, subState);
@@ -92,6 +94,7 @@ export function init(
     data.notifications = new notificationsClass();
     data.cache = new CacheManager();
     data.adCoordinator = new AdCoordinatorGuest();
+    data.siteSession = new SiteSession();
 
     (data.state as any).generalSettings = settings;
 
@@ -117,6 +120,7 @@ export interface Core {
     readonly notifications: Notifications
     readonly cache: CacheManager
     readonly adCoordinator: AdCoordinatorGuest;
+    readonly siteSession: SiteSession;
 
     watch<T>(getter: (this: VueState) => T, callback: WatchHandler<T>): void
 }

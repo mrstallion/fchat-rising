@@ -1,7 +1,8 @@
 # Changelog
 
 ## Canary
-*   Fixed max ad length for automated ads to be 50,000 characters
+*   Show number of unread notes and messages in the bottom right corner
+*   Fixed max ad length for automated ads to 50,000 characters
 *   Fixed 'unsure' sexual orientation to display correctly in character preview
 
 

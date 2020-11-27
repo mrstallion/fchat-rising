@@ -3,6 +3,7 @@ import { Character } from '../../site/character_page/interfaces';
 import { Message } from '../common';
 import { Conversation } from '../interfaces';
 import ChannelConversation = Conversation.ChannelConversation;
+import { NoteCheckerCount } from '../../site/note-checker';
 
 /**
  * 'imagepreview-dismiss': {url: string}
@@ -14,6 +15,7 @@ import ChannelConversation = Conversation.ChannelConversation;
  * 'channel-ad': {message: Message, channel: Conversation, profile: ComplexCharacter | undefined}
  * 'channel-message': {message: Message, channel: Conversation}
  * 'select-conversation': { conversation: Conversation }
+ * 'note-counts-update': {}
  */
 
 
@@ -38,6 +40,11 @@ export interface CharacterDataEvent {
 export interface SelectConversationEvent extends EventBusEvent {
     conversation: Conversation;
 }
+
+
+// tslint:disable-next-line no-empty-interface
+export interface NoteCountsUpdate extends EventBusEvent, NoteCheckerCount {}
+
 
 export const EventBus = new Vue();
 
