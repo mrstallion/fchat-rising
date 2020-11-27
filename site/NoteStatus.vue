@@ -2,9 +2,9 @@
   <div id="note-status" :class="{active: hasReports()}">
 
     <div v-for="(report, index) in reports" :key="`report-${index}`" :class="`status-report ${report.type} ${(report.count > 0) && (report.count !== report.dismissedCount) ? 'active': ''}`">
-      <a :href="report.url">
+      <a :href="report.url" @click="dismissReport(report)">
         <span class="count">{{report.count}}</span>
-        {{ report.title }}
+        {{ `${report.count !== 1 ? report.title : report.title.substr(0, report.title.length - 1)}` }}
 
       </a>
       <a @click="dismissReport(report)" class="dismiss"><i class="fas fa-times-circle"></i></a>
@@ -44,17 +44,16 @@ export default class NoteStatus extends Vue {
       dismissedCount: 0,
       url: 'https://www.f-list.net/read_notes.php'
     }
-  ]
+  ];
 
-  interval?: any;
-  callback?: any;
+  callback?: () => void;
 
 
   @Hook('mounted')
   mounted(): void {
-    this.processCounts();
+    this.updateCounts();
 
-    this.callback = () => this.processCounts();
+    this.callback = () => this.updateCounts();
 
     EventBus.$on('note-counts-update', this.callback);
   }
@@ -76,13 +75,13 @@ export default class NoteStatus extends Vue {
   }
 
 
-  processCounts() {
+  updateCounts(): void {
     const v = core.siteSession.interfaces.notes.getCounts();
 
     const mapper = {
       message: 'unreadMessages',
       note: 'unreadNotes'
-    }
+    };
 
     _.each(
       mapper,
@@ -104,7 +103,6 @@ export default class NoteStatus extends Vue {
     );
   }
 }
-
 </script>
 <style lang="scss">
 

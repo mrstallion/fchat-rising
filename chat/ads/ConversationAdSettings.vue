@@ -13,7 +13,7 @@
                 <a @click="removeAd(index)" title="Remove Ad"><i class="fas fa-times-circle"></i></a>
             </label>
 
-            <editor :id="'ad' + conversation.key + '-' + index" v-model="ads[index]" :hasToolbar="true" class="form-control" :maxlength="50000">
+            <editor :id="'ad' + conversation.key + '-' + index" v-model="ads[index]" :hasToolbar="true" class="form-control" :maxlength="core.connection.vars.lfrp_max">
             </editor>
         </div>
         <button class="btn btn-outline-secondary" @click="addAd()">Add Another</button>
@@ -28,6 +28,7 @@
     import {Conversation} from '../interfaces';
     import l from '../localize';
     import {Editor} from '../bbcode';
+    import core from '../core';
 
     @Component({
         components: {modal: Modal, editor: Editor}
@@ -38,6 +39,7 @@
         l = l;
         setting = Conversation.Setting;
         ads!: string[];
+        core = core;
 
         load(): void {
             const settings = this.conversation.settings;

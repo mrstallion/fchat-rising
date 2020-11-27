@@ -216,6 +216,8 @@ export namespace Settings {
         readonly risingCharacterPreview: boolean;
         readonly risingComparisonInUserMenu: boolean;
         readonly risingComparisonInSearch: boolean;
+
+        readonly risingShowUnreadOfflineCount: boolean;
     }
 }
 

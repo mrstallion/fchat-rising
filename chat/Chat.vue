@@ -140,6 +140,8 @@ import {InlineDisplayMode} from '../interfaces';
 
                 AdManager.onConnectionClosed();
                 core.adCoordinator.clear();
+
+                // tslint:disable-next-line:no-floating-promises
                 core.siteSession.onConnectionClosed();
 
                 document.title = l('title');
@@ -174,6 +176,8 @@ import {InlineDisplayMode} from '../interfaces';
                 this.connected = true;
                 core.notifications.playSound('login');
                 document.title = l('title.connected', core.connection.character);
+
+                // tslint:disable-next-line:no-floating-promises
                 core.siteSession.onConnectionEstablished();
             });
             core.watch(() => core.conversations.hasNew, (hasNew) => {

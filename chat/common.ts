@@ -51,6 +51,8 @@ export class Settings implements ISettings {
     risingCharacterPreview = true;
     risingComparisonInUserMenu = true;
     risingComparisonInSearch = true;
+
+    risingShowUnreadOfflineCount = true;
 }
 
 

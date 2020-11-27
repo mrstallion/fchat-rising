@@ -1,6 +1,8 @@
 import { SiteSession, SiteSessionInterface } from './site-session';
-import log from 'electron-log';
+import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 import { EventBus } from '../chat/preview/event-bus';
+
+/* tslint:disable:no-unsafe-any */
 
 export interface NoteCheckerCount {
   unreadNotes: number;
@@ -10,7 +12,7 @@ export interface NoteCheckerCount {
 
 
 export class NoteChecker implements SiteSessionInterface {
-  private static readonly CHECK_FREQUENCY = 10 * 60 * 1000;
+  private static readonly CHECK_FREQUENCY = 15 * 60 * 1000;
 
   private latestCount: NoteCheckerCount = { unreadNotes: 0, unreadMessages: 0, onlineUsers: 0 };
   private timer?: any;
@@ -75,6 +77,18 @@ export class NoteChecker implements SiteSessionInterface {
     EventBus.$emit('note-counts-update', summary);
 
     return summary;
+  }
+
+
+  incrementMessages(): void {
+    this.latestCount.unreadMessages++;
+    EventBus.$emit('note-counts-update', this.latestCount);
+  }
+
+
+  incrementNotes(): void {
+    this.latestCount.unreadNotes++;
+    EventBus.$emit('note-counts-update', this.latestCount);
   }
 
 

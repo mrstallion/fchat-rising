@@ -183,6 +183,15 @@
                 </label>
             </div>
 
+            <h5>Misc</h5>
+
+            <div class="form-group">
+                <label class="control-label" for="risingShowUnreadOfflineCount">
+                    <input type="checkbox" id="risingShowUnreadOfflineCount" v-model="risingShowUnreadOfflineCount"/>
+                    Show unread note and offline message counts at the bottom right corner
+                </label>
+            </div>
+
         </div>
         <div v-show="selectedTab === '3'">
             <template v-if="hidden.length">
@@ -250,6 +259,8 @@
         risingComparisonInUserMenu!: boolean;
         risingComparisonInSearch!: boolean;
 
+        risingShowUnreadOfflineCount!: boolean;
+
 
         async load(): Promise<void> {
             const settings = core.state.settings;
@@ -283,6 +294,7 @@
             this.risingCharacterPreview = settings.risingCharacterPreview;
             this.risingComparisonInUserMenu = settings.risingComparisonInUserMenu;
             this.risingComparisonInSearch = settings.risingComparisonInSearch;
+            this.risingShowUnreadOfflineCount = settings.risingShowUnreadOfflineCount;
         }
 
         async doImport(): Promise<void> {
@@ -334,7 +346,8 @@
                 risingAutoExpandCustomKinks: this.risingAutoExpandCustomKinks,
                 risingCharacterPreview: this.risingCharacterPreview,
                 risingComparisonInUserMenu: this.risingComparisonInUserMenu,
-                risingComparisonInSearch: this.risingComparisonInSearch
+                risingComparisonInSearch: this.risingComparisonInSearch,
+                risingShowUnreadOfflineCount: this.risingShowUnreadOfflineCount
             };
             if(this.notifications) await core.notifications.requestPermission();
         }

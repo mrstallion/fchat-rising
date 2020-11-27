@@ -98,7 +98,7 @@
         <recent-conversations ref="recentDialog"></recent-conversations>
         <image-preview ref="imagePreview"></image-preview>
         <add-pm-partner ref="addPmPartnerDialog"></add-pm-partner>
-        <note-status></note-status>
+        <note-status v-if="coreState.settings.risingShowUnreadOfflineCount"></note-status>
     </div>
 </template>/me
 
@@ -152,6 +152,7 @@
         characterImage = characterImage;
         conversations = core.conversations;
         getStatusIcon = getStatusIcon;
+        coreState = core.state;
         keydownListener!: (e: KeyboardEvent) => void;
         focusListener!: () => void;
         blurListener!: () => void;

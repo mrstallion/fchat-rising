@@ -823,9 +823,13 @@ export default function(this: any): Interfaces.State {
             text = l(key, `[user]${data.name}[/user]`, l(`events.rtbComment_${data.target_type}`), `[url=${url}]${data.target}[/url]`);
             character = data.name;
         } else if(data.type === 'note') {
+            // tslint:disable-next-line:no-unsafe-any
+            core.siteSession.interfaces.notes.incrementNotes();
             text = l('events.rtb_note', `[user]${data.sender}[/user]`, `[url=${url}view_note.php?note_id=${data.id}]${data.subject}[/url]`);
             character = data.sender;
         } else if(data.type === 'friendrequest') {
+            // tslint:disable-next-line:no-unsafe-any
+            core.siteSession.interfaces.notes.incrementMessages();
             text = l(`events.rtb_friendrequest`, `[user]${data.name}[/user]`);
             character = data.name;
         } else {

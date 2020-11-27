@@ -1,11 +1,11 @@
-// import qs from 'qs';
 import _ from 'lodash';
-import log from 'electron-log';
-import throat from 'throat'; //tslint:disable-line:match-default-export-name
+import log from 'electron-log'; //tslint:disable-line:match-default-export-name
+import throat from 'throat';
 import { NoteChecker } from './note-checker';
 
-import request from 'request-promise';
+import request from 'request-promise'; //tslint:disable-line:match-default-export-name
 
+/* tslint:disable:no-unsafe-any */
 
 export interface SiteSessionInterface {
   start(): Promise<void>;
@@ -160,15 +160,13 @@ export class SiteSession {
 
 
   async get(uri: string, mustBeLoggedIn: boolean = false, config: Partial<request.Options> = {}): Promise<request.RequestPromise> {
-    const res = await this.sessionThroat(
+    return this.sessionThroat(
       async() => {
           const finalConfig = await this.prepareRequest('get', uri, mustBeLoggedIn, config);
 
           return this.request(finalConfig);
       }
     );
-
-    return res;
   }
 
 
@@ -178,15 +176,13 @@ export class SiteSession {
     mustBeLoggedIn: boolean = false,
     config: Partial<request.Options> = {}
   ): Promise<request.RequestPromise> {
-    const res = await this.sessionThroat(
+    return this.sessionThroat(
       async() => {
         const finalConfig = await this.prepareRequest('post', uri, mustBeLoggedIn, _.merge({ form: data }, config));
 
         return this.request(finalConfig);
       }
     );
-
-    return res;
   }
 
 
