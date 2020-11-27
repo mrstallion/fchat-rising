@@ -1,6 +1,6 @@
 # Changelog
 
-## Canary
+## 1.6.0
 *   Show number of unread notes and messages in the bottom right corner
 *   Fixed max ad length for automated ads
 *   Fixed 'unsure' sexual orientation to display correctly in character preview
