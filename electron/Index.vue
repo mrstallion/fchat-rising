@@ -369,6 +369,7 @@
                 this.defaultCharacter = data.default_character;
             } catch(e) {
                 this.error = l('login.error');
+                log.error('connect.error', e);
                 if(process.env.NODE_ENV !== 'production') throw e;
             } finally {
                 this.loggingIn = false;

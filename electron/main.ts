@@ -280,7 +280,12 @@ function createWindow(): Electron.BrowserWindow | undefined {
                 log.debug('adblock.inject.style', { length: style.length, url });
             });
         }
-      );
+    ).catch(
+      (err) => {
+        log.warn('adblock.init.error', 'Adblocker failed to initialize.'
+            + 'This does not break F-Chat Rising, but may produce slower image previews', err);
+      }
+    );
 
 
     // This prevents automatic download prompts on certain webview URLs without
