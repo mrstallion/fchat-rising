@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.7.0
+*   Option for serving ads in random order
+*   Fixed Twitter previews crashing the app
+
+
 ## 1.6.0
 *   Show number of unread notes and messages in the bottom right corner
 *   Fixed max ad length for automated ads
