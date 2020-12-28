@@ -659,6 +659,10 @@ function onReady(): void {
     createWindow();
 }
 
+// Twitter fix
+app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy');
+
+
 const isSquirrelStart = require('electron-squirrel-startup'); //tslint:disable-line:no-require-imports
 if(isSquirrelStart || process.env.NODE_ENV === 'production' && !app.requestSingleInstanceLock()) app.quit();
 else app.on('ready', onReady);
