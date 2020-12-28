@@ -37,6 +37,7 @@ export class AdManager {
     private expireDue?: Date;
     private firstPost?: Date;
     private interval?: Timer;
+    private adMap: number[] = [];
 
     constructor(conversation: Conversation) {
         this.conversation = conversation;
@@ -46,12 +47,10 @@ export class AdManager {
         return this.active;
     }
 
-
     // tslint:disable-next-line
     private async delay(ms: number): Promise<void> {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
-
 
     // This makes sure there is a 5s delay between channel posts
     private async sendAdToChannel(msg: string, conv: Conversation.ChannelConversation): Promise<void> {
@@ -86,7 +85,6 @@ export class AdManager {
         );
     }
 
-
     private async sendNextPost(): Promise<void> {
         const msg = this.getNextAd();
 
@@ -116,6 +114,17 @@ export class AdManager {
         ) as Timer;
     }
 
+    generateAdMap(): number[] {
+        const ads = this.getAds();
+        const idx = _.range(ads.length);
+
+        return this.shouldUseRandomOrder() ? _.shuffle(idx) : idx;
+    }
+
+    shouldUseRandomOrder(): boolean {
+        return !!this.conversation.settings.adSettings.randomOrder;
+    }
+
     getAds(): string[] {
         return this.conversation.settings.adSettings.ads;
     }
@@ -126,7 +135,12 @@ export class AdManager {
         if (ads.length === 0)
             return;
 
-        return ads[this.adIndex % ads.length];
+        if (ads.length !== this.adMap.length) {
+            log.debug('adManager.regenerate.on-the-fly', ads.length, this.adMap.length);
+            this.adMap = this.generateAdMap();
+        }
+
+        return ads[this.adMap[this.adIndex % this.adMap.length] % ads.length];
     }
 
     getNextPostDue(): Date | undefined {
@@ -149,6 +163,7 @@ export class AdManager {
         this.active = true;
         this.nextPostDue = new Date(Date.now() + initialWait);
         this.expireDue = new Date(Date.now() + AdManager.POSTING_PERIOD);
+        this.adMap = this.generateAdMap();
 
         // tslint:disable-next-line: no-unnecessary-type-assertion
         this.interval = setTimeout(

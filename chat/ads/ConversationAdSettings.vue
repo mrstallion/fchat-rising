@@ -2,8 +2,11 @@
     <modal :action="`Ads for ${conversation.name}`" @submit="submit" ref="dialog" @open="load()" dialogClass="w-100"
         :buttonText="l('conversationSettings.save')">
 
-        <div>
-            [] Randomize the order of the ads every time you start automated posting.
+        <div class="form-group">
+            <label class="control-label" for="randomOrder">
+                <input type="checkbox" v-model="randomOrder" id="randomOrder" />
+                Serve ads in random order
+            </label>
         </div>
 
         <div class="form-group ad-list" v-for="(ad, index) in ads">
@@ -39,12 +42,14 @@
         l = l;
         setting = Conversation.Setting;
         ads!: string[];
+        randomOrder! = false;
         core = core;
 
         load(): void {
             const settings = this.conversation.settings;
 
             this.ads = settings.adSettings.ads.slice(0);
+            this.randomOrder = !!settings.adSettings.randomOrder;
 
             if (this.ads.length === 0) {
                 this.ads.push('');
@@ -53,13 +58,11 @@
 
         submit(): void {
             this.conversation.settings = {
-                notify: this.conversation.settings.notify,
-                highlight: this.conversation.settings.highlight,
-                highlightWords: this.conversation.settings.highlightWords,
-                joinMessages: this.conversation.settings.joinMessages,
-                defaultHighlights: this.conversation.settings.defaultHighlights,
+                ...this.conversation.settings,
+
                 adSettings: {
-                    ads: this.ads.map((ad: string) => ad.trim()).filter((ad: string) => (ad.length > 0))
+                    ads: this.ads.map((ad: string) => ad.trim()).filter((ad: string) => (ad.length > 0)),
+                    randomOrder: this.randomOrder
                 }
             };
         }

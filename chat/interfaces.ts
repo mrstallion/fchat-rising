@@ -108,6 +108,7 @@ export namespace Conversation {
 
     export interface AdSettings {
         readonly ads: string[];
+        readonly randomOrder: boolean;
     }
 
     export const enum UnreadState { None, Unread, Mention }
