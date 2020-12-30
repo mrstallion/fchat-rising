@@ -16,7 +16,7 @@ To install, download the application from the links above and then refer to the 
 ### Link Previews
 Hover your mouse on any link to view the image.
 
-![Link Previews](assets/images/link-preview.png)
+![Link Previews](assets/images/link-preview.gif)
 
 
 ### Smarter Ads
