@@ -14,13 +14,13 @@ To install, download the application from the links above and then refer to the 
 ## Features
 
 ### Link Previews
-Hover your mouse on any link to view the image.
+Hover your mouse on any link to see a preview image.
 
 ![Link Previews](assets/images/link-preview.gif)
 
 
 ### Smarter Ads
-Characters who match your preferences have highlighted ads.
+Characters who match your preferences get highlighted ads.
 
 ![Smarter Ads](assets/images/smarter-ads.png)
 
@@ -35,3 +35,11 @@ See immediately who is a good match for you.
 Dozens of useful improvements all around!
 
 ![UI Tweaks](assets/images/ui-tweaks.png)
+
+
+
+### Character Previews
+See how characters match up with you.
+
+![Character Previews](assets/images/character-preview.png)
+
