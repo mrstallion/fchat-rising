@@ -31,3 +31,12 @@
         }
     }
 }
+
+.colorblindMode {
+  @import "../colorblind";
+  @import "../../rising";
+
+  @each $varName, $value in $risingVariables {
+    --#{$varName}: #{$value};
+  }
+}

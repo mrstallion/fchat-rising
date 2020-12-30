@@ -443,10 +443,16 @@
         }
 
 
-        getThemeClass(): string {
-            return `theme-${this.settings.theme}`;
+        getThemeClass(): Record<string, boolean> {
+          try {
+            return {
+              [`theme-${this.settings.theme}`]: true,
+              colorblindMode: core.state.settings.risingColorblindMode
+            };
+          } catch(err) {
+            return { [`theme-${this.settings.theme}`]: true };
+          }
         }
-
 
         nextProfile(): void {
           if (!this.nextProfileAvailable()) {

@@ -219,6 +219,7 @@ export namespace Settings {
         readonly risingComparisonInSearch: boolean;
 
         readonly risingShowUnreadOfflineCount: boolean;
+        readonly risingColorblindMode: boolean;
     }
 }
 

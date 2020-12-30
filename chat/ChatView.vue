@@ -362,6 +362,10 @@
         getClasses(conversation: Conversation): string {
             return conversation === core.conversations.selectedConversation ? ' active' : unreadClasses[conversation.unread];
         }
+
+        isColorblindModeActive(): boolean {
+          return core.state.settings.risingColorblindMode;
+        }
     }
 </script>
 

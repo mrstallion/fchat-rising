@@ -1,7 +1,7 @@
 # Download
-[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.7.0/F-Chat-Rising-1.7.0-win.exe) (75 MB)
-| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.7.0/F-Chat-Rising-1.7.0-macos.dmg) (76 MB)
-| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.7.0/F-Chat-Rising-1.7.0-linux.AppImage) (76 MB)
+[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.8.0/F-Chat-Rising-1.8.0-win.exe) (75 MB)
+| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.8.0/F-Chat-Rising-1.8.0-macos.dmg) (76 MB)
+| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.8.0/F-Chat-Rising-1.8.0-linux.AppImage) (76 MB)
 
 
 # F-Chat Rising
@@ -66,6 +66,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    PM list shows characters' online status as a colored icon
     *    Use `Ctrl+Tab`, `Ctrl+Shift+Tab`, `Ctrl+PgDown`, and `Ctrl+PgUp` to switch between character tabs
     *    Show number of unread notes and messages in the bottom right corner
+    *    Colorblind mode
 *   Technical Details for Nerds
     *    Upgraded to Electron 10.x
     *    Replaced `node-spellchecker` with the built-in spellchecker that ships with Electron 8+

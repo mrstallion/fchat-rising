@@ -31,3 +31,28 @@
     }
   }
 }
+
+.colorblindMode {
+  @import "../colorblind";
+  @import "../../rising";
+
+  @each $varName, $value in $risingVariables {
+    --#{$varName}: #{$value};
+  }
+}
+
+//@import "../../util/accecss";
+//
+//@include accecss(
+//  'html body',
+//  false,
+//  false,
+//  tritanopia
+//);
+
+// deuteranomaly
+// protanomaly
+// protanopia
+// deuteranopia
+// tritanomaly
+// tritanopia

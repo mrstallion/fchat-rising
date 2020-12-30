@@ -785,8 +785,8 @@
             padding-bottom: 2px;
 
             &.unicorn {
-              background-color: #00adad;
-              border: solid 1px #1d9a9a;
+              background-color: var(--scoreUnicornMatchBg);
+              border: 1px solid var(--scoreUnicornMatchFg);
               box-shadow: 0 0 5px 0 rgba(255, 255, 255, 0.5);
 
               &::before {

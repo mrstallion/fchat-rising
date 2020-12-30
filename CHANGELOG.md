@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.0
+*   Added colorblind mode (settings -> rising -> colorblind mode)
+
+
 ## 1.7.0
 *   Option for serving ads in random order
 *   Fixed Twitter previews crashing the app

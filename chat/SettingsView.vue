@@ -192,6 +192,13 @@
                 </label>
             </div>
 
+            <div class="form-group">
+                <label class="control-label" for="risingColorblindMode">
+                    <input type="checkbox" id="risingColorblindMode" v-model="risingColorblindMode"/>
+                    Colorblind mode
+                </label>
+            </div>
+
         </div>
         <div v-show="selectedTab === '3'">
             <template v-if="hidden.length">
@@ -260,6 +267,7 @@
         risingComparisonInSearch!: boolean;
 
         risingShowUnreadOfflineCount!: boolean;
+        risingColorblindMode!: boolean;
 
 
         async load(): Promise<void> {
@@ -295,6 +303,8 @@
             this.risingComparisonInUserMenu = settings.risingComparisonInUserMenu;
             this.risingComparisonInSearch = settings.risingComparisonInSearch;
             this.risingShowUnreadOfflineCount = settings.risingShowUnreadOfflineCount;
+
+            this.risingColorblindMode = settings.risingColorblindMode;
         }
 
         async doImport(): Promise<void> {
@@ -347,7 +357,9 @@
                 risingCharacterPreview: this.risingCharacterPreview,
                 risingComparisonInUserMenu: this.risingComparisonInUserMenu,
                 risingComparisonInSearch: this.risingComparisonInSearch,
-                risingShowUnreadOfflineCount: this.risingShowUnreadOfflineCount
+                risingShowUnreadOfflineCount: this.risingShowUnreadOfflineCount,
+
+                risingColorblindMode: this.risingColorblindMode
             };
             if(this.notifications) await core.notifications.requestPermission();
         }

@@ -53,6 +53,7 @@ export class Settings implements ISettings {
     risingComparisonInSearch = true;
 
     risingShowUnreadOfflineCount = true;
+    risingColorblindMode = false;
 }
 
 

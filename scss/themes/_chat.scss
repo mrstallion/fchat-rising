@@ -34,6 +34,14 @@
 @import "../flist_overrides";
 @import "../rising";
 
+
+:root {
+  @each $varName, $value in $risingVariables {
+    --#{$varName}: #{$value};
+  }
+}
+
+
 * {
   &::-webkit-scrollbar-track {
     box-shadow: inset 0 0 8px $card-border-color;
