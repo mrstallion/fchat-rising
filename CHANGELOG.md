@@ -1,5 +1,9 @@
 # Changelog
 
+## Canary
+*   Skip button for auto-post ads
+
+
 ## 1.8.0
 *   Added colorblind mode (settings -> rising -> colorblind mode)
 

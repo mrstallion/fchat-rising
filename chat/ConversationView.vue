@@ -108,8 +108,9 @@
             <div class="update">{{adAutoPostUpdate}}</div>
 
             <div v-show="adAutoPostNextAd" class="next">
-                <h5>{{l('admgr.comingNext')}}</h5>
-                <div>{{(adAutoPostNextAd ? adAutoPostNextAd.substr(0, 64) : '')}}...</div>
+                <h5>{{l('admgr.comingNext')}} <a @click="skipAd()"><i class='adAction fas fa-arrow-right' /></a></h5>
+                <div>{{(adAutoPostNextAd ? adAutoPostNextAd.substr(0, 100) : '')}}...</div>
+
             </div>
 
             <a class="btn btn-sm btn-outline-primary renew-autoposts" @click="renewAutoPosting()" v-if="!adsRequireSetup">{{l('admgr.renew')}}</a>
@@ -503,6 +504,12 @@
         }
 
 
+        skipAd(): void {
+          this.conversation.adManager.skipAd();
+          this.updateAutoPostingState();
+        }
+
+
         stopAutoPostAds(): void {
             this.conversation.adManager.stop();
         }
@@ -525,6 +532,35 @@
         }
 
 
+        updateAutoPostingState() {
+            const adManager = this.conversation.adManager;
+
+            this.adAutoPostNextAd = adManager.getNextAd() || null;
+
+            if(this.adAutoPostNextAd) {
+                const diff = ((adManager.getNextPostDue() || new Date()).getTime() - Date.now()) / 1000;
+                const expDiff = ((adManager.getExpireDue() || new Date()).getTime() - Date.now()) / 1000;
+
+                const diffMins = Math.floor(diff / 60);
+                const diffSecs = Math.floor(diff % 60);
+                const expDiffMins = Math.floor(expDiff / 60);
+                const expDiffSecs = Math.floor(expDiff % 60);
+
+                this.adAutoPostUpdate = l(
+                    ((adManager.getNextPostDue()) && (!adManager.getFirstPost())) ? 'admgr.postingBegins' : 'admgr.nextPostDue',
+                    diffMins,
+                    diffSecs
+                ) + l('admgr.expiresIn', expDiffMins, expDiffSecs);
+
+                this.adsRequireSetup = false;
+            } else {
+                this.adAutoPostNextAd = null;
+
+                this.adAutoPostUpdate = l('admgr.noAds');
+                this.adsRequireSetup = true;
+            }
+        };
+
         refreshAutoPostingTimer(): void {
             if (this.autoPostingUpdater)
                 window.clearInterval(this.autoPostingUpdater);
@@ -535,38 +571,8 @@
                 return;
             }
 
-            const updateAutoPostingState = () => {
-                const adManager = this.conversation.adManager;
-
-                this.adAutoPostNextAd = adManager.getNextAd() || null;
-
-                if(this.adAutoPostNextAd) {
-                    const diff = ((adManager.getNextPostDue() || new Date()).getTime() - Date.now()) / 1000;
-                    const expDiff = ((adManager.getExpireDue() || new Date()).getTime() - Date.now()) / 1000;
-
-                    const diffMins = Math.floor(diff / 60);
-                    const diffSecs = Math.floor(diff % 60);
-                    const expDiffMins = Math.floor(expDiff / 60);
-                    const expDiffSecs = Math.floor(expDiff % 60);
-
-                    this.adAutoPostUpdate = l(
-                        ((adManager.getNextPostDue()) && (!adManager.getFirstPost())) ? 'admgr.postingBegins' : 'admgr.nextPostDue',
-                        diffMins,
-                        diffSecs
-                    ) + l('admgr.expiresIn', expDiffMins, expDiffSecs);
-
-                    this.adsRequireSetup = false;
-                } else {
-                    this.adAutoPostNextAd = null;
-
-                    this.adAutoPostUpdate = l('admgr.noAds');
-                    this.adsRequireSetup = true;
-                }
-            };
-
-            this.autoPostingUpdater = window.setInterval(updateAutoPostingState, 1000);
-
-            updateAutoPostingState();
+            this.autoPostingUpdater = window.setInterval(() => this.updateAutoPostingState(), 1000);
+            this.updateAutoPostingState();
         }
 
 
@@ -672,6 +678,16 @@
             margin: 0;
             position: relative;
             margin-top: 5px;
+
+            .adAction {
+              &:hover {
+                color: rgba(255, 255, 255, 0.8);
+              }
+
+              &:active {
+                color: rgba(255, 255, 255, 0.6);
+              }
+            }
 
             .renew-autoposts {
                 display: block;

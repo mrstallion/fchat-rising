@@ -47,6 +47,10 @@ export class AdManager {
         return this.active;
     }
 
+    skipAd(): void {
+        this.adIndex += 1;
+    }
+
     // tslint:disable-next-line
     private async delay(ms: number): Promise<void> {
         return new Promise((resolve) => setTimeout(resolve, ms));
