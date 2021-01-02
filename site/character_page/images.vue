@@ -1,7 +1,7 @@
 <template>
 <!--    <div class="character-images row">-->
     <div class="character-images">
-        <div v-show="loading" class="alert alert-info">Loading images.</div>
+        <div v-show="((loading) && (images.length === 0))" class="alert alert-info">Loading images.</div>
         <template v-if="!loading">
             <div class="images-navigate-up">
                 <i class="fa fa-angle-up"></i>
@@ -24,6 +24,7 @@
 </template>
 
 <script lang="ts">
+    import log from 'electron-log'; //tslint:disable-line:match-default-export-name
     import {Component, Prop} from '@f-list/vue-ts';
     import Vue from 'vue';
     import {CharacterImage} from '../../interfaces';
@@ -31,6 +32,8 @@
     import {methods} from './data_store';
     import {Character} from './interfaces';
     import core from '../../chat/core';
+    import _ from 'lodash';
+
 
     @Component
     export default class ImagesView extends Vue {
@@ -50,35 +53,81 @@
         imageUrl = (image: CharacterImage) => methods.imageUrl(image);
         thumbUrl = (image: CharacterImage) => methods.imageThumbUrl(image);
 
-        async show(): Promise<void> {
+
+        show(): void {
+          log.debug('profile.images.show', { shown: this.shown, loading: this.loading });
+
+          if (this.shown) {
+            return;
+          }
+
+          this.images = this.resolveImages();
+
+          // this promise is intentionally not part of a chain
+          this.showAsync().catch((err) => log.error('profile.images.error', { err }));
+        }
+
+
+        async showAsync(): Promise<void> {
+            log.debug('profile.images.show.async', { shown: this.shown, loading: this.loading });
+
             if(this.shown) return;
             try {
                 this.error = '';
                 this.shown = true;
                 this.loading = true;
-                this.images = await this.resolveImages();
-            } catch(e) {
+                this.images = await this.resolveImagesAsync();
+            } catch(err) {
                 this.shown = false;
-                if(Utils.isJSONError(e))
-                    this.error = <string>e.response.data.error;
-                Utils.ajaxError(e, 'Unable to load images.');
+                if(Utils.isJSONError(err))
+                    this.error = <string>err.response.data.error;
+                Utils.ajaxError(err, 'Unable to refresh images.');
+                log.error('profile.images.show.async.error', { err });
             }
             this.loading = false;
         }
 
-        async resolveImages(): Promise<CharacterImage[]> {
+        async resolveImagesAsync(): Promise<CharacterImage[]> {
+            log.debug('profile.images.async.injected', { count: this.injectedImages ? this.injectedImages.length : 0 });
+
             if ((this.injectedImages) && (this.injectedImages.length)) {
                 return this.injectedImages;
             }
 
             const c = await core.cache.profileCache.get(this.character.character.name);
 
+            log.debug('profile.images.async.cache', { count: _.get(c, 'meta.images.length') });
+
             if ((c) && (c.meta) && (c.meta.images)) {
                 return c.meta.images;
             }
 
-            return methods.imagesGet(this.character.character.id);
+            const images = await methods.imagesGet(this.character.character.id);
+
+            log.debug('profile.images.async.api', { count: images.length });
+
+            return images;
         }
+
+
+        resolveImages(): CharacterImage[] {
+          log.debug('profile.images.sync.injected', { count: this.injectedImages ? this.injectedImages.length : 0 });
+
+          if ((this.injectedImages) && (this.injectedImages.length)) {
+              return this.injectedImages;
+          }
+
+          const c = core.cache.profileCache.getSync(this.character.character.name);
+
+          log.debug('profile.images.sync.cache', { count: _.get(c, 'meta.images.length') });
+
+          if ((c) && (c.meta) && (c.meta.images)) {
+              return c.meta.images;
+          }
+
+          return [];
+        }
+
 
         handleImageClick(e: MouseEvent, image: CharacterImage): void {
             if(this.usePreview) {

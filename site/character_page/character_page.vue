@@ -73,6 +73,8 @@
 
     import {Component, Hook, Prop, Watch} from '@f-list/vue-ts';
     import Vue from 'vue';
+    import log from 'electron-log'; //tslint:disable-line:match-default-export-name
+
     import {StandardBBCodeParser} from '../../bbcode/standard';
     import {BBCodeView} from '../../bbcode/view';
     import { CharacterCacheRecord } from '../../learn/profile-cache';
@@ -95,7 +97,7 @@
     import { CharacterImage, SimpleCharacter } from '../../interfaces';
 
     const CHARACTER_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 7 days (milliseconds)
-    const CHARACTER_META_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 10 days (milliseconds)
+    const CHARACTER_META_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 7 days (milliseconds)
 
     interface ShowableVueTab extends Vue {
         show?(): void
@@ -198,8 +200,14 @@
             return core.state.settings.risingAdScore;
         }
 
+
         async reload(): Promise<void> {
             await this.load(true, true);
+
+            const target = <ShowableVueTab>this.$refs[`tab${this.tab}`];
+
+            //tslint:disable-next-line:no-unbound-method
+            if(typeof target.show === 'function') target.show();
         }
 
 
@@ -355,6 +363,8 @@
         }
 
         private async _getCharacter(skipCache: boolean = false): Promise<void> {
+            log.debug('profile.getCharacter', { name: this.name } );
+
             this.character = undefined;
             this.friends = null;
             this.groups = null;
@@ -373,20 +383,24 @@
 
             standardParser.inlines = this.character.character.inlines;
 
+            if ((cache) && (cache.meta)) {
+              this.guestbook = cache.meta.guestbook;
+              this.friends = cache.meta.friends;
+              this.groups = cache.meta.groups;
+              this.images = cache.meta.images;
+            }
+
             if (
                 (cache && !skipCache)
                 && (cache.meta)
                 && (cache.meta.lastMetaFetched)
                 && (Date.now() - cache.meta.lastMetaFetched.getTime() > CHARACTER_META_CACHE_EXPIRE)
             ) {
-                this.guestbook = cache.meta.guestbook;
-                this.friends = cache.meta.friends;
-                this.groups = cache.meta.groups;
-                this.images = cache.meta.images;
+              // do nothing
             } else {
                 // No await on purpose:
                 // tslint:disable-next-line no-floating-promises
-                this.updateMeta(this.name);
+                this.updateMeta(this.name).catch(err => console.error('profile.updateMeta', err));
             }
 
             // console.log('LoadChar', this.name, this.character);

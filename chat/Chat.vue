@@ -1,4 +1,3 @@
-import {InlineDisplayMode} from '../interfaces';
 <template>
     <div style="display:flex; flex-direction: column; height:100%; justify-content: center">
         <div class="card bg-light" style="width:400px;max-width:100%;margin:0 auto" v-if="!connected">

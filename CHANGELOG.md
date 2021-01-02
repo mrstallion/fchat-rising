@@ -2,6 +2,7 @@
 
 ## Canary
 *   Skip button for auto-post ads
+*   Image tab on the character profile view now loads up faster 
 
 
 ## 1.8.0
