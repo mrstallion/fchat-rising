@@ -214,13 +214,13 @@
                     // tslint:disable-next-line no-unsafe-any no-any
                     && (_.find(this.results, (s: SearchResult) => s.character.name === event.character.character.name))
                 ) {
+                    this.resultsPending = this.countPendingResults(event.character.character.name);
+
                     this.results = (_.filter(
                         this.results,
                         (x) => this.isSpeciesMatch(x)
                     ) as SearchResult[]).sort(sort);
-
-                    this.resultsPending = this.countPendingResults();
-                }
+              }
             };
 
             EventBus.$on(
@@ -327,7 +327,7 @@
         }
 
 
-        countPendingResults(): number {
+        countPendingResults(specificName?: string): number {
             return _.reduce(
                 this.results,
                 (accum: number, result: SearchResult) => {
@@ -335,7 +335,10 @@
                     return accum;
                   }
 
-                  result.profile = core.cache.profileCache.getSync(result.character.name);
+                  if ((!specificName) || (result.character.name === specificName)) {
+                    result.profile = core.cache.profileCache.getSync(result.character.name);
+                  }
+
                   return !!result.profile ? accum : accum + 1;
                 },
                 0

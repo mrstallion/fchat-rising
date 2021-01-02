@@ -3,6 +3,8 @@
 ## Canary
 *   Skip button for auto-post ads
 *   Image tab on the character profile view now loads up faster 
+*   Search results view is more responsive while still scoring profiles
+*   Fixed 'unicorn match' badge color
 
 
 ## 1.8.0
