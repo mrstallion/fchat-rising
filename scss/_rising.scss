@@ -1,4 +1,6 @@
 $risingVariables: (
+  scoreUnicornMatchBg: #{$scoreUnicornMatchBg},
+  scoreUnicornMatchFg: #{$scoreUnicornMatchFg},
   scoreMatchBg: #{$scoreMatchBg},
   scoreMatchFg: #{$scoreMatchFg},
   scoreWeakMatchBg: #{$scoreWeakMatchBg},
@@ -12,6 +14,8 @@ $risingVariables: (
   scoreMinimizeButtonBg: #{$scoreMinimizeButtonBg},
   scoreReportBg: #{$scoreReportBg},
 
+  scoreFadedUnicornMatchBg: #{$scoreFadedUnicornMatchBg},
+  scoreFadedUnicornMatchFg: #{$scoreFadedUnicornMatchFg},
   scoreFadedMatchBg: #{$scoreFadedMatchBg},
   scoreFadedMatchFg: #{$scoreFadedMatchFg},
   scoreFadedWeakMatchBg: #{$scoreFadedWeakMatchBg},
