@@ -1,4 +1,5 @@
-import Vue from 'vue';
+// import Vue from 'vue';
+import _ from 'lodash';
 import { Character } from '../../site/character_page/interfaces';
 import { Message } from '../common';
 import { Conversation } from '../interfaces';
@@ -41,10 +42,43 @@ export interface SelectConversationEvent extends EventBusEvent {
     conversation: Conversation;
 }
 
+export type EventCallback = (data: any) => void | Promise<void>;
+
 
 // tslint:disable-next-line no-empty-interface
 export interface NoteCountsUpdate extends EventBusEvent, NoteCheckerCount {}
 
+class EventBusManager {
+    private eventCallbacks: Record<string, EventCallback[]> = {};
 
-export const EventBus = new Vue();
+    $on(eventName: string, callback: EventCallback): void {
+        this.$off(eventName, callback);
+
+        if (!(eventName in this.eventCallbacks)) {
+            this.eventCallbacks[eventName] = [];
+        }
+
+        this.eventCallbacks[eventName].push(callback);
+    }
+
+
+    $off(eventName: string, callback: EventCallback): void {
+        if (!(eventName in this.eventCallbacks)) {
+            return;
+        }
+
+        this.eventCallbacks[eventName] = _.filter(
+          this.eventCallbacks[eventName],
+          (cb) => (cb !== callback)
+        );
+    }
+
+
+    $emit(eventName: string, eventData: EventBusEvent): void {
+        _.each(this.eventCallbacks[eventName] || [], (cb) => (cb(eventData)));
+    }
+}
+
+export const EventBus = new EventBusManager();
+// export const EventBus = new Vue();
 

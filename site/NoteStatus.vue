@@ -61,7 +61,9 @@ export default class NoteStatus extends Vue {
 
   @Hook('beforeDestroy')
   destroying(): void {
-    EventBus.$off('note-counts-update', this.callback);
+    if (this.callback) {
+      EventBus.$off('note-counts-update', this.callback);
+    }
   }
 
 
