@@ -45,6 +45,7 @@
     import Logs from './Logs.vue';
     import {init as profileApiInit} from './profile_api';
     import { AdManager } from './ads/ad-manager';
+    import { EventBus } from './preview/event-bus';
 
     type BBCodeNode = Node & {bbcodeTag?: string, bbcodeParam?: string};
 
@@ -139,9 +140,11 @@
 
                 AdManager.onConnectionClosed();
                 core.adCoordinator.clear();
+                EventBus.clear();
 
                 // tslint:disable-next-line:no-floating-promises
                 core.siteSession.onConnectionClosed();
+                core.cache.stop();
 
                 document.title = l('title');
             });
@@ -178,6 +181,7 @@
 
                 // tslint:disable-next-line:no-floating-promises
                 core.siteSession.onConnectionEstablished();
+                core.cache.start((core.state as any).generalSettings, true);
             });
             core.watch(() => core.conversations.hasNew, (hasNew) => {
                 document.title = (hasNew ? '💬 ' : '') + l(core.connection.isOpen ? 'title.connected' : 'title', core.connection.character);

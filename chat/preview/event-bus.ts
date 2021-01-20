@@ -77,6 +77,11 @@ class EventBusManager {
     $emit(eventName: string, eventData: EventBusEvent): void {
         _.each(this.eventCallbacks[eventName] || [], (cb) => (cb(eventData)));
     }
+
+
+    clear(): void {
+        this.eventCallbacks = {};
+    }
 }
 
 export const EventBus = new EventBusManager();
