@@ -52,7 +52,8 @@ import {Logs, SettingsStore} from './filesystem';
 import Notifications from './notifications';
 import * as SlimcatImporter from './importer';
 import Index from './Index.vue';
-import log from 'electron-log'; // tslint:disable-line: match-default-export-name
+import log from 'electron-log';
+import { DefinitionDictionary } from '../learn/dictionary/definition-dictionary'; // tslint:disable-line: match-default-export-name
 
 
 log.debug('init.chat');
@@ -73,6 +74,7 @@ const sc = nativeRequire<{
     }
 }>('spellchecker/build/Release/spellchecker.node');
 const spellchecker = new sc.Spellchecker();*/
+
 
 Axios.defaults.params = {__fchat: `desktop/${electron.remote.app.getVersion()}`};
 
@@ -105,6 +107,8 @@ function openIncognito(url: string): void {
 }
 
 const webContents = electron.remote.getCurrentWebContents();
+const wordDef = new DefinitionDictionary(electron.remote.app.getAppPath());
+
 webContents.on('context-menu', (_, props) => {
     const hasText = props.selectionText.trim().length > 0;
     const can = (type: string) => (<Electron.EditFlags & {[key: string]: boolean}>props.editFlags)[`can${type}`] && hasText;
@@ -181,7 +185,23 @@ webContents.on('context-menu', (_, props) => {
             click: () => electron.ipcRenderer.send('dictionary-remove', props.selectionText)
         }, {type: 'separator'});
 
+    if (props.selectionText) {
+        menuTemplate.unshift(
+          { type: 'separator' },
+          {
+            label: `Look up '${props.selectionText}'`,
+            click: async() => {
+                const words = await wordDef.getDefinition(props.selectionText);
+
+                // console.log('WORDS', words);
+            }
+          }
+        );
+    }
+
     if(menuTemplate.length > 0) electron.remote.Menu.buildFromTemplate(menuTemplate).popup({});
+
+    log.debug('context.text', { linkText: props.linkText, misspelledWord: props.misspelledWord, selectionText: props.selectionText, titleText: props.titleText });
 });
 
 let dictDir = path.join(electron.remote.app.getPath('userData'), 'spellchecker');

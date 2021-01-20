@@ -1,9 +1,10 @@
 # Changelog
 
 ## Canary
+*   Right click a word and select 'Look up...' to see its dictionary definition
 *   Skip button for auto-post ads
 *   Image tab on the character profile view now loads up faster 
-*   Search results view is more responsive while still scoring profiles
+*   Search results view is now more responsive while scoring profiles
 *   Fixed 'unicorn match' badge color
 
 
