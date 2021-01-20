@@ -64,7 +64,7 @@ export class ImageDomMutator {
             mutator = this.hostMutators['default'];
         }
 
-        if (mutator.eventName !== eventName)
+        if ((!mutator) || (mutator.eventName !== eventName))
             return;
 
         // console.log(`Mutator match: ${mutator.match}`, (mutator === this.hostMutators['default']), url);
