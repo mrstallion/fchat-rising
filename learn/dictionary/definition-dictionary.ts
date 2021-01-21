@@ -35,7 +35,7 @@ export class DefinitionDictionary {
 
 
   async getDefinition(expression: string): Promise<Definition[]> {
-    const exp = this.cleanExpression(expression);
+    const exp = DefinitionDictionary.cleanExpression(expression);
     const forms = await this.getWordNetValidForms(exp);
 
     const results = await Promise.all(
@@ -75,7 +75,7 @@ export class DefinitionDictionary {
   }
 
 
-  private cleanExpression(expression: string): string {
+  public static cleanExpression(expression: string): string {
     return anyAscii(expression).toLowerCase().replace(/[^a-z0-9\-]/g, ' ').replace(/  +/g, ' ').trim();
   }
 }

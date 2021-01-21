@@ -1,10 +1,13 @@
 <template>
-  <ul>
-    <li v-for="definition in definitions">
-      <p><i>({{definition.type}}.)</i> {{definition.definition}}</p>
-      <small>{{definition.synonyms.join(', ').replace(/_/g, ' ')}}</small>
-    </li>
-  </ul>
+  <div>
+    <ul v-if="definitions.length > 0">
+      <li v-for="definition in definitions">
+        <p><i>({{definition.type}}.)</i> {{definition.definition}}</p>
+        <small>{{definition.synonyms.join(', ').replace(/_/g, ' ')}}</small>
+      </li>
+    </ul>
+    <div v-else class="error">No definitions found for '{{ expression }}'.</div>
+  </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';

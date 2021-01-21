@@ -93,6 +93,11 @@
             <word-definition :expression="wordDefinitionLookup" ref="characterPage"></word-definition>
             <template slot="title">
                 {{wordDefinitionLookup}}
+
+                <a class="btn wordDefBtn dictionary" @click="openDefinitionWithDictionary"><i>D</i></a>
+                <a class="btn wordDefBtn thesaurus" @click="openDefinitionWithThesaurus"><i>T</i></a>
+                <a class="btn wordDefBtn urbandictionary" @click="openDefinitionWithUrbanDictionary"><i>UD</i></a>
+                <a class="btn wordDefBtn wikipedia" @click="openDefinitionWithWikipedia"><i>W</i></a>
             </template>
         </modal>
         <logs ref="logsDialog"></logs>
@@ -128,6 +133,7 @@
     import * as SlimcatImporter from './importer';
     import _ from 'lodash';
     import { EventBus } from '../chat/preview/event-bus';
+    import { DefinitionDictionary } from '../learn/dictionary/definition-dictionary';
     // import Bluebird from 'bluebird';
     // import Connection from '../fchat/connection';
     // import Notifications from './notifications';
@@ -518,6 +524,30 @@
         showLogs(): void {
             (<Logs>this.$refs['logsDialog']).show();
         }
+
+
+        getCleanedWordDefinition(): string {
+          return DefinitionDictionary.cleanExpression(this.wordDefinitionLookup);
+        }
+
+        async openDefinitionWithDictionary(): Promise<void> {
+            await electron.remote.shell.openExternal(`https://www.dictionary.com/browse/${encodeURI(this.getCleanedWordDefinition())}`);
+        }
+
+
+        async openDefinitionWithThesaurus(): Promise<void> {
+            await electron.remote.shell.openExternal(`https://www.thesaurus.com/browse/${encodeURI(this.getCleanedWordDefinition())}`);
+        }
+
+
+        async openDefinitionWithUrbanDictionary(): Promise<void> {
+            await electron.remote.shell.openExternal(`https://www.urbandictionary.com/define.php?term=${encodeURIComponent(this.getCleanedWordDefinition())}`);
+        }
+
+
+        async openDefinitionWithWikipedia(): Promise<void> {
+            await electron.remote.shell.openExternal(`https://en.wikipedia.org/wiki/${encodeURI(this.getCleanedWordDefinition())}`);
+        }
     }
 </script>
 
@@ -598,6 +628,45 @@
             small {
                 display: block;
                 opacity: 0.8;
+            }
+        }
+    }
+
+
+    .btn.wordDefBtn {
+        background-color: red;
+        padding: 0.2rem 0.2rem;
+        line-height: 90%;
+        margin-right: 0.2rem;
+        text-align: center;
+
+        i {
+            font-style: normal !important;
+            color: white;
+            font-weight: bold
+        }
+
+        &.thesaurus {
+            background-color: #F44725
+        }
+
+        &.urbandictionary {
+            background-color: #d96a36;
+
+            i {
+                color: #fadf4b;
+            }
+        }
+
+        &.dictionary {
+            background-color: #314ca7;
+        }
+
+        &.wikipedia {
+            background-color: white;
+
+            i {
+                color: black;
             }
         }
     }
