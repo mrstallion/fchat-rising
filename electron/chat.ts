@@ -52,8 +52,8 @@ import {Logs, SettingsStore} from './filesystem';
 import Notifications from './notifications';
 import * as SlimcatImporter from './importer';
 import Index from './Index.vue';
-import log from 'electron-log';
-import { DefinitionDictionary } from '../learn/dictionary/definition-dictionary'; // tslint:disable-line: match-default-export-name
+import log from 'electron-log'; // tslint:disable-line: match-default-export-name
+import { WordPosSearch } from '../learn/dictionary/word-pos-search';
 
 
 log.debug('init.chat');
@@ -107,7 +107,7 @@ function openIncognito(url: string): void {
 }
 
 const webContents = electron.remote.getCurrentWebContents();
-const wordDef = new DefinitionDictionary(electron.remote.app.getAppPath());
+const wordPosSearch = new WordPosSearch();
 
 webContents.on('context-menu', (_, props) => {
     const hasText = props.selectionText.trim().length > 0;
@@ -185,15 +185,16 @@ webContents.on('context-menu', (_, props) => {
             click: () => electron.ipcRenderer.send('dictionary-remove', props.selectionText)
         }, {type: 'separator'});
 
-    if (props.selectionText) {
+
+    const lookupWord = props.selectionText || wordPosSearch.getLastClickedWord();
+
+    if (lookupWord) {
         menuTemplate.unshift(
           { type: 'separator' },
           {
-            label: `Look up '${props.selectionText}'`,
+            label: `Look up '${lookupWord}'`,
             click: async() => {
-                const words = await wordDef.getDefinition(props.selectionText);
-
-                // console.log('WORDS', words);
+                EventBus.$emit('word-definition', { lookupWord, x: props.x, y: props.y });
             }
           }
         );

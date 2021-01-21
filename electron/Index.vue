@@ -89,6 +89,12 @@
                 </select>
             </div>
         </modal>
+        <modal :buttons="false" ref="wordDefinitionViewer" dialogClass="word-definition-viewer">
+            <word-definition :expression="wordDefinitionLookup" ref="characterPage"></word-definition>
+            <template slot="title">
+                {{wordDefinitionLookup}}
+            </template>
+        </modal>
         <logs ref="logsDialog"></logs>
     </div>
 </template>
@@ -116,10 +122,12 @@
     // import { BetterSqliteStore } from '../learn/store/better-sqlite3';
     // import { Sqlite3Store } from '../learn/store/sqlite3';
     import CharacterPage from '../site/character_page/character_page.vue';
+    import WordDefinition from '../learn/dictionary/WordDefinition.vue';
     import {defaultHost, GeneralSettings, nativeRequire} from './common';
     import { fixLogs /*SettingsStore, Logs as FSLogs*/ } from './filesystem';
     import * as SlimcatImporter from './importer';
     import _ from 'lodash';
+    import { EventBus } from '../chat/preview/event-bus';
     // import Bluebird from 'bluebird';
     // import Connection from '../fchat/connection';
     // import Notifications from './notifications';
@@ -171,7 +179,7 @@
     log.info('init.chat.keytar.load.done');
 
     @Component({
-        components: {chat: Chat, modal: Modal, characterPage: CharacterPage, logs: Logs}
+        components: {chat: Chat, modal: Modal, characterPage: CharacterPage, logs: Logs, 'word-definition': WordDefinition}
     })
     export default class Index extends Vue {
         showAdvanced = false;
@@ -190,6 +198,7 @@
         adName = '';
         fixCharacters: ReadonlyArray<string> = [];
         fixCharacter = '';
+        wordDefinitionLookup = '';
 
         shouldShowSpinner = false;
 
@@ -242,6 +251,17 @@
         @Hook('mounted')
         onMounted(): void {
             log.debug('init.chat.mounted');
+
+            EventBus.$on(
+              'word-definition',
+              (data: any) => {
+                this.wordDefinitionLookup = data.lookupWord;
+
+                if (!!data.lookupWord) {
+                  (<Modal>this.$refs.wordDefinitionViewer).show();
+                }
+              }
+            );
         }
 
 
@@ -311,7 +331,6 @@
 
                 dt.connect();
             }*/
-
         }
 
         async login(): Promise<void> {

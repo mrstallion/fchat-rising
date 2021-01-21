@@ -86,8 +86,7 @@ export class CacheManager {
 
         this.queue.push(entry);
 
-        console.log('Added to queue', entry.name, entry.added.toISOString());
-
+        // console.log('Added to queue', entry.name, entry.added.toISOString());
         // console.log('AddProfileForFetching', name, this.queue.length);
     }
 
@@ -239,11 +238,11 @@ export class CacheManager {
         const scheduleNextFetch = () => {
             this.profileTimer = setTimeout(
                 async() => {
-                    const d = Date.now();
+                    // const d = Date.now();
                     const next = this.consumeNextInQueue();
 
                     if (next) {
-                        console.log('Next in queue', next.name, (Date.now() - d) / 1000.0);
+                        // console.log('Next in queue', next.name, (Date.now() - d) / 1000.0);
 
                         try {
                             // tslint:disable-next-line: binary-expression-operand-order
@@ -259,7 +258,7 @@ export class CacheManager {
                             this.queue.push(next); // return to queue
                         }
 
-                        console.log('Completed', next.name, (Date.now() - d) / 1000.0);
+                        // console.log('Completed', next.name, (Date.now() - d) / 1000.0);
                     }
 
                     scheduleNextFetch();

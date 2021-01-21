@@ -13,6 +13,7 @@ import WordNet from './wordnet/wordnet';
 export interface Definition {
   definition: string;
   synonyms: string[];
+  type: string;
 }
 
 
@@ -22,8 +23,6 @@ export class DefinitionDictionary {
 
   constructor(basePath: string) {
     const dataDir = path.join(basePath, 'assets', 'wordnet-dictionary');
-
-    console.log('MOO MOO', process.cwd(), dataDir);
 
     // tslint:disable-next-line:ban-ts-ignore
     // @ts-ignore
@@ -68,7 +67,8 @@ export class DefinitionDictionary {
       (r) => (
         {
           definition: r.def,
-          synonyms: r.synonyms
+          synonyms: r.synonyms,
+          type: r.pos
         } as any as Definition
       )
     );
