@@ -89,8 +89,8 @@
                 </select>
             </div>
         </modal>
-        <modal :buttons="false" ref="wordDefinitionViewer" dialogClass="word-definition-viewer">
-            <word-definition :expression="wordDefinitionLookup" ref="characterPage"></word-definition>
+        <modal :buttons="false" ref="wordDefinitionViewer" dialogClass="w-100 word-definition-viewer">
+            <word-definition :expression="wordDefinitionLookup" ref="wordDefinitionLookup"></word-definition>
             <template slot="title">
                 {{wordDefinitionLookup}}
 
@@ -133,7 +133,6 @@
     import * as SlimcatImporter from './importer';
     import _ from 'lodash';
     import { EventBus } from '../chat/preview/event-bus';
-    import { DefinitionDictionary } from '../learn/dictionary/definition-dictionary';
     // import Bluebird from 'bluebird';
     // import Connection from '../fchat/connection';
     // import Notifications from './notifications';
@@ -526,27 +525,23 @@
         }
 
 
-        getCleanedWordDefinition(): string {
-          return DefinitionDictionary.cleanExpression(this.wordDefinitionLookup);
-        }
-
         async openDefinitionWithDictionary(): Promise<void> {
-            await electron.remote.shell.openExternal(`https://www.dictionary.com/browse/${encodeURI(this.getCleanedWordDefinition())}`);
+          (this.$refs.wordDefinitionLookup as any).setMode('dictionary');
         }
 
 
         async openDefinitionWithThesaurus(): Promise<void> {
-            await electron.remote.shell.openExternal(`https://www.thesaurus.com/browse/${encodeURI(this.getCleanedWordDefinition())}`);
+          (this.$refs.wordDefinitionLookup as any).setMode('thesaurus');
         }
 
 
         async openDefinitionWithUrbanDictionary(): Promise<void> {
-            await electron.remote.shell.openExternal(`https://www.urbandictionary.com/define.php?term=${encodeURIComponent(this.getCleanedWordDefinition())}`);
+          (this.$refs.wordDefinitionLookup as any).setMode('urbandictionary');
         }
 
 
         async openDefinitionWithWikipedia(): Promise<void> {
-            await electron.remote.shell.openExternal(`https://en.wikipedia.org/wiki/${encodeURI(this.getCleanedWordDefinition())}`);
+          (this.$refs.wordDefinitionLookup as any).setMode('wikipedia');
         }
     }
 </script>
@@ -655,6 +650,8 @@
 
             i {
                 color: #fadf4b;
+                text-transform: lowercase;
+                font-family: monospace;
             }
         }
 
@@ -667,7 +664,30 @@
 
             i {
                 color: black;
+                font-family: serif;
             }
         }
+    }
+
+    .word-definition-viewer {
+      .modal-content {
+        min-height: 60%;
+      }
+
+      .definition-wrapper {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin-left: 20px;
+        margin-right: 20px;
+
+        webview {
+          height: 100%;
+          padding-bottom: 10px;
+        }
+      }
+
     }
 </style>

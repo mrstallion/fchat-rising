@@ -1,39 +1,128 @@
 <template>
-  <div>
-    <ul v-if="definitions.length > 0">
-      <li v-for="definition in definitions">
-        <p><i>({{definition.type}}.)</i> {{definition.definition}}</p>
-        <small>{{definition.synonyms.join(', ').replace(/_/g, ' ')}}</small>
-      </li>
-    </ul>
-    <div v-else class="error">No definitions found for '{{ expression }}'.</div>
+  <div class="definition-wrapper">
+    <webview
+      :src="getWebUrl()"
+      webpreferences="autoplayPolicy=no-user-gesture-required,contextIsolation,sandbox,disableDialogs,disableHtmlFullScreenWindowResize,webSecurity,enableWebSQL=no,nodeIntegration=no,nativeWindowOpen=no,nodeIntegrationInWorker=no,nodeIntegrationInSubFrames=no,webviewTag=no"
+      enableremotemodule="false"
+      allowpopups="false"
+      nodeIntegration="false"
+
+      id="defintion-preview"
+      ref="definitionPreview"
+      class="definition-preview"
+    ></webview>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
-import { Definition, DefinitionDictionary } from './definition-dictionary';
-import electron from 'electron';
-import { Component, Prop, Watch } from '@f-list/vue-ts';
-// import { EventBus } from '../../chat/preview/event-bus';
+import { WebviewTag } from 'electron';
+import { Component, Hook, Prop } from '@f-list/vue-ts';
+import { EventBusEvent } from '../../chat/preview/event-bus';
+
+import anyAscii from 'any-ascii';
+import log from 'electron-log'; //tslint:disable-line:match-default-export-name
+
+// tslint:disable-next-line:ban-ts-ignore
+// @ts-ignore
+// tslint:disable-next-line:no-submodule-imports ban-ts-ignore match-default-export-name
+import mutatorScript from '!!raw-loader!./assets/mutator.raw.js';
+
+
+const scripts: Record<string, string> = {
+  mutator: mutatorScript
+}
+
 
 @Component({})
 export default class WordDefinition extends Vue {
-  private wordDef = new DefinitionDictionary(electron.remote.app.getAppPath());
+  mode: 'dictionary' | 'thesaurus' | 'urbandictionary' | 'wikipedia' = 'dictionary';
 
   @Prop
   readonly expression?: string;
 
-  public definitions: Definition[] = [];
+  @Hook('mounted')
+  mounted(): void {
+    const webview = this.getWebview();
 
-  // @Hook('mounted')
-  // mounted(): void {
-  //
-  // }
+    webview.addEventListener(
+        'update-target-url', // 'did-navigate', // 'dom-ready',
+        (event: EventBusEvent) => {
+            const js = this.wrapJs(this.getMutator(this.mode));
 
-  @Watch('expression')
-  async onWordChange(newExpression: string): Promise<void> {
-    this.definitions = await this.wordDef.getDefinition(newExpression);
+            // tslint:disable-next-line
+            this.executeJavaScript(js, event);
+        }
+    );
   }
+
+
+  setMode(mode: 'dictionary' | 'thesaurus' | 'urbandictionary' | 'wikipedia'): void {
+    this.mode = mode;
+  }
+
+
+  getWebUrl(): string {
+    switch(this.mode) {
+      case 'dictionary':
+        return `https://www.dictionary.com/browse/${encodeURI(this.getCleanedWordDefinition())}`;
+
+      case 'thesaurus':
+        return `https://www.thesaurus.com/browse/${encodeURI(this.getCleanedWordDefinition())}`;
+
+      case 'urbandictionary':
+        return `https://www.urbandictionary.com/define.php?term=${encodeURIComponent(this.getCleanedWordDefinition())}`;
+
+      case 'wikipedia':
+        return `https://en.m.wikipedia.org/wiki/${encodeURI(this.getCleanedWordDefinition())}`;
+    }
+  }
+
+
+  getCleanedWordDefinition(expression = this.expression): string {
+    return anyAscii(expression || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\-]/g, ' ')
+      .replace(/  +/g, ' ')
+      .trim();
+  }
+
+
+  protected getWebview(): WebviewTag {
+      return this.$refs.definitionPreview as WebviewTag;
+  }
+
+
+  protected async executeJavaScript(js: string | undefined, logDetails?: any): Promise<any> {
+      const webview = this.getWebview();
+
+      if (!js) {
+          log.debug('word-definition.execute-js.missing', { logDetails });
+          return;
+      }
+
+      try {
+          const result = await (webview.executeJavaScript(js) as unknown as Promise<any>);
+
+          log.debug('word-definition.execute-js.result', result);
+
+          return result;
+      } catch (err) {
+          log.debug('word-definition.execute-js.error', err);
+      }
+  }
+
+
+  protected wrapJs(mutatorJs: string): string {
+      return `(() => { try { ${mutatorJs} } catch (err) { console.error('Mutator error', err); } })();`;
+  }
+
+
+  protected getMutator(mode: string): string {
+    const js = scripts.mutator; // ./assets/mutator.raw.js
+
+    return js.replace(/## SITE ##/g, mode);
+  }
+
 }
 
 </script>

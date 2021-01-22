@@ -31,9 +31,7 @@
     "extract-loader": "^5.1.0",
     "file-loader": "^6.2.0",
     "lodash": "^4.17.20",
-    "lru-cache": "^2.5.0",
     "node-sass": "^4.14.1",
-    "node-wordnet": "^0.1.12",
     "optimize-css-assets-webpack-plugin": "^5.0.4",
     "qs": "^6.9.4",
     "raven-js": "^3.27.2",
@@ -51,8 +49,7 @@
     "vue": "^2.6.12",
     "vue-loader": "^15.9.4",
     "vue-template-compiler": "^2.6.12",
-    "webpack": "^5.3.2",
-    "wndb-with-exceptions": "^3.0.2"
+    "webpack": "^5.3.2"
   },
   "dependencies": {
     "@cliqz/adblocker-electron": "^1.18.3",

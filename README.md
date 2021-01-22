@@ -67,6 +67,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
     *    Use `Ctrl+Tab`, `Ctrl+Shift+Tab`, `Ctrl+PgDown`, and `Ctrl+PgUp` to switch between character tabs
     *    Show number of unread notes and messages in the bottom right corner
     *    Colorblind mode
+    *    Right click any word and select 'Look up...' to see its dictionary definition
 *   Technical Details for Nerds
     *    Upgraded to Electron 10.x
     *    Replaced `node-spellchecker` with the built-in spellchecker that ships with Electron 8+

@@ -1446,11 +1446,6 @@ block-stream@*:
   dependencies:
     inherits "~2.0.0"
 
-bluebird@^2.6.0:
-  version "2.11.0"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-2.11.0.tgz#534b9033c022c9579c56ba3b3e5a5caafbb650e1"
-  integrity sha1-U0uQM8AiyVecVro7Plpcqvu2UOE=
-
 bluebird@^3.1.1, bluebird@^3.5.0, bluebird@^3.7.2:
   version "3.7.2"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
@@ -2808,11 +2803,6 @@ es6-error@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/es6-error/-/es6-error-4.1.1.tgz#9e3af407459deed47e9a91f9b885a84eb05c561d"
   integrity sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==
-
-es6-shim@^0.22.1:
-  version "0.22.2"
-  resolved "https://registry.yarnpkg.com/es6-shim/-/es6-shim-0.22.2.tgz#4afe7c54bb92b178e5d464dd5d9c31c5742d7521"
-  integrity sha1-Sv58VLuSsXjl1GTdXZwxxXQtdSE=
 
 escalade@^3.1.1:
   version "3.1.1"
@@ -4470,11 +4460,6 @@ lowercase-keys@^2.0.0:
   resolved "https://registry.yarnpkg.com/lowercase-keys/-/lowercase-keys-2.0.0.tgz#2603e78b7b4b0006cbca2fbcc8a3202558ac9479"
   integrity sha512-tqNXrS78oMOE73NMxK4EMLQsQowWf8jKooH9g7xPavRT706R6bkQJ6DY2Te7QukaZsulxa30wQ7bk0pm4XiHmA==
 
-lru-cache@^2.5.0:
-  version "2.7.3"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-2.7.3.tgz#6d4524e8b955f95d4f5b58851ce21dd72fb4e952"
-  integrity sha1-bUUk6LlV+V1PW1iFHOId1y+06VI=
-
 lru-cache@^4.0.1, lru-cache@^4.1.2:
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-4.1.5.tgz#8bbe50ea85bed59bc9e33dcab8235ee9bcf443cd"
@@ -4945,16 +4930,6 @@ node-sass@^4.14.1:
     sass-graph "2.2.5"
     stdout-stream "^1.4.0"
     "true-case-path" "^1.0.2"
-
-node-wordnet@^0.1.12:
-  version "0.1.12"
-  resolved "https://registry.yarnpkg.com/node-wordnet/-/node-wordnet-0.1.12.tgz#62b0568f5dfc188bd02d136cf730832952fa9c1b"
-  integrity sha1-YrBWj138GIvQLRNs9zCDKVL6nBs=
-  dependencies:
-    async "^0.9.0"
-    bluebird "^2.6.0"
-    es6-shim "^0.22.1"
-    lru-cache "^2.5.0"
 
 noop-logger@^0.1.1:
   version "0.1.1"
@@ -6982,18 +6957,6 @@ tar@^6.0.2, tar@^6.0.5:
     mkdirp "^1.0.3"
     yallist "^4.0.0"
 
-tar@latest:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.0.tgz#d1724e9bcc04b977b18d5c573b333a2207229a83"
-  integrity sha512-DUCttfhsnLCjwoDoFcI+B2iJgYa93vBnDUATYEeRx6sntCTdN01VnqsIuTlALXla/LWooNg0yEGeB+Y8WdFxGA==
-  dependencies:
-    chownr "^2.0.0"
-    fs-minipass "^2.0.0"
-    minipass "^3.0.0"
-    minizlib "^2.1.1"
-    mkdirp "^1.0.3"
-    yallist "^4.0.0"
-
 temp@^0.9.0:
   version "0.9.4"
   resolved "https://registry.yarnpkg.com/temp/-/temp-0.9.4.tgz#cd20a8580cb63635d0e4e9d4bd989d44286e7620"
@@ -7536,13 +7499,6 @@ wide-align@^1.1.0:
   integrity sha512-QGkOQc8XL6Bt5PwnsExKBPuMKBxnGxWWW3fU55Xt4feHozMUhdUMaBCk290qpm/wG5u/RSKzwdAC4i51YigihA==
   dependencies:
     string-width "^1.0.2 || 2"
-
-wndb-with-exceptions@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/wndb-with-exceptions/-/wndb-with-exceptions-3.0.2.tgz#7048c1be7e0d13d231a51e408e0b37426000bcbb"
-  integrity sha1-cEjBvn4NE9IxpR5Ajgs3QmAAvLs=
-  dependencies:
-    tar latest
 
 worker-rpc@^0.1.0:
   version "0.1.1"
