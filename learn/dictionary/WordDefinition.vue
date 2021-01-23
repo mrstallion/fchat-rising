@@ -44,15 +44,14 @@ export default class WordDefinition extends Vue {
   mounted(): void {
     const webview = this.getWebview();
 
-    webview.addEventListener(
-        'update-target-url', // 'did-navigate', // 'dom-ready',
-        (event: EventBusEvent) => {
-            const js = this.wrapJs(this.getMutator(this.mode));
+    const eventProcessor = async (event: EventBusEvent): Promise<void> => {
+        const js = this.wrapJs(this.getMutator(this.mode));
 
-            // tslint:disable-next-line
-            this.executeJavaScript(js, event);
-        }
-    );
+        return this.executeJavaScript(js, event);
+    };
+
+    webview.addEventListener('update-target-url', eventProcessor);
+    webview.addEventListener('dom-ready', eventProcessor);
   }
 
 
@@ -62,6 +61,10 @@ export default class WordDefinition extends Vue {
 
 
   getWebUrl(): string {
+    if (!this.expression) {
+      return 'about:blank';
+    }
+
     switch(this.mode) {
       case 'dictionary':
         return `https://www.dictionary.com/browse/${encodeURI(this.getCleanedWordDefinition())}`;

@@ -89,7 +89,7 @@
                 </select>
             </div>
         </modal>
-        <modal :buttons="false" ref="wordDefinitionViewer" dialogClass="w-100 word-definition-viewer">
+        <modal :buttons="false" ref="wordDefinitionViewer" dialogClass="word-definition-viewer">
             <word-definition :expression="wordDefinitionLookup" ref="wordDefinitionLookup"></word-definition>
             <template slot="title">
                 {{wordDefinitionLookup}}
@@ -671,7 +671,7 @@
 
     .word-definition-viewer {
       .modal-content {
-        min-height: 60%;
+        min-height: 75%;
       }
 
       .definition-wrapper {

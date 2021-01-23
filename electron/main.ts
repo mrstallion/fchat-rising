@@ -238,7 +238,8 @@ function createWindow(): Electron.BrowserWindow | undefined {
 
             // Temp fix -- manually override adblocker's preload script
             // to point to CJS  that has been copied over with config in webpack.config.js
-            const preloadScript = './preview/assets/adblocker/preload.cjs.js'; // require.resolve('@cliqz/adblocker-electron-preload');
+            // require.resolve('@cliqz/adblocker-electron-preload');
+            const preloadScript =  path.join(electron.app.getAppPath(), './preview/assets/adblocker/preload.cjs.js');
 
             // const originPath = require.resolve('@cliqz/adblocker-electron-preload');
             // const preloadScript = path.resolve(path.dirname(originPath), 'preload.cjs.js');
@@ -652,6 +653,7 @@ function onReady(): void {
     });
 
     electron.ipcMain.on('rising-upgrade-complete', () => {
+        // console.log('RISING COMPLETE SHARE');
         hasCompletedUpgrades = true;
         for(const w of electron.webContents.getAllWebContents()) w.send('rising-upgrade-complete');
     });

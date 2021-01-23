@@ -105,10 +105,6 @@
 
             log.debug('init.window.languages');
 
-            await this.addTab();
-
-            log.debug('init.window.tab');
-
             electron.ipcRenderer.on('settings', (_e: Event, settings: GeneralSettings) => {
                 this.settings = settings;
 
@@ -116,7 +112,10 @@
                 log.transports.console.level = settings.risingSystemLogLevel;
             });
 
-            electron.ipcRenderer.on('rising-upgrade-complete', () => { this.hasCompletedUpgrades = true; });
+            electron.ipcRenderer.on('rising-upgrade-complete', () => {
+              // console.log('RISING COMPLETE RECV');
+              this.hasCompletedUpgrades = true;
+            });
             electron.ipcRenderer.on('allow-new-tabs', (_e: Event, allow: boolean) => this.canOpenTab = allow);
             electron.ipcRenderer.on('open-tab', () => this.addTab());
             electron.ipcRenderer.on('update-available', (_e: Event, available: boolean) => this.hasUpdate = available);
@@ -171,6 +170,13 @@
             });
             document.addEventListener('click', () => this.activeTab!.view.webContents.focus());
             window.addEventListener('focus', () => this.activeTab!.view.webContents.focus());
+
+            log.debug('init.window.listeners');
+
+            await this.addTab();
+
+            log.debug('init.window.tab');
+
 
             // console.log('SORTABLE', Sortable);
 
