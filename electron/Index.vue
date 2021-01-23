@@ -669,25 +669,30 @@
         }
     }
 
-    .word-definition-viewer {
-      .modal-content {
-        min-height: 75%;
-      }
+    .modal {
+      .word-definition-viewer {
+        max-width: 50rem !important;
+        width: 50% !important;
+        min-width: 22rem !important;
 
-      .definition-wrapper {
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        margin-left: 20px;
-        margin-right: 20px;
+        .modal-content {
+          min-height: 75%;
+        }
 
-        webview {
-          height: 100%;
-          padding-bottom: 10px;
+        .definition-wrapper {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          margin-left: 20px;
+          margin-right: 20px;
+
+          webview {
+            height: 100%;
+            padding-bottom: 10px;
+          }
         }
       }
-
     }
 </style>
