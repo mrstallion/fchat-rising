@@ -1,6 +1,6 @@
 # Changelog
 
-## Canary
+## 1.9.0
 *   Right click any word and select 'Look up...' to see its dictionary definition
 *   Skip button for auto-post ads
 *   Image tab on the character profile view now loads up faster 
