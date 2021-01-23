@@ -142,7 +142,7 @@ export class ImageDomMutator {
         this.add('about:blank', '');
         this.add('e621.net', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('e-hentai.org', this.getBaseJsMutatorScript(['video', '#img']));
-        this.add('gelbooru.com', this.getBaseJsMutatorScript(['.post-view video', '.contain-push video', '#image']));
+        this.add('gelbooru.com', this.getBaseJsMutatorScript(['video.gelcomVPlayer', '.post-view video', '.contain-push video', '#image']));
         this.add('gyazo.com', this.getBaseJsMutatorScript(['.image-view video', '.image-view img']));
         this.add('chan.sankakucomplex.com', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('danbooru.donmai.us', this.getBaseJsMutatorScript(['video', '#image']));

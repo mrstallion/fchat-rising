@@ -1,5 +1,9 @@
 # Changelog
 
+## Canary
+*   Fixed Gelbooru video previews
+
+
 ## 1.9.0
 *   Right click any word and select 'Look up...' to see its dictionary definition
 *   Skip button for auto-post ads

@@ -672,7 +672,7 @@
     .modal {
       .word-definition-viewer {
         max-width: 50rem !important;
-        width: 50% !important;
+        width: 70% !important;
         min-width: 22rem !important;
 
         .modal-content {
