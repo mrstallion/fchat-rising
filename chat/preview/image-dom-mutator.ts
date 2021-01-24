@@ -173,6 +173,7 @@ export class ImageDomMutator {
         this.add('rule34.paheal.net', this.getBaseJsMutatorScript(['#main_image', 'video', 'img']));
         this.add('xhamster.com', this.getBaseJsMutatorScript(['#photo_slider video', '#photo_slider img', 'video', 'img']));
         this.add('shadbase.com', this.getBaseJsMutatorScript(['#comic video', '#comic img', 'video', 'img']));
+        this.add('instagram.com', this.getBaseJsMutatorScript(['article video', 'article img', 'video', 'img']));
 
         this.add(
             'pornhub.com',

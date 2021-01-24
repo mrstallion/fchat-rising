@@ -1,7 +1,7 @@
 # Changelog
 
 ## Canary
-*   Fixed Gelbooru video previews
+*   Fixed Gelbooru and Instagram previews
 *   Moved database queries to a web worker to gain more responsive UI
 
 
