@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import log from 'electron-log'; //tslint:disable-line:match-default-export-name
+// import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 
 import { IndexedStore } from '../indexed';
 import { IndexedRequest, ProfileStoreCommand } from './types';
@@ -18,12 +18,11 @@ const reply = (req: IndexedRequest, result?: any, err?: string | Error): void =>
   };
 
   if (err) {
-    console.error(err);
-    console.error('store.worker.endpoint.error', { err });
+    console.error('store.worker.endpoint.error', err);
     res.msg = _.isString(err) ? err : err.message;
   }
 
-  log.debug('store.worker.endpoint.reply', { req, res });
+  // log.debug('store.worker.endpoint.reply', { req, res });
 
   postMessage(res);
 };
@@ -46,7 +45,7 @@ const generateMessageProcessor = () => {
   };
 
   return async(e: Event) => {
-    log.silly('store.worker.endpoint.msg', { e });
+    // log.silly('store.worker.endpoint.msg', { e });
 
     const req = (e as any).data as IndexedRequest;
 
