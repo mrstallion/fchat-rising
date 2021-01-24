@@ -2,6 +2,7 @@
 
 ## Canary
 *   Fixed Gelbooru video previews
+*   Moved database queries to a web worker to gain more responsive UI
 
 
 ## 1.9.0

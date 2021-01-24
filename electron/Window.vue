@@ -254,6 +254,7 @@
                 webPreferences: {
                   webviewTag: true,
                   nodeIntegration: true,
+                  nodeIntegrationInWorker: true,
                   spellcheck: true,
                   enableRemoteModule: true
                 }

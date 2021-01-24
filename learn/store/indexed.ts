@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 
 import {Character as ComplexCharacter, CharacterGroup, Guestbook} from '../../site/character_page/interfaces';
 import { CharacterAnalysis } from '../matcher';
-import { PermanentIndexedStore, ProfileRecord } from './sql-store';
+import { PermanentIndexedStore, ProfileRecord } from './types';
 import { CharacterImage, SimpleCharacter } from '../../interfaces';
 
 import Bluebird from 'bluebird';
@@ -30,7 +30,7 @@ export class IndexedStore implements PermanentIndexedStore {
     }
 
     static async open(dbName: string = 'flist-ascending-profiles'): Promise<IndexedStore> {
-        const request = window.indexedDB.open(dbName, 2);
+        const request = indexedDB.open(dbName, 2);
 
         request.onupgradeneeded = (event) => {
             const db = request.result;
@@ -85,7 +85,7 @@ export class IndexedStore implements PermanentIndexedStore {
     }
 
 
-    async prepareProfileData(c: ComplexCharacter): Promise<ProfileRecord> {
+    private async prepareProfileData(c: ComplexCharacter): Promise<ProfileRecord> {
         const existing = await this.getProfile(c.character.name);
         const ca = new CharacterAnalysis(c.character);
 
@@ -121,8 +121,8 @@ export class IndexedStore implements PermanentIndexedStore {
     }
 
 
-    async storeProfile(c: ComplexCharacter): Promise<void> {
-        const data = await this.prepareProfileData(c);
+    async storeProfile(character: ComplexCharacter): Promise<void> {
+        const data = await this.prepareProfileData(character);
 
         const tx = this.db.transaction(IndexedStore.STORE_NAME, 'readwrite');
         const store = tx.objectStore(IndexedStore.STORE_NAME);
@@ -135,37 +135,37 @@ export class IndexedStore implements PermanentIndexedStore {
     }
 
 
-    async updateProfileCounts(
-        name: string,
-        guestbookCount: number | null,
-        friendCount: number | null,
-        groupCount: number | null
-    ): Promise<void> {
-        const existing = await this.getProfile(name);
-
-        if (!existing) {
-            return;
-        }
-
-        const data = _.merge(
-            existing,
-            {
-                lastCounted: Math.round(Date.now() / 1000),
-                guestbookCount,
-                friendCount,
-                groupCount
-            }
-        );
-
-        const tx = this.db.transaction(IndexedStore.STORE_NAME, 'readwrite');
-        const store = tx.objectStore(IndexedStore.STORE_NAME);
-        const putRequest = store.put(data);
-
-        // tslint:disable-next-line no-any
-        await promisifyRequest<any>(putRequest);
-
-        // console.log('IDX update counts', name, data);
-    }
+    // async updateProfileCounts(
+    //     name: string,
+    //     guestbookCount: number | null,
+    //     friendCount: number | null,
+    //     groupCount: number | null
+    // ): Promise<void> {
+    //     const existing = await this.getProfile(name);
+    //
+    //     if (!existing) {
+    //         return;
+    //     }
+    //
+    //     const data = _.merge(
+    //         existing,
+    //         {
+    //             lastCounted: Math.round(Date.now() / 1000),
+    //             guestbookCount,
+    //             friendCount,
+    //             groupCount
+    //         }
+    //     );
+    //
+    //     const tx = this.db.transaction(IndexedStore.STORE_NAME, 'readwrite');
+    //     const store = tx.objectStore(IndexedStore.STORE_NAME);
+    //     const putRequest = store.put(data);
+    //
+    //     // tslint:disable-next-line no-any
+    //     await promisifyRequest<any>(putRequest);
+    //
+    //     // console.log('IDX update counts', name, data);
+    // }
 
 
     async updateProfileMeta(

@@ -8,7 +8,6 @@ import { AdCache } from './ad-cache';
 import { ChannelConversationCache } from './channel-conversation-cache';
 import { CharacterProfiler } from './character-profiler';
 import { CharacterCacheRecord, ProfileCache } from './profile-cache';
-import { IndexedStore } from './store/indexed';
 import Timer = NodeJS.Timer;
 import ChannelConversation = Conversation.ChannelConversation;
 import Message = Conversation.Message;
@@ -17,6 +16,10 @@ import Bluebird from 'bluebird';
 import ChatMessage = Conversation.ChatMessage;
 import { GeneralSettings } from '../electron/common';
 import { Gender } from './matcher-types';
+import { WorkerStore } from './store/worker';
+import { PermanentIndexedStore } from './store/types';
+import * as path from 'path';
+// import * as electron from 'electron';
 
 
 export interface ProfileCacheQueueEntry {
@@ -41,7 +44,7 @@ export class CacheManager {
     protected profileTimer: Timer | null = null;
     protected characterProfiler: CharacterProfiler | undefined;
 
-    protected profileStore?: IndexedStore;
+    protected profileStore?: PermanentIndexedStore;
 
     protected lastPost: Date = new Date();
 
@@ -175,7 +178,9 @@ export class CacheManager {
     async start(settings: GeneralSettings, skipFlush: boolean): Promise<void> {
         await this.stop();
 
-        this.profileStore = await IndexedStore.open();
+        this.profileStore = await WorkerStore.open(
+          path.join(/*electron.remote.app.getAppPath(),*/ 'storeWorkerEndpoint.js')
+        ); // await IndexedStore.open();
 
         this.profileCache.setStore(this.profileStore);
 

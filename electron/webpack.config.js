@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
 const ForkTsCheckerWebpackPlugin = require('@f-list/fork-ts-checker-webpack-plugin');
@@ -145,6 +146,44 @@ const mainConfig = {
     }
 };
 
+
+const storeWorkerEndpointConfig = _.assign(
+    _.cloneDeep(mainConfig),
+    {
+        entry: [path.join(__dirname, '..', 'learn', 'store', 'worker', 'store.worker.endpoint.ts')],
+        output: {
+            path: __dirname + '/app',
+            filename: 'storeWorkerEndpoint.js',
+            globalObject: 'this'
+        },
+        target: 'electron-renderer',
+
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/,
+                    loader: 'ts-loader',
+                    options: {
+                        configFile: __dirname + '/tsconfig-renderer.json',
+                        transpileOnly: true,
+                        getCustomTransformers: () => ({before: [vueTransformer]})
+                    }
+                },
+            ]
+        },
+
+        plugins: [
+            new ForkTsCheckerWebpackPlugin({
+                async: false,
+                tslint: path.join(__dirname, '../tslint.json'),
+                tsconfig: './tsconfig-renderer.json',
+                vue: true
+            })
+        ]
+    }
+);
+
+
 module.exports = function(mode) {
     const themesDir = path.join(__dirname, '../scss/themes/chat');
     const themes = fs.readdirSync(themesDir);
@@ -185,12 +224,14 @@ module.exports = function(mode) {
         process.env.NODE_ENV = 'production';
         mainConfig.devtool = rendererConfig.devtool = 'source-map';
         rendererConfig.plugins.push(new OptimizeCssAssetsPlugin());
+        storeWorkerEndpointConfig.devtool = 'source-map';
     } else {
         // mainConfig.devtool = rendererConfig.devtool = 'none';
 
         mainConfig.devtool = 'inline-source-map';
         rendererConfig.devtool = 'inline-source-map';
+        storeWorkerEndpointConfig.devtool = 'inline-source-map';
     }
 
-    return [mainConfig, rendererConfig];
+    return [mainConfig, rendererConfig, storeWorkerEndpointConfig];
 };
