@@ -192,6 +192,8 @@ export default class UserView extends Vue {
     }
 
     update(): void {
+      // console.log('user.view.update', this.character.name);
+
       const res = getStatusClasses(this.character, this.channel, !!this.showStatus, !!this.bookmark, !!this.match);
 
       this.rankIcon = res.rankIcon;

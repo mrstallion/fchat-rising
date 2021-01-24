@@ -28,11 +28,12 @@
             <search-history ref="searchHistory" :callback="updateSearch" :curSearch="data"></search-history>
         </div>
         <div v-else-if="state === 'results'" class="results">
-            <h4>
+            <h4 v-if="hasReceivedResults">
                 {{results.length}} {{l('characterSearch.results')}}
 
                 <span v-if="resultsPending > 0" class="pending">Scoring {{resultsPending}}... <i class="fas fa-circle-notch fa-spin search-spinner"></i></span>
             </h4>
+            <h4 v-else>Searching...</h4>
 
             <div v-for="record in results" :key="record.character.name" class="search-result" :class="'status-' + record.character.status">
                 <template v-if="record.character.status === 'looking'" v-once>
@@ -67,6 +68,7 @@
     import { Matcher } from '../learn/matcher';
     import { nonAnthroSpecies, Species, speciesMapping, speciesNames } from '../learn/matcher-types';
     import { CharacterCacheRecord } from '../learn/profile-cache';
+    import Bluebird from 'bluebird';
 
     type Options = {
         kinks: SearchKink[],
@@ -136,6 +138,9 @@
         options!: ExtendedSearchData;
         shouldShowMatch = true;
         state = 'search';
+        hasReceivedResults = false;
+
+        private countUpdater?: ResultCountUpdater;
 
         data: ExtendedSearchData = {
             kinks: [],
@@ -173,6 +178,22 @@
                 positions: options.listitems.filter((x) => x.name === 'position').map((x) => x.value),
                 species: this.getSpeciesOptions()
             });
+
+
+            this.countUpdater = new ResultCountUpdater(
+                (names: string[]) => {
+                    this.resultsPending = this.countPendingResults(names);
+
+                    if (this.resultsPending === 0) {
+                      this.countUpdater?.stop();
+                    }
+
+                    this.results = (_.filter(
+                        this.results,
+                        (x) => this.isSpeciesMatch(x)
+                    ) as SearchResult[]).sort(sort);
+                }
+            );
         }
 
 
@@ -190,13 +211,26 @@
                         this.error = l('characterSearch.error.tooManyResults');
                 }
             });
-            core.connection.onMessage('FKS', (data) => {
-                this.results = data.characters.map((x) => ({ character: core.characters.get(x), profile: null }))
+
+            core.connection.onMessage('FKS', async (data) => {
+                const results = data.characters.map((x) => ({ character: core.characters.get(x), profile: null }))
                     .filter((x) => core.state.hiddenUsers.indexOf(x.character.name) === -1 && !x.character.isIgnored)
                     .filter((x) => this.isSpeciesMatch(x))
                     .sort(sort);
 
-                this.resultsPending = this.countPendingResults();
+                // pre-warm cache
+                await Bluebird.mapSeries(
+                  results,
+                  (c) => core.cache.profileCache.get(c.character.name)
+                );
+
+                this.resultsPending = this.countPendingResults(undefined, results);
+
+                this.countUpdater?.start();
+
+                // this is done LAST to force Vue to wait with rendering
+                this.hasReceivedResults = true;
+                this.results = results;
             });
 
             if (this.scoreWatcher) {
@@ -214,12 +248,7 @@
                     // tslint:disable-next-line no-unsafe-any no-any
                     && (_.find(this.results, (s: SearchResult) => s.character.name === event.character.character.name))
                 ) {
-                    this.resultsPending = this.countPendingResults(event.character.character.name);
-
-                    this.results = (_.filter(
-                        this.results,
-                        (x) => this.isSpeciesMatch(x)
-                    ) as SearchResult[]).sort(sort);
+                    this.countUpdater?.requestUpdate(event.character.character.name);
               }
             };
 
@@ -240,6 +269,8 @@
 
                 this.scoreWatcher = null;
             }
+
+            this.countUpdater?.stop();
         }
 
 
@@ -327,15 +358,17 @@
         }
 
 
-        countPendingResults(specificName?: string): number {
+        countPendingResults(names?: string[], results = this.results): number {
+            // console.log('COUNTPENDINGRESULTS', names);
+
             return _.reduce(
-                this.results,
+                results,
                 (accum: number, result: SearchResult) => {
                   if (!!result.profile) {
                     return accum;
                   }
 
-                  if ((!specificName) || (result.character.name === specificName)) {
+                  if ((_.isUndefined(names)) || (_.indexOf(names, result.character.name) >= 0)) {
                     result.profile = core.cache.profileCache.getSync(result.character.name);
                   }
 
@@ -393,6 +426,8 @@
         submit(): void {
             if(this.state === 'results') {
                 this.results = [];
+                this.hasReceivedResults = false;
+                this.countUpdater?.stop();
                 this.state = 'search';
                 return;
             }
@@ -435,6 +470,53 @@
             await core.settingsStore.set('searchHistory', newHistory);
         }
     }
+
+
+    class ResultCountUpdater {
+      // @ts-ignore
+      private _isVue = true;
+
+      private updatedNames: string[] = [];
+
+      private timerId?: NodeJS.Timeout;
+
+      constructor(private callback: (names: string[]) => void) {
+
+      }
+
+
+      requestUpdate(name: string): void {
+        this.updatedNames.push(name);
+      }
+
+
+      start() {
+        const schedule = () => {
+          this.timerId = setTimeout(
+              () => {
+                if (this.updatedNames.length > 0) {
+                  this.callback(this.updatedNames);
+                  this.updatedNames = [];
+                }
+
+                schedule();
+              },
+              250
+          );
+        };
+
+        schedule();
+      }
+
+
+      stop() {
+        if (this.timerId) {
+          clearTimeout(this.timerId);
+          delete this.timerId;
+        }
+      }
+    }
+
 </script>
 
 <style lang="scss">
