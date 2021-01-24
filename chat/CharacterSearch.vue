@@ -188,10 +188,7 @@
                       this.countUpdater?.stop();
                     }
 
-                    this.results = (_.filter(
-                        this.results,
-                        (x) => this.isSpeciesMatch(x)
-                    ) as SearchResult[]).sort(sort);
+                    this.resort();
                 }
             );
         }
@@ -231,6 +228,8 @@
                 // this is done LAST to force Vue to wait with rendering
                 this.hasReceivedResults = true;
                 this.results = results;
+
+                this.resort(results);
             });
 
             if (this.scoreWatcher) {
@@ -285,6 +284,14 @@
                 ),
                 ', '
             );
+        }
+
+
+        private resort(results = this.results) {
+          this.results = (_.filter(
+              results,
+              (x) => this.isSpeciesMatch(x)
+          ) as SearchResult[]).sort(sort);
         }
 
 
