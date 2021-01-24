@@ -255,6 +255,64 @@ export class ImageDomMutator {
                 return urlHelper.format(u);
             }
         );
+
+
+        this.add(
+            'twitter.com',
+            `
+            const finalizer = (counter) => {
+                if (counter <= 0) {
+                    return;
+                }
+
+                setTimeout(
+                    () => {
+                        const e = document.querySelector('#flistWrapper img');
+
+                        if (e) {
+                            const src = e.getAttribute('src');
+
+                            if (src) {
+                                e.setAttribute('src', src.replace(/name\=[a-z0-9\-\_]+/, 'name=large'));
+                            }
+                        }
+
+                        const v = document.querySelector('#flistWrapper video');
+
+                        if (v) {
+                            v.play();
+                        }
+
+                        finalizer(counter - 1);
+                    },
+                    100
+                );
+            };
+
+            const scheduler = () => {
+                setTimeout(
+                    () => {
+                        // skip content warning
+                        document.querySelectorAll('article article div[tabindex="0"] *').forEach(e => e.click());
+
+                        if (!document.querySelector('article video, div[aria-label="Image"] img')) {
+                            console.log('NOT FOUND');
+                            scheduler();
+                            return;
+                        }
+
+                        ${this.getBaseJsMutatorScript(['article video', 'div[aria-label=\'Image\'] img'])}
+
+                        finalizer(25);
+                    },
+                    200
+                );
+            };
+
+            scheduler();
+            `
+        );
+
     }
 
 

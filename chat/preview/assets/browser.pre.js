@@ -80,7 +80,7 @@ const previewInitiationTime = Date.now();
                 const scriptCount = document.scripts.length;
 
                 for (let i = 0; i < scriptCount; i++) {
-                    document.scripts[i].src = 'about:blank';
+                    delete document.scripts[i].src;
                 }
             } catch (e) {
                 console.error('Script location', e);
