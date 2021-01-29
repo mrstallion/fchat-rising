@@ -124,6 +124,26 @@
           font-size: 32px;
         }
 
+
+        #logo {
+            box-shadow: none;
+            border: none;
+            display: block;
+            margin-top: 1.5rem;
+        }
+
+        #slogan {
+            box-shadow: none;
+            border: none;
+        }
+
+        h1.logo-header,
+        h2.slogan-header {
+            display: none;
+        }
+
+
+
     </style>
 
 
@@ -138,7 +158,10 @@
         <header class="inner">
           <a id="forkme_banner" href="{{ site.github.repository_url }}">View on GitHub</a>
 
-          <h1 id="project_title">{{ site.title }}</h1>
+          <h1 class="logo-header" id="project_title">{{ site.title }}</h1>
+
+          <img src="assets/images/logo.png" id="logo" />
+
           <h2 id="project_tagline">{{ site.description }}</h2>
 
           {% if site.show_downloads %}
