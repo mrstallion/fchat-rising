@@ -2,9 +2,13 @@
 layout: rising
 ---
 
-## What is this?!
+<h2 class="slogan-header">Modded for Your Pleasure</h2>
+<img src="./assets/images/slogan.png" id="slogan" />
 
-**F-Chat Rising** is an extended version of the [original F-Chat 3.0 client](https://wiki.f-list.net/F-Chat_3.0). It offers new features, bug fixes, and usability improvements.
+**F-Chat Rising** is an extended version of the [original F-Chat 3.0 client](https://wiki.f-list.net/F-Chat_3.0) with new features, bug fixes, and usability improvements.
+
+You'll connect with the same F-List, same players, and same channels you're already used to.
+You'll just do it with style!
 
 Scroll down to see a [feature summary](#link-previews), or take a look at a more [detailed list of features](https://github.com/mrstallion/fchat-rising/blob/master/README.md#key-differences).
 
