@@ -1,8 +1,9 @@
 # Changelog
 
 ## Canary
-*   Fixed Gelbooru, Instagram, and Twitter previews
 *   Moved database queries to a web worker to gain more responsive UI
+*   Fixed Gelbooru, Instagram, and Twitter previews
+*   Fixed green names not showing up when 'show friends/bookmarks in a different colour' is selected
 
 
 ## 1.9.0
