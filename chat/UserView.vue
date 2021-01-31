@@ -117,8 +117,8 @@ export default class UserView extends Vue {
     @Prop()
     readonly showStatus?: boolean = true;
 
-    @Prop()
-    readonly bookmark?: boolean = false;
+    @Prop({default: true})
+    readonly bookmark?: boolean = true;
 
     @Prop()
     readonly match?: boolean = false;

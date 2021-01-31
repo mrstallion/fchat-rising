@@ -841,6 +841,14 @@
     }
 
     .message {
+        .message-pre {
+          font-size: 75%;
+          padding-right: 2px;
+          padding-left: 1px;
+          opacity: 0.90;
+          display: inline-block;
+        }
+
         &.message-event {
             font-size: 85%;
             background-color: rgba(255, 255, 255, 0.1);
@@ -876,7 +884,9 @@
 
                 .bbcode,
                 .user-view,
-                .message-time {
+                .message-time,
+                .message-pre,
+                .message-post {
                     opacity: 0.6;
                 }
             };
@@ -891,7 +901,9 @@
 
                 .bbcode,
                 .user-view,
-                .message-time {
+                .message-time,
+                .message-pre,
+                .message-post {
                     opacity: 0.55;
                 }
             }
@@ -905,7 +917,9 @@
 
                 .bbcode,
                 .user-view,
-                .message-time {
+                .message-time,
+                .message-pre,
+                .message-post {
                     opacity: 0.3;
                 }
             }

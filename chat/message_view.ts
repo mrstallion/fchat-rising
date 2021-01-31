@@ -34,9 +34,11 @@ const userPostfix: {[key: number]: string | undefined} = {
             ((this.classes !== undefined) ? ` ${this.classes}` : '') +
             ` ${this.scoreClasses}`;
         if(message.type !== Conversation.Message.Type.Event) {
-            children.push((message.type === Conversation.Message.Type.Action) ? '*' : '',
+            children.push(
+                (message.type === Conversation.Message.Type.Action) ? createElement('i', { class: 'message-pre fas fa-star' }) : '',
                 createElement(UserView, {props: {character: message.sender, channel: this.channel}}),
-                userPostfix[message.type] !== undefined ? userPostfix[message.type]! : ' ');
+                userPostfix[message.type] !== undefined ? createElement('span', { class: 'message-post' }, userPostfix[message.type]) : ' '
+            );
             if(message.isHighlight) classes += ' message-highlight';
         }
         const isAd = message.type === Conversation.Message.Type.Ad && !this.logs;

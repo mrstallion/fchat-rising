@@ -6,8 +6,6 @@ import { CharacterAnalysis } from '../matcher';
 import { PermanentIndexedStore, ProfileRecord } from './types';
 import { CharacterImage, SimpleCharacter } from '../../interfaces';
 
-import Bluebird from 'bluebird';
-
 
 async function promisifyRequest<T>(req: IDBRequest): Promise<T> {
     return new Promise<T>((resolve, reject) => {
@@ -224,12 +222,25 @@ export class IndexedStore implements PermanentIndexedStore {
 
         log.info('character.cache.expire', {daysToExpire, totalRecords, removableRecords: result.length});
 
-        await Bluebird.mapSeries(
-            result,
-            async(pk: IDBValidKey) => {
+        return new Promise(
+          (resolve, reject) => {
+            const gen = (index: number): void => {
+                if(index >= result.length) {
+                    resolve();
+                    return;
+                }
+
+                const pk = result[index];
                 log.silly('character.cache.expire.name', { name: pk });
-                await promisifyRequest(store.delete(pk));
-            }
+
+                const req = store.delete(pk);
+
+                req.onsuccess = () => gen(index + 1);
+                req.onerror = reject;
+            };
+
+            gen(0);
+          }
         );
     }
 }
