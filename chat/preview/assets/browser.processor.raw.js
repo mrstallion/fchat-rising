@@ -23,7 +23,8 @@ class FListImagePreviewDomMutator {
             debug: true,
             skipElementRemove: false,
             safeTags: [],
-            injectStyle: false
+            injectStyle: false,
+            delayPreprocess: false
         };
         /* ## SETTINGS_END ## */
 
@@ -32,6 +33,7 @@ class FListImagePreviewDomMutator {
         this.selectors = this.settings.selectors;
         this.skipElementRemove = this.settings.skipElementRemove;
         this.safeTags = this.settings.safeTags;
+        this.delayPreprocess = this.settings.delayPreprocess;
 
         this.body = document.querySelector('body');
         this.html = document.querySelector('html');
@@ -42,7 +44,9 @@ class FListImagePreviewDomMutator {
                 : (...args) => (this.debug('MOCK.ipc.sendToHost', ...args))
         };
 
-        this.preprocess();
+        if (!this.delayPreprocess) {
+            this.preprocess();
+        }
 
         this.img = this.detectImage(this.selectors, this.body);
         this.wrapper = this.createWrapperElement();
@@ -82,6 +86,10 @@ class FListImagePreviewDomMutator {
     run() {
         if (!this.img) {
             return;
+        }
+
+        if (this.delayPreprocess) {
+            this.preprocess();
         }
 
         this.updateImgSize(this.img, 'pre');
@@ -186,7 +194,7 @@ class FListImagePreviewDomMutator {
                 (img.play)
                 && (
                     (lessStrict)
-                    || ((!lessStrict) && (!img.paused) && (!img.ended) && (!(img.currentTime > 0)))
+                    || ((!lessStrict) && (!img.ended) && (!(img.currentTime > 0)))
                 )
             )
             {

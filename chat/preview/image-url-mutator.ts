@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import Axios from 'axios';
+import { domain } from '../../bbcode/core';
 
 export type UrlSolverCallback = (url: string, match: RegExpMatchArray) => Promise<string>;
 
@@ -18,6 +19,11 @@ export class ImageUrlMutator {
     private static readonly IMGUR_IMAGE_URL_REGEX = /^https?:\/\/i.imgur.com\/([a-zA-Z0-9]+)(\.[a-z0-9A-Z]+)(.*)$/;
 
     private debug: boolean;
+
+    private static SUPPRESSOR_DOMAINS = [
+      'vimeo.com',
+      'gfycat.com'
+    ];
 
 
     constructor(debug: boolean) {
@@ -191,7 +197,7 @@ export class ImageUrlMutator {
                     if (this.debug)
                         console.log('Imgur image', url, imageUrl);
 
-                    return imageUrl as string;
+                    return this.getOptimizedImgurUrlFromUrl(imageUrl as string);
                 } catch (err) {
                     console.error('Imgur Image Failure', url, err);
                     return url;
@@ -239,11 +245,28 @@ export class ImageUrlMutator {
     async resolve(url: string): Promise<string> {
         const match = _.find(this.solvers, (s: UrlSolver) => url.match(s.matcher)) as (UrlSolver | undefined);
 
-        if (!match) {
-            return url;
-        }
+        return this.attachSuppressor(
+          match
+          ? await match.solver(url, url.match(match.matcher) as RegExpMatchArray)
+          : url
+        );
 
-        return match.solver(url, url.match(match.matcher) as RegExpMatchArray);
+        // return this.attachSuppressor(await match.solver(url, url.match(match.matcher) as RegExpMatchArray));
+    }
+
+
+    attachSuppressor(url: string): string {
+      const host = domain(url);
+
+      if (_.indexOf(ImageUrlMutator.SUPPRESSOR_DOMAINS, host) < 0) {
+        return url;
+      }
+
+      const u = new URL(url);
+
+      u.searchParams.set('__x-suppress__', '1');
+
+      return u.toString();
     }
 }
 

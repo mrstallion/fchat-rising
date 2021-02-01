@@ -146,13 +146,13 @@ export class ImageDomMutator {
         this.add('gyazo.com', this.getBaseJsMutatorScript(['.image-view video', '.image-view img']));
         this.add('chan.sankakucomplex.com', this.getBaseJsMutatorScript(['video', '#image']));
         this.add('danbooru.donmai.us', this.getBaseJsMutatorScript(['video', '#image']));
-        this.add('gfycat.com', this.getBaseJsMutatorScript(['video']) /*, undefined, 'dom-ready' */);
-        this.add('gfycatporn.com', this.getBaseJsMutatorScript(['video']) /*, undefined, 'dom-ready'*/);
+        this.add('gfycat.com', this.getBaseJsMutatorScript(['video'], true, [], true));
+        this.add('gfycatporn.com', this.getBaseJsMutatorScript(['video'], true, [], true));
         this.add('youtube.com', this.getBaseJsMutatorScript(['video']), undefined, 'dom-ready');
         this.add('instantfap.com', this.getBaseJsMutatorScript(['#post video', '#post img']));
         this.add('webmshare.com', this.getBaseJsMutatorScript(['video']));
         this.add('vimeo.com', this.getBaseJsMutatorScript(['#video, video', '#image, img']));
-        this.add('sex.com', this.getBaseJsMutatorScript(['.image_frame video', '.image_frame img']));
+        this.add('sex.com', this.getBaseJsMutatorScript(['.image_frame video', '.image_frame img']), undefined, 'dom-ready');
         // this.add('redirect.media.tumblr.com', this.getBaseJsMutatorScript(['picture video', 'picture img']));
         this.add(/^[a-zA-Z0-9-]+\.media\.tumblr\.com$/, this.getBaseJsMutatorScript(['.photoset video', '.photoset img', 'img:not([role="img"]):not([alt="Avatar"])', '#base-container video', '#base-container img', 'picture video', 'picture img', 'video', 'img']), undefined, 'dom-ready');
         this.add(/^[a-zA-Z0-9-]+\.tumblr\.com$/, this.getBaseJsMutatorScript(['.photoset iframe', '.photoset video', '.photoset img', 'img:not([role="img"]):not([alt="Avatar"])', 'picture video', 'picture img', 'video', 'img']), undefined, 'dom-ready');
@@ -316,12 +316,13 @@ export class ImageDomMutator {
     }
 
 
-    protected getBaseJsMutatorScript(elSelector: string[], skipElementRemove: boolean = false, safeTags: string[] = []): string {
+    protected getBaseJsMutatorScript(elSelector: string[], skipElementRemove: boolean = false, safeTags: string[] = [], delayPreprocess = false): string {
         const js = this.scripts.processor; // ./assets/browser.processor.raw.js
 
         const settings = {
             skipElementRemove,
             safeTags,
+            delayPreprocess,
             selectors: elSelector,
             debug: this.debug
         };

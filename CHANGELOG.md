@@ -2,7 +2,7 @@
 
 ## Canary
 *   Moved database queries to a web worker to gain more responsive UI
-*   Fixed Gelbooru, Instagram, and Twitter previews
+*   Fixed Gelbooru, Gfycat, Instagram, Twitter, and Vimeo previews
 *   Fixed green names not showing up when 'show friends/bookmarks in a different colour' is selected
 *   Sped up Imgur previews
 *   Minor UI design adjustments for user names and badges

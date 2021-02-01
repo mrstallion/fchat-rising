@@ -131,3 +131,11 @@ const previewInitiationTime = Date.now();
     }
 })();
 
+
+try {
+    if (!!window.location.toString().match(/__x-suppress__/)) {
+        document.write("<script type='application/x-suppress'>");
+    }
+} catch(err) {
+    console.error('X-Suppress', err);
+}
