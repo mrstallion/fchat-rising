@@ -138,7 +138,7 @@
             <div class="form-group">
                 <label class="control-label" for="risingComparisonInSearch">
                     <input type="checkbox" id="risingComparisonInSearch" v-model="risingComparisonInSearch"/>
-                    Show quick match results in search results
+                    Show quick match results in the search results
                 </label>
             </div>
 
@@ -162,7 +162,7 @@
             <div class="form-group">
                 <label class="control-label" for="risingCharacterPreview">
                     <input type="checkbox" id="risingCharacterPreview" v-model="risingCharacterPreview"/>
-                    Show a character preview when mouse hovers over a character name
+                    Show a character preview when the mouse hovers over a character name
                 </label>
             </div>
 

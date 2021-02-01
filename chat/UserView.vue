@@ -92,8 +92,8 @@ export function getStatusClasses(
     const userClass = `user-view gender-${gender}${isBookmark ? ' user-bookmark' : ''}`;
 
     return {
-      rankIcon,
-      statusClass,
+      rankIcon: rankIcon ? `user-rank ${rankIcon}` : null,
+      statusClass: statusClass ? `user-status ${statusClass}` : null,
       matchClass,
       matchScore,
       userClass,
