@@ -13,7 +13,9 @@ export class ImageUrlMutator {
 
     private solvers: UrlSolver[] = [];
 
-    private static IMGUR_CLIENT_ID = 'd60e27140a73b2e';
+    private static readonly IMGUR_CLIENT_ID = 'd60e27140a73b2e';
+
+    private static readonly IMGUR_IMAGE_URL_REGEX = /^https?:\/\/i.imgur.com\/([a-zA-Z0-9]+)(\.[a-z0-9A-Z]+)(.*)$/;
 
     private debug: boolean;
 
@@ -122,7 +124,7 @@ export class ImageUrlMutator {
                     if (this.debug)
                         console.log('Imgur gallery', url, imageUrl, imageCount);
 
-                    return `${imageUrl}?flist_gallery_image_count=${imageCount}`;
+                    return this.getOptimizedImgurUrlFromUrl(`${imageUrl}?flist_gallery_image_count=${imageCount}`);
 
                 } catch (err) {
                     console.error('Imgur Gallery Failure', url, err);
@@ -158,7 +160,7 @@ export class ImageUrlMutator {
                     if (this.debug)
                         console.log('Imgur album', url, imageUrl, imageCount);
 
-                    return `${imageUrl}?flist_gallery_image_count=${imageCount}`;
+                    return this.getOptimizedImgurUrlFromUrl(`${imageUrl}?flist_gallery_image_count=${imageCount}`);
 
                 } catch (err) {
                     console.error('Imgur Album Failure', url, err);
@@ -197,7 +199,30 @@ export class ImageUrlMutator {
             }
         );
 
+        // Load large thumbnail instead of the full size picture when possible
+        this.add(ImageUrlMutator.IMGUR_IMAGE_URL_REGEX,
+            async(_url: string, match: RegExpMatchArray) => this.getOptimizedImgUrlFromMatch(match)
+        );
+    }
 
+
+    getOptimizedImgUrlFromMatch(match: RegExpMatchArray): string {
+        const imageId = match[1];
+        const ext = match[2];
+        const rest = match[3];
+
+        const finalExt = ((ext === '.gif') || (ext === '.gifv'))
+          ? '.mp4'
+          : ext;
+
+        return `https://i.imgur.com/${imageId}${((imageId.length <= 7) && (finalExt !== '.mp4')) ? 'l' : ''}${finalExt}${rest}`;
+    }
+
+
+    getOptimizedImgurUrlFromUrl(url: string): string {
+      const m = url.match(ImageUrlMutator.IMGUR_IMAGE_URL_REGEX);
+
+      return m ? this.getOptimizedImgUrlFromMatch(m) : url;
     }
 
 

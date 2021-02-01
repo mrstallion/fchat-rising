@@ -127,7 +127,7 @@
 
 
         @Hook('mounted')
-        onMounted(): void {
+        async onMounted(): Promise<void> {
             console.info('Mounted ImagePreview');
 
             // tslint:disable-next-line:no-floating-promises
@@ -175,6 +175,12 @@
             );
 
             const webview = this.getWebview();
+
+            // clear preview cache, particularly cookies
+            // setInterval(
+            //     () => remote.webContents.fromId(webview.getWebContentsId()).session.clearStorageData({storages: ['cookies', 'indexdb']}),
+            //     5000
+            // );
 
             webview.addEventListener(
                 'update-target-url', // 'did-navigate', // 'dom-ready',
@@ -447,7 +453,7 @@
 
             this.debugLog('ImagePreview: show.exec', url);
 
-            const due = ((url === this.exitUrl) && (this.exitInterval)) ? 0 : 100;
+            const due = ((url === this.exitUrl) && (this.exitInterval)) ? 0 : 200;
 
             this.url = url;
             this.domain = domain(url);
