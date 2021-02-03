@@ -41,7 +41,7 @@ export default class WordDefinition extends Vue {
   readonly expression?: string;
 
   @Hook('mounted')
-  mounted(): void {
+  async mounted(): Promise<void> {
     const webview = this.getWebview();
 
     const eventProcessor = async (event: EventBusEvent): Promise<void> => {
@@ -52,6 +52,8 @@ export default class WordDefinition extends Vue {
 
     webview.addEventListener('update-target-url', eventProcessor);
     webview.addEventListener('dom-ready', eventProcessor);
+
+    // await remote.webContents.fromId(webview.getWebContentsId()).session.clearStorageData({storages: ['cookies', 'indexdb']});
   }
 
 

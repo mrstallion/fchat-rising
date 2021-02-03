@@ -8,9 +8,14 @@ export interface WaiterDef {
   id: string;
   resolve(result?: any): void;
   reject(result?: any): void;
+  initiated: number;
+  request: IndexedRequest;
 }
 
 export class WorkerClient {
+  // @ts-ignore
+  private _isVue = true;
+
   private readonly worker: Worker;
 
   private idCounter = 0;
@@ -30,8 +35,8 @@ export class WorkerClient {
   }
 
 
-  private when(id: string, resolve: (result?: any) => void, reject: (reason?: any) => void): void {
-    this.waiters.push({ id, resolve, reject });
+  private when(id: string, resolve: (result?: any) => void, reject: (reason?: any) => void, request: IndexedRequest): void {
+    this.waiters.push({ id, resolve, reject, request, initiated: Date.now() });
   }
 
 
@@ -39,7 +44,7 @@ export class WorkerClient {
     return (e: Event) => {
       const res = (e as any).data as IndexedResponse;
 
-      log.silly('store.worker.client.msg', { res });
+      // log.silly('store.worker.client.msg', { res });
 
       if (!res) {
         log.error('store.worker.client.msg.invalid', { res });
@@ -54,8 +59,10 @@ export class WorkerClient {
       }
 
       if (res.state === 'ok') {
+        // log.silly('store.worker.client.msg.ok', { t: (Date.now() - waiter.initiated) / 1000, req: waiter.request });
         waiter.resolve(res.result);
       } else {
+        log.error('store.worker.client.msg.err', { t: (Date.now() - waiter.initiated) / 1000, msg: res.msg, req: waiter.request });
         waiter.reject(new Error(res.msg));
       }
 
@@ -66,6 +73,8 @@ export class WorkerClient {
 
   private clearWaiter(id: string): void {
     this.waiters = _.filter(this.waiters, (w) => (w.id !== id));
+
+    // log.silly('store.worker.waiter.clear', this.waiters.length);
   }
 
 
@@ -84,7 +93,8 @@ export class WorkerClient {
           this.when(
             id,
             resolve,
-            reject
+            reject,
+            request
           );
 
           this.worker.postMessage(request);

@@ -33,6 +33,9 @@ export interface ProfileCacheQueueEntry {
 
 
 export class CacheManager {
+    // @ts-ignore
+    private _isVue = true;
+
     static readonly PROFILE_QUERY_DELAY = 400; //1 * 1000;
 
     adCache: AdCache = new AdCache();

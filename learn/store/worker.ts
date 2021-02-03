@@ -6,6 +6,9 @@ import { WorkerClient } from './worker/client';
 
 
 export class WorkerStore implements PermanentIndexedStore {
+    // @ts-ignore
+    private _isVue = true;
+
     protected readonly workerClient: WorkerClient;
 
     constructor(jsEndpointFile: string) {

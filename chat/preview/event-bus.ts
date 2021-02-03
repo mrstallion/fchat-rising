@@ -1,9 +1,12 @@
 // import Vue from 'vue';
 import _ from 'lodash';
+// import log from 'electron-log'; //tslint:disable-line:match-default-export-name
+
 import { Character } from '../../site/character_page/interfaces';
 import { Message } from '../common';
 import { Conversation } from '../interfaces';
 import ChannelConversation = Conversation.ChannelConversation;
+
 import { NoteCheckerCount } from '../../site/note-checker';
 
 /**
@@ -75,7 +78,11 @@ class EventBusManager {
 
 
     $emit(eventName: string, eventData: EventBusEvent): void {
+        // const d = Date.now();
+
         _.each(this.eventCallbacks[eventName] || [], (cb) => (cb(eventData)));
+
+        // log.silly('event.bus.emit', { eventName, eventData, time: (Date.now() - d) / 1000 });
     }
 
 
