@@ -196,6 +196,10 @@ class PrivateConversation extends Conversation implements Interfaces.PrivateConv
 
     async addMessage(message: Interfaces.Message): Promise<void> {
         await this.logPromise;
+
+        if (core.conversations.selectedConversation === this)
+            this.maxMessages += 1;
+
         this.safeAddMessage(message);
         if(message.type !== Interfaces.Message.Type.Event) {
             if(core.state.settings.logMessages) await core.logs.logMessage(this, message);
@@ -329,6 +333,10 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
 
     async addMessage(message: Interfaces.Message): Promise<void> {
         await this.logPromise;
+
+        if (core.conversations.selectedConversation === this)
+            this.maxMessages += 1;
+
         if((message.type === MessageType.Message || message.type === MessageType.Ad) && isWarn(message.text)) {
             const member = this.channel.members[message.sender.name];
             if(member !== undefined && member.rank > Channel.Rank.Member || message.sender.isChatOp)
