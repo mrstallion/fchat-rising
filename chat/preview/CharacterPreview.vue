@@ -196,7 +196,11 @@ export default class CharacterPreview extends Vue {
   updateAdStatus(): void {
     const cache = core.cache.adCache.get(this.characterName!);
 
-    if ((!cache) || (cache.posts.length === 0)) {
+    if (
+      (!cache)
+      || (cache.posts.length === 0)
+      || (Date.now() - cache.posts[cache.posts.length - 1].datePosted.getTime() > (45 * 60 * 1000))
+    ) {
       this.latestAd = undefined;
       return;
     }
