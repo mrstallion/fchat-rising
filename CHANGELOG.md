@@ -1,11 +1,11 @@
 # Changelog
 
-## Canary
+## 1.10.0
 *   Moved database queries to a web worker to gain more responsive UI
-*   Fixed Gelbooru, Gfycat, Instagram, Twitter, and Vimeo previews
+*   Fixed Gelbooru, Gfycat, Hentai-Foundry, Instagram, Twitter, and Vimeo previews
 *   Fixed green names not showing up when 'show friends/bookmarks in a different colour' is selected
 *   Sped up Imgur previews
-*   Minor UI design adjustments for user names and badges
+*   Minor UI design adjustments for usernames with badges
 
 
 ## 1.9.0

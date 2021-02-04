@@ -240,7 +240,7 @@ export class ImageDomMutator {
 
         this.add(
             'hentai-foundry.com',
-            this.getBaseJsMutatorScript(['main video', 'main img']),
+            this.getBaseJsMutatorScript(['#picBox video', '#picBox img']),
             (url: string): string => {
                 const u = urlHelper.parse(url, true);
 
