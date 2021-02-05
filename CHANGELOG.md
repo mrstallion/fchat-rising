@@ -1,5 +1,9 @@
 # Changelog
 
+## Canary
+*   Improved performance on highly advertised channels like LFRP
+
+
 ## 1.10.0
 *   Moved database queries to a web worker to gain more responsive UI
 *   Fixed Gelbooru, Gfycat, Hentai-Foundry, Instagram, Twitter, and Vimeo previews

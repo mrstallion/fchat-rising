@@ -38,9 +38,11 @@ abstract class Conversation implements Interfaces.Conversation {
     _settings: Interfaces.Settings | undefined;
     protected abstract context: CommandContext;
     protected maxMessages = 50;
+    protected insertCount = 0;
     protected allMessages: Interfaces.Message[] = [];
     readonly reportMessages: Interfaces.Message[] = [];
     private lastSent = '';
+    // private loadedMore = false;
     adManager: AdManager;
 
     protected static readonly conversationThroat = throat(1); // make sure user posting and ad posting won't get in each others' way
@@ -100,6 +102,7 @@ abstract class Conversation implements Interfaces.Conversation {
     loadMore(): boolean {
         if(this.messages.length >= this.allMessages.length) return false;
         this.maxMessages += 50;
+        // this.loadedMore = true;
         this.messages = this.allMessages.slice(-this.maxMessages);
 
         EventBus.$emit('conversation-load-more', { conversation: this });
@@ -116,6 +119,28 @@ abstract class Conversation implements Interfaces.Conversation {
         this.lastRead = this.messages[this.messages.length - 1];
         this.maxMessages = 50;
         this.messages = this.allMessages.slice(-this.maxMessages);
+        // this.loadedMore = false;
+        this.insertCount = 0;
+    }
+
+    // Keeps the message-list from re-rendering every time when full, cleaning up after itself every 200 messages
+    stretch(): void {
+        if ((core.conversations.selectedConversation !== this) || (this.messages.length < this.maxMessages)) {
+            return;
+        }
+
+        if (this.insertCount < 200) {
+            this.maxMessages += 1;
+            this.insertCount += 1;
+        } else {
+            const removed = this.insertCount;
+
+            this.maxMessages -= removed;
+            this.insertCount = 0;
+            this.messages = this.allMessages.slice(-this.maxMessages);
+
+            log.debug('conversation.view.cleanup', { channel: this.name, removed, left: this.messages.length, limit: this.maxMessages });
+        }
     }
 
     clear(): void {
@@ -197,8 +222,7 @@ class PrivateConversation extends Conversation implements Interfaces.PrivateConv
     async addMessage(message: Interfaces.Message): Promise<void> {
         await this.logPromise;
 
-        if (core.conversations.selectedConversation === this)
-            this.maxMessages += 1;
+        this.stretch();
 
         this.safeAddMessage(message);
         if(message.type !== Interfaces.Message.Type.Event) {
@@ -334,8 +358,7 @@ class ChannelConversation extends Conversation implements Interfaces.ChannelConv
     async addMessage(message: Interfaces.Message): Promise<void> {
         await this.logPromise;
 
-        if (core.conversations.selectedConversation === this)
-            this.maxMessages += 1;
+        this.stretch();
 
         if((message.type === MessageType.Message || message.type === MessageType.Ad) && isWarn(message.text)) {
             const member = this.channel.members[message.sender.name];
