@@ -225,7 +225,7 @@ export class AdManager {
 
 
     static onConnectionClosed(): void {
-        AdManager.recoverableCharacter = core.characters.ownCharacter.name;
+        AdManager.recoverableCharacter = _.get(core, 'characters.ownCharacter.name', '');
 
         AdManager.recoverableAds = _.map(
             _.filter(core.conversations.channelConversations, (c) => ((c.adManager) && (c.adManager.isActive()))),
