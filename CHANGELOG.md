@@ -1,7 +1,8 @@
 # Changelog
 
-## Canary
+## 1.10.1
 *   Improved performance on highly advertised channels like LFRP
+*   Fixed Rule34.xxx previews
 
 
 ## 1.10.0

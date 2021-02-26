@@ -28,6 +28,8 @@ class FListImagePreviewDomMutator {
         };
         /* ## SETTINGS_END ## */
 
+        // this.settings.debug = true;
+
         this.startTime = Date.now();
 
         this.selectors = this.settings.selectors;
@@ -188,7 +190,9 @@ class FListImagePreviewDomMutator {
     }
 
 
-    attemptPlay(img, lessStrict) {
+    async attemptPlay(img, lessStrict) {
+        this.debug('attemptPlay', img, lessStrict);
+
         try {
             if (
                 (img.play)
@@ -198,9 +202,24 @@ class FListImagePreviewDomMutator {
                 )
             )
             {
+                img.onpause = () => {
+                    img.muted = true;
+                    img.loop = true;
+                    img.play();
+                };
+
                 img.muted = true;
                 img.loop = true;
-                img.play();
+
+                const result = await img.play();
+
+                img.muted = true;
+                img.loop = true;
+
+                this.debug('attemptPlay result', result);
+            }
+            else {
+                this.debug('attemptPlay skip', img.ended, img.currentTime);
             }
         } catch (err) {
             this.error('attemptPlay', err, img, lessStrict);
@@ -255,7 +274,7 @@ class FListImagePreviewDomMutator {
             try {
                 img.parentNode.removeChild(img);
             } catch(err2) {
-                console.error('attachImgToWrapper', 'removeChild()', err2);
+                this.error('attachImgToWrapper', 'removeChild()', err2);
             }
         }
 
