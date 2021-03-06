@@ -10,7 +10,9 @@ export enum TagId {
     ApparentAge = 64,
     RelationshipStatus = 42,
     Species = 9,
-    LanguagePreference = 49
+    LanguagePreference = 49,
+
+    Kinks = 99999
 }
 
 export enum Gender {
@@ -479,5 +481,92 @@ export interface SpeciesMappingCacheRecord {
 
 export interface SpeciesMappingCache {
     [key: number]: SpeciesMappingCacheRecord[];
+}
+
+
+export const kinkMatchScoreMap = {
+    favorite: {
+        favorite: 0.55,
+        yes: 0.25,
+        maybe: -0.5,
+        no: -1.0
+    },
+
+    yes: {
+        favorite: 0.20,
+        yes: 0.20,
+        maybe: -0.25,
+        no: -0.5
+    },
+
+    maybe: {
+        favorite: -0.5,
+        yes: -0.25,
+        maybe: 0,
+        no: 0
+    },
+
+    no: {
+        favorite: -1.0,
+        yes: -0.5,
+        maybe: -0.1,
+        no: 0
+    }
+};
+
+
+export const kinkComparisonExclusions = {
+    585: true, // amputees
+    587: true, // anthro characters
+    588: true, // body hair
+    589: true, // canon characters
+    458: true, // chubby
+    605: true, // disabilities
+    590: true, // facial hair / beards
+    531: true, // femboys
+    592: true, // femininity
+    109: true, // older characters
+    600: true, // shorter characters
+    601: true, // skinny characters
+    584: true, // slime / goo characters
+    616: true, // superheroes / villains
+    603: true, // taller characters
+    532: true, // tomboys
+    720: true, // toons
+    354: true, // twinks
+    183: true, // very fat characters
+    85: true, // very lithe characters
+    84: true, // very muscular characters
+    197: true // younger characters
+};
+
+export const kinkComparisonExclusionGroups = {
+    29: true, // gender preferences
+    30: true // species preferences
+};
+
+
+export const kinkComparisonSwaps: Record<any, number> = {
+    137: 157, // anal sex giving -> receiving
+    157: 137, // anal sex receiving -> giving
+    163: 16, // rimming giving -> receiving
+    16: 163, // rimming receiving -> giving
+    229: 340, // vaginal sex giving -> receiving
+    340: 229, // vaginal sex receiving -> giving
+    513: 515, // cunnilingus giving -> receiving
+    515: 513, // cunnilingus receiving -> giving
+    141: 158, // oral sex giving -> receiving
+    158: 141 // oral sex receiving -> giving
+};
+
+
+export interface KinkBucketScore {
+    score: number;
+    count: number;
+    weighted: number;
+}
+
+export interface MatchResultKinkScores {
+    [key: string]: KinkBucketScore;
 }
 

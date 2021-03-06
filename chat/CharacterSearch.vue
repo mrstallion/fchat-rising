@@ -197,6 +197,8 @@
         @Hook('mounted')
         mounted(): void {
             core.connection.onMessage('ERR', (data) => {
+                this.state = 'search';
+
                 switch(data.number) {
                     case 18:
                         this.error = l('characterSearch.error.noResults');

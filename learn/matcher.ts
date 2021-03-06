@@ -1,20 +1,21 @@
 /* eslint-disable no-null-keyword, max-file-line-count */
 
 import * as _ from 'lodash';
-import { Character, CharacterInfotag } from '../interfaces';
+import { Character, CharacterInfotag, KinkChoice } from '../interfaces';
 import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 
 // tslint:disable-next-line ban-ts-ignore
 // @ts-ignore
 import anyAscii from 'any-ascii';
 
+import {Store} from '../site/character_page/data_store';
 
 import {
     BodyType, fchatGenderMap,
     FurryPreference,
     Gender, genderKinkMapping,
-    Kink,
-    kinkMapping,
+    Kink, KinkBucketScore, kinkComparisonExclusionGroups, kinkComparisonExclusions, kinkComparisonSwaps,
+    kinkMapping, kinkMatchScoreMap,
     KinkPreference, likelyHuman, mammalSpecies, nonAnthroSpecies,
     Orientation,
     Species, SpeciesMap, speciesMapping, SpeciesMappingCache,
@@ -25,6 +26,7 @@ import {
 
 
 export interface MatchReport {
+    _isVue: true;
     you: MatchResult;
     them: MatchResult;
     youMultiSpecies: boolean;
@@ -47,6 +49,7 @@ export interface MatchResultScores {
     [TagId.Age]: Score;
     [TagId.FurryPreference]: Score;
     [TagId.Species]: Score;
+    [TagId.Kinks]: Score;
 }
 
 export interface MatchScoreDetails {
@@ -177,7 +180,7 @@ export class Matcher {
     readonly yourAnalysis: CharacterAnalysis;
     readonly theirAnalysis: CharacterAnalysis;
 
-    static readonly UNICORN_LEVEL = 5.5;
+    static readonly UNICORN_LEVEL = 6.0;
 
 
     constructor(you: Character, them: Character, yourAnalysis?: CharacterAnalysis, theirAnalysis?: CharacterAnalysis) {
@@ -199,6 +202,7 @@ export class Matcher {
         const themYouMatch = themYou.match();
 
         const report: MatchReport = {
+            _isVue: true,
             you: youThemMatch,
             them: themYouMatch,
             youMultiSpecies: false,
@@ -215,6 +219,8 @@ export class Matcher {
 
         report.details.totalScoreDimensions = Matcher.countScoresTotal(report);
         report.details.dimensionsAtScoreLevel = Matcher.countScoresAtLevel(report, report.score) || 0;
+
+        // log.debug('report.generate', report);
 
         return report;
     }
@@ -238,6 +244,7 @@ export class Matcher {
                 const themYouMatch = themYou.match();
 
                 const report: MatchReport = {
+                    _isVue: true,
                     you: youThemMatch,
                     them: themYouMatch,
                     youMultiSpecies: (yourCharacterAnalyses.length > 1),
@@ -275,7 +282,11 @@ export class Matcher {
 
         log.debug(
             'report.identify.best',
-            {buildTime: Date.now() - reportStartTime, variations: yourCharacterAnalyses.length * theirCharacterAnalyses.length}
+            {
+                buildTime: Date.now() - reportStartTime,
+                variations: yourCharacterAnalyses.length * theirCharacterAnalyses.length,
+                report: bestReport!
+            }
         );
 
         return bestReport!;
@@ -382,7 +393,8 @@ export class Matcher {
                 [TagId.Age]: this.resolveAgeScore(),
                 [TagId.FurryPreference]: this.resolveFurryPairingsScore(),
                 [TagId.Species]: this.resolveSpeciesScore(),
-                [TagId.SubDomRole]: this.resolveSubDomScore()
+                [TagId.SubDomRole]: this.resolveSubDomScore(),
+                [TagId.Kinks]: this.resolveKinkScore()
             },
 
             info: {
@@ -556,6 +568,32 @@ export class Matcher {
 
         return this.formatScoring(score, theyAreAnthro ? 'furry pairings' : theyAreHuman ? 'human pairings' : '');
     }
+
+
+    private resolveKinkScore(): Score {
+        const kinkScore = this.resolveKinkBucketScore('all');
+
+        log.debug('report.score.kink', this.them.name, this.you.name, kinkScore.count, kinkScore.score, kinkScore.weighted);
+
+        if (kinkScore.weighted === 0) {
+            return new Score(Scoring.NEUTRAL);
+        }
+
+        if (kinkScore.weighted < 0) {
+            if (Math.abs(kinkScore.weighted) < 0.45) {
+                return new Score(Scoring.WEAK_MISMATCH, 'Challenging <span>kinks</span>');
+            }
+
+            return new Score(Scoring.MISMATCH, 'Mismatching <span>kinks</span>');
+        }
+
+        if (Math.abs(kinkScore.weighted) < 0.45) {
+            return new Score(Scoring.WEAK_MATCH, 'Good <span>kinks</span>');
+        }
+
+        return new Score(Scoring.MATCH, 'Great <span>kinks</span>');
+    }
+
 
     static furryLikeabilityScore(c: Character): Scoring {
         const furryPreference = Matcher.getTagValueList(TagId.FurryPreference, c);
@@ -744,6 +782,78 @@ export class Matcher {
             return new Score(Scoring.MATCH, `Loves <span>submissives</span>`);
 
         return new Score(Scoring.NEUTRAL);
+    }
+
+
+    private resolveKinkBucketScore(bucket: 'all' | 'favorite' | 'yes' | 'maybe' | 'no' | 'positive' | 'negative'): KinkBucketScore {
+        const yourKinks = this.getAllStandardKinks(this.you);
+        const theirKinks = this.getAllStandardKinks(this.them);
+
+        const result: any = _.reduce(
+            yourKinks,
+            (accum, yourKinkValue: any, yourKinkId: any) => {
+                const theirKinkId = (yourKinkId in kinkComparisonSwaps) ? kinkComparisonSwaps[yourKinkId] : yourKinkId;
+
+                if (
+                    (!(theirKinkId in theirKinks))
+                    || (yourKinkId in kinkComparisonExclusions)
+                    || ((Store.shared.kinks[yourKinkId]) && (Store.shared.kinks[yourKinkId].kink_group in kinkComparisonExclusionGroups))
+                ) {
+                    return accum;
+                }
+
+                const theirKinkValue = theirKinks[theirKinkId] as any;
+
+                if (
+                (yourKinkValue === bucket)
+                || (bucket === 'all')
+                || ((bucket === 'negative') && ((yourKinkValue === 'no') || (yourKinkValue === 'maybe')))
+                || ((bucket === 'positive') && ((yourKinkValue === 'favorite') || (yourKinkValue === 'yes')))
+                ) {
+                    return {
+                        score: accum.score + this.getKinkMatchScore(yourKinkValue, theirKinkValue),
+                        count: accum.count + 1
+                    };
+                }
+
+                return accum;
+            },
+            { score: 0, count: 0 }
+        );
+
+        result.weighted = (result.count === 0)
+            ? 0
+            : (
+                (Math.log(result.count) / Math.log(5)) // log 5 base
+                * (result.score / result.count)
+             );
+
+        return result;
+    }
+
+
+    private getAllStandardKinks(c: Character): { [key: number]: KinkChoice } {
+        const kinks = _.pickBy(c.kinks, _.isString);
+
+        _.each(
+          c.customs,
+          (custom: any) => {
+            if (!custom) {
+                return;
+            }
+
+            const children = (custom.children) ? custom.children : {};
+
+            _.each(children, (child) => kinks[child] = custom.choice);
+          }
+        );
+
+        return kinks as any;
+    }
+
+
+    private getKinkMatchScore(aValue: string, bValue: string): number {
+        return _.get(kinkMatchScoreMap, `${aValue}.${bValue}`, 0);
     }
 
 
@@ -1025,6 +1135,8 @@ export class Matcher {
 
           aboveLevelScore = (1 - (aboveLevelMul * 0.5)) * Math.pow(dimensionsAboveScoreLevel, matchRatio);
         }
+
+        // const kinkScore = match.you.kinkScore.weighted;
 
         log.debug(
             'report.score.search',
