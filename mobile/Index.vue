@@ -127,7 +127,7 @@
         get styling(): string {
             if(window.NativeView !== undefined) window.NativeView.setTheme(this.settings.theme);
             //tslint:disable-next-line:no-require-imports
-            return `<style>${require('../scss/fa.scss')}${require(`../scss/themes/chat/${this.settings.theme}.scss`)}</style>`;
+            return `<style id="themeStyle">${require('../scss/fa.scss')}${require(`../scss/themes/chat/${this.settings.theme}.scss`)}</style>`;
         }
 
         async login(): Promise<void> {

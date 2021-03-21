@@ -101,6 +101,7 @@ const strings: {[key: string]: string | undefined} = {
     'logs.corruption.mobile.success': 'Your logs have been fixed.',
     'logs.corruption.mobile.error': 'Unable to fix corrupted logs. Please clear the application data or reinstall the app.',
     'logs.corruption.web': 'Error reading logs from browser storage. If this issue persists, please clear your stored browser data for F-Chat.',
+    'logs.html': 'Would you like to export these logs as HTML with formatting? Otherwise, they will be exported as plain text.',
     'user.profile': 'Profile',
     'user.message': 'Open conversation',
     'user.messageJump': 'View conversation',

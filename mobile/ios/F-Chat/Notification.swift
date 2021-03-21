@@ -7,7 +7,7 @@ class Notification: NSObject, WKScriptMessageHandler, UNUserNotificationCenterDe
     let center = UNUserNotificationCenter.current()
     let baseDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
     var webView: WKWebView!
-    
+
     func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
         center.delegate = self
         self.webView = message.webView
@@ -29,14 +29,14 @@ class Notification: NSObject, WKScriptMessageHandler, UNUserNotificationCenterDe
             return
         }
     }
-    
+
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         if(response.actionIdentifier == UNNotificationDefaultActionIdentifier) {
             webView.evaluateJavaScript("document.dispatchEvent(new CustomEvent('notification-clicked',{detail:{data:'\(response.notification.request.content.userInfo["data"]!)'}}))")
         }
         completionHandler()
     }
-    
+
     func notify(_ notify: Bool, _ title: String, _ text: String, _ icon: String, _ sound: String?, _ data: String, _ cb: (String?) -> Void) {
         if(!notify) {
             if(sound != nil) {
@@ -49,14 +49,14 @@ class Notification: NSObject, WKScriptMessageHandler, UNUserNotificationCenterDe
         let content = UNMutableNotificationContent()
         content.title = title
         if(sound != nil) {
-            content.sound = UNNotificationSound(named: Bundle.main.path(forResource: "www/sounds/" + sound!, ofType: "wav")!)
+            content.sound = UNNotificationSound(named: UNNotificationSoundName(Bundle.main.path(forResource: "www/sounds/" + sound!, ofType: "wav")!))
         }
         content.body = text
         content.userInfo["data"] = data
         center.add(UNNotificationRequest(identifier: "1", content: content, trigger: UNTimeIntervalNotificationTrigger.init(timeInterval: 1, repeats: false)))
         cb("1");
     }
-    
+
     func requestPermission(_ cb: @escaping (String?) -> Void) {
         center.requestAuthorization(options: [.alert, .sound]) { (_, _) in
             cb(nil)

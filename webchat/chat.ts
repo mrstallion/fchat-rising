@@ -71,7 +71,7 @@ window.addEventListener('beforeunload', (e) => {
     return l('chat.confirmLeave');
 });
 
-require(`../scss/themes/chat/${chatSettings.theme}.scss`);
+require(`!style-loader?{"attrs":{"id":"themeStyle"}}!css-loader!sass-loader!../scss/themes/chat/${chatSettings.theme}.scss`);
 
 new Chat({ //tslint:disable-line:no-unused-expression
     el: '#app',

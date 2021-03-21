@@ -129,7 +129,7 @@ require('electron-packager')({
                 const args = [appPaths[0], 'fchat.AppImage', '-u', 'zsync|https://client.f-list.net/fchat.AppImage.zsync'];
                 if(process.argv.length > 2) args.push('-s', '--sign-key', process.argv[2]);
                 else console.warn('Warning: Creating unsigned AppImage');
-                if(process.argv.length > 3) args.push('--sign-args', `--no-tty --passphrase=${process.argv[3]}`);
+                if(process.argv.length > 3) args.push('--sign-args', `--no-tty  --pinentry-mode loopback --yes --passphrase=${process.argv[3]}`);
                 fs.chmodSync(downloaded, 0o755);
                 child_process.spawn(downloaded, ['--appimage-extract'], {cwd: distDir}).on('close', () => {
                     const child = child_process.spawn(path.join(distDir, 'squashfs-root', 'AppRun'), args, {cwd: distDir, env: {ARCH: 'x86_64'}});

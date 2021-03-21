@@ -36,8 +36,8 @@ const config = {
             {test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader'},
             {test: /\.(wav|mp3|ogg)$/, loader: 'file-loader?name=sounds/[name].[ext]'},
             {test: /\.(png|html)$/, loader: 'file-loader?name=[name].[ext]'},
-            {test: /\.scss/, use: ['vue-style-loader', 'css-loader', 'sass-loader']},
-            {test: /\.css/, use: ['vue-style-loader', 'css-loader']}
+            {test: /\.scss$/, use: ['vue-style-loader', 'css-loader', 'sass-loader']},
+            {test: /\.css$/, use: ['vue-style-loader', 'css-loader']},
         ]
     },
     plugins: [

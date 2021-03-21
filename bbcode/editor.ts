@@ -90,6 +90,12 @@ export let defaultButtons: ReadonlyArray<EditorButton> = [
         key: Keys.KeyE
     },
     {
+        title: 'Spoiler (Ctrl+K)\n\nHidden until explicitly clicked by the viewer.',
+        tag: 'spoiler',
+        icon: 'fa-eye-slash',
+        key: Keys.KeyK
+    },
+    {
         title: 'Noparse (Ctrl+N)\n\nAll BBCode placed within this tag will be ignored and treated as text. Great for sharing structure without it being rendered.',
         tag: 'noparse',
         icon: 'fa-ban',

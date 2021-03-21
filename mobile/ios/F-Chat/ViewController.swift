@@ -29,13 +29,12 @@ class ViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
         webView.uiDelegate = self
         webView.navigationDelegate = self
         view = webView
-        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.keyboardWillShow), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.keyboardDidShow), name: NSNotification.Name.UIKeyboardDidShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.keyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.keyboardDidShow), name: UIResponder.keyboardDidShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.scrollView.bounces = false
         UIApplication.shared.statusBarStyle = .lightContent
-        (UIApplication.shared.value(forKey: "statusBar") as! UIView).backgroundColor = UIColor(white: 0, alpha: 0.5)
     }
 
     override func viewDidLoad() {
@@ -47,8 +46,8 @@ class ViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
 
     @objc func keyboardWillShow(notification: NSNotification) {
         let info = notification.userInfo!
-        let newHeight = view.window!.frame.height - (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue.height
-        UIView.animate(withDuration: (info[UIKeyboardAnimationDurationUserInfoKey] as! NSNumber).doubleValue, animations: {
+        let newHeight = view.window!.frame.height - (info[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue.height
+        UIView.animate(withDuration: (info[UIResponder.keyboardAnimationDurationUserInfoKey] as! NSNumber).doubleValue, animations: {
             self.webView.frame = CGRect(x: 0, y: 0, width: self.webView.frame.width, height: newHeight)
         })
     }
@@ -59,7 +58,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
 
     @objc func keyboardWillHide(notification: NSNotification) {
         let info = notification.userInfo!
-        UIView.animate(withDuration: (info[UIKeyboardAnimationDurationUserInfoKey] as! NSNumber).doubleValue, animations: {
+        UIView.animate(withDuration: (info[UIResponder.keyboardAnimationDurationUserInfoKey] as! NSNumber).doubleValue, animations: {
             self.webView.frame = UIApplication.shared.windows[0].frame
         })
     }
@@ -88,7 +87,7 @@ class ViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
         decisionHandler(.cancel)
         let str = url.absoluteString
         if(url.scheme == "data") {
-            let start = str.index(of: ",")!
+            let start = str.firstIndex(of: ",")!
             let file = FileManager.default.temporaryDirectory.appendingPathComponent(str[str.index(str.startIndex, offsetBy: 5)..<start].removingPercentEncoding!)
             try! str.suffix(from: str.index(after: start)).removingPercentEncoding!.write(to: file, atomically: false, encoding: .utf8)
             let controller = UIActivityViewController(activityItems: [file], applicationActivities: nil)

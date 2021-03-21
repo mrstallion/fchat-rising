@@ -23,7 +23,7 @@
             <label class="col-sm-2 col-form-label">{{l('logs.conversation')}}</label>
             <div :class="canZip ? 'col-sm-8 col-10 col-xl-9' : 'col-sm-10'">
                 <filterable-select v-model="selectedConversation" :options="conversations" :filterFunc="filterConversation"
-                    :placeholder="l('filter')">
+                                   :placeholder="l('filter')">
                     <template slot-scope="s">
                         {{s.option && ((s.option.key[0] == '#' ? '#' : '') + s.option.name) || l('logs.selectConversation')}}
                     </template>
@@ -47,7 +47,8 @@
                     class="fa fa-download"></span></button>
             </div>
         </div>
-        <div class="messages messages-both" style="overflow:auto;overscroll-behavior:none;" ref="messages" tabindex="-1" @scroll="onMessagesScroll">
+        <div class="messages messages-both" style="overflow:auto;overscroll-behavior:none;" ref="messages" tabindex="-1"
+             @scroll="onMessagesScroll">
             <message-view v-for="message in displayedMessages" :message="message" :key="message.id" :logs="true"></message-view>
         </div>
         <div class="input-group" style="flex-shrink:0">
@@ -77,8 +78,15 @@
         return format(date, 'yyyy-MM-dd');
     }
 
-    function getLogs(messages: ReadonlyArray<Conversation.Message>): string {
-        return messages.reduce((acc, x) => acc + messageToString(x, (date) => formatTime(date, true)), '');
+    function getLogs(messages: ReadonlyArray<Conversation.Message>, html: boolean): string {
+        const start = html ?
+            `<meta charset="utf-8"><style>body { padding: 10px; }${document.getElementById('themeStyle')!.innerText}</style>` : '';
+        return '<div class="messages bbcode">' + messages.reduce((acc, x) => acc + messageToString(x, (date) => formatTime(date, true),
+            html ? (c) => {
+                const gender = core.characters.get(c).gender;
+                return `<span class="user-view gender-${gender ? gender.toLowerCase() : 'none'}">${c}</span>`;
+            } : undefined,
+            html ? (t) => `${core.bbCodeParser.parseEverything(t).innerHTML}` : undefined), start) + '</div>';
     }
 
     @Component({
@@ -187,16 +195,18 @@
 
         downloadDay(): void {
             if(this.selectedConversation === undefined || this.selectedDate === undefined || this.messages.length === 0) return;
-            const name = `${this.selectedConversation.name}-${formatDate(new Date(this.selectedDate))}.txt`;
-            this.download(name, `data:${encodeURIComponent(name)},${encodeURIComponent(getLogs(this.messages))}`);
+            const html = confirm(l('logs.html'));
+            const name = `${this.selectedConversation.name}-${formatDate(new Date(this.selectedDate))}.${html ? 'html' : 'txt'}`;
+            this.download(name, `data:${encodeURIComponent(name)},${encodeURIComponent(getLogs(this.messages, html))}`);
         }
 
         async downloadConversation(): Promise<void> {
             if(this.selectedConversation === undefined) return;
             const zip = new Zip();
+            const html = confirm(l('logs.html'));
             for(const date of this.dates) {
                 const messages = await core.logs.getLogs(this.selectedCharacter, this.selectedConversation.key, date);
-                zip.addFile(`${formatDate(date)}.txt`, getLogs(messages));
+                zip.addFile(`${formatDate(date)}.${html ? 'html' : 'txt'}`, getLogs(messages, html));
             }
             this.download(`${this.selectedConversation.name}.zip`, URL.createObjectURL(zip.build()));
         }
@@ -204,12 +214,13 @@
         async downloadCharacter(): Promise<void> {
             if(this.selectedCharacter === '' || !confirm(l('logs.confirmExport', this.selectedCharacter))) return;
             const zip = new Zip();
+            const html = confirm(l('logs.html'));
             for(const conv of this.conversations) {
                 zip.addFile(`${conv.name}/`, '');
                 const dates = await core.logs.getLogDates(this.selectedCharacter, conv.key);
                 for(const date of dates) {
                     const messages = await core.logs.getLogs(this.selectedCharacter, conv.key, date);
-                    zip.addFile(`${conv.name}/${formatDate(date)}.txt`, getLogs(messages));
+                    zip.addFile(`${conv.name}/${formatDate(date)}.${html ? 'html' : 'txt'}`, getLogs(messages, html));
                 }
             }
             this.download(`${this.selectedCharacter}.zip`, URL.createObjectURL(zip.build()));
@@ -272,9 +283,11 @@
             if(this.lockScroll) return;
             if(list === undefined || ev !== undefined && Math.abs(list.scrollTop - this.lastScroll) < 50) return;
             this.lockScroll = true;
+
             function getTop(index: number): number {
                 return (<HTMLElement>list!.children[index]).offsetTop;
             }
+
             while(this.selectedConversation !== undefined && this.selectedDate === undefined && this.dialog.isShown) {
                 const oldHeight = list.scrollHeight, oldTop = list.scrollTop;
                 const oldFirst = this.displayedMessages[0];

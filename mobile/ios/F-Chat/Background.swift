@@ -7,7 +7,7 @@ class Background: NSObject, WKScriptMessageHandler {
 
     override init() {
         let session = AVAudioSession.sharedInstance();
-        try! session.setCategory(AVAudioSessionCategoryPlayback, with: .mixWithOthers)
+        try! session.setCategory(AVAudioSession.Category.playback, options: .mixWithOthers)
         player.volume = 0
         player.numberOfLoops = -1;
         player.play()
