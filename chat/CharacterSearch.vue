@@ -28,6 +28,11 @@
             <search-history ref="searchHistory" :callback="updateSearch" :curSearch="data"></search-history>
         </div>
         <div v-else-if="state === 'results'" class="results">
+            <div class="debug" v-show="false">
+              <textarea v-model="debugSearchJson"></textarea>
+              <button class="btn" @click.prevent="debugUpdateResults()">Update</button>
+            </div>
+
             <h4 v-if="hasReceivedResults">
                 {{results.length}} {{l('characterSearch.results')}}
 
@@ -66,7 +71,14 @@
     import {EventBus} from './preview/event-bus';
     import CharacterSearchHistory from './CharacterSearchHistory.vue';
     import { Matcher } from '../learn/matcher';
-    import { nonAnthroSpecies, Species, speciesMapping, speciesNames } from '../learn/matcher-types';
+    import {
+      kinkMatchScoreMap,
+      kinkMatchWeights,
+      nonAnthroSpecies,
+      Species,
+      speciesMapping,
+      speciesNames
+    } from '../learn/matcher-types';
     import { CharacterCacheRecord } from '../learn/profile-cache';
     import Bluebird from 'bluebird';
 
@@ -140,6 +152,15 @@
         state = 'search';
         hasReceivedResults = false;
 
+        debugSearchJson = JSON.stringify(
+          {
+            scoreMap: kinkMatchScoreMap,
+            weights: kinkMatchWeights
+          },
+          null,
+          2
+        );
+
         private countUpdater?: ResultCountUpdater;
 
         data: ExtendedSearchData = {
@@ -191,6 +212,39 @@
                     this.resort();
                 }
             );
+        }
+
+
+        async debugUpdateResults(): Promise<void> {
+          if (this.state !== 'results') {
+            return;
+          }
+
+          const data = JSON.parse(this.debugSearchJson);
+
+          _.assign(kinkMatchScoreMap, data.scoreMap);
+          _.assign(kinkMatchWeights, data.weights);
+
+          core.cache.profileCache.clear();
+
+          const results = this.results;
+
+          this.results = [];
+
+          await Bluebird.delay(10);
+
+          // pre-warm cache
+          await Bluebird.mapSeries(
+            results,
+            (c) => core.cache.profileCache.get(c.character.name)
+          );
+
+          this.resultsPending = this.countPendingResults(undefined, results);
+
+          this.countUpdater?.start();
+          this.resort(results);
+
+          console.log('Done!');
         }
 
 

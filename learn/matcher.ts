@@ -15,7 +15,7 @@ import {
     FurryPreference,
     Gender, genderKinkMapping,
     Kink, KinkBucketScore, kinkComparisonExclusionGroups, kinkComparisonExclusions, kinkComparisonSwaps,
-    kinkMapping, kinkMatchScoreMap,
+    kinkMapping, kinkMatchScoreMap, kinkMatchWeights,
     KinkPreference, likelyHuman, mammalSpecies, nonAnthroSpecies,
     Orientation,
     Species, SpeciesMap, speciesMapping, SpeciesMappingCache,
@@ -180,9 +180,6 @@ export class Matcher {
     readonly yourAnalysis: CharacterAnalysis;
     readonly theirAnalysis: CharacterAnalysis;
 
-    static readonly UNICORN_LEVEL = 6.0;
-
-
     constructor(you: Character, them: Character, yourAnalysis?: CharacterAnalysis, theirAnalysis?: CharacterAnalysis) {
         this.you = you;
         this.them = them;
@@ -198,8 +195,8 @@ export class Matcher {
         const youThem = new Matcher(you, them, yourAnalysis, theirAnalysis);
         const themYou = new Matcher(them, you, theirAnalysis, yourAnalysis);
 
-        const youThemMatch = youThem.match();
-        const themYouMatch = themYou.match();
+        const youThemMatch = youThem.match('their');
+        const themYouMatch = themYou.match('your');
 
         const report: MatchReport = {
             _isVue: true,
@@ -240,8 +237,8 @@ export class Matcher {
                 const youThem = new Matcher(yourAnalysis.character, theirAnalysis.character, yourAnalysis.analysis, theirAnalysis.analysis);
                 const themYou = new Matcher(theirAnalysis.character, yourAnalysis.character, theirAnalysis.analysis, yourAnalysis.analysis);
 
-                const youThemMatch = youThem.match();
-                const themYouMatch = themYou.match();
+                const youThemMatch = youThem.match('their');
+                const themYouMatch = themYou.match('your');
 
                 const report: MatchReport = {
                     _isVue: true,
@@ -377,7 +374,7 @@ export class Matcher {
         return (finalScore === null) ? Scoring.NEUTRAL : finalScore;
     }
 
-    match(): MatchResult {
+    match(pronoun: string): MatchResult {
         const data: MatchResult = {
             you: this.you,
             them: this.them,
@@ -394,7 +391,7 @@ export class Matcher {
                 [TagId.FurryPreference]: this.resolveFurryPairingsScore(),
                 [TagId.Species]: this.resolveSpeciesScore(),
                 [TagId.SubDomRole]: this.resolveSubDomScore(),
-                [TagId.Kinks]: this.resolveKinkScore()
+                [TagId.Kinks]: this.resolveKinkScore(pronoun)
             },
 
             info: {
@@ -570,7 +567,7 @@ export class Matcher {
     }
 
 
-    private resolveKinkScore(): Score {
+    private resolveKinkScore(pronoun: string): Score {
         const kinkScore = this.resolveKinkBucketScore('all');
 
         log.debug('report.score.kink', this.them.name, this.you.name, kinkScore.count, kinkScore.score, kinkScore.weighted);
@@ -580,18 +577,18 @@ export class Matcher {
         }
 
         if (kinkScore.weighted < 0) {
-            if (Math.abs(kinkScore.weighted) < 0.45) {
-                return new Score(Scoring.WEAK_MISMATCH, 'Challenging <span>kinks</span>');
+            if (Math.abs(kinkScore.weighted) < kinkMatchWeights.weakMismatchThreshold) {
+                return new Score(Scoring.WEAK_MISMATCH, `Hesitant about ${pronoun} <span>kinks</span>`);
             }
 
-            return new Score(Scoring.MISMATCH, 'Mismatching <span>kinks</span>');
+            return new Score(Scoring.MISMATCH, `Dislikes ${pronoun} <span>kinks</span>`);
         }
 
-        if (Math.abs(kinkScore.weighted) < 0.45) {
-            return new Score(Scoring.WEAK_MATCH, 'Good <span>kinks</span>');
+        if (Math.abs(kinkScore.weighted) < kinkMatchWeights.weakMatchThreshold) {
+            return new Score(Scoring.WEAK_MATCH, `Likes ${pronoun} <span>kinks</span>`);
         }
 
-        return new Score(Scoring.MATCH, 'Great <span>kinks</span>');
+        return new Score(Scoring.MATCH, `Loves ${pronoun} <span>kinks</span>`);
     }
 
 
@@ -789,6 +786,8 @@ export class Matcher {
         const yourKinks = this.getAllStandardKinks(this.you);
         const theirKinks = this.getAllStandardKinks(this.them);
 
+        // let missed = 0;
+
         const result: any = _.reduce(
             yourKinks,
             (accum, yourKinkValue: any, yourKinkId: any) => {
@@ -816,20 +815,41 @@ export class Matcher {
                     };
                 }
 
+                // missed += 1;
                 return accum;
             },
             { score: 0, count: 0 }
         );
 
+        // const yourBucketCounts = this.countKinksByBucket(yourKinks);
+        // const theirBucketCounts = this.countKinksByBucket(theirKinks);
+
         result.weighted = (result.count === 0)
             ? 0
             : (
-                (Math.log(result.count) / Math.log(5)) // log 5 base
+                (Math.log(result.count) / Math.log(kinkMatchWeights.logBase)) // log 8 base
                 * (result.score / result.count)
              );
 
         return result;
     }
+
+
+    // private countKinksByBucket(kinks: { [key: number]: KinkChoice }): { favorite: number, yes: number, maybe: number, no: number } {
+    //     return _.reduce(
+    //       kinks,
+    //       (accum, kinkValue) => {
+    //         accum[kinkValue] += 1;
+    //         return accum;
+    //       },
+    //       {
+    //         favorite: 0,
+    //         yes: 0,
+    //         maybe: 0,
+    //         no: 0
+    //       }
+    //     );
+    // }
 
 
     private getAllStandardKinks(c: Character): { [key: number]: KinkChoice } {

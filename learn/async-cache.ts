@@ -11,4 +11,8 @@ export abstract class AsyncCache<RecordType> {
     static nameKey(name: string): string {
         return Cache.nameKey(name);
     }
+
+    clear(): void {
+        this.cache = {};
+    }
 }

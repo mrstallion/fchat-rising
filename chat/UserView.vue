@@ -6,9 +6,10 @@
 import { Component, Hook, Prop, Watch } from '@f-list/vue-ts';
 import Vue from 'vue';
 import {Channel, Character} from '../fchat';
-import { Matcher, Score, Scoring } from '../learn/matcher';
+import { Score, Scoring } from '../learn/matcher';
 import core from './core';
 import { EventBus } from './preview/event-bus';
+import { kinkMatchWeights } from '../learn/matcher-types';
 
 
 export function getStatusIcon(status: Character.Status): string {
@@ -71,7 +72,7 @@ export function getStatusClasses(
         const cache = core.cache.profileCache.getSync(character.name);
 
         if (cache) {
-            if ((cache.match.searchScore > Matcher.UNICORN_LEVEL) && (cache.match.matchScore === Scoring.MATCH)) {
+            if ((cache.match.searchScore > kinkMatchWeights.unicornThreshold) && (cache.match.matchScore === Scoring.MATCH)) {
               matchClass = 'match-found unicorn';
               matchScore = 'unicorn';
             } else {

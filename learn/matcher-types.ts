@@ -484,32 +484,39 @@ export interface SpeciesMappingCache {
 }
 
 
+export const kinkMatchWeights = {
+    logBase: 10,
+    weakMismatchThreshold: 0.3,
+    weakMatchThreshold: 0.3,
+    unicornThreshold: 8.0
+};
+
 export const kinkMatchScoreMap = {
     favorite: {
-        favorite: 0.55,
+        favorite: 0.5,
         yes: 0.25,
         maybe: -0.5,
-        no: -1.0
+        no: -2
     },
 
     yes: {
-        favorite: 0.20,
-        yes: 0.20,
-        maybe: -0.25,
+        favorite: 0.3,
+        yes: 0.2,
+        maybe: -0.15,
         no: -0.5
     },
 
     maybe: {
         favorite: -0.5,
-        yes: -0.25,
+        yes: -0.2,
         maybe: 0,
         no: 0
     },
 
     no: {
-        favorite: -1.0,
+        favorite: -2,
         yes: -0.5,
-        maybe: -0.1,
+        maybe: 0,
         no: 0
     }
 };
