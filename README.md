@@ -1,7 +1,7 @@
 # Download
-[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.10.1/F-Chat-Rising-1.10.1-win.exe) (75 MB)
-| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.10.1/F-Chat-Rising-1.10.1-macos.dmg) (76 MB)
-| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.10.1/F-Chat-Rising-1.10.1-linux.AppImage) (76 MB)
+[Windows](https://github.com/mrstallion/fchat-rising/releases/download/v1.11.0/F-Chat-Rising-1.11.0-win.exe) (75 MB)
+| [MacOS](https://github.com/mrstallion/fchat-rising/releases/download/v1.11.0/F-Chat-Rising-1.11.0-macos.dmg) (76 MB)
+| [Linux](https://github.com/mrstallion/fchat-rising/releases/download/v1.11.0/F-Chat-Rising-1.11.0-linux.AppImage) (76 MB)
 
 
 # F-Chat Rising
@@ -109,20 +109,12 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
 
 
 ## Todo / Ideas
-
 *   Collect data on ads / responses to determine which ads work best
 *   Preview mode should allow detaching from the main window
 *   Improve log browsing
 *   Conversation bot API
 *   'Filter unmatching ads' is not channel specific -- it's either on everywhere or nowhere
-*   Bug? Usually submissive vs usually submissive shows up as 'maybe'
-*   Bug? YOU have 'loves humans'; THEY have 'no furry characters, just humans' -- THEIR ad shows green, not red -- your side of comparison is fully green, they just have 'no furry pairings' in red
-*   Bug? [color] acts weird
-*   Bug? inline images act weird on profiles
-*   Better disconnect management / API tickets?
-*   Ctrl+P to re-open closed profile; navigate back and forward in profiles (e.g. when you click one); 'back to top' button
 *   What are the things that would make your profile more compatible with others?
-
 
 
 # F-List Exported

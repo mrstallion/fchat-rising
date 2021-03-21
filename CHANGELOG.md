@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.11.0
+*   Kinks are now part of the profile matching score
+*   Merged with the latest official F-Chat codebase
+*   Fixed broken `[collapse]` when wrapped in `[heading]`
+
+
 ## 1.10.1
 *   Improved performance on highly advertised channels like LFRP
 *   Fixed Rule34.xxx previews

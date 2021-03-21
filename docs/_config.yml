@@ -50,7 +50,7 @@ theme: jekyll-theme-slate
 changelog: https://github.com/mrstallion/fchat-rising/blob/master/CHANGELOG.md
 
 download:
-  version: 1.10.1
+  version: 1.11.0
 
   url: https://github.com/mrstallion/fchat-rising/releases/download/v%VERSION%/F-Chat-Rising-%VERSION%-%PLATFORM_TAIL%
 
