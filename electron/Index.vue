@@ -11,6 +11,8 @@
                     <i class="fas fa-circle-notch fa-spin search-spinner"></i>
                 </div>
 
+                <BBCodeTester v-show="false"></BBCodeTester>
+
                 <h3 class="card-header" style="margin-top:0;display:flex">
                     {{l('title')}}
 
@@ -133,6 +135,9 @@
     import * as SlimcatImporter from './importer';
     import _ from 'lodash';
     import { EventBus } from '../chat/preview/event-bus';
+
+    import BBCodeTester from '../bbcode/Tester.vue';
+
     // import Bluebird from 'bluebird';
     // import Connection from '../fchat/connection';
     // import Notifications from './notifications';
@@ -184,7 +189,14 @@
     log.info('init.chat.keytar.load.done');
 
     @Component({
-        components: {chat: Chat, modal: Modal, characterPage: CharacterPage, logs: Logs, 'word-definition': WordDefinition}
+        components: {
+          chat: Chat,
+          modal: Modal,
+          characterPage: CharacterPage,
+          logs: Logs,
+          'word-definition': WordDefinition,
+          BBCodeTester: BBCodeTester
+        }
     })
     export default class Index extends Vue {
         showAdvanced = false;

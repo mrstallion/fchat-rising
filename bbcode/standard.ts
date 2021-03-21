@@ -50,7 +50,7 @@ export class StandardBBCodeParser extends CoreBBCodeParser {
         this.addTag(new BBCodeSimpleTag('small', 'span', ['smallText'], ['url', 'i', 'u', 'b', 'color', 's']));
         this.addTag(new BBCodeSimpleTag('sub', 'span', ['smallText'], ['url', 'i', 'u', 'b', 'color', 's']));
         this.addTag(new BBCodeSimpleTag('indent', 'div', ['indentText']));
-        this.addTag(new BBCodeSimpleTag('heading', 'h2', [], ['url', 'i', 'u', 'b', 'color', 's', 'big', 'sub']));
+        this.addTag(new BBCodeSimpleTag('heading', 'h2', [], ['collapse', 'justify', 'center', 'left', 'right', 'url', 'i', 'u', 'b', 'color', 's', 'big', 'sub']));
         this.addTag(new BBCodeSimpleTag('row', 'div', ['row']));
         this.addTag(new BBCodeCustomTag('col', (parser, parent, param) => {
             const col = parser.createElement('div');
