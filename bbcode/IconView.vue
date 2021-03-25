@@ -5,7 +5,7 @@
   @mouseover.prevent="show()"
   @mouseenter.prevent="show()"
   @mouseleave.prevent="dismiss()"
-  @click.middle.prevent="toggleStickyness()"
+  @click.middle.prevent.stop="toggleStickyness()"
   @click.right.passive="dismiss(true)"
   @click.left.passive="dismiss(true)"
   ><img :src="`${Utils.staticDomain}images/avatar/${character.toLowerCase()}.png`" class="character-avatar icon" :title="character" :alt="character" v-once></a>

@@ -169,8 +169,16 @@
 
                     const eventUrl = this.jsMutator.mutateUrl(this.negotiateUrl(eventData.url as string || ''));
 
-                    if ((this.url === eventUrl) && (this.visible))
+                    if (
+                      ((eventData.force === true) || (this.url === eventUrl))
+                      && (this.visible)
+                    ) {
                         this.sticky = !this.sticky;
+
+                        if (eventData.force) {
+                          this.hide();
+                        }
+                    }
                 }
             );
 

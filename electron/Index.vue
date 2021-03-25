@@ -1,5 +1,5 @@
 <template>
-    <div @mouseover="onMouseOver" id="page" style="position:relative;padding:5px 10px 10px" :class="getThemeClass()" @auxclick.prevent>
+    <div @mouseover="onMouseOver" id="page" style="position:relative;padding:5px 10px 10px" :class="getThemeClass()" @auxclick.prevent @click.middle="unpinUrlPreview">
         <div v-html="styling"></div>
         <div v-if="!characters" style="display:flex; align-items:center; justify-content:center; height: 100%;">
             <div class="card bg-light" style="width: 400px;">
@@ -138,6 +138,7 @@
 
     import BBCodeTester from '../bbcode/Tester.vue';
 
+    // import ImagePreview from '../chat/preview/ImagePreview.vue';
     // import Bluebird from 'bluebird';
     // import Connection from '../fchat/connection';
     // import Notifications from './notifications';
@@ -555,6 +556,21 @@
         async openDefinitionWithWikipedia(): Promise<void> {
           (this.$refs.wordDefinitionLookup as any).setMode('wikipedia');
         }
+
+
+        unpinUrlPreview(e: Event): void {
+          const imagePreview = (this.$refs['chat'] as Chat)?.getChatView()?.getImagePreview();
+
+          // const imagePreview = this.$refs['imagePreview'] as ImagePreview;
+
+          if ((imagePreview) && (imagePreview.isVisible()) && (imagePreview.sticky)) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            EventBus.$emit('imagepreview-toggle-stickyness', {force: true});
+          }
+        }
+
     }
 </script>
 

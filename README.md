@@ -93,6 +93,7 @@ This repository contains a heavily customized version of the mainline F-Chat 3.0
    *   Sexual preference
    *   Dominance preference
    *   Human/anthro preference
+   *   Post length preference
    *   Non-custom kinks
    *   Species
 1. Maching for non-binary genders relies on kinks. For example, if your non-binary character has a preference for females, make sure 'females' are listed as a favorite kink.

@@ -1,7 +1,13 @@
 # Changelog
 
+## 1.12.0
+*   Post length preference is now part of the profile match score
+*   Improved kink match scoring
+*   Middle click a link to pin or unpin preview
+
+
 ## 1.11.0
-*   Kinks are now part of the profile matching score
+*   Kinks are now part of the profile match score
 *   Merged with the latest official F-Chat codebase
 *   Fixed broken `[collapse]` when wrapped in `[heading]`
 

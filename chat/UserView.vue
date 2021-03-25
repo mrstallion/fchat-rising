@@ -1,5 +1,5 @@
 <!-- Linebreaks inside this template will break BBCode views -->
-<template><span :class="userClass" v-bind:bbcodeTag.prop="'user'" v-bind:character.prop="character" v-bind:channel.prop="channel" @mouseover.prevent="show()" @mouseenter.prevent="show()" @mouseleave.prevent="dismiss()" @click.middle.prevent="toggleStickyness()" @click.right.passive="dismiss(true)" @click.left.passive="dismiss(true)"><span v-if="!!statusClass" :class="statusClass"></span><span v-if="!!rankIcon" :class="rankIcon"></span>{{character.name}}<span v-if="!!matchClass" :class="matchClass">{{getMatchScoreTitle(matchScore)}}</span></span></template>
+<template><span :class="userClass" v-bind:bbcodeTag.prop="'user'" v-bind:character.prop="character" v-bind:channel.prop="channel" @mouseover.prevent="show()" @mouseenter.prevent="show()" @mouseleave.prevent="dismiss()" @click.middle.prevent.stop="toggleStickyness()" @click.right.passive="dismiss(true)" @click.left.passive="dismiss(true)"><span v-if="!!statusClass" :class="statusClass"></span><span v-if="!!rankIcon" :class="rankIcon"></span>{{character.name}}<span v-if="!!matchClass" :class="matchClass">{{getMatchScoreTitle(matchScore)}}</span></span></template>
 
 
 <script lang="ts">

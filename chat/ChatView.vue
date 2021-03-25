@@ -34,7 +34,7 @@
                 <a v-for="conversation in conversations.privateConversations" href="#" @click.prevent="conversation.show()"
                     :class="getClasses(conversation)" :data-character="conversation.character.name" data-touch="false"
                     class="list-group-item list-group-item-action item-private" :key="conversation.key"
-                    @click.middle.prevent="conversation.close()">
+                    @click.middle.prevent.stop="conversation.close()">
                     <img :src="characterImage(conversation.character.name)" v-if="showAvatars"/>
                     <div class="name">
                         <span>{{conversation.character.name}}</span>
@@ -54,7 +54,7 @@
             <div class="list-group conversation-nav" ref="channelConversations">
                 <a v-for="conversation in conversations.channelConversations" href="#" @click.prevent="conversation.show()"
                     :class="getClasses(conversation)" class="list-group-item list-group-item-action item-channel" :key="conversation.key"
-                    @click.middle.prevent="conversation.close()">
+                    @click.middle.prevent.stop="conversation.close()">
                     <span class="name">{{conversation.name}}</span>
                     <span>
                         <span v-if="conversation.hasAutomatedAds()" class="fas fa-ad" :class="{'active': conversation.isSendingAutomatedAds()}" aria-label="Toggle ads"
@@ -129,6 +129,7 @@
     import PrivateConversation = Conversation.PrivateConversation;
     import * as _ from 'lodash';
     import NoteStatus from '../site/NoteStatus.vue';
+    // import { EventBus } from './preview/event-bus';
 
     const unreadClasses = {
         [Conversation.UnreadState.None]: '',
@@ -365,6 +366,10 @@
 
         isColorblindModeActive(): boolean {
           return core.state.settings.risingColorblindMode;
+        }
+
+        getImagePreview(): ImagePreview | undefined {
+          return this.$refs['imagePreview'] as ImagePreview;
         }
     }
 </script>
