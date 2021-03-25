@@ -1,12 +1,13 @@
 import { Component, Hook, Prop } from '@f-list/vue-ts';
 import {CreateElement, default as Vue, VNode, VNodeChildrenArrayContents} from 'vue';
 import {Channel} from '../fchat';
-import { Score, Scoring } from '../learn/matcher';
+import { Score } from '../learn/matcher';
 import {BBCodeView} from '../bbcode/view';
 import {formatTime} from './common';
 import core from './core';
 import {Conversation} from './interfaces';
 import UserView from './UserView.vue';
+import { Scoring } from '../learn/matcher-types';
 
 const userPostfix: {[key: number]: string | undefined} = {
     [Conversation.Message.Type.Message]: ': ',

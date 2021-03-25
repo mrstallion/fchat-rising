@@ -94,7 +94,7 @@
         async mounted(): Promise<void> {
             log.debug('init.window.mounting');
             // top bar devtools
-            // browserWindow.webContents.openDevTools({ mode: 'detach' });
+            browserWindow.webContents.openDevTools({ mode: 'detach' });
 
             updateSupportedLanguages(browserWindow.webContents.session.availableSpellCheckerLanguages);
 
@@ -262,7 +262,7 @@
             );
 
             // tab devtools
-            // view.webContents.openDevTools();
+            view.webContents.openDevTools();
 
             // console.log('ADD TAB LANGUAGES', getSafeLanguages(this.settings.spellcheckLang), this.settings.spellcheckLang);
             view.webContents.session.setSpellCheckerLanguages(getSafeLanguages(this.settings.spellcheckLang));

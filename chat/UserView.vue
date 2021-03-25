@@ -6,10 +6,10 @@
 import { Component, Hook, Prop, Watch } from '@f-list/vue-ts';
 import Vue from 'vue';
 import {Channel, Character} from '../fchat';
-import { Score, Scoring } from '../learn/matcher';
+import { Score } from '../learn/matcher';
 import core from './core';
 import { EventBus } from './preview/event-bus';
-import { kinkMatchWeights } from '../learn/matcher-types';
+import { kinkMatchWeights, Scoring } from '../learn/matcher-types';
 
 
 export function getStatusIcon(status: Character.Status): string {
