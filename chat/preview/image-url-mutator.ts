@@ -104,10 +104,10 @@ export class ImageUrlMutator {
 
 
         this.add(
-            /^https?:\/\/imgur.com\/gallery\/([a-zA-Z0-9]+)/,
+            /^https?:\/\/((m|www).)?imgur.com\/gallery\/([a-zA-Z0-9]+)/,
             async(url: string, match: RegExpMatchArray): Promise<string> => {
                 // Imgur Gallery
-                const galleryId = match[1];
+                const galleryId = match[3];
 
                 try {
                     const result = await Axios.get(
@@ -140,10 +140,10 @@ export class ImageUrlMutator {
         );
 
         this.add(
-            /^https?:\/\/imgur.com\/a\/([a-zA-Z0-9]+)/,
+            /^https?:\/\/((m|www).)?imgur.com\/a\/([a-zA-Z0-9]+)/,
             async(url: string, match: RegExpMatchArray): Promise<string> => {
                 // Imgur Album
-                const albumId = match[1];
+                const albumId = match[3];
 
                 try {
                     const result = await Axios.get(
@@ -177,10 +177,10 @@ export class ImageUrlMutator {
 
         // must be AFTER gallery & album test
         this.add(
-            /^https?:\/\/imgur.com\/([a-zA-Z0-9]+)/,
+            /^https?:\/\/((m|www).)?imgur.com\/([a-zA-Z0-9]+)/,
             async(url: string, match: RegExpMatchArray): Promise<string> => {
                 // Single Imgur Image
-                const imageId = match[1];
+                const imageId = match[3];
 
                 try {
                     const result = await Axios.get(
