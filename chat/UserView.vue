@@ -72,7 +72,7 @@ export function getStatusClasses(
         const cache = core.cache.profileCache.getSync(character.name);
 
         if (cache) {
-            if ((cache.match.searchScore > kinkMatchWeights.unicornThreshold) && (cache.match.matchScore === Scoring.MATCH)) {
+            if ((cache.match.searchScore >= kinkMatchWeights.unicornThreshold) && (cache.match.matchScore === Scoring.MATCH)) {
               matchClass = 'match-found unicorn';
               matchScore = 'unicorn';
             } else {

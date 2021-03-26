@@ -1204,6 +1204,8 @@ export class Matcher {
 
         log.debug(
             'report.score.search',
+            match.you.you.name,
+            match.them.you.name,
             {
                 you: match.you.you.name,
                 them: match.them.you.name,

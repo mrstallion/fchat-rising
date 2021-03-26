@@ -149,7 +149,7 @@ export const postLengthPreferenceScoreMapping = {
         [PostLengthPreference.MultiParagraph_14_25]: Scoring.MATCH,
         [PostLengthPreference.StrongParagraph_10_14]: Scoring.MATCH,
         [PostLengthPreference.Paragraph_7_10]: Scoring.MATCH,
-        [PostLengthPreference.SemiParagraph_4_7]: Scoring.WEAK_MISMATCH,
+        [PostLengthPreference.SemiParagraph_4_7]: Scoring.WEAK_MATCH,
         [PostLengthPreference.Short_2_4]: Scoring.MISMATCH,
         [PostLengthPreference.VeryShort_1_2]: Scoring.MISMATCH
     },
@@ -158,7 +158,7 @@ export const postLengthPreferenceScoreMapping = {
         [PostLengthPreference.MultiParagraph_14_25]: Scoring.WEAK_MATCH,
         [PostLengthPreference.StrongParagraph_10_14]: Scoring.MATCH,
         [PostLengthPreference.Paragraph_7_10]: Scoring.MATCH,
-        [PostLengthPreference.SemiParagraph_4_7]: Scoring.WEAK_MATCH,
+        [PostLengthPreference.SemiParagraph_4_7]: Scoring.MATCH,
         [PostLengthPreference.Short_2_4]: Scoring.MISMATCH,
         [PostLengthPreference.VeryShort_1_2]: Scoring.MISMATCH
     },
@@ -166,7 +166,7 @@ export const postLengthPreferenceScoreMapping = {
     [PostLengthPreference.SemiParagraph_4_7]: {
         [PostLengthPreference.MultiParagraph_14_25]: Scoring.MISMATCH,
         [PostLengthPreference.StrongParagraph_10_14]: Scoring.WEAK_MISMATCH,
-        [PostLengthPreference.Paragraph_7_10]: Scoring.WEAK_MATCH,
+        [PostLengthPreference.Paragraph_7_10]: Scoring.MATCH,
         [PostLengthPreference.SemiParagraph_4_7]: Scoring.MATCH,
         [PostLengthPreference.Short_2_4]: Scoring.MATCH,
         [PostLengthPreference.VeryShort_1_2]: Scoring.WEAK_MATCH
@@ -176,7 +176,7 @@ export const postLengthPreferenceScoreMapping = {
         [PostLengthPreference.MultiParagraph_14_25]: Scoring.MISMATCH,
         [PostLengthPreference.StrongParagraph_10_14]: Scoring.MISMATCH,
         [PostLengthPreference.Paragraph_7_10]: Scoring.WEAK_MISMATCH,
-        [PostLengthPreference.SemiParagraph_4_7]: Scoring.WEAK_MATCH,
+        [PostLengthPreference.SemiParagraph_4_7]: Scoring.MATCH,
         [PostLengthPreference.Short_2_4]: Scoring.MATCH,
         [PostLengthPreference.VeryShort_1_2]: Scoring.MATCH
     },
@@ -185,7 +185,7 @@ export const postLengthPreferenceScoreMapping = {
         [PostLengthPreference.MultiParagraph_14_25]: Scoring.MISMATCH,
         [PostLengthPreference.StrongParagraph_10_14]: Scoring.MISMATCH,
         [PostLengthPreference.Paragraph_7_10]: Scoring.MISMATCH,
-        [PostLengthPreference.SemiParagraph_4_7]: Scoring.WEAK_MATCH,
+        [PostLengthPreference.SemiParagraph_4_7]: Scoring.WEAK_MISMATCH,
         [PostLengthPreference.Short_2_4]: Scoring.MATCH,
         [PostLengthPreference.VeryShort_1_2]: Scoring.MATCH
     }
