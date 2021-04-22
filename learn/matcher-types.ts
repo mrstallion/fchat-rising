@@ -56,6 +56,14 @@ export enum SubDomRole {
     AlwaysDominant = 11
 }
 
+export enum Position {
+    AlwaysBottom = 85,
+    UsuallyBottom = 86,
+    Switch = 91,
+    UsuallyTop = 87,
+    AlwaysTop = 88
+}
+
 export enum Orientation {
     Straight = 4,
     Gay = 5,

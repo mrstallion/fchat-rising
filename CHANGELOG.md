@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.13.0
+*   Position is now part of the profile match score
+
 ## 1.12.0
 *   Post length preference is now part of the profile match score
 *   Improved kink match scoring

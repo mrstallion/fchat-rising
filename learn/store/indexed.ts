@@ -99,7 +99,7 @@ export class IndexedStore implements PermanentIndexedStore {
             species: ca.species,
             age: ca.age,
             domSubRole: ca.subDomRole, // domSubRole
-            position: null, // position
+            position: ca.position, // position
 
             lastMetaFetched: null,
             guestbook: null,

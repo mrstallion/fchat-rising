@@ -28,6 +28,7 @@ import {
     mammalSpecies,
     nonAnthroSpecies,
     Orientation,
+    Position,
     PostLengthPreference, postLengthPreferenceMapping, postLengthPreferenceScoreMapping, Scoring,
     Species,
     SpeciesMap,
@@ -148,6 +149,7 @@ export class CharacterAnalysis {
     readonly furryPreference: FurryPreference | null;
     readonly age: number | null;
     readonly subDomRole: SubDomRole | null;
+    readonly position: Position | null;
     readonly postLengthPreference: PostLengthPreference | null;
 
     readonly isAnthro: boolean | null;
@@ -162,6 +164,7 @@ export class CharacterAnalysis {
         this.species = Matcher.species(c);
         this.furryPreference = Matcher.getTagValueList(TagId.FurryPreference, c);
         this.subDomRole = Matcher.getTagValueList(TagId.SubDomRole, c);
+        this.position = Matcher.getTagValueList(TagId.Position, c);
         this.postLengthPreference = Matcher.getTagValueList(TagId.PostLength, c);
 
         const ageTag = Matcher.getTagValue(TagId.Age, c);
@@ -401,7 +404,8 @@ export class Matcher {
                 [TagId.Species]: this.resolveSpeciesScore(),
                 [TagId.SubDomRole]: this.resolveSubDomScore(),
                 [TagId.Kinks]: this.resolveKinkScore(pronoun),
-                [TagId.PostLength]: this.resolvePostLengthScore()
+                [TagId.PostLength]: this.resolvePostLengthScore(),
+                [TagId.Position]: this.resolvePositionScore()
             },
 
             info: {
@@ -731,7 +735,7 @@ export class Matcher {
 
         if (yourSubDomRole === SubDomRole.UsuallyDominant) {
             if (theirSubDomRole === SubDomRole.Switch)
-                return new Score(Scoring.MATCH, `Loves <span>switches</span>`);
+                return new Score(Scoring.MATCH, `Loves <span>switches</span> (role)`);
 
             if ((theirSubDomRole === SubDomRole.AlwaysSubmissive) || (theirSubDomRole === SubDomRole.UsuallySubmissive))
                 return new Score(Scoring.MATCH, `Loves <span>submissives</span>`);
@@ -747,7 +751,7 @@ export class Matcher {
 
         if (yourSubDomRole === SubDomRole.AlwaysDominant) {
             if (theirSubDomRole === SubDomRole.Switch)
-                return new Score(Scoring.WEAK_MATCH, `Likes <span>switches</span>`);
+                return new Score(Scoring.WEAK_MATCH, `Likes <span>switches</span> (role)`);
 
             if ((theirSubDomRole === SubDomRole.AlwaysSubmissive) || (theirSubDomRole === SubDomRole.UsuallySubmissive))
                 return new Score(Scoring.MATCH, `Loves <span>submissives</span>`);
@@ -766,7 +770,7 @@ export class Matcher {
 
         if (yourSubDomRole === SubDomRole.UsuallySubmissive) {
             if (theirSubDomRole === SubDomRole.Switch)
-                return new Score(Scoring.MATCH, `Loves <span>switches</span>`);
+                return new Score(Scoring.MATCH, `Loves <span>switches</span> (role)`);
 
             if ((theirSubDomRole === SubDomRole.AlwaysDominant) || (theirSubDomRole === SubDomRole.UsuallyDominant))
                 return new Score(Scoring.MATCH, `Loves <span>dominants</span>`);
@@ -782,7 +786,7 @@ export class Matcher {
 
         if (yourSubDomRole === SubDomRole.AlwaysSubmissive) {
             if (theirSubDomRole === SubDomRole.Switch)
-                return new Score(Scoring.WEAK_MATCH, `Likes <span>switches</span>`);
+                return new Score(Scoring.WEAK_MATCH, `Likes <span>switches</span> (role)`);
 
             if ((theirSubDomRole === SubDomRole.AlwaysDominant) || (theirSubDomRole === SubDomRole.UsuallyDominant))
                 return new Score(Scoring.MATCH, `Loves <span>dominants</span>`);
@@ -801,7 +805,7 @@ export class Matcher {
 
         // You must be a switch
         if (theirSubDomRole === SubDomRole.Switch)
-            return new Score(Scoring.MATCH, `Loves <span>switches</span>`);
+            return new Score(Scoring.MATCH, `Loves <span>switches</span> (role)`);
 
         // if (yourRoleReversalPreference === KinkPreference.Favorite)
         //     return new Score(Scoring.MATCH, `Loves <span>role reversal</span>`);
@@ -814,6 +818,78 @@ export class Matcher {
 
         if ((theirSubDomRole === SubDomRole.AlwaysSubmissive) || (theirSubDomRole === SubDomRole.UsuallySubmissive))
             return new Score(Scoring.MATCH, `Loves <span>submissives</span>`);
+
+        return new Score(Scoring.NEUTRAL);
+    }
+
+    private resolvePositionScore(): Score {
+        const yourPosition = this.yourAnalysis.position;
+        const theirPosition = this.theirAnalysis.position;
+
+        if ((!yourPosition) || (!theirPosition))
+            return new Score(Scoring.NEUTRAL);
+
+        if (yourPosition === Position.UsuallyTop) {
+            if (theirPosition === Position.Switch)
+                return new Score(Scoring.MATCH, `Loves <span>switches</span> (position)`);
+
+            if ((theirPosition === Position.AlwaysBottom) || (theirPosition === Position.UsuallyBottom))
+                return new Score(Scoring.MATCH, `Loves <span>bottoms</span>`);
+
+            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant about <span>tops</span>');
+        }
+
+        if (yourPosition === Position.AlwaysTop) {
+            if (theirPosition === Position.Switch)
+                return new Score(Scoring.WEAK_MATCH, `Likes <span>switches</span> (position)`);
+
+            if ((theirPosition === Position.AlwaysBottom) || (theirPosition === Position.UsuallyBottom))
+                return new Score(Scoring.MATCH, `Loves <span>bottoms</span>`);
+
+            if ((yourPosition === Position.AlwaysTop) && (theirPosition === Position.AlwaysTop))
+                return new Score(Scoring.MISMATCH, 'No <span>tops</span>');
+
+            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant about <span>tops</span>');
+        }
+
+        if (yourPosition === Position.UsuallyBottom) {
+            if (theirPosition === Position.Switch)
+                return new Score(Scoring.MATCH, `Loves <span>switches</span> (position)`);
+
+            if ((theirPosition === Position.AlwaysTop) || (theirPosition === Position.UsuallyTop))
+                return new Score(Scoring.MATCH, `Loves <span>tops</span>`);
+
+            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant about <span>bottoms</span>');
+        }
+
+        if (yourPosition === Position.AlwaysBottom) {
+            if (theirPosition === Position.Switch)
+                return new Score(Scoring.WEAK_MATCH, `Likes <span>switches</span> (position)`);
+
+            if ((theirPosition === Position.AlwaysTop) || (theirPosition === Position.UsuallyTop))
+                return new Score(Scoring.MATCH, `Loves <span>tops</span>`);
+
+            if ((yourPosition === Position.AlwaysBottom) && (theirPosition === Position.AlwaysBottom))
+                return new Score(Scoring.MISMATCH, 'No <span>bottoms</span>');
+
+            return new Score(Scoring.WEAK_MISMATCH, 'Hesitant about <span>bottoms</span>');
+        }
+
+        // You must be a switch
+        if (theirPosition === Position.Switch)
+            return new Score(Scoring.MATCH, `Loves <span>switches</span> (position)`);
+
+        // if (yourRoleReversalPreference === KinkPreference.Favorite)
+        //     return new Score(Scoring.MATCH, `Loves <span>role reversal</span>`);
+        //
+        // if (yourRoleReversalPreference === KinkPreference.Yes)
+        //     return new Score(Scoring.MATCH, `Likes <span>role reversal</span>`);
+
+        if ((theirPosition === Position.AlwaysTop) || (theirPosition === Position.UsuallyTop))
+            return new Score(Scoring.MATCH, `Loves <span>tops</span>`);
+
+        if ((theirPosition === Position.AlwaysBottom) || (theirPosition === Position.UsuallyBottom))
+            return new Score(Scoring.MATCH, `Loves <span>bottoms</span>`);
 
         return new Score(Scoring.NEUTRAL);
     }

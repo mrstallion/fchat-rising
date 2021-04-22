@@ -59,7 +59,7 @@
         }
 
         theirInterestIsRelevant(id: number): boolean {
-            return ((id === TagId.FurryPreference) || (id === TagId.Orientation) || (id === TagId.SubDomRole) || (id === TagId.PostLength));
+            return ((id === TagId.FurryPreference) || (id === TagId.Orientation) || (id === TagId.SubDomRole) || (id === TagId.Position) || (id === TagId.PostLength));
         }
 
         yourInterestIsRelevant(id: number): boolean {
