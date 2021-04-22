@@ -11,7 +11,7 @@
             @mouseover.prevent="show()"
             @mouseenter.prevent="show()"
             @mouseleave.prevent="dismiss()"
-            @click.middle.prevent="toggleStickyness()"
+            @click.middle.prevent.stop="toggleStickyness()"
         >{{text}}</a>
         <span
             class="link-domain bbcode-pseudo"

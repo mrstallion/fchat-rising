@@ -3,9 +3,10 @@ import * as _ from 'lodash';
 import core from '../chat/core';
 import {Character as ComplexCharacter, CharacterGroup, Guestbook} from '../site/character_page/interfaces';
 import { AsyncCache } from './async-cache';
-import { Matcher, MatchReport, Scoring } from './matcher';
+import { Matcher, MatchReport } from './matcher';
 import { PermanentIndexedStore } from './store/types';
 import { CharacterImage, SimpleCharacter } from '../interfaces';
+import { Scoring } from './matcher-types';
 
 
 export interface MetaRecord {

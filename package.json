@@ -1,6 +1,6 @@
 {
   "name": "f-list-rising",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "author": "The F-List Team and and Mister Stallion (Esq.)",
   "description": "A heavily modded F-Chat 3.0 client for F-List",
   "license": "MIT",
@@ -52,9 +52,9 @@
     "webpack": "^5.3.2"
   },
   "dependencies": {
-    "@cliqz/adblocker-electron": "^1.20.0",
+    "@cliqz/adblocker-electron": "^1.20.4",
     "jquery": "^3.6.0",
-    "keytar": "^7.4.0",
+    "keytar": "^7.5.0",
     "node-fetch": "^2.6.1"
   },
   "optionalDependencies": {

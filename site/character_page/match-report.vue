@@ -37,9 +37,9 @@
     import * as _ from 'lodash';
     import Vue from 'vue';
     import * as Utils from '../utils';
-    import { Matcher, MatchReport, MatchResult, Score, Scoring } from '../../learn/matcher';
+    import { Matcher, MatchReport, MatchResult, Score } from '../../learn/matcher';
     import core from '../../chat/core';
-    import { TagId } from '../../learn/matcher-types';
+    import { Scoring, TagId } from '../../learn/matcher-types';
 
     export interface CssClassMap {
         [key: string]: boolean;

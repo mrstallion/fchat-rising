@@ -20,7 +20,7 @@
                 </div>
             </div>
         </div>
-        <chat v-else></chat>
+        <chat ref="chatview" v-else></chat>
         <modal :action="l('chat.disconnected.title')" :buttonText="l('action.cancel')" ref="reconnecting" @submit="cancelReconnect"
             :showCancel="false" buttonClass="btn-danger">
             <div class="alert alert-danger" v-show="error">{{error}}</div>
@@ -219,6 +219,10 @@
             core.notifications.initSounds(['attention', 'login', 'logout', 'modalert', 'newnote']);
 
             core.connection.connect(this.selectedCharacter.name);
+        }
+
+        getChatView(): ChatView | undefined {
+          return this.$refs['chatview'] as ChatView;
         }
     }
 </script>

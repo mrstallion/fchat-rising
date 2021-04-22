@@ -1,3 +1,12 @@
+export enum Scoring {
+    MATCH = 1,
+    WEAK_MATCH = 0.5,
+    NEUTRAL = 0,
+    WEAK_MISMATCH = -0.5,
+    MISMATCH = -1
+}
+
+
 export enum TagId {
     Age = 1,
     Orientation = 2,
@@ -11,9 +20,22 @@ export enum TagId {
     RelationshipStatus = 42,
     Species = 9,
     LanguagePreference = 49,
+    PostLength = 24,
 
     Kinks = 99999
 }
+
+
+export enum PostLengthPreference {
+    NoPreference = 63,
+    VeryShort_1_2 = 26,
+    Short_2_4 = 27,
+    SemiParagraph_4_7 = 28,
+    Paragraph_7_10 = 60,
+    StrongParagraph_10_14 = 61,
+    MultiParagraph_14_25 = 62
+}
+
 
 export enum Gender {
     Male = 1,
@@ -102,6 +124,72 @@ export const furryPreferenceMapping = {
     [FurryPreference.FurriesPreferredHumansOk]: 'loves furries, likes humans'
 };
 
+
+export const postLengthPreferenceMapping = {
+    [PostLengthPreference.MultiParagraph_14_25]: 'multi-paragraph posts',
+    [PostLengthPreference.StrongParagraph_10_14]: 'strong paragraph posts',
+    [PostLengthPreference.Paragraph_7_10]: 'paragraph posts',
+    [PostLengthPreference.SemiParagraph_4_7]: 'semi-paragraph posts',
+    [PostLengthPreference.Short_2_4]: 'short posts',
+    [PostLengthPreference.VeryShort_1_2]: 'very short posts'
+};
+
+
+export const postLengthPreferenceScoreMapping = {
+    [PostLengthPreference.MultiParagraph_14_25]: {
+        [PostLengthPreference.MultiParagraph_14_25]: Scoring.MATCH,
+        [PostLengthPreference.StrongParagraph_10_14]: Scoring.MATCH,
+        [PostLengthPreference.Paragraph_7_10]: Scoring.WEAK_MATCH,
+        [PostLengthPreference.SemiParagraph_4_7]: Scoring.WEAK_MISMATCH,
+        [PostLengthPreference.Short_2_4]: Scoring.MISMATCH,
+        [PostLengthPreference.VeryShort_1_2]: Scoring.MISMATCH
+    },
+
+    [PostLengthPreference.StrongParagraph_10_14]: {
+        [PostLengthPreference.MultiParagraph_14_25]: Scoring.MATCH,
+        [PostLengthPreference.StrongParagraph_10_14]: Scoring.MATCH,
+        [PostLengthPreference.Paragraph_7_10]: Scoring.MATCH,
+        [PostLengthPreference.SemiParagraph_4_7]: Scoring.WEAK_MISMATCH,
+        [PostLengthPreference.Short_2_4]: Scoring.MISMATCH,
+        [PostLengthPreference.VeryShort_1_2]: Scoring.MISMATCH
+    },
+
+    [PostLengthPreference.Paragraph_7_10]: {
+        [PostLengthPreference.MultiParagraph_14_25]: Scoring.WEAK_MATCH,
+        [PostLengthPreference.StrongParagraph_10_14]: Scoring.MATCH,
+        [PostLengthPreference.Paragraph_7_10]: Scoring.MATCH,
+        [PostLengthPreference.SemiParagraph_4_7]: Scoring.WEAK_MATCH,
+        [PostLengthPreference.Short_2_4]: Scoring.MISMATCH,
+        [PostLengthPreference.VeryShort_1_2]: Scoring.MISMATCH
+    },
+
+    [PostLengthPreference.SemiParagraph_4_7]: {
+        [PostLengthPreference.MultiParagraph_14_25]: Scoring.MISMATCH,
+        [PostLengthPreference.StrongParagraph_10_14]: Scoring.WEAK_MISMATCH,
+        [PostLengthPreference.Paragraph_7_10]: Scoring.WEAK_MATCH,
+        [PostLengthPreference.SemiParagraph_4_7]: Scoring.MATCH,
+        [PostLengthPreference.Short_2_4]: Scoring.MATCH,
+        [PostLengthPreference.VeryShort_1_2]: Scoring.WEAK_MATCH
+    },
+
+    [PostLengthPreference.Short_2_4]: {
+        [PostLengthPreference.MultiParagraph_14_25]: Scoring.MISMATCH,
+        [PostLengthPreference.StrongParagraph_10_14]: Scoring.MISMATCH,
+        [PostLengthPreference.Paragraph_7_10]: Scoring.WEAK_MISMATCH,
+        [PostLengthPreference.SemiParagraph_4_7]: Scoring.WEAK_MATCH,
+        [PostLengthPreference.Short_2_4]: Scoring.MATCH,
+        [PostLengthPreference.VeryShort_1_2]: Scoring.MATCH
+    },
+
+    [PostLengthPreference.VeryShort_1_2]: {
+        [PostLengthPreference.MultiParagraph_14_25]: Scoring.MISMATCH,
+        [PostLengthPreference.StrongParagraph_10_14]: Scoring.MISMATCH,
+        [PostLengthPreference.Paragraph_7_10]: Scoring.MISMATCH,
+        [PostLengthPreference.SemiParagraph_4_7]: Scoring.WEAK_MATCH,
+        [PostLengthPreference.Short_2_4]: Scoring.MATCH,
+        [PostLengthPreference.VeryShort_1_2]: Scoring.MATCH
+    }
+};
 
 export interface GenderKinkIdMap {
     [key: number]: Kink
@@ -485,37 +573,37 @@ export interface SpeciesMappingCache {
 
 
 export const kinkMatchWeights = {
-    logBase: 10,
-    weakMismatchThreshold: 0.3,
-    weakMatchThreshold: 0.3,
-    unicornThreshold: 8.0
+    // logBase: 10,
+    weakMismatchThreshold: 16,
+    weakMatchThreshold: 16,
+    unicornThreshold: 9
 };
 
 export const kinkMatchScoreMap = {
     favorite: {
-        favorite: 0.5,
-        yes: 0.25,
-        maybe: -0.5,
-        no: -2
+        favorite: 1,
+        yes: 0.5,
+        maybe: -0.65,
+        no: -1.5
     },
 
     yes: {
-        favorite: 0.3,
-        yes: 0.2,
-        maybe: -0.15,
+        favorite: 0.5,
+        yes: 0.5,
+        maybe: -0.25,
         no: -0.5
     },
 
     maybe: {
         favorite: -0.5,
-        yes: -0.2,
+        yes: -0.25,
         maybe: 0,
         no: 0
     },
 
     no: {
-        favorite: -2,
-        yes: -0.5,
+        favorite: -1.5,
+        yes: -0.65,
         maybe: 0,
         no: 0
     }
@@ -571,6 +659,7 @@ export interface KinkBucketScore {
     score: number;
     count: number;
     weighted: number;
+    total: number;
 }
 
 export interface MatchResultKinkScores {
